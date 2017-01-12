@@ -1,0 +1,298 @@
+/*--------------------------------------------------------------------------------------------------
+
+											Cities Box 
+										 Main Source Code
+	
+										(C)YotioSoft 2017
+	
+--------------------------------------------------------------------------------------------------*/
+
+/*チップサイズ（64x64）*/
+#define chip_size		64
+
+/*タイルを塗りつぶすためのマクロ*/
+#define qv(%1,%2)	macro1=%1*chip_size/2-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
+					macro1(2)=%1*chip_size/2+chip_size-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
+					macro2=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4-camy+%1*chip_size/4:\
+					macro2(2)=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4+chip_size/2-camy+%1*chip_size/4:\
+					gsquare -1,macro1,macro2
+	
+/*クウォータービューの位置を取得するためのマクロ（チップ表示用）*/
+#define qv2(%1,%2)	macro1@=%1*chip_size/2-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
+					macro1@(2)=%1*chip_size/2+chip_size-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
+					macro2@=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4-camy+%1*chip_size/4:\
+					macro2@(2)=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4+chip_size/2-camy+%1*chip_size/4:\
+
+
+#module
+
+/*文字を中央に表示（使用例：cmes "hogehoge", 0, 640, 0, 480, 0）*/
+#deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
+	#include "user32.as"
+	RECT = cx, cy, cx2, cy2
+	DrawText hdc, ctext, -1, varptr(RECT), $01
+	
+	if redraw_exist = 0 : redraw 1
+	return
+
+/*画像をぼかす（hsp/sample/new/gblur.hsp | 使用例：gblur 2）*/
+#deffunc gblur int p1, int p2
+	gmode 3, ginfo_sx, ginfo_sy, 128
+	if (p2&1)=0 {
+		repeat p1
+		pos 1,0:gcopy ginfo(3)
+		pos 0,0:gcopy ginfo(3),2,0
+		loop
+	}
+	if (p2&2)=0 {
+		repeat p1
+		pos 0,1:gcopy ginfo(3)
+		pos 0,0:gcopy ginfo(3),0,2
+		loop
+	}
+	return
+	
+#global
+	
+*buffering		; 読み込む順番がバラバラですみません。。。この辺はそのうちに整理しておきます。
+	celload "img/mapchips/road/single-lane/normal.png", 1						; 道路（直線）
+	
+	celload "img/mapchips/buildings/office/high_density/1.png", 2				; オフィスビル
+	celload "img/mapchips/buildings/house/low_density/1.png", 3					; 一軒家
+	
+	celload "img/mapchips/road/single-lane/normal_dead_end.png", 4				; 道路（行き止まり）
+	celload "img/mapchips/road/single-lane/normal_turn.png", 5					; 道路（曲がり角）
+	celload "img/mapchips/road/single-lane/normal_intersection_T.png", 6		; 道路（T字型交差点）
+	celload "img/mapchips/road/single-lane/normal_intersection_cross.png", 7	; 道路（十字型交差点）
+	
+	celload "img/mapchips/tiles/concrete.png", 8								; タイル（コンクリート）
+	
+	celload "img/logo.png", 9													; ロゴ
+	celload "img/AME963_sappro_TP_V.jpg", 10									; タイトル背景画像
+	
+*menu
+	title "Cities Box"
+	
+	pos 0, 0 : gzoom 640, 480, 10, 0, 0, 1600, 1066 : gblur 2
+	
+	pos 265, 50 : gmode 0 : gcopy 9, 0, 0, 110, 110
+	
+	color 255, 255, 255
+	cmes "Ver.0.1", 0, 270, 640, 300
+	
+	objsize 100, 20
+	pos 270, 350 : button "新規マップ作成", *drawing
+	
+	stop
+
+*drawing
+	clrobj
+	
+	camx=-300:camy=-150	//カメラの位地
+	mapx=100:mapy=100
+	
+	dim map, mapx, mapy
+	dim dir_rnd, mapx, mapy
+	
+	ix = 0 : iy = 0
+	
+	randomize
+	
+	repeat mapx * mapy
+		map(ix,iy)=rnd(3)
+		dir_rnd(ix,iy) = rnd(2)
+		
+		ix++
+		if ix = mapx {
+			ix = 0
+			iy += 1
+		}
+	loop
+	
+	repeat
+	
+		/*カメラ操作*/
+			getkey key_left, 37
+			if key_left = 1 {
+				camx -= 10
+			}
+			
+			getkey key_up, 38
+			if key_up = 1 {
+				camy -= 5
+			}
+			
+			getkey key_right, 39
+			if key_right = 1 {
+				camx += 10
+			}
+			
+			getkey key_down, 40
+			if key_down = 1 {
+				camy += 5
+			}
+	
+		/*マップ描写*/
+			redraw 0
+			color 0, 0, 0 : boxf
+			
+			mousex_=mousex+camx-chip_size/2	//mx,myにマウス座標取得
+			mousey_=mousey+camy
+			mx=(mousey_+mousex_/2)/(chip_size/2)
+			my=(-mousex_+mousey_*2)/chip_size
+	
+			repeat mapx
+				x = cnt
+	
+				repeat mapy
+					y = cnt
+	
+					if mx=x & my=y:{		//マウスポインタの位置のチップを光らせる
+						color 255, 100, 100
+						qv x,y
+						title "Cities Box 座標("+x+","+y+") カメラ座標("+camx+","+camy+")"
+						continue
+					}
+	
+					left_chip = -1
+					up_chip = -1
+					down_chip = -1
+					right_chip = -1
+	
+					if x > 0 {
+						left_chip = map(x-1, y)
+					}
+					if y > 0 {
+						up_chip = map(x, y-1)
+					}
+					if mapy-1 > y {
+						down_chip = map(x, y+1)
+					}
+					if mapx-1 > x {
+						right_chip = map(x+1, y)
+					}
+					
+					switch(map(x,y))
+	
+						/*道路*/
+						case 0
+							building = 1
+							qv2 x,y
+	
+							/*縦向き*/
+								if left_chip != 0 and up_chip = 0 and down_chip = 0 and right_chip != 0 {
+									chip_direction = "width" : gmode 2
+									pos macro1, macro2-48 : gcopy 1, 0, 0, 64, 64
+								}
+	
+							/*横向き*/
+								if left_chip = 0 and up_chip != 0 and down_chip != 0 and right_chip = 0 {
+									chip_direction = "depth" : gmode 2
+									pos macro1, macro2-48 : gcopy 1, 64, 0, 64, 64
+								}
+	
+							/*行き止まり*/
+								if left_chip = 0 and up_chip != 0 and down_chip != 0 and right_chip != 0 {
+									chip_direction = "left" : gmode 2
+									pos macro1, macro2-48 : gcopy 4, 0, 0, 64, 64
+								}
+								if left_chip != 0 and up_chip = 0 and down_chip != 0 and right_chip != 0 {
+									chip_direction = "up" : gmode 2
+									pos macro1, macro2-48 : gcopy 4, 64, 0, 64, 64
+								}
+								if left_chip != 0 and up_chip != 0 and down_chip = 0 and right_chip != 0 {
+									chip_direction = "down" : gmode 2
+									pos macro1, macro2-48 : gcopy 4, 0, 64, 64, 64
+								}
+								if left_chip != 0 and up_chip != 0 and down_chip != 0 and right_chip = 0 {
+									chip_direction = "right" : gmode 2
+									pos macro1, macro2-48 : gcopy 4, 64, 64, 64, 64
+								}
+	
+							/*曲がり角*/
+								if left_chip = 0 and up_chip = 0 and down_chip != 0 and right_chip != 0 {
+									chip_direction = "left-up" : gmode 2
+									pos macro1, macro2-48 : gcopy 5, 0, 0, 64, 64
+								}
+								if left_chip != 0 and up_chip = 0 and down_chip != 0 and right_chip = 0 {
+									chip_direction = "right-up" : gmode 2
+									pos macro1, macro2-48 : gcopy 5, 64, 0, 64, 64
+								}
+								if left_chip = 0 and up_chip != 0 and down_chip = 0 and right_chip != 0 {
+									chip_direction = "left-down" : gmode 2
+									pos macro1, macro2-48 : gcopy 5, 0, 64, 64, 64
+								}
+								if left_chip != 0 and up_chip != 0 and down_chip = 0 and right_chip = 0 {
+									chip_direction = "right-down" : gmode 2
+									pos macro1, macro2-48 : gcopy 5, 64, 64, 64, 64
+								}
+	
+							/*T字型交差点*/
+								if left_chip = 0 and up_chip = 0 and down_chip = 0 and right_chip != 0 {
+									chip_direction = "left-up-down" : gmode 2
+									pos macro1, macro2-48 : gcopy 6, 0, 0, 64, 64
+								}
+								if left_chip = 0 and up_chip = 0 and down_chip != 0 and right_chip = 0 {
+									chip_direction = "left-right-up" : gmode 2
+									pos macro1, macro2-48 : gcopy 6, 64, 0, 64, 64
+								}
+								if left_chip = 0 and up_chip != 0 and down_chip = 0 and right_chip = 0 {
+									chip_direction = "left-right-down" : gmode 2
+									pos macro1, macro2-48 : gcopy 6, 0, 64, 64, 64
+								}
+								if left_chip != 0 and up_chip = 0 and down_chip = 0 and right_chip = 0 {
+									chip_direction = "right-up-down" : gmode 2
+									pos macro1, macro2-48 : gcopy 6, 64, 64, 64, 64
+								}
+	
+							/*十字型交差点*/
+								if left_chip = 0 and up_chip = 0 and down_chip = 0 and right_chip = 0 {
+									chip_drection = "null" : gmode 2
+									pos macro1, macro2-48 : gcopy 7, 0, 0, 64, 64
+								}
+	
+							/*1マスだけ孤立した（周りに接続する道路がない）道路の場合はコンクリートタイルを表示*/
+								if left_chip != 0 and up_chip != 0 and down_chip != 0 and right_chip != 0 {
+									chip_drection = "null" : gmode 2
+									pos macro1, macro2-48 : gcopy 8, 0, 0, 64, 64
+								}
+							
+							swbreak
+	
+						/*オフィスビル*/
+						case 1
+							building = 2
+							qv2 x,y
+	
+							pos macro1, macro2-48
+							if dir_rnd(x,y) = 0 {
+								gmode 2 : gcopy building, 0, 0, 64, 64
+							} else {
+								gmode 2 : gcopy building, 64, 0, 64, 64
+							}
+	
+							swbreak
+	
+						/*一軒家*/
+						case 2
+							building = 3
+							qv2 x,y
+	
+							pos macro1, macro2-48
+							if dir_rnd(x,y) = 0 {
+								gmode 2 : gcopy building, 0, 0, 64, 64
+							} else {
+								gmode 2 : gcopy building, 64, 0, 64, 64
+							}
+	
+							swbreak
+							
+					swend
+	
+				loop
+			loop
+			
+			redraw 1
+			await 50
+			c+=16
+	loop
