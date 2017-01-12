@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-											Cities Box 
+										Cities Box Ver 0.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -25,6 +25,14 @@
 
 
 #module
+
+/*指定された範囲内にマウスがあるか確認する関数（使用例：click_range (100, 0, 300, 300) ）*/
+#defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
+	if mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
+		return 1
+	}else{
+		return 0
+	}
 
 /*文字を中央に表示（使用例：cmes "hogehoge", 0, 640, 0, 480, 0）*/
 #deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
@@ -52,9 +60,16 @@
 	}
 	return
 	
+/*半透明色表示命令*/
+#deffunc boxfa int ax, int ay, int bx, int by
+	pdx = ax, bx, bx, ax
+	pdy = ay, ay, by, by
+	gsquare -1,pdx, pdy
+	return
+	
 #global
 	
-*buffering		; 読み込む順番がバラバラですみません。。。この辺はそのうちに整理しておきます。
+*buffering
 	celload "img/mapchips/road/single-lane/normal.png", 1						; 道路（直線）
 	
 	celload "img/mapchips/buildings/office/high_density/1.png", 2				; オフィスビル
@@ -70,15 +85,22 @@
 	celload "img/logo.png", 9													; ロゴ
 	celload "img/AME963_sappro_TP_V.jpg", 10									; タイトル背景画像
 	
+	celload "img/mapchips/tiles/greenfield.png", 12								; 更地
+	
+	celload "img/menu_icons/normal_cursor/cursor.png", 13						; 標準カーソル
+	celload "img/menu_icons/building/road.png", 14								; メニューアイコン（道路敷設）
+	celload "img/menu_icons/building/house.png", 15								; メニューアイコン（一軒家建設）
+	celload "img/menu_icons/building/office.png", 16							; メニューアイコン（オフィス建設）
+	
+	
 *menu
-	title "Cities Box"
 	
 	pos 0, 0 : gzoom 640, 480, 10, 0, 0, 1600, 1066 : gblur 2
 	
 	pos 265, 50 : gmode 0 : gcopy 9, 0, 0, 110, 110
 	
 	color 255, 255, 255
-	cmes "Ver.0.1", 0, 270, 640, 300
+	cmes "Ver.0.2", 0, 270, 640, 300
 	
 	objsize 100, 20
 	pos 270, 350 : button "新規マップ作成", *drawing
@@ -88,19 +110,21 @@
 *drawing
 	clrobj
 	
-	camx=-300:camy=-150	//カメラの位地
+	camx=-300:camy=-150		//カメラの位地
 	mapx=100:mapy=100
 	
-	dim map, mapx, mapy
-	dim dir_rnd, mapx, mapy
+	menu_line_y = 400		//メニューとの境界線
+	cursor_mode = "normal"	//カーソルのモード
+	
+	dim map, mapx, mapy			//マップの座標
+	sdim obj_dir, mapx, mapy	//座標上にあるオブジェクトの向き
 	
 	ix = 0 : iy = 0
 	
 	randomize
 	
 	repeat mapx * mapy
-		map(ix,iy)=rnd(3)
-		dir_rnd(ix,iy) = rnd(2)
+		map(ix,iy) = 3
 		
 		ix++
 		if ix = mapx {
@@ -147,30 +171,39 @@
 				repeat mapy
 					y = cnt
 	
-					if mx=x & my=y:{		//マウスポインタの位置のチップを光らせる
+					if mx=x & my=y and mousey < menu_line_y {		//マウスポインタの位置のチップを光らせる
 						color 255, 100, 100
 						qv x,y
-						title "Cities Box 座標("+x+","+y+") カメラ座標("+camx+","+camy+")"
+						title "座標("+x+","+y+") カメラ座標("+camx+","+camy+")"
 						continue
 					}
 	
-					left_chip = -1
-					up_chip = -1
-					down_chip = -1
-					right_chip = -1
+					//マウスがクリックされているとき
+						getkey mouse_left, 1
+						getkey mouse_right, 2
 	
-					if x > 0 {
-						left_chip = map(x-1, y)
-					}
-					if y > 0 {
-						up_chip = map(x, y-1)
-					}
-					if mapy-1 > y {
-						down_chip = map(x, y+1)
-					}
-					if mapx-1 > x {
-						right_chip = map(x+1, y)
-					}
+						if mouse_left = 1 or mouse_right = 1 {
+							gosub *drawing_onclick
+						}
+	
+					//周囲に道路があるか取得
+						left_chip = -1
+						up_chip = -1
+						down_chip = -1
+						right_chip = -1
+	
+						if x > 0 {
+							left_chip = map(x-1, y)
+						}
+						if y > 0 {
+							up_chip = map(x, y-1)
+						}
+						if mapy-1 > y {
+							down_chip = map(x, y+1)
+						}
+						if mapx-1 > x {
+							right_chip = map(x+1, y)
+						}
 					
 					switch(map(x,y))
 	
@@ -265,10 +298,17 @@
 							qv2 x,y
 	
 							pos macro1, macro2-48
-							if dir_rnd(x,y) = 0 {
+							if obj_dir(x,y) = "left" {
 								gmode 2 : gcopy building, 0, 0, 64, 64
-							} else {
+							}
+							if obj_dir(x,y) = "up" {
 								gmode 2 : gcopy building, 64, 0, 64, 64
+							}
+							if obj_dir(x,y) = "down" {
+								gmode 2 : gcopy building, 0, 64, 64, 64
+							}
+							if obj_dir(x,y) = "right" {
+								gmode 2 : gcopy building, 64, 64, 64, 64
 							}
 	
 							swbreak
@@ -279,20 +319,196 @@
 							qv2 x,y
 	
 							pos macro1, macro2-48
-							if dir_rnd(x,y) = 0 {
+							if obj_dir(x,y) = "left" {
 								gmode 2 : gcopy building, 0, 0, 64, 64
-							} else {
+							}
+							if obj_dir(x,y) = "up" {
 								gmode 2 : gcopy building, 64, 0, 64, 64
 							}
+							if obj_dir(x,y) = "down" {
+								gmode 2 : gcopy building, 0, 64, 64, 64
+							}
+							if obj_dir(x,y) = "right" {
+								gmode 2 : gcopy building, 64, 64, 64, 64
+							}
 	
+							swbreak
+	
+						/*更地*/
+						case 3
+							building = 12
+							qv2 x,y
+	
+							pos macro1, macro2-48
+							gmode 2 : gcopy building, 0, 0, 64, 64
+	
+							swbreak
+	
+						default
+							building = 12
+							qv2 x,y
+	
+							pos macro1, macro2-48
+							gmode 2 : gcopy building, 0, 0, 64, 64
+							
 							swbreak
 							
 					swend
 	
 				loop
+					
 			loop
+	
+			//メニュー
+				color 0, 0, 0
+				gmode 3,,,200 : boxfa 0, 400, 640, 480
+	
+				//標準カーソルボタン
+					if cursor_mode = "normal" {
+						gmode 2
+						pos 20, 410 : gcopy 13, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 20, 410 : gcopy 13, 0, 0, 32, 32
+					}
+	
+				//道路ボタン
+					if cursor_mode = "put_Road" {
+						gmode 2
+						pos 60, 410 : gcopy 14, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 60, 410 : gcopy 14, 0, 0, 32, 32
+					}
+	
+				//建物（一軒家）ボタン
+					if cursor_mode = "put_House" {
+						gmode 2
+						pos 92, 410 : gcopy 15, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 92, 410 : gcopy 15, 0, 0, 32, 32
+					}
+	
+				//建物（オフィス）ボタン
+					if cursor_mode = "put_Office" {
+						gmode 2
+						pos 124, 410 : gcopy 16, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 124, 410 : gcopy 16, 0, 0, 32, 32
+					}
 			
 			redraw 1
 			await 50
 			c+=16
 	loop
+	
+*drawing_onclick
+	/*------------------------------------------メニューのボタンの動作------------------------------------------------*/
+	
+		//標準カーソルボタン
+			if click_range( 20, 410, 20+32, 410+32 ) = 1 {
+				cursor_mode = "normal"
+			}
+			
+		//道路ボタン
+			if click_range( 60, 410, 60+32, 410+32 ) = 1 {
+				cursor_mode = "put_Road"
+			}
+	
+		//建物（一軒家）ボタン
+			if click_range( 92, 410, 92+32, 410+32 ) = 1 {
+				cursor_mode = "put_House"
+			}
+	
+		//建物（オフィス）ボタン
+			if click_range( 124, 410, 124+32, 410+32 ) = 1 {
+				cursor_mode = "put_Office"
+			}
+			
+	
+	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
+	
+		//標準カーソルモードあるいはクリックされたマウスy座標が400以上の場合はreturn
+			if cursor_mode = "normal" or mousey >= 400 or mx < 0 or my < 0 {
+				return
+			}
+	
+		//建設・敷設
+			if mouse_left = 1 {
+	
+				//道路敷設
+					if cursor_mode = "put_Road" and map(mx, my) != 0 {
+						map(mx, my) = 0
+					}
+	
+				//道路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
+					if cursor_mode != "put_Road" {
+						around_road_exist = -1
+						
+						if mx > 0 {
+							if map(mx-1, my) = 0 {
+								around_road_exist += 1
+								obj_dir(mx, my) = "left"
+							}
+						}
+						if my > 0 {
+							if map(mx, my-1) = 0 {
+								around_road_exist += 1
+								obj_dir(mx, my) = "up"
+							}
+						}
+						if my < mapy {
+							if map(mx, my+1) = 0 {
+								around_road_exist += 1
+								obj_dir(mx, my) = "down"
+							}
+						}
+						if mx < mapx {
+							if map(mx+1, my) = 0 {
+								around_road_exist += 1
+								obj_dir(mx, my) = "right"
+							}
+						}
+		
+						if around_road_exist = -1 {
+							dialog "道路に接続されていない場所には建設できません！"
+							return
+						}
+					}
+					
+	
+				//建物（一軒家）建設
+					if cursor_mode = "put_House" and map(mx, my) != 2 {
+						map(mx, my) = 2
+					}
+	
+				//建物（オフィス）建設
+					if cursor_mode = "put_Office" and map(mx, my) != 1 {
+						map(mx, my) = 1
+					}
+	
+			}
+			
+		//取り壊し
+			if mouse_right = 1 {
+	
+				//道路削除
+					if cursor_mode = "put_Road" and map(mx, my) = 0 {
+						map(mx, my) = 3
+					}
+	
+				//道路削除
+					if cursor_mode = "put_House" and map(mx, my) = 2 {
+						map(mx, my) = 3
+					}
+	
+				//道路削除
+					if cursor_mode = "put_Office" and map(mx, my) = 1 {
+						map(mx, my) = 3
+					}
+	
+			}
+		
+		return
