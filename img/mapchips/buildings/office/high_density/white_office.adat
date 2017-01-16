@@ -1,0 +1,57 @@
+addon_name = "white_office"
+addon_jp_name = "白い壁のオフィス"
+addon_summary = "8階建ての白い壁のオフィスです。\n外観が白いからといって中の会社がホワイト企業とは限りません！"
+addon_type = "low_density_office"
+
+use_types = "null"
+
+null {
+	image = "white_office.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+	
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};
