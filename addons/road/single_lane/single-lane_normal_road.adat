@@ -2,7 +2,7 @@ addon_name = "normal_road"
 addon_jp_name = "2Ôü“¹˜H"
 addon_summary = "•’Ê‚Ì2Ôü“¹˜H‚Å‚·B"
 
-addon_type = "single-lane_road"
+addon_type = "single_lane_road"
 
 use_types = "default, dead_end, turn, intersection_T, intersection_cross"
 

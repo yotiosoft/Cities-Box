@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-										Cities Box Ver 0.3.1
+										Cities Box Ver 0.3.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -150,12 +150,24 @@
 	//onexit
 		onexit *exit
 	
+	//タイトルとバージョンの読み込み
+		notesel about
+		noteload "data/about.txt"
+		
+		noteget about_title, 0
+		noteget about_version, 1
+	
+		split about_title, " : ", not_use, about_title
+		split about_version, " : ", not_use, about_version
+	
+		title about_title
+	
 	//バッファ番号1000以降はオブジェクト
 		//まずAddonフォルダ内のアドオンの数を取得
 			directory = dirinfo(0)
 	
 			#include "hspext.as"
-				chdir "img"
+				chdir "addons"
 	
 				//まずパス名を覗いたファイル一覧を取得
 					dirlist2h 2, ','
@@ -210,6 +222,14 @@
 				sdim addon_bottom_right_y_buf, total_addons, 100, 100
 				dim addon_bottom_right_x, total_addons, 100, 100
 				dim addon_bottom_right_y, total_addons, 100, 100
+	
+				sdim type_single_lane_road, 128
+				sdim type_low_density_residential, 128
+				sdim type_high_density_residential, 128
+				sdim type_low_density_office, 128
+				sdim type_high_density_office, 128
+				sdim type_industrial, 128
+				sdim type_public, 128
 				
 			//オブジェクトのadatファイルを読み込み
 				repeat total_addons
@@ -239,6 +259,49 @@
 						//アドオンのadatファイルの詳細の読み込みへ
 							gosub *load_adat
 	
+						//カテゴリ分け
+							if addon_type(cnt) = "single_lane_road" {
+								notesel type_single_lane_road
+								noteadd addon_name(cnt)
+							}
+							
+							if addon_type(cnt) = "low_density_residential" {
+								notesel type_low_density_residential
+								noteadd addon_name(cnt)
+							}
+							if addon_type(cnt) = "high_density_residential" {
+								notesel type_high_density_residential
+								noteadd addon_name(cnt)
+							}
+	
+							if addon_type(cnt) = "low_density_commercial" {
+								notesel type_low_density_commercial
+								noteadd addon_name(cnt)
+							}
+							if addon_type(cnt) = "high_density_commercial" {
+								notesel type_high_density_commercial
+								noteadd addon_name(cnt)
+							}
+	
+							if addon_type(cnt) = "low_density_office" {
+								notesel type_low_density_office
+								noteadd addon_name(cnt)
+							}
+							if addon_type(cnt) = "high_density_office" {
+								notesel type_high_density_office
+								noteadd addon_name(cnt)
+							}
+	
+							if addon_type(cnt) = "industrial" {
+								notesel type_industrial
+								noteadd addon_name(cnt)
+							}
+							
+							if addon_type(cnt) = "public" {
+								notesel type_public
+								noteadd addon_name(cnt)
+							}
+	
 						//バッファ
 							if addon_total_use_types(addon_number) > 1 {
 								repeat addon_total_use_types(addon_number)
@@ -260,7 +323,7 @@
 							notesave "data/temp/"+addon_name(cnt)+".temp"
 	
 						//ディレクトリを戻す
-							chdir ""+directory+"\\img"
+							chdir ""+directory+"\\addons"
 	
 						addon_number++
 	
@@ -275,7 +338,7 @@
 	pos 265, 50 : gmode 0 : gcopy 1, 0, 0, 110, 110
 	
 	color 255, 255, 255
-	cmes "Ver.0.3.1", 0, 270, 640, 300
+	cmes "Ver."+about_version+"", 0, 270, 640, 300
 	
 	objsize 100, 20
 	pos 270, 350 : button "新規マップ作成", *map_preparating
@@ -316,8 +379,6 @@
 		map(ix,iy) = addon_num_buf
 		obj_type(ix,iy) = 0
 		obj_dire(ix,iy) = 0
-	
-		get_about_addon map(ix,iy), obj_type(ix,iy), obj_dire(ix,iy), atlx(ix,iy), atly(ix,iy), abrx(ix,iy), abry(ix,iy), sizex(ix,iy), sizey(ix,iy)
 		
 		ix++
 		if ix = mapx {
@@ -358,70 +419,105 @@
 			mousey_=mousey+camy
 			mx=(mousey_+mousex_/2)/(chip_size/2)
 			my=(-mousex_+mousey_*2)/chip_size
+	
+		//FPS表示
+		/*
+			; ------ FPS取得処理 ------
+			  if gettime(7) < msecond { ; ミリ秒の桁上がりを確認する
+			    ; fpsにカウントしたフレーム数を代入し、カウントを1フレーム目に戻す
+			    fps = frame_count
+			    frame_count = 1
 			
+			  } else {
+			    ; 上記以外の場合フレームをカウント
+			    frame_count = frame_count + 1
+			
+			  }
+			  ; msecondへ現在のミリ秒値を代入
+			  msecond = gettime(7)
+			
+			  ; 文字描画
+			  color 255,255,255
+			  pos 550,8
+			  mes "FPS " + fps
+	
+		*/
+			
+			  stick key,0 ; キー取得
+	
+*map_drawing_2
 			repeat mapx
 				x = cnt
 				
 				repeat mapy
 					y = cnt
 	
-					if mx=x & my=y and mousey < menu_line_y {		//マウスポインタの位置のチップを光らせる
-						color 255, 100, 100
-						qv x,y
-						title "座標("+x+","+y+") "+atlx+","+atly+" "+abrx+" "+abry+""
-						continue
-					}
+					x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
+					y_=(windowy/2)+camy
+					middle_x=(y_+x_/2)/(chip_size/2)
+					middle_y=(-x_+y_*2)/chip_size
 	
-					//マウスがクリックされているとき
-						getkey mouse_left, 1
-						getkey mouse_right, 2
+					if x > (middle_x-(windowx/64)) - 5 and y > (middle_y-(windowy/32)) - 5 and x < (middle_x+(windowx/64)) + 5 and y < (middle_y+(windowy/32)) + 5 {
 	
-						if mouse_left = 1 or mouse_right = 1 {
-							gosub *map_drawing_onclick
+						if mx=x & my=y and mousey < menu_line_y {		//マウスポインタの位置のチップを光らせる
+							color 255, 100, 100
+							qv x,y
+							title "座標("+x+","+y+") カメラ座標("+camx+","+camy+") "+atlx+","+atly+" "+abrx+" "+abry+""
+							continue
 						}
-	
-					//周囲のオブジェクトの番号を取得
-						left_chip = "null"
-						top_chip = "null"
-						bottom_chip = "null"
-						right_chip = "null"
-	
-						if x > 0 {
-							left_chip = map(x-1, y)
-						}
-						if y > 0 {
-							top_chip = map(x, y-1)
-						}
-						if mapy-1 > y {
-							bottom_chip = map(x, y+1)
-						}
-						if mapx-1 > x {
-							right_chip = map(x+1, y)
-						}
-					
-					//マップ作成
-						qv2 x, y
-	
-						if addon_total_use_types( map(x,y) ) > 1 {
-							buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
-							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx(x,y), atly(x,y), abrx(x,y), abry(x,y), sizex(x,y), sizey(x,y)
-							
-						} else {
-							buffer_number(x,y) = map(x,y) + 1000
-							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx(x,y), atly(x,y), abrx(x,y), abry(x,y), sizex(x,y), sizey(x,y)
-							
-						}
-	
-						if sizey(x,y) > 32 {
-							macro2 -= 32
-						}
-						
-						//オブジェクトを表示
-						pos macro1, macro2 - sizey/2 + 1
-						gmode 2 : gcopy buffer_number(x,y), atlx(x,y), atly(x,y), sizex(x,y), sizey(x,y)
-	
+		
+						//マウスがクリックされているとき
+							getkey mouse_left, 1
+							getkey mouse_right, 2
+		
+							if mouse_left = 1 or mouse_right = 1 {
+								gosub *map_drawing_onclick
+							}
+		
+						//周囲のオブジェクトの番号を取得
+							left_chip = "null"
+							top_chip = "null"
+							bottom_chip = "null"
+							right_chip = "null"
+		
+							if x > 0 {
+								left_chip = map(x-1, y)
+							}
+							if y > 0 {
+								top_chip = map(x, y-1)
+							}
+							if mapy-1 > y {
+								bottom_chip = map(x, y+1)
+							}
+							if mapx-1 > x {
+								right_chip = map(x+1, y)
+							}
+		
 						//道路の向きを調節
-						gosub *adjustment_road
+							gosub *adjustment_road
+						
+						//マップ作成
+							qv2 x, y
+		
+							if addon_total_use_types( map(x,y) ) > 1 {
+								buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
+								get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
+								
+							} else {
+								buffer_number(x,y) = map(x,y) + 1000
+								get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
+								
+							}
+		
+							if sizey > 32 {
+								macro2 -= 16
+							}
+							
+							//オブジェクトを表示
+							pos macro1, macro2 - sizey/2 + 1
+							gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
+	
+						}
 					
 				loop
 					
@@ -478,7 +574,7 @@
 					}
 					
 			redraw 1
-			await 80
+			await 30
 			c+=16
 	loop
 	
@@ -543,62 +639,86 @@
 				//道路敷設
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
 						map(mx, my) = addon_num_normal_road
+	
+						gosub *adjustment_road
 					}
 	
 				//道路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
 					if cursor_mode != "put_Road" {
 	
-						//建物（一軒家）建設
-							if cursor_mode = "put_House" and map(mx, my) != 2 {
-								new_building = "red_roof_house"
-								map(mx, my) = addon_num(""+new_building+"")
-							}
-			
-						//建物（オフィス）建設
-							if cursor_mode = "put_Office" and map(mx, my) != 1 {
-								new_building = "white_office"
-								map(mx, my) = addon_num(""+new_building+"")
-							}
-			
-						//建物（郵便局）建設
-							if cursor_mode = "put_Postoffice" and map(mx, my) != 1 {
-								new_building = "post_office"
-								map(mx, my) = addon_num(""+new_building+"")
-							}
-							
 						around_road_exist = -1
 						
 						if mx > 0 {
 							if map(mx-1, my) = addon_num_normal_road {
 								around_road_exist += 1
-								obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
 							}
 						}
 						if my > 0 {
 							if map(mx, my-1) = addon_num_normal_road {
 								around_road_exist += 1
-								obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
 							}
 						}
 						if my < mapy {
 							if map(mx, my+1) = addon_num_normal_road {
 								around_road_exist += 1
-								obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
 							}
 						}
 						if mx < mapx {
 							if map(mx+1, my) = addon_num_normal_road {
 								around_road_exist += 1
-								obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
 							}
 						}
-		
+	
 						if around_road_exist = -1 {
 							dialog "道路に接続されていない場所には建設できません！"
 							return
 						}
-					}
 	
+						if around_road_exist >= 0 {
+							//建物（一軒家）建設
+								if cursor_mode = "put_House" {
+									new_building = "red_roof_house"
+									map(mx, my) = addon_num(""+new_building+"")
+								}
+				
+							//建物（オフィス）建設
+								if cursor_mode = "put_Office" {
+									new_building = "white_office"
+									map(mx, my) = addon_num(""+new_building+"")
+								}
+				
+							//建物（郵便局）建設
+								if cursor_mode = "put_Postoffice" {
+									new_building = "post_office"
+									map(mx, my) = addon_num(""+new_building+"")
+								}
+	
+							if mx > 0 {
+								if map(mx-1, my) = addon_num_normal_road {
+									around_road_exist += 1
+									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
+								}
+							}
+							if my > 0 {
+								if map(mx, my-1) = addon_num_normal_road {
+									around_road_exist += 1
+									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
+								}
+							}
+							if my < mapy {
+								if map(mx, my+1) = addon_num_normal_road {
+									around_road_exist += 1
+									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
+								}
+							}
+							if mx < mapx {
+								if map(mx+1, my) = addon_num_normal_road {
+									around_road_exist += 1
+									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
+								}
+							}
+						}
+					}	
 			}
 			
 		//取り壊し
