@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-										Cities Box Ver 0.3.2
+									  Cities Box Ver 0.3.2.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -420,9 +420,7 @@
 			mx=(mousey_+mousex_/2)/(chip_size/2)
 			my=(-mousex_+mousey_*2)/chip_size
 	
-		//FPS表示
-		/*
-			; ------ FPS取得処理 ------
+		; ------ FPS取得処理 ------
 			  if gettime(7) < msecond { ; ミリ秒の桁上がりを確認する
 			    ; fpsにカウントしたフレーム数を代入し、カウントを1フレーム目に戻す
 			    fps = frame_count
@@ -436,14 +434,8 @@
 			  ; msecondへ現在のミリ秒値を代入
 			  msecond = gettime(7)
 			
-			  ; 文字描画
-			  color 255,255,255
-			  pos 550,8
-			  mes "FPS " + fps
 	
-		*/
-			
-			  stick key,0 ; キー取得
+		stick key,0 ; キー取得
 	
 *map_drawing_2
 			repeat mapx
@@ -459,10 +451,13 @@
 	
 					if x > (middle_x-(windowx/64)) - 5 and y > (middle_y-(windowy/32)) - 5 and x < (middle_x+(windowx/64)) + 5 and y < (middle_y+(windowy/32)) + 5 {
 	
+						if cnt \ 100 = 0 {
+							title "マウス座標("+mx+","+my+") 画面中央の座標("+middle_x+","+middle_y+") カメラ座標("+camx+","+camy+") FPS:"+fps+""
+						}
+	
 						if mx=x & my=y and mousey < menu_line_y {		//マウスポインタの位置のチップを光らせる
 							color 255, 100, 100
 							qv x,y
-							title "座標("+x+","+y+") カメラ座標("+camx+","+camy+") "+atlx+","+atly+" "+abrx+" "+abry+""
 							continue
 						}
 		
@@ -696,24 +691,28 @@
 							if mx > 0 {
 								if map(mx-1, my) = addon_num_normal_road {
 									around_road_exist += 1
+									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
 								}
 							}
 							if my > 0 {
 								if map(mx, my-1) = addon_num_normal_road {
 									around_road_exist += 1
+									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
 								}
 							}
 							if my < mapy {
 								if map(mx, my+1) = addon_num_normal_road {
 									around_road_exist += 1
+									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
 								}
 							}
 							if mx < mapx {
 								if map(mx+1, my) = addon_num_normal_road {
 									around_road_exist += 1
+									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
 								}
 							}
