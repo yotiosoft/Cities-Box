@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.3.2.1
+									  Cities Box Ver 0.3.2.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -24,6 +24,12 @@
 					macro2@=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4-camy+%1*chip_size/4:\
 					macro2@(2)=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4+chip_size/2-camy+%1*chip_size/4:\
 
+*uselib
+	#uselib "user32.dll"
+		#func FindWindow "FindWindowA" str, int
+		#func GetWindowRect "GetWindowRect" int, int
+		#func DrawText "DrawTextW" int,wstr,int,int,int
+	
 *module
 #module
 
@@ -51,6 +57,11 @@
 	
 /*指定された文字列が何番目の要素にあるかを取得（2次配列用）（使用例：element2 検索するアドオン名, 検索する文字列が含まれる変数名, その変数の要素数が格納されている変数, "検索する文字列"）*/
 #defcfunc element2 str search_addon_name, array search_var, array search_var_elements, str search_word
+	exist "data/temp/"+search_addon_name+".temp"
+	if strsize = -1 {
+		return -1
+	}
+	
 	notesel temp_file
 	noteload "data/temp/"+search_addon_name+".temp"
 	
@@ -88,9 +99,8 @@
 
 /*文字を中央に表示（使用例：cmes "hogehoge", 0, 640, 0, 480, 0）*/
 #deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
-	#include "user32.as"
 	RECT = cx, cy, cx2, cy2
-	DrawText hdc, ctext, -1, varptr(RECT), $01
+	DrawText@ hdc, ctext, -1, varptr(RECT), $01
 	
 	if redraw_exist = 0 : redraw 1
 	return
@@ -149,6 +159,14 @@
 	
 	//onexit
 		onexit *exit
+	
+	//タスクバーの高さを取得
+			dim RECT, 4
+		
+			FindWindow "shell_traywnd"
+			GetWindowRect stat, varptr (RECT)
+			
+			taskbar_high = RECT.3 - RECT.1
 	
 	//タイトルとバージョンの読み込み
 		notesel about
@@ -451,7 +469,7 @@
 	
 					if x > (middle_x-(windowx/64)) - 5 and y > (middle_y-(windowy/32)) - 5 and x < (middle_x+(windowx/64)) + 5 and y < (middle_y+(windowy/32)) + 5 {
 	
-						if cnt \ 100 = 0 {
+						if cnt \ 10000 = 0 {
 							title "マウス座標("+mx+","+my+") 画面中央の座標("+middle_x+","+middle_y+") カメラ座標("+camx+","+camy+") FPS:"+fps+""
 						}
 	
@@ -664,7 +682,7 @@
 							}
 						}
 	
-						if around_road_exist = -1 {
+						if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+taskbar_high&ginfo_my<=ginfo_wy2) {
 							dialog "道路に接続されていない場所には建設できません！"
 							return
 						}
