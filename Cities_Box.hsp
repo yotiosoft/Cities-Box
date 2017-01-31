@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.3.2.2
+									   Cities Box Ver 0.3.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -78,6 +78,11 @@
 	
 /*指定された文字列が何番目の要素にあるかを取得（3次配列用）（使用例：element3 検索するアドオン名, 検索する文字列が含まれる変数名, その変数の要素数が格納されている変数, "検索する文字列", 検索する文字列が含まれる3番目の要素の変数名, その3番目の要素の変数の要素数が格納されている変数, "3番目の要素で検索する文字列"）*/
 #defcfunc element3 str search_addon_name, array search_var, array search_var_elements, str search_word, array second_search_var, array second_search_var_elements, str second_search_word
+	exist "data/temp/"+search_addon_name+".temp"
+	if strsize = -1 {
+		return -1
+	}
+	
 	notesel temp_file
 	noteload "data/temp/"+search_addon_name+".temp"
 	
@@ -210,6 +215,7 @@
 				sdim addon_name, total_addons
 				sdim addon_jp_name, total_addons
 				sdim addon_summary, total_addons
+				sdim addon_icon, total_addons
 				sdim addon_type, total_addons
 	
 				sdim use_type, total_addons, 100
@@ -270,6 +276,9 @@
 						//日本語のアドオン名と説明
 							addon_jp_name(cnt) = get_chapter(buf_adat, "addon_jp_name", " = \\", "\"")
 							addon_summary(cnt) = get_chapter(buf_adat, "addon_summary", " = \\", "\"")
+	
+						//アドオンのアイコン
+							addon_icon(cnt) = get_chapter(buf_adat, "addon_icon", " = \\", "\"")
 							
 						//アドオンのタイプ
 							addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
@@ -281,6 +290,9 @@
 							if addon_type(cnt) = "single_lane_road" {
 								notesel type_single_lane_road
 								noteadd addon_name(cnt)
+	
+								notesel type_number_single_lane_road
+								noteadd str(cnt)
 							}
 							
 							if addon_type(cnt) = "low_density_residential" {
@@ -320,7 +332,7 @@
 								noteadd addon_name(cnt)
 							}
 	
-						//バッファ
+						//アドオンのバッファ（1000～、複数の画像を利用する場合は1001000～）
 							if addon_total_use_types(addon_number) > 1 {
 								repeat addon_total_use_types(addon_number)
 									addon_buffer_number = (1000 + addon_number) * 1001 + cnt
@@ -330,6 +342,9 @@
 							} else {
 								celload addon_image(addon_number, 0), (1000 + addon_number)
 							}
+	
+						//アドオンのアイコンのバッファ（10001000～）
+							celload addon_icon(addon_number), (10001000 + addon_number)
 	
 						//ディレクトリを戻す
 							chdir directory
@@ -375,8 +390,6 @@
 	windowx = 640
 	windowy = 480
 	
-	addon_num_normal_road = addon_num("normal_road")
-	
 	dim buffer_number, mapx, mapy
 	dim atlx, mapx, mapy
 	dim atly, mapx, mapy
@@ -386,6 +399,7 @@
 	dim sizey, mapx, mapy
 	
 	dim map, mapx, mapy			//マップの座標
+	sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 	dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
 	dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
 	
@@ -395,6 +409,7 @@
 	
 	repeat mapx * mapy
 		map(ix,iy) = addon_num_buf
+		category(ix,iy) = "tile"
 		obj_type(ix,iy) = 0
 		obj_dire(ix,iy) = 0
 		
@@ -488,22 +503,22 @@
 							}
 		
 						//周囲のオブジェクトの番号を取得
-							left_chip = "null"
-							top_chip = "null"
-							bottom_chip = "null"
-							right_chip = "null"
+							left_chip = ""
+							top_chip = ""
+							bottom_chip = ""
+							right_chip = ""
 		
 							if x > 0 {
-								left_chip = map(x-1, y)
+								left_chip = category(x-1, y)
 							}
 							if y > 0 {
-								top_chip = map(x, y-1)
+								top_chip = category(x, y-1)
 							}
 							if mapy-1 > y {
-								bottom_chip = map(x, y+1)
+								bottom_chip = category(x, y+1)
 							}
 							if mapx-1 > x {
-								right_chip = map(x+1, y)
+								right_chip = category(x+1, y)
 							}
 		
 						//道路の向きを調節
@@ -539,7 +554,7 @@
 *menu_buttons
 			//メニュー
 				color 0, 0, 0
-				gmode 3,,,200 : boxfa 0, 400, 640, 480
+				gmode 3,,,200 : boxfa 0, 410, 640, 480
 	
 				//標準カーソルボタン
 					if cursor_mode = "normal" {
@@ -585,6 +600,10 @@
 						gmode 2
 						pos 156, 410 : gcopy 7, 0, 0, 32, 32
 					}
+	
+				if opening_menu_put_Road = 1 {
+					gosub *open_menu_put_Road
+				}
 					
 			redraw 1
 			await 30
@@ -597,52 +616,109 @@
 		//標準カーソルボタン
 			if click_range( 20, 410, 20+32, 410+32 ) = 1 {
 				cursor_mode = "normal"
+	
+				opening_menu_put_Road = 0
 			}
 			
 		//道路ボタン
 			if click_range( 60, 410, 60+32, 410+32 ) = 1 {
-				cursor_mode = "put_Road"
+				
+				if opening_menu_put_Road = 0 {
+					cursor_mode = "put_Road"
+					gosub *open_menu_put_Road
+					opening_menu_put_Road = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_single_lane_road
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_single_lane_road
+							noteget addon_num_normal_road, clicked_addon_number
+							addon_num_normal_road = int(addon_num_normal_road)
+				} 
+				/*
+				if opening_menu_put_Road = 1 {
+					cursor_mode = "normal"
+					opening_menu_put_Road = 0
+				}
+				*/
+			
 			}
 	
 		//建物（一軒家）ボタン
 			if click_range( 92, 410, 92+32, 410+32 ) = 1 {
 				cursor_mode = "put_House"
+	
+				opening_menu_put_Road = 0
 			}
 	
 		//建物（オフィス）ボタン
 			if click_range( 124, 410, 124+32, 410+32 ) = 1 {
 				cursor_mode = "put_Office"
+	
+				opening_menu_put_Road = 0
 			}
 		//建物（郵便局）ボタン
 			if click_range( 156, 410, 156+32, 410+32 ) = 1 {
 				cursor_mode = "put_Postoffice"
+	
+				opening_menu_put_Road = 0
+			}
+	
+	
+		//アドオン選択ボタン（水色のメニューバー）
+			notesel type_single_lane_road
+			
+			if click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				cursor_mode = "put_Road"
+	
+				clicked_addon_number = mousex/35 - 1
+	
+				//選択されたアドオンのアドオン名を取得
+					notesel type_single_lane_road
+					noteget put_addon_name, clicked_addon_number
+	
+				//選択されたアドオンのアドオン番号を取得
+					notesel type_number_single_lane_road
+					noteget addon_num_normal_road, clicked_addon_number
+					addon_num_normal_road = int(addon_num_normal_road)
 			}
 			
 	
 	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
 	
-		//標準カーソルモードあるいはクリックされたマウスy座標が400以上の場合はreturn
-			if cursor_mode = "normal" or mousey >= 400 or mx < 0 or my < 0 {
+		if opening_menu_put_Road = 1 {
+			menu_line_y = windowy-70-32-20
+		} else {
+			menu_line_y = windowy-70
+		}
+	
+		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
+			if cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0 {
 				return
 			}
 	
 		//周囲のオブジェクトの番号を取得
-			left_chip = -1
-			top_chip = -1
-			bottom_chip = -1
-			right_chip = -1
+			left_chip = ""
+			top_chip = ""
+			bottom_chip = ""
+			right_chip = ""
 	
 			if mx > 0 {
-				left_chip = map(mx-1, my)
+				left_chip = category(mx-1, my)
 			}
 			if my > 0 {
-				top_chip = map(mx, my-1)
+				top_chip = category(mx, my-1)
 			}
 			if mapy-1 > my {
-				bottom_chip = map(mx, my+1)
+				bottom_chip = category(mx, my+1)
 			}
 			if mapx-1 > mx {
-				right_chip = map(mx+1, my)
+				right_chip = category(mx+1, my)
 			}
 	
 	
@@ -652,6 +728,7 @@
 				//道路敷設
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
 						map(mx, my) = addon_num_normal_road
+						category(mx, my) = "road"
 	
 						gosub *adjustment_road
 					}
@@ -662,22 +739,22 @@
 						around_road_exist = -1
 						
 						if mx > 0 {
-							if map(mx-1, my) = addon_num_normal_road {
+							if category(mx-1, my) = "road" {
 								around_road_exist += 1
 							}
 						}
 						if my > 0 {
-							if map(mx, my-1) = addon_num_normal_road {
+							if category(mx, my-1) = "road" {
 								around_road_exist += 1
 							}
 						}
 						if my < mapy {
-							if map(mx, my+1) = addon_num_normal_road {
+							if category(mx, my+1) = "road" {
 								around_road_exist += 1
 							}
 						}
 						if mx < mapx {
-							if map(mx+1, my) = addon_num_normal_road {
+							if category(mx+1, my) = "road" {
 								around_road_exist += 1
 							}
 						}
@@ -692,43 +769,46 @@
 								if cursor_mode = "put_House" {
 									new_building = "red_roof_house"
 									map(mx, my) = addon_num(""+new_building+"")
+									category(mx, my) = "residential"
 								}
 				
 							//建物（オフィス）建設
 								if cursor_mode = "put_Office" {
 									new_building = "white_office"
 									map(mx, my) = addon_num(""+new_building+"")
+									category(mx, my) = "office"
 								}
 				
 							//建物（郵便局）建設
 								if cursor_mode = "put_Postoffice" {
 									new_building = "post_office"
 									map(mx, my) = addon_num(""+new_building+"")
+									category(mx, my) = "public"
 								}
 	
 							if mx > 0 {
-								if map(mx-1, my) = addon_num_normal_road {
+								if category(mx-1, my) = "road" {
 									around_road_exist += 1
 									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
 								}
 							}
 							if my > 0 {
-								if map(mx, my-1) = addon_num_normal_road {
+								if category(mx, my-1) = "road" {
 									around_road_exist += 1
 									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
 								}
 							}
 							if my < mapy {
-								if map(mx, my+1) = addon_num_normal_road {
+								if category(mx, my+1) = "road" {
 									around_road_exist += 1
 									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
 								}
 							}
 							if mx < mapx {
-								if map(mx+1, my) = addon_num_normal_road {
+								if category(mx+1, my) = "road" {
 									around_road_exist += 1
 									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
 									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
@@ -744,6 +824,7 @@
 				//道路削除
 					if cursor_mode = "put_Road" and map(mx, my) = addon_num_normal_road {
 						map(mx, my) = addon_num("tile_greenfield")
+						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 					}
@@ -751,6 +832,7 @@
 				//家削除
 					if cursor_mode = "put_House" and map(mx, my) = addon_num("red_roof_house") {
 						map(mx, my) = addon_num("tile_greenfield")
+						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 					}
@@ -758,6 +840,7 @@
 				//オフィス削除
 					if cursor_mode = "put_Office" and map(mx, my) = addon_num("white_office") {
 						map(mx, my) = addon_num("tile_greenfield")
+						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 					}
@@ -765,6 +848,7 @@
 				//郵便局削除
 					if cursor_mode = "put_Postoffice" and map(mx, my) = addon_num("post_office") {
 						map(mx, my) = addon_num("tile_greenfield")
+						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 					}
@@ -772,89 +856,116 @@
 			}
 		
 		return
+	
+*open_menu_put_Road
+	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, windowx, windowy-70
+	
+	notesel type_number_single_lane_road
+	
+	repeat notemax
+		noteget get_addon_number, cnt
+	
+		gmode 2
+		if clicked_addon_number != cnt {
+			pos 30 + (cnt*35)+10, windowy-70-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
+		}
+		if clicked_addon_number = cnt {
+			color 255,255,255 : font "", 14
+			pos 20, (windowy-70-32-40+5) : mes addon_jp_name(int(get_addon_number))
+			
+			color 255,255,255 : font "", 10
+			pos 23, (windowy-70-32-20) : mes addon_summary(int(get_addon_number))
+			
+			pos 30 + (cnt*35)+10, windowy-70-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
+		}
+	
+		await 1
+	loop
+	
+	return
 		
 *adjustment_road
-		if map(x, y) = addon_num_normal_road {
-	
-			//縦向き
-				if left_chip != addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "default")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
-				}
-	
-			//横向き
-				if left_chip = addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "default")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
-				}
-	
-			//行き止まり
-				if left_chip = addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "dead_end")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
-				}
-				if left_chip != addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "dead_end")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
-				}
-				if left_chip != addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "dead_end")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
-				}
-				if left_chip != addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "dead_end")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
-				}
-	
-			//曲がり角
-				if left_chip = addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "turn")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-top")
-				}
-				if left_chip != addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "turn")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-top")
-				}
-				if left_chip = addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "turn")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-bottom")
-				}
-				if left_chip != addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "turn")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-bottom")
-				}
-	
-			//T字型交差点
-				if left_chip = addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "intersection_T")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
-				}
-				if left_chip = addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "intersection_T")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
-				}
-				if left_chip = addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "intersection_T")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
-				}
-				if left_chip != addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "intersection_T")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
-				}
-	
-			//十字型交差点
-				if left_chip = addon_num_normal_road and top_chip = addon_num_normal_road and bottom_chip = addon_num_normal_road and right_chip = addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "intersection_cross")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
-				}
-	
-			//1マスだけ孤立した（周りに接続する道路がない）道路の場合はコンクリートタイルを表示
-				if left_chip != addon_num_normal_road and top_chip != addon_num_normal_road and bottom_chip != addon_num_normal_road and right_chip != addon_num_normal_road {
-					obj_type(x, y) = element2( "normal_road", use_type, addon_total_use_types, "intersection_cross")
-					obj_dire(x, y) = element3( "normal_road", use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
-				}
-	
+	if category(x, y) = "road" {
+		
+		//縦向き
+			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 			}
+	
+		//横向き
+			if left_chip = "road" and top_chip != "road" and bottom_chip != "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+			}
+	
+		//行き止まり
+			if left_chip = "road" and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
+			}
+			if left_chip != "road" and top_chip = "road" and bottom_chip != "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
+			}
+			if left_chip != "road" and top_chip != "road" and bottom_chip = "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
+			}
+			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
+			}
+	
+		//曲がり角
+			if left_chip = "road" and top_chip = "road" and bottom_chip != "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-top")
+			}
+			if left_chip != "road" and top_chip = "road" and bottom_chip != "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-top")
+			}
+			if left_chip = "road" and top_chip != "road" and bottom_chip = "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-bottom")
+			}
+			if left_chip != "road" and top_chip != "road" and bottom_chip = "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-bottom")
+			}
+	
+		//T字型交差点
+			if left_chip = "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
+			}
+			if left_chip = "road" and top_chip = "road" and bottom_chip != "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
+			}
+			if left_chip = "road" and top_chip != "road" and bottom_chip = "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
+			}
+			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
+			}
+	
+		//十字型交差点
+			if left_chip = "road" and top_chip = "road" and bottom_chip = "road" and right_chip = "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+			}
+	
+		//1マスだけ孤立した（周りに接続する道路がない）道路の場合はコンクリートタイルを表示
+			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+			}
+	
+		}
 	
 	return
 	

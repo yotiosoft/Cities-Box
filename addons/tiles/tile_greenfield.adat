@@ -1,6 +1,7 @@
 addon_name = "tile_greenfield"
 addon_jp_name = "X’n"
 addon_summary = "‘¶‚¦‚é"
+addon_icon = "icon_tile_greenfield.png"
 
 addon_type = "tile"
 
