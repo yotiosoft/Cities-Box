@@ -1,14 +1,14 @@
-addon_name = "white_office"
-addon_jp_name = "白い壁のオフィス"
-addon_summary = "8階建ての白い壁のオフィスです。\n外観が白いからといって中の会社がホワイト企業とは限りません！"
-addon_icon = "icon_white_office.png"
+addon_name = "blue_roof_house"
+addon_jp_name = "青いの屋根の家"
+addon_summary = "2階建ての一軒家、3LDKで23年ローンです。"
+addon_icon = "icon_blue_roof_house.png"
 
-addon_type = "low_density_office"
+addon_type = "low_density_residential"
 
 use_types = "null"
 
 null {
-	image = "white_office.png"
+	image = "blue_roof_house.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

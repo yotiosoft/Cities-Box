@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.3
+									   Cities Box Ver 0.3.3.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -156,11 +156,15 @@
 		celload "img/AME963_sappro_TP_V.jpg", 2						; タイトル背景画像
 	
 	//メニューのアイコン
-		celload "img/menu_icons/normal_cursor/cursor.png", 3		; 標準カーソル
-		celload "img/menu_icons/building/road.png", 4				; メニューアイコン（道路敷設）
-		celload "img/menu_icons/building/house.png", 5				; メニューアイコン（一軒家建設）
-		celload "img/menu_icons/building/office.png", 6				; メニューアイコン（オフィス建設）
-		celload "img/menu_icons/building/post_office.png", 7		; メニューアイコン（郵便局建設）
+		celload "img/menu_icons/normal_cursor/cursor.png", 3				; 標準カーソル
+		celload "img/menu_icons/building/road.png", 4						; メニューアイコン（道路敷設）
+		celload "img/menu_icons/building/low_density_residential.png", 5	; メニューアイコン（住居地区建設）
+		celload "img/menu_icons/building/office.png", 6						; メニューアイコン（オフィス建設）
+		celload "img/menu_icons/building/post_office.png", 7				; メニューアイコン（郵便局建設）
+	
+	//小サイズのアイコン
+		celload "img/menu_icons/mini/low_density_residential.png", 8		; 高密度住居地区
+		celload "img/menu_icons/mini/high_density_residential.png", 9		; 低密度住居地区
 	
 	//onexit
 		onexit *exit
@@ -248,8 +252,11 @@
 				dim addon_bottom_right_y, total_addons, 100, 100
 	
 				sdim type_single_lane_road, 128
+				sdim type_number_single_lane_road, 128
 				sdim type_low_density_residential, 128
+				sdim type_number_low_density_residential, 128
 				sdim type_high_density_residential, 128
+				sdim type_number_high_density_residential, 128
 				sdim type_low_density_office, 128
 				sdim type_high_density_office, 128
 				sdim type_industrial, 128
@@ -298,38 +305,62 @@
 							if addon_type(cnt) = "low_density_residential" {
 								notesel type_low_density_residential
 								noteadd addon_name(cnt)
+	
+								notesel type_number_low_density_residential
+								noteadd str(cnt)
 							}
 							if addon_type(cnt) = "high_density_residential" {
 								notesel type_high_density_residential
 								noteadd addon_name(cnt)
+	
+								notesel type_number_high_density_residential
+								noteadd str(cnt)
 							}
 	
 							if addon_type(cnt) = "low_density_commercial" {
 								notesel type_low_density_commercial
 								noteadd addon_name(cnt)
+	
+								notesel type_number_low_density_commercial
+								noteadd str(cnt)
 							}
 							if addon_type(cnt) = "high_density_commercial" {
 								notesel type_high_density_commercial
 								noteadd addon_name(cnt)
+	
+								notesel type_number_high_density_commercial
+								noteadd str(cnt)
 							}
 	
 							if addon_type(cnt) = "low_density_office" {
 								notesel type_low_density_office
 								noteadd addon_name(cnt)
+	
+								notesel type_number_low_density_office
+								noteadd str(cnt)
 							}
 							if addon_type(cnt) = "high_density_office" {
 								notesel type_high_density_office
 								noteadd addon_name(cnt)
+	
+								notesel type_number_high_density_office
+								noteadd str(cnt)
 							}
 	
 							if addon_type(cnt) = "industrial" {
 								notesel type_industrial
 								noteadd addon_name(cnt)
+	
+								notesel type_industrial
+								noteadd str(cnt)
 							}
 							
 							if addon_type(cnt) = "public" {
 								notesel type_public
 								noteadd addon_name(cnt)
+	
+								notesel type_number_public
+								noteadd str(cnt)
 							}
 	
 						//アドオンのバッファ（1000～、複数の画像を利用する場合は1001000～）
@@ -574,8 +605,8 @@
 						pos 60, 410 : gcopy 4, 0, 0, 32, 32
 					}
 	
-				//建物（一軒家）ボタン
-					if cursor_mode = "put_House" {
+				//建物（住居地区）ボタン
+					if cursor_mode = "put_Residential" {
 						gmode 2
 						pos 92, 410 : gcopy 5, 0, 32, 32, 32
 					} else {
@@ -584,7 +615,7 @@
 					}
 	
 				//建物（オフィス）ボタン
-					if cursor_mode = "put_Office" {
+					if cursor_mode = "put_High_density_Office" {
 						gmode 2
 						pos 124, 410 : gcopy 6, 0, 32, 32, 32
 					} else {
@@ -593,7 +624,7 @@
 					}
 	
 				//建物（郵便局）ボタン
-					if cursor_mode = "put_Postoffice" {
+					if cursor_mode = "put_Public" {
 						gmode 2
 						pos 156, 410 : gcopy 7, 0, 32, 32, 32
 					} else {
@@ -601,8 +632,8 @@
 						pos 156, 410 : gcopy 7, 0, 0, 32, 32
 					}
 	
-				if opening_menu_put_Road = 1 {
-					gosub *open_menu_put_Road
+				if opening_addon_menu = 1 {
+					gosub *open_menu_addon_menu
 				}
 					
 			redraw 1
@@ -617,7 +648,13 @@
 			if click_range( 20, 410, 20+32, 410+32 ) = 1 {
 				cursor_mode = "normal"
 	
+				opening_addon_menu = 0
 				opening_menu_put_Road = 0
+				opening_menu_put_Low_density_Residential = 0
+				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Public = 0
 			}
 			
 		//道路ボタン
@@ -625,7 +662,11 @@
 				
 				if opening_menu_put_Road = 0 {
 					cursor_mode = "put_Road"
-					gosub *open_menu_put_Road
+					density = ""
+					
+					gosub *open_menu_addon_menu
+	
+					opening_addon_menu = 1
 					opening_menu_put_Road = 1
 	
 					//とりあえず一番左にあるアドオンを選択させておく
@@ -646,52 +687,236 @@
 					opening_menu_put_Road = 0
 				}
 				*/
-			
+	
+				opening_menu_put_Low_density_Residential = 0
+				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Public = 0
 			}
 	
-		//建物（一軒家）ボタン
+		//建物（住居地区）ボタン
 			if click_range( 92, 410, 92+32, 410+32 ) = 1 {
-				cursor_mode = "put_House"
+				
+				if opening_menu_put_Reaidential = 0 {
+					cursor_mode = "put_Residential"
+					density = "low"
+					
+					gosub *open_menu_addon_menu
+					opening_addon_menu = 1
+					opening_menu_put_Residential = 1
 	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_low_density_residential
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_low_density_residential
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				} 
+				
 				opening_menu_put_Road = 0
+				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Public = 0
 			}
 	
 		//建物（オフィス）ボタン
 			if click_range( 124, 410, 124+32, 410+32 ) = 1 {
-				cursor_mode = "put_Office"
+	
+				if opening_menu_put_High_density_Office = 0 {
+					cursor_mode = "put_High_density_Office"
+					gosub *open_menu_addon_menu
+	
+					opening_addon_menu = 1
+					opening_menu_put_High_density_Office = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_high_density_office
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_high_density_office
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				} 
 	
 				opening_menu_put_Road = 0
+				opening_menu_put_Low_density_Residential = 0
+				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_Public = 0
 			}
-		//建物（郵便局）ボタン
+		//建物（公共施設）ボタン
 			if click_range( 156, 410, 156+32, 410+32 ) = 1 {
-				cursor_mode = "put_Postoffice"
+	
+				if opening_menu_put_High_density_Residential = 0 {
+					cursor_mode = "put_Public"
+					gosub *open_menu_addon_menu
+	
+					opening_addon_menu = 1
+					opening_menu_put_Public = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_public
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_public
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				} 
 	
 				opening_menu_put_Road = 0
+				opening_menu_put_Low_density_Residential = 0
+				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
 			}
 	
 	
 		//アドオン選択ボタン（水色のメニューバー）
-			notesel type_single_lane_road
 			
-			if click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
-				cursor_mode = "put_Road"
+			/*-------------------------------------------道路---------------------------------------------------*/
+				notesel type_single_lane_road
+				if opening_menu_put_Road = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+					cursor_mode = "put_Road"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_single_lane_road
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_single_lane_road
+						noteget addon_num_normal_road, clicked_addon_number
+						addon_num_normal_road = int(addon_num_normal_road)
+				}
 	
-				clicked_addon_number = mousex/35 - 1
+			/*-----------------------------------------住居地区-------------------------------------------------*/
 	
-				//選択されたアドオンのアドオン名を取得
-					notesel type_single_lane_road
-					noteget put_addon_name, clicked_addon_number
+			//住居地区の低密度・高密度選択ボタン
+				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-32, 16, windowy-70-16 ) = 1 {
+					density = "low"
 	
-				//選択されたアドオンのアドオン番号を取得
-					notesel type_number_single_lane_road
-					noteget addon_num_normal_road, clicked_addon_number
-					addon_num_normal_road = int(addon_num_normal_road)
-			}
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_low_density_residential
+						noteget put_addon_name, clicked_addon_number
+			
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_low_density_residential
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+							
+					gosub *open_menu_addon_menu
+				}
+				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-16, 16, windowy-70 ) = 1 {
+					density = "high"
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_high_density_residential
+						noteget put_addon_name, clicked_addon_number
+			
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_high_density_residential
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+						
+					gosub *open_menu_addon_menu
+				}
+			
+			//低密度住居地区
+				notesel type_low_density_residential
+				if opening_menu_put_Residential = 1 and density = "low" and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+					cursor_mode = "put_Residential"
+					
+					clicked_addon_number = mousex/35 - 1
+					
+					//選択されたアドオンのアドオン名を取得
+						notesel type_low_density_residential
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_low_density_residential
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
+				
+			//高密度住居地区
+				notesel type_high_density_residential
+				if opening_menu_put_Residential = 1 and density = "high" and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+					cursor_mode = "put_Residential"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_high_density_residential
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_high_density_residential
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+	
+						dialog"high"
+				}
+	
+			//高密度オフィス
+				notesel type_high_density_office
+				if opening_menu_put_high_density_office = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+					cursor_mode = "put_High_density_Office"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_high_density_office
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_high_density_office
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
+	
+			//公共施設
+				notesel type_public
+				if opening_menu_put_public = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+					cursor_mode = "put_Public"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_public
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_public
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
 			
 	
 	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
 	
-		if opening_menu_put_Road = 1 {
+		if opening_addon_menu = 1 {
 			menu_line_y = windowy-70-32-20
 		} else {
 			menu_line_y = windowy-70
@@ -702,7 +927,7 @@
 				return
 			}
 	
-		//周囲のオブジェクトの番号を取得
+		//周囲のオブジェクトのカテゴリを取得
 			left_chip = ""
 			top_chip = ""
 			bottom_chip = ""
@@ -721,10 +946,9 @@
 				right_chip = category(mx+1, my)
 			}
 	
-	
 		//建設・敷設
 			if mouse_left = 1 {
-	
+				
 				//道路敷設
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
 						map(mx, my) = addon_num_normal_road
@@ -741,21 +965,33 @@
 						if mx > 0 {
 							if category(mx-1, my) = "road" {
 								around_road_exist += 1
+								
+								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
+								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
 							}
 						}
 						if my > 0 {
 							if category(mx, my-1) = "road" {
 								around_road_exist += 1
+								
+								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
+								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
 							}
 						}
 						if my < mapy {
 							if category(mx, my+1) = "road" {
 								around_road_exist += 1
+	
+								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
+								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
 							}
 						}
 						if mx < mapx {
 							if category(mx+1, my) = "road" {
 								around_road_exist += 1
+	
+								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
+								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
 							}
 						}
 	
@@ -765,55 +1001,24 @@
 						}
 	
 						if around_road_exist >= 0 {
-							//建物（一軒家）建設
-								if cursor_mode = "put_House" {
-									new_building = "red_roof_house"
-									map(mx, my) = addon_num(""+new_building+"")
+							//建物（住居地区）建設
+								if cursor_mode = "put_Residential" {
+									map(mx, my) = addon_num_buf
 									category(mx, my) = "residential"
 								}
 				
-							//建物（オフィス）建設
-								if cursor_mode = "put_Office" {
-									new_building = "white_office"
-									map(mx, my) = addon_num(""+new_building+"")
+							//建物（高密度オフィス）建設
+								if cursor_mode = "put_High_density_Office" {
+									map(mx, my) = addon_num_buf
 									category(mx, my) = "office"
 								}
 				
-							//建物（郵便局）建設
-								if cursor_mode = "put_Postoffice" {
-									new_building = "post_office"
-									map(mx, my) = addon_num(""+new_building+"")
+							//建物（公共施設）建設
+								if cursor_mode = "put_Public" {
+									map(mx, my) = addon_num_buf
 									category(mx, my) = "public"
 								}
-	
-							if mx > 0 {
-								if category(mx-1, my) = "road" {
-									around_road_exist += 1
-									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
-								}
-							}
-							if my > 0 {
-								if category(mx, my-1) = "road" {
-									around_road_exist += 1
-									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
-								}
-							}
-							if my < mapy {
-								if category(mx, my+1) = "road" {
-									around_road_exist += 1
-									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
-								}
-							}
-							if mx < mapx {
-								if category(mx+1, my) = "road" {
-									around_road_exist += 1
-									obj_type(mx, my) = element2( ""+new_building+"", use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( ""+new_building+"", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
-								}
-							}
+								
 						}
 					}	
 			}
@@ -822,15 +1027,15 @@
 			if mouse_right = 1 {
 	
 				//道路削除
-					if cursor_mode = "put_Road" and map(mx, my) = addon_num_normal_road {
+					if cursor_mode = "put_Road" and category(mx, my) = "road" {
 						map(mx, my) = addon_num("tile_greenfield")
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 					}
 	
-				//家削除
-					if cursor_mode = "put_House" and map(mx, my) = addon_num("red_roof_house") {
+				//住居地区削除
+					if cursor_mode = "put_Residential" and category(mx, my) = "residential" {
 						map(mx, my) = addon_num("tile_greenfield")
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -838,15 +1043,15 @@
 					}
 	
 				//オフィス削除
-					if cursor_mode = "put_Office" and map(mx, my) = addon_num("white_office") {
+					if (cursor_mode = "put_High_density_Office" or cursor_mode = "put_Low_density_Office") and category(mx, my) = "office" {
 						map(mx, my) = addon_num("tile_greenfield")
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 					}
 	
-				//郵便局削除
-					if cursor_mode = "put_Postoffice" and map(mx, my) = addon_num("post_office") {
+				//公共事業削除
+					if cursor_mode = "put_Public" and category(mx, my) = "public" {
 						map(mx, my) = addon_num("tile_greenfield")
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -857,10 +1062,35 @@
 		
 		return
 	
-*open_menu_put_Road
+*open_menu_addon_menu
 	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, windowx, windowy-70
 	
-	notesel type_number_single_lane_road
+	if cursor_mode = "put_Road" {
+		notesel type_number_single_lane_road
+	}
+	if cursor_mode = "put_Residential" and density = "low" {
+		notesel type_number_low_density_residential
+	
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, 16, windowy-70
+		pos 0, windowy-72-32 : gmode 2 : gcopy 8, 0, 16, 16, 16
+		pos 0, windowy-72-16 : gmode 2 : gcopy 9, 0, 0, 16, 16 
+	}
+	if cursor_mode = "put_Residential" and density = "high" {
+		notesel type_number_high_density_residential
+	
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, 16, windowy-70
+		pos 0, windowy-72-32 : gmode 2 : gcopy 8, 0, 0, 16, 16
+		pos 0, windowy-72-16 : gmode 2 : gcopy 9, 0, 16, 16, 16
+	}
+	if cursor_mode = "put_Low_density_Office" {
+		notesel type_number_low_density_office
+	}
+	if cursor_mode = "put_High_density_Office" {
+		notesel type_number_high_density_office
+	}
+	if cursor_mode = "put_Public" {
+		notesel type_number_public
+	}
 	
 	repeat notemax
 		noteget get_addon_number, cnt
@@ -885,7 +1115,7 @@
 	return
 		
 *adjustment_road
-	if category(x, y) = "road" {
+	if category(x, y) = "road" and cursor_mode = "put_Road" {
 		
 		//縦向き
 			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {

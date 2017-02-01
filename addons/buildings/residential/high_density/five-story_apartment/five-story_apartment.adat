@@ -1,15 +1,14 @@
-addon_name = "post_office"
-addon_jp_name = "郵便局"
-addon_summary = "どこにでもありそうな普通の郵便局。\n今日も無数の郵便物を取り扱っています。\nたまに郵便物が消えることがあり、噂では、黒ヤギがいるとかいないとか…"
-addon_icon = "icon_post_office.png"
+addon_name = "five-story_apartment"
+addon_jp_name = "5階建てのマンション"
+addon_summary = "5階建ての賃貸マンションです。大家さんは家賃を払わない住民を屋上から落とすほどの怖い人。"
+addon_icon = "icon_five-story_apartment.png"
 
-addon_type = "public"
-addon_type_2 = "post_office"
+addon_type = "high_density_residential"
 
 use_types = "null"
 
 null {
-	image = "post_office.png"
+	image = "five-story_apartment.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
