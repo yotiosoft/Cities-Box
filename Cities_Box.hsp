@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.3.1
+									   Cities Box Ver 0.3.3.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -16,7 +16,7 @@
 					macro1(2)=%1*chip_size/2+chip_size-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
 					macro2=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4-camy+%1*chip_size/4:\
 					macro2(2)=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4+chip_size/2-camy+%1*chip_size/4:\
-					gsquare -1,macro1,macro2
+					gmode 3,,,128 : gsquare -1,macro1,macro2
 	
 /*クウォータービューの位置を取得するためのマクロ（チップ表示用）*/
 #define qv2(%1,%2)	macro1@=%1*chip_size/2-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
@@ -421,6 +421,8 @@
 	windowx = 640
 	windowy = 480
 	
+	pointer_icon = -1		//ポインタのアイコン（-1で四角形）
+	
 	dim buffer_number, mapx, mapy
 	dim atlx, mapx, mapy
 	dim atly, mapx, mapy
@@ -518,12 +520,6 @@
 						if cnt \ 10000 = 0 {
 							title "マウス座標("+mx+","+my+") 画面中央の座標("+middle_x+","+middle_y+") カメラ座標("+camx+","+camy+") FPS:"+fps+""
 						}
-	
-						if mx=x & my=y and mousey < menu_line_y {		//マウスポインタの位置のチップを光らせる
-							color 255, 100, 100
-							qv x,y
-							continue
-						}
 		
 						//マウスがクリックされているとき
 							getkey mouse_left, 1
@@ -576,6 +572,22 @@
 							pos macro1, macro2 - sizey/2 + 1
 							gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
 	
+						}
+	
+					//マウスポインタの位置のチップを光らせる
+						if mx=x & my=y and mousey < menu_line_y {
+							if pointer_icon = -1 {
+								color 245, 133, 138
+								qv x,y
+							} else {
+								color 0, 162, 232
+								qv x,y
+								
+								qv2 x,y
+								color : gmode 4,,,200
+								pos macro1+16,macro2-16 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
+							}
+							continue
 						}
 					
 				loop
@@ -808,23 +820,25 @@
 			/*-----------------------------------------住居地区-------------------------------------------------*/
 	
 			//住居地区の低密度・高密度選択ボタン
-				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-32, 16, windowy-70-16 ) = 1 {
-					density = "low"
-	
-				//とりあえず一番左にあるアドオンを選択させておく
-					clicked_addon_number = 0
+				//低密度
+					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-32, 16, windowy-70-16 ) = 1 {
+						density = "low"
 		
-					//選択されたアドオンのアドオン名を取得
-						notesel type_low_density_residential
-						noteget put_addon_name, clicked_addon_number
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
 			
-					//選択されたアドオンのアドオン番号を取得
-						notesel type_number_low_density_residential
-						noteget addon_num_buf, clicked_addon_number
-						addon_num_buf = int(addon_num_buf)
-							
-					gosub *open_menu_addon_menu
-				}
+						//選択されたアドオンのアドオン名を取得
+							notesel type_low_density_residential
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_low_density_residential
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+								
+						gosub *open_menu_addon_menu
+					}
+				//高密度
 				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-16, 16, windowy-70 ) = 1 {
 					density = "high"
 	
@@ -875,10 +889,10 @@
 						notesel type_number_high_density_residential
 						noteget addon_num_buf, clicked_addon_number
 						addon_num_buf = int(addon_num_buf)
-	
-						dialog"high"
 				}
 	
+			/*--------------------------------------------オフィス-----------------------------------------------*/
+			
 			//高密度オフィス
 				notesel type_high_density_office
 				if opening_menu_put_high_density_office = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
@@ -896,6 +910,8 @@
 						addon_num_buf = int(addon_num_buf)
 				}
 	
+			/*---------------------------------------------公共施設-----------------------------------------------*/
+			
 			//公共施設
 				notesel type_public
 				if opening_menu_put_public = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
@@ -924,6 +940,7 @@
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
 			if cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0 {
+				pointer_icon = -1
 				return
 			}
 	
@@ -954,7 +971,8 @@
 						map(mx, my) = addon_num_normal_road
 						category(mx, my) = "road"
 	
-						gosub *adjustment_road
+						//道路の向きを揃える
+							gosub *adjustment_road
 					}
 	
 				//道路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
@@ -1018,9 +1036,40 @@
 									map(mx, my) = addon_num_buf
 									category(mx, my) = "public"
 								}
+						/*
+							//周辺にある道路の向きを揃える
+								cursor_mode_buf = cursor_mode
+								x_buf = x : y_buf = y
+								
+								repeat 4
+									if cnt = 0 {
+										x = mx-1
+									}
+									if cnt = 1 {
+										y = my-1
+									}
+									if cnt = 2 {
+										y = my+1
+									}
+									if cnt = 3 {
+										x = mx+1
+									}
+									
+									if category(x,y) = "road" {
+										dialog"A"
+										cursor_mode = "put_Road"
+										put_addon_name = "normal_road(orange_line)
+										gosub *adjustment_road
+									}
+								loop
+	
+								cursor_mode = cursor_mode_buf
+								x = x_buf : y = y_buf
+						*/
 								
 						}
 					}	
+					
 			}
 			
 		//取り壊し
@@ -1107,6 +1156,8 @@
 			pos 23, (windowy-70-32-20) : mes addon_summary(int(get_addon_number))
 			
 			pos 30 + (cnt*35)+10, windowy-70-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
+	
+			pointer_icon = int(get_addon_number)
 		}
 	
 		await 1

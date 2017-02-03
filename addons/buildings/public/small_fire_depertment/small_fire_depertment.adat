@@ -1,0 +1,60 @@
+addon_name = "small_fire_depertment"
+addon_jp_name = "è¨ãKñÕÇ»è¡ñhèê"
+addon_summary = "Ç±ÇÃäXÇÃà¿êSÇ∆à¿ëSÇéÁÇÈÇΩÇﬂÇ…ïKóvÇ»é{ê›Ç≈Ç∑ÅB"
+addon_icon = "icon_small_fire_depertment.png"
+
+addon_type = "public"
+addon_type_2 = "fire_depertment"
+
+use_types = "null"
+
+null {
+	image = "small_fire_depertment.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+	
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};
