@@ -1,12 +1,12 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.3.2
+									   Cities Box Ver 0.3.3.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
 	
 --------------------------------------------------------------------------------------------------*/
-
+onerror gosub *e
 *define
 /*チップサイズ（64x64）*/
 #define chip_size		64
@@ -59,7 +59,7 @@
 #defcfunc element2 str search_addon_name, array search_var, array search_var_elements, str search_word
 	exist "data/temp/"+search_addon_name+".temp"
 	if strsize = -1 {
-		return -1
+		return -2
 	}
 	
 	notesel temp_file
@@ -80,7 +80,7 @@
 #defcfunc element3 str search_addon_name, array search_var, array search_var_elements, str search_word, array second_search_var, array second_search_var_elements, str second_search_word
 	exist "data/temp/"+search_addon_name+".temp"
 	if strsize = -1 {
-		return -1
+		return -2
 	}
 	
 	notesel temp_file
@@ -135,16 +135,15 @@
 	return
 	
 /*アドオンの情報を取得*/
-#deffunc get_about_addon int search_addon_number, int search_type_number, int search_direction_number, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y
-	
+#deffunc get_about_addon int search_addon_number@, int search_type_number@, int search_direction_number@, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y
 	//オブジェクトの画像上の座標を取得
-		input_top_left_x = addon_top_left_x@( search_addon_number, search_type_number, search_direction_number )
-		input_top_left_y = addon_top_left_y@( search_addon_number, search_type_number, search_direction_number )
-		input_bottom_right_x = addon_bottom_right_x@( search_addon_number, search_type_number, search_direction_number )
-		input_bottom_right_y = addon_bottom_right_y@( search_addon_number, search_type_number, search_direction_number )
+		input_top_left_x = addon_top_left_x@( search_addon_number@, search_type_number@, search_direction_number@ )
+		input_top_left_y = addon_top_left_y@( search_addon_number@, search_type_number@, search_direction_number@ )
+		input_bottom_right_x = addon_bottom_right_x@( search_addon_number@, search_type_number@, search_direction_number@ )
+		input_bottom_right_y = addon_bottom_right_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 		
-		input_size_x = addon_size_x@( search_addon_number, search_type_number, search_direction_number )
-		input_size_y = addon_size_y@( search_addon_number, search_type_number, search_direction_number )
+		input_size_x = addon_size_x@( search_addon_number@, search_type_number@, search_direction_number@ )
+		input_size_y = addon_size_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 	
 	return
 								
@@ -161,6 +160,8 @@
 		celload "img/menu_icons/building/low_density_residential.png", 5	; メニューアイコン（住居地区建設）
 		celload "img/menu_icons/building/office.png", 6						; メニューアイコン（オフィス建設）
 		celload "img/menu_icons/building/post_office.png", 7				; メニューアイコン（郵便局建設）
+	
+		celload "img/menu_icons/bulldozer/bulldozer.png", 10				; メニューアイコン（取り壊し）
 	
 	//小サイズのアイコン
 		celload "img/menu_icons/mini/low_density_residential.png", 8		; 高密度住居地区
@@ -251,8 +252,8 @@
 				dim addon_bottom_right_x, total_addons, 100, 100
 				dim addon_bottom_right_y, total_addons, 100, 100
 	
-				sdim type_single_lane_road, 128
-				sdim type_number_single_lane_road, 128
+				sdim type_Two_lane_road, 128
+				sdim type_number_Two_lane_road, 128
 				sdim type_low_density_residential, 128
 				sdim type_number_low_density_residential, 128
 				sdim type_high_density_residential, 128
@@ -294,11 +295,11 @@
 							gosub *load_adat
 	
 						//カテゴリ分け
-							if addon_type(cnt) = "single_lane_road" {
-								notesel type_single_lane_road
+							if addon_type(cnt) = "Two_lane_road" {
+								notesel type_Two_lane_road
 								noteadd addon_name(cnt)
 	
-								notesel type_number_single_lane_road
+								notesel type_number_Two_lane_road
 								noteadd str(cnt)
 							}
 							
@@ -422,6 +423,8 @@
 	windowy = 480
 	
 	pointer_icon = -1		//ポインタのアイコン（-1で四角形）
+	
+	put_addon_name = "tile_greenfield"
 	
 	dim buffer_number, mapx, mapy
 	dim atlx, mapx, mapy
@@ -554,11 +557,11 @@
 						//マップ作成
 							qv2 x, y
 		
-							if addon_total_use_types( map(x,y) ) > 1 {
+							if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を領する場合
 								buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
 								get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
 								
-							} else {
+							} else {										; ひとつのアドオンでひとつの画像を領する場合
 								buffer_number(x,y) = map(x,y) + 1000
 								get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
 								
@@ -577,7 +580,12 @@
 					//マウスポインタの位置のチップを光らせる
 						if mx=x & my=y and mousey < menu_line_y {
 							if pointer_icon = -1 {
-								color 245, 133, 138
+								if cursor_mode = "normal" {
+									color 0, 162, 232
+								}
+								if cursor_mode = "bulldozer" {
+									color 245, 133, 138
+								}
 								qv x,y
 							} else {
 								color 0, 162, 232
@@ -602,46 +610,55 @@
 				//標準カーソルボタン
 					if cursor_mode = "normal" {
 						gmode 2
-						pos 20, 410 : gcopy 3, 0, 32, 32, 32
+						pos 20, windowy-70 : gcopy 3, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 20, 410 : gcopy 3, 0, 0, 32, 32
+						pos 20, windowy-70 : gcopy 3, 0, 0, 32, 32
 					}
 	
 				//道路ボタン
 					if cursor_mode = "put_Road" {
 						gmode 2
-						pos 60, 410 : gcopy 4, 0, 32, 32, 32
+						pos 60, windowy-70 : gcopy 4, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 60, 410 : gcopy 4, 0, 0, 32, 32
+						pos 60, windowy-70 : gcopy 4, 0, 0, 32, 32
 					}
 	
 				//建物（住居地区）ボタン
 					if cursor_mode = "put_Residential" {
 						gmode 2
-						pos 92, 410 : gcopy 5, 0, 32, 32, 32
+						pos 92, windowy-70 : gcopy 5, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 92, 410 : gcopy 5, 0, 0, 32, 32
+						pos 92, windowy-70 : gcopy 5, 0, 0, 32, 32
 					}
 	
 				//建物（オフィス）ボタン
 					if cursor_mode = "put_High_density_Office" {
 						gmode 2
-						pos 124, 410 : gcopy 6, 0, 32, 32, 32
+						pos 124, windowy-70 : gcopy 6, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 124, 410 : gcopy 6, 0, 0, 32, 32
+						pos 124, windowy-70 : gcopy 6, 0, 0, 32, 32
 					}
 	
 				//建物（郵便局）ボタン
 					if cursor_mode = "put_Public" {
 						gmode 2
-						pos 156, 410 : gcopy 7, 0, 32, 32, 32
+						pos 156, windowy-70 : gcopy 7, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 156, 410 : gcopy 7, 0, 0, 32, 32
+						pos 156, windowy-70 : gcopy 7, 0, 0, 32, 32
+					}
+	
+				//取り壊しボタン
+					if cursor_mode = "bulldozer" {
+						gmode 2
+						pos windowx-54, windowy-70 : gcopy 10, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos windowx-54, windowy-70 : gcopy 10, 0, 0, 32, 32
 					}
 	
 				if opening_addon_menu = 1 {
@@ -662,8 +679,7 @@
 	
 				opening_addon_menu = 0
 				opening_menu_put_Road = 0
-				opening_menu_put_Low_density_Residential = 0
-				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Residential = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
@@ -685,11 +701,11 @@
 						clicked_addon_number = 0
 		
 						//選択されたアドオンのアドオン名を取得
-							notesel type_single_lane_road
+							notesel type_Two_lane_road
 							noteget put_addon_name, clicked_addon_number
 			
 						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_single_lane_road
+							notesel type_number_Two_lane_road
 							noteget addon_num_normal_road, clicked_addon_number
 							addon_num_normal_road = int(addon_num_normal_road)
 				} 
@@ -700,8 +716,7 @@
 				}
 				*/
 	
-				opening_menu_put_Low_density_Residential = 0
-				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Residential = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
@@ -732,7 +747,6 @@
 				} 
 				
 				opening_menu_put_Road = 0
-				opening_menu_put_High_density_Residential = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
@@ -762,7 +776,6 @@
 				} 
 	
 				opening_menu_put_Road = 0
-				opening_menu_put_Low_density_Residential = 0
 				opening_menu_put_High_density_Residential = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_Public = 0
@@ -791,28 +804,40 @@
 				} 
 	
 				opening_menu_put_Road = 0
-				opening_menu_put_Low_density_Residential = 0
-				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Residential = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
+			}
+	
+		//取り壊しボタン
+			//標準カーソルボタン
+			if click_range( windowx-54, windowy-70, windowx-54+32, windowy-70+32 ) = 1 {
+				cursor_mode = "bulldozer"
+	
+				opening_addon_menu = 0
+				opening_menu_put_Road = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Public = 0
 			}
 	
 	
 		//アドオン選択ボタン（水色のメニューバー）
 			
 			/*-------------------------------------------道路---------------------------------------------------*/
-				notesel type_single_lane_road
+				notesel type_Two_lane_road
 				if opening_menu_put_Road = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
 					cursor_mode = "put_Road"
 		
 					clicked_addon_number = mousex/35 - 1
 		
 					//選択されたアドオンのアドオン名を取得
-						notesel type_single_lane_road
+						notesel type_Two_lane_road
 						noteget put_addon_name, clicked_addon_number
 		
 					//選択されたアドオンのアドオン番号を取得
-						notesel type_number_single_lane_road
+						notesel type_number_Two_lane_road
 						noteget addon_num_normal_road, clicked_addon_number
 						addon_num_normal_road = int(addon_num_normal_road)
 				}
@@ -941,6 +966,16 @@
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
 			if cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0 {
 				pointer_icon = -1
+				return
+			}
+	
+		//取り壊しモードの場合は選択されたマスを更地にする
+			if cursor_mode = "bulldozer" {
+				map(mx, my) = addon_num("tile_greenfield")
+				category(mx, my) = "tile"
+				obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+				obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+	
 				return
 			}
 	
@@ -1115,7 +1150,7 @@
 	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, windowx, windowy-70
 	
 	if cursor_mode = "put_Road" {
-		notesel type_number_single_lane_road
+		notesel type_number_Two_lane_road
 	}
 	if cursor_mode = "put_Residential" and density = "low" {
 		notesel type_number_low_density_residential
@@ -1166,7 +1201,10 @@
 	return
 		
 *adjustment_road
-	if category(x, y) = "road" and cursor_mode = "put_Road" {
+	if instr(put_addon_name, 0, "road") = -1 {
+		return
+	}
+	if category(x, y) = "road" and (cursor_mode = "put_Road" or cursor_mode = "bulldozer") {
 		
 		//縦向き
 			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
@@ -1338,3 +1376,8 @@
 		loop
 	
 	end
+	
+*e
+	dialog""+search_addon_number+"\n"+search_type_number+"\n"+search_direction_number+"\n\nx:"+x+"\ny:"+y+""
+	
+	return

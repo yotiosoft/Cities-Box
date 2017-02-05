@@ -1,14 +1,14 @@
-addon_name = "blue_roof_house"
-addon_jp_name = "青い屋根の家"
-addon_summary = "2階建ての一軒家、3LDKで23年ローンです。"
-addon_icon = "icon_blue_roof_house.png"
+addon_name = "North-American_House"
+addon_jp_name = "北米風の一軒家"
+addon_summary = "アメリカやカナダによくありそうな一軒家。"
+addon_icon = "icon_North-American_House.png"
 
 addon_type = "low_density_residential"
 
 use_types = "null"
 
 null {
-	image = "blue_roof_house.png"
+	image = "North-American_House.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

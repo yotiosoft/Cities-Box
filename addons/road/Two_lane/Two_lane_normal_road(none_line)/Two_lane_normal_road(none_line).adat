@@ -1,14 +1,14 @@
-addon_name = "normal_road(orange_line)"
-addon_jp_name = "2車線道路（オレンジ線）"
-addon_summary = "普通の2車線道路です。オレンジ色の線は「追越のためのはみ出し禁止」の意味。"
-addon_icon = "icon_single-lane_normal_road(orange_line).png"
+addon_name = "Two_lane_normal_road(none_line)"
+addon_jp_name = "2車線道路（区画線無し）"
+addon_summary = "普通の2車線道路です。"
+addon_icon = "icon_Two_lane_normal_road(none_line).png"
 
-addon_type = "single_lane_road"
+addon_type = "Two_lane_road"
 
 use_types = "default, dead_end, turn, intersection_T, intersection_cross"
 
 default {
-	image = "single-lane_normal_road(orange_line).png"
+	image = "Two_lane_normal_road(none_line).png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	
@@ -37,7 +37,7 @@ default {
 };
 
 dead_end {
-	image = "single-lane_normal_road(orange_line)_dead_end.png"
+	image = "Two_lane_normal_road(none_line)_dead_end.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
@@ -88,7 +88,7 @@ dead_end {
 };
 
 turn {
-	image = "single-lane_normal_road(orange_line)_turn.png"
+	image = "Two_lane_normal_road(none_line)_turn.png"
 	direction = "left-top, right-top, left-bottom, right-bottom"
 	transparent_color = "0, 0, 0"
 	
@@ -139,7 +139,7 @@ turn {
 };
 
 intersection_T {
-	image = "single-lane_normal_road_intersection_T.png"
+	image = "Two_lane_normal_road_intersection_T.png"
 	direction = "left-top-bottom, left-right-top, left-right-bottom, right-top-bottom"
 	transparent_color = "0, 0, 0"
 	
@@ -190,7 +190,7 @@ intersection_T {
 };
 
 intersection_cross {
-	image = "single-lane_normal_road_intersection_cross.png"
+	image = "Two_lane_normal_road_intersection_cross.png"
 	direction = "null"
 	transparent_color = "0, 0, 0"
 	

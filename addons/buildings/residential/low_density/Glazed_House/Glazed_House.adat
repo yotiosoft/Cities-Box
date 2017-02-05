@@ -1,14 +1,14 @@
-addon_name = "blue_roof_house"
-addon_jp_name = "青い屋根の家"
-addon_summary = "2階建ての一軒家、3LDKで23年ローンです。"
-addon_icon = "icon_blue_roof_house.png"
+addon_name = "Glazed_House"
+addon_jp_name = "ガラス張りの家"
+addon_summary = "ガラス張りでモダンな一軒家。外から丸見えです。トイレも丸見え。"
+addon_icon = "icon_Glazed_House.png"
 
 addon_type = "low_density_residential"
 
 use_types = "null"
 
 null {
-	image = "blue_roof_house.png"
+	image = "Glazed_House.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
