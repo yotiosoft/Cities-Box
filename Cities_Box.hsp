@@ -1,12 +1,12 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.3.3
+									   Cities Box Ver 0.3.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
 	
 --------------------------------------------------------------------------------------------------*/
-onerror gosub *e
+
 *define
 /*チップサイズ（64x64）*/
 #define chip_size		64
@@ -146,6 +146,17 @@ onerror gosub *e
 		input_size_y = addon_size_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 	
 	return
+	
+/*暗号化＆復号*/
+#define global PublicKey	1234
+#deffunc Xine var p1, int p2
+	randomize (PublicKey+strlen(p1)+p2)
+	repeat strlen(p1)
+	p = peek(p1,cnt)
+	p = (p^rnd(255))&255 : if ((cnt\2) == 0) {p = (p^2)&255}
+	poke p1,cnt,p
+	loop
+	return
 								
 #global
 	
@@ -158,10 +169,12 @@ onerror gosub *e
 		celload "img/menu_icons/normal_cursor/cursor.png", 3				; 標準カーソル
 		celload "img/menu_icons/building/road.png", 4						; メニューアイコン（道路敷設）
 		celload "img/menu_icons/building/low_density_residential.png", 5	; メニューアイコン（住居地区建設）
+		celload "img/menu_icons/building/commercial.png", 12				; メニューアイコン（商業地区建設）
 		celload "img/menu_icons/building/office.png", 6						; メニューアイコン（オフィス建設）
 		celload "img/menu_icons/building/post_office.png", 7				; メニューアイコン（郵便局建設）
 	
-		celload "img/menu_icons/bulldozer/bulldozer.png", 10				; メニューアイコン（取り壊し）
+		celload "img/menu_icons/bulldozer/bulldozer.png", 10				; 取り壊しボタン
+		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
 	
 	//小サイズのアイコン
 		celload "img/menu_icons/mini/low_density_residential.png", 8		; 高密度住居地区
@@ -406,10 +419,27 @@ onerror gosub *e
 	cmes "Ver."+about_version+"", 0, 270, 640, 300
 	
 	objsize 100, 20
-	pos 270, 350 : button "新規マップ作成", *map_preparating
+	pos 270, 350 : button "新規マップ作成", *new_map
+	pos 270, 370 : button "マップ読み込み", *load_map
 	
 	stop
-
+	
+*new_map
+	map_mode = "new_map"
+	goto *map_preparating
+*load_map
+	dialog "cbd", 16, "Cities Box マップデータ"
+	
+	if stat = 1 {
+		load_mapdata_name = refstr
+		chdir directory
+		
+		map_mode = "load_map"
+		goto *map_preparating
+	} else {
+		stop
+	}
+	
 *map_preparating
 	clrobj
 	
@@ -434,7 +464,8 @@ onerror gosub *e
 	dim sizex, mapx, mapy
 	dim sizey, mapx, mapy
 	
-	dim map, mapx, mapy			//マップの座標
+	dim map, mapx, mapy			//各座標のアドオン番号
+	sdim name, mapx, mapy		//各座標のアドオン名
 	sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 	dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
 	dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
@@ -443,18 +474,111 @@ onerror gosub *e
 	
 	addon_num_buf = addon_num("tile_greenfield")
 	
-	repeat mapx * mapy
-		map(ix,iy) = addon_num_buf
-		category(ix,iy) = "tile"
-		obj_type(ix,iy) = 0
-		obj_dire(ix,iy) = 0
-		
-		ix++
-		if ix = mapx {
-			ix = 0
-			iy += 1
+	//マップ新規作成
+		if map_mode = "new_map" {
+			repeat mapx * mapy
+				map(ix,iy) = addon_num_buf
+				name(ix,iy) = "tile_greenfield"
+				category(ix,iy) = "tile"
+				obj_type(ix,iy) = 0
+				obj_dire(ix,iy) = 0
+				
+				ix++
+				if ix = mapx {
+					ix = 0
+					iy += 1
+				}
+			loop
 		}
-	loop
+	
+	//マップ読み込み
+		if map_mode = "load_map" {
+			notesel load_mapdata
+			noteload refstr
+	
+			;exist refstr
+	
+			;Xine load_mapdata, 332
+	
+			;dialog""+load_mapdata+""
+		
+			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)も取得
+				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
+			
+				repeat mapy
+					y = cnt
+		
+					notesel name_buf
+					noteget name_buf_a_line, (y+1)
+		
+					sdim name_buf_a_tile, mapx
+					split name_buf_a_line, ", ", name_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						name(x,y) = name_buf_a_tile(x)
+						map(x,y) = addon_num(name_buf_a_tile(x))
+					loop
+			
+				loop
+			
+			//category(x,y)の読み込み
+				category_buf = get_chapter(load_mapdata, "category(x,y)", " {", "}")
+			
+				repeat mapy
+					y = cnt
+		
+					notesel category_buf
+					noteget category_buf_a_line, (y+1)
+		
+					sdim category_buf_a_tile, mapx
+					split category_buf_a_line, ", ", category_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						category(x,y) = category_buf_a_tile(x)
+					loop
+			
+				loop
+		
+			//obj_type(x,y)の読み込み
+				obj_type_buf = get_chapter(load_mapdata, "obj_type(x,y)", " {", "}")
+			
+				repeat mapy
+					y = cnt
+		
+					notesel obj_type_buf
+					noteget obj_type_buf_a_line, (y+1)
+		
+					sdim obj_type_buf_a_tile, mapx
+					split obj_type_buf_a_line, ", ", obj_type_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						obj_type(x,y) = int(obj_type_buf_a_tile(x))
+					loop
+			
+				loop
+		
+			//obj_dire(x,y)の読み込み
+				obj_dire_buf = get_chapter(load_mapdata, "obj_dire(x,y)", " {", "}")
+			
+				repeat mapy
+					y = cnt
+		
+					notesel obj_dire_buf
+					noteget obj_dire_buf_a_line, (y+1)
+		
+					sdim obj_dire_buf_a_tile, mapx
+					split obj_dire_buf_a_line, ", ", obj_dire_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						obj_dire(x,y) = int(obj_dire_buf_a_tile(x))
+					loop
+			
+				loop
+			}
 	
 *map_drawing
 	repeat
@@ -634,22 +758,31 @@ onerror gosub *e
 						pos 92, windowy-70 : gcopy 5, 0, 0, 32, 32
 					}
 	
+				//建物（商業地区）ボタン
+					if cursor_mode = "put_Commercial" {
+						gmode 2
+						pos 124, windowy-70 : gcopy 12, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 124, windowy-70 : gcopy 12, 0, 0, 32, 32
+					}
+	
 				//建物（オフィス）ボタン
 					if cursor_mode = "put_High_density_Office" {
 						gmode 2
-						pos 124, windowy-70 : gcopy 6, 0, 32, 32, 32
+						pos 156, windowy-70 : gcopy 6, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 124, windowy-70 : gcopy 6, 0, 0, 32, 32
+						pos 156, windowy-70 : gcopy 6, 0, 0, 32, 32
 					}
 	
-				//建物（郵便局）ボタン
+				//建物（公共施設）ボタン
 					if cursor_mode = "put_Public" {
 						gmode 2
-						pos 156, windowy-70 : gcopy 7, 0, 32, 32, 32
+						pos 188, windowy-70 : gcopy 7, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 156, windowy-70 : gcopy 7, 0, 0, 32, 32
+						pos 188, windowy-70 : gcopy 7, 0, 0, 32, 32
 					}
 	
 				//取り壊しボタン
@@ -660,6 +793,10 @@ onerror gosub *e
 						gmode 2
 						pos windowx-54, windowy-70 : gcopy 10, 0, 0, 32, 32
 					}
+	
+				//保存ボタン
+					gmode 2
+					pos windowx-54, windowy -35 : gcopy 11, 0, 0, 32, 32
 	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
@@ -680,6 +817,7 @@ onerror gosub *e
 				opening_addon_menu = 0
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
@@ -717,6 +855,7 @@ onerror gosub *e
 				*/
 	
 				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
@@ -747,13 +886,44 @@ onerror gosub *e
 				} 
 				
 				opening_menu_put_Road = 0
+				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
 			}
 	
-		//建物（オフィス）ボタン
+		//建物（商業地区）ボタン
 			if click_range( 124, 410, 124+32, 410+32 ) = 1 {
+	
+				if opening_menu_put_High_density_Office = 0 {
+					cursor_mode = "put_Commercial"
+					density = "low"
+					
+					gosub *open_menu_addon_menu
+					opening_addon_menu = 1
+					opening_menu_put_Commercial = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_low_density_commercial
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_low_density_commercial
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				} 
+	
+				opening_menu_put_Road = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_Public = 0
+			}
+	
+		//建物（オフィス）ボタン
+			if click_range( 156, 410, 156+32, 410+32 ) = 1 {
 	
 				if opening_menu_put_High_density_Office = 0 {
 					cursor_mode = "put_High_density_Office"
@@ -776,12 +946,13 @@ onerror gosub *e
 				} 
 	
 				opening_menu_put_Road = 0
-				opening_menu_put_High_density_Residential = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_Public = 0
 			}
 		//建物（公共施設）ボタン
-			if click_range( 156, 410, 156+32, 410+32 ) = 1 {
+			if click_range( 188, 410, 188+32, 410+32 ) = 1 {
 	
 				if opening_menu_put_High_density_Residential = 0 {
 					cursor_mode = "put_Public"
@@ -805,21 +976,27 @@ onerror gosub *e
 	
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 			}
 	
 		//取り壊しボタン
-			//標準カーソルボタン
 			if click_range( windowx-54, windowy-70, windowx-54+32, windowy-70+32 ) = 1 {
 				cursor_mode = "bulldozer"
 	
 				opening_addon_menu = 0
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
+			}
+	
+		//保存ボタン
+			if click_range( windowx-54, windowy-35, windowx-54+32, windowy-35+32 ) = 1 {
+				gosub *save
 			}
 	
 	
@@ -916,6 +1093,25 @@ onerror gosub *e
 						addon_num_buf = int(addon_num_buf)
 				}
 	
+			/*--------------------------------------------商業地区---------------------------------------------*/
+			
+			//低密度商業地区
+				notesel type_high_density_commercial
+				if opening_menu_put_commercial = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+					cursor_mode = "put_Commercial"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_low_density_commercial
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_low_density_commercial
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
+	
 			/*--------------------------------------------オフィス-----------------------------------------------*/
 			
 			//高密度オフィス
@@ -1004,6 +1200,7 @@ onerror gosub *e
 				//道路敷設
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
 						map(mx, my) = addon_num_normal_road
+						name(mx, my) = put_addon_name
 						category(mx, my) = "road"
 	
 						//道路の向きを揃える
@@ -1057,18 +1254,28 @@ onerror gosub *e
 							//建物（住居地区）建設
 								if cursor_mode = "put_Residential" {
 									map(mx, my) = addon_num_buf
+									name(mx, my) = put_addon_name
 									category(mx, my) = "residential"
+								}
+	
+							//建物（商業地区）建設
+								if cursor_mode = "put_Commercial" {
+									map(mx, my) = addon_num_buf
+									name(mx, my) = put_addon_name
+									category(mx, my) = "commercial"
 								}
 				
 							//建物（高密度オフィス）建設
 								if cursor_mode = "put_High_density_Office" {
 									map(mx, my) = addon_num_buf
+									name(mx, my) = put_addon_name
 									category(mx, my) = "office"
 								}
 				
 							//建物（公共施設）建設
 								if cursor_mode = "put_Public" {
 									map(mx, my) = addon_num_buf
+									name(mx, my) = put_addon_name
 									category(mx, my) = "public"
 								}
 						/*
@@ -1113,6 +1320,7 @@ onerror gosub *e
 				//道路削除
 					if cursor_mode = "put_Road" and category(mx, my) = "road" {
 						map(mx, my) = addon_num("tile_greenfield")
+						name(mx, my) = "tile_greenfield"
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
@@ -1121,6 +1329,16 @@ onerror gosub *e
 				//住居地区削除
 					if cursor_mode = "put_Residential" and category(mx, my) = "residential" {
 						map(mx, my) = addon_num("tile_greenfield")
+						name(mx, my) = "tile_greenfield"
+						category(mx, my) = "tile"
+						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+					}
+	
+				//商業地区削除
+					if cursor_mode = "put_Commercial" and category(mx, my) = "commercial" {
+						map(mx, my) = addon_num("tile_greenfield")
+						name(mx, my) = "tile_greenfield"
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
@@ -1129,6 +1347,7 @@ onerror gosub *e
 				//オフィス削除
 					if (cursor_mode = "put_High_density_Office" or cursor_mode = "put_Low_density_Office") and category(mx, my) = "office" {
 						map(mx, my) = addon_num("tile_greenfield")
+						name(mx, my) = "tile_greenfield"
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
@@ -1137,6 +1356,7 @@ onerror gosub *e
 				//公共事業削除
 					if cursor_mode = "put_Public" and category(mx, my) = "public" {
 						map(mx, my) = addon_num("tile_greenfield")
+						name(mx, my) = "tile_greenfield"
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
@@ -1165,6 +1385,9 @@ onerror gosub *e
 		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, 16, windowy-70
 		pos 0, windowy-72-32 : gmode 2 : gcopy 8, 0, 0, 16, 16
 		pos 0, windowy-72-16 : gmode 2 : gcopy 9, 0, 16, 16, 16
+	}
+	if cursor_mode = "put_Commercial" and density = "low" {
+		notesel type_number_low_density_commercial
 	}
 	if cursor_mode = "put_Low_density_Office" {
 		notesel type_number_low_density_office
@@ -1363,6 +1586,119 @@ onerror gosub *e
 	
 	return
 	
+*save
+	//マップ保存
+		notesel save_mapdata
+	
+		//name(x,y)
+			noteadd "name(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = name(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+name(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//category(x,y)
+			noteadd "category(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = map_data_buf = category(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+category(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_type(x,y)
+			noteadd "obj_type(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_type(x,y))		; 3桁に揃えているのは見やすくするためなので特に意味は無いです。4桁（1000以上）も読み込み可
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_type(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_dire(x,y)
+			noteadd "obj_dire(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_dire(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_dire(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//保存
+			dialog "cbd", 17, "Cities Box マップデータ"
+	
+			save_mapdata_name = refstr
+			if instr(save_mapdata_name, 0, ".cbd") = -1 {
+				save_mapdata_name = ""+save_mapdata_name+".cbd"
+			}
+	
+			;Xine save_mapdata, strlen(save_mapdata)
+			
+			if stat = 1 {
+				notesel save_mapdata
+				notesave save_mapdata_name
+			}
+	
+		return
+			
 *exit
 	//一時ファイルを削除
 		repeat total_addons
