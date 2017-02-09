@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.4
+									   Cities Box Ver 0.3.5
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -29,6 +29,15 @@
 		#func FindWindow "FindWindowA" str, int
 		#func GetWindowRect "GetWindowRect" int, int
 		#func DrawText "DrawTextW" int,wstr,int,int,int
+	
+		#func ClientToScreen "ClientToScreen" int, int
+	
+		#func GetWindowLong "GetWindowLongA" int,int
+		#func SetWindowLong "SetWindowLongA" int,int,int
+	
+		#define WM_SIZE	0x00005	//ウィンドウサイズ変更
+		#define WS_MAXIMIZEBOX	0x10000	//最大化ボタン
+		#define WS_THICKFRAME	0x40000	//サイズ変更可能
 	
 *module
 #module
@@ -166,14 +175,14 @@
 		celload "img/AME963_sappro_TP_V.jpg", 2						; タイトル背景画像
 	
 	//メニューのアイコン
-		celload "img/menu_icons/normal_cursor/cursor.png", 3				; 標準カーソル
-		celload "img/menu_icons/building/road.png", 4						; メニューアイコン（道路敷設）
-		celload "img/menu_icons/building/low_density_residential.png", 5	; メニューアイコン（住居地区建設）
-		celload "img/menu_icons/building/commercial.png", 12				; メニューアイコン（商業地区建設）
-		celload "img/menu_icons/building/office.png", 6						; メニューアイコン（オフィス建設）
-		celload "img/menu_icons/building/post_office.png", 7				; メニューアイコン（郵便局建設）
+		celload "img/menu_icons/menu/cursor.png", 3							; 標準カーソル
+		celload "img/menu_icons/menu/road.png", 4							; メニューアイコン（道路敷設）
+		celload "img/menu_icons/menu/low_density_residential.png", 5		; メニューアイコン（住居地区建設）
+		celload "img/menu_icons/menu/commercial.png", 12					; メニューアイコン（商業地区建設）
+		celload "img/menu_icons/menu/office.png", 6							; メニューアイコン（オフィス建設）
+		celload "img/menu_icons/menu/post_office.png", 7					; メニューアイコン（郵便局建設）
 	
-		celload "img/menu_icons/bulldozer/bulldozer.png", 10				; 取り壊しボタン
+		celload "img/menu_icons/menu/bulldozer.png", 10						; 取り壊しボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
 	
 	//小サイズのアイコン
@@ -183,13 +192,12 @@
 	//onexit
 		onexit *exit
 	
-	//タスクバーの高さを取得
-			dim RECT, 4
+	//ウィンドウのサイズを変更可能化
+		windowx=640 : windowy=480
+		screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
 		
-			FindWindow "shell_traywnd"
-			GetWindowRect stat, varptr (RECT)
-			
-			taskbar_high = RECT.3 - RECT.1
+		GetWindowLong hwnd, -16
+		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
 	
 	//タイトルとバージョンの読み込み
 		notesel about
@@ -411,18 +419,32 @@
 			chdir directory
 	
 *menu
-	pos 0, 0 : gzoom 640, 480, 2, 0, 0, 1600, 1066 : gblur 2
+	repeat
+		//ウィンドウサイズとタイトルバーの高さを取得
+			gosub *get_windowsize
+			
+		redraw 0
+		
+		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 2, 0, 0, 1600, 1066 : gblur 2
+		
+		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 1, 0, 0, 110, 110
+		color 255, 255, 255
+		cmes "Ver."+about_version+"", 0, double(270./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
 	
-	pos 265, 50 : gmode 0 : gcopy 1, 0, 0, 110, 110
+		//前回のループ時とウィンドウサイズが変わっている場合はclrobj
+			if before_windowy != windowy {
+				clrobj
 	
-	color 255, 255, 255
-	cmes "Ver."+about_version+"", 0, 270, 640, 300
+				objsize 100, 20
+				pos windowx/2-50, double(350./483)*(windowy-titlebar_h) : button "新規マップ作成", *new_map
+				pos windowx/2-50, double(350./483)*(windowy-titlebar_h)+20 : button "マップ読み込み", *load_map
+			}
 	
-	objsize 100, 20
-	pos 270, 350 : button "新規マップ作成", *new_map
-	pos 270, 370 : button "マップ読み込み", *load_map
+		before_windowy = windowy
 	
-	stop
+		redraw 1
+		wait 1
+	loop
 	
 *new_map
 	map_mode = "new_map"
@@ -449,10 +471,13 @@
 	menu_line_y = 400		//メニューとの境界線
 	cursor_mode = "normal"	//カーソルのモード
 	
-	windowx = 640
-	windowy = 480
-	
 	pointer_icon = -1		//ポインタのアイコン（-1で四角形）
+	
+	before_mousex = 0
+	before_mousey = 0
+	
+	before_camx = 0
+	before_camy = 0
 	
 	put_addon_name = "tile_greenfield"
 	
@@ -607,11 +632,16 @@
 		/*マップ描写*/
 			redraw 0
 			color 0, 0, 0 : boxf
-			
-			mousex_=mousex+camx-chip_size/2	//mx,myにマウス座標取得
-			mousey_=mousey+camy
-			mx=(mousey_+mousex_/2)/(chip_size/2)
-			my=(-mousex_+mousey_*2)/chip_size
+	
+			if mousex != before_mousex or mousey != before_mousey or camx != before_camx or camy != before_camy {
+				mousex_=mousex+camx-chip_size/2	//mx,myにマウス座標取得
+				mousey_=mousey+camy
+				mx=(mousey_+mousex_/2)/(chip_size/2)
+				my=(-mousex_+mousey_*2)/chip_size
+	
+				before_mousex = mousex
+				before_mousey = mousey
+			}
 	
 		; ------ FPS取得処理 ------
 			  if gettime(7) < msecond { ; ミリ秒の桁上がりを確認する
@@ -637,15 +667,46 @@
 				repeat mapy
 					y = cnt
 	
-					x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
-					y_=(windowy/2)+camy
-					middle_x=(y_+x_/2)/(chip_size/2)
-					middle_y=(-x_+y_*2)/chip_size
+					if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
 	
-					if x > (middle_x-(windowx/64)) - 5 and y > (middle_y-(windowy/32)) - 5 and x < (middle_x+(windowx/64)) + 5 and y < (middle_y+(windowy/32)) + 5 {
+						//画面中央の座標
+							x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
+							y_=(windowy/2)+camy
+							middle_x=(y_+x_/2)/(chip_size/2)
+							middle_y=(-x_+y_*2)/chip_size
+	
+						//左上のx座標
+							left_top_x_ = 0+camx-chip_size/2
+							left_top_y_ = 0+camy
+							left_top_x = (left_top_y_+left_top_x_/2)/(chip_size/2)
+		
+						//左下のy座標
+							left_bottom_x_ = 0+camx-chip_size/2
+							left_bottom_y_ = windowy+camy
+							left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
+		
+						//右上のy座標
+							right_top_x_ = windowx+camx-chip_size/2
+							right_top_y_ = 0+camy
+							right_top_y = (-right_top_x_+right_top_y_*2)/chip_size
+		
+						//右下のx座標
+							right_bottom_x_ = windowx+camx-chip_size/2
+							right_bottom_y_ = windowy+camy
+							right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
+	
+							before_camx = camx
+							before_camy = camy
+	
+							before_windowx = windowx
+							before_windowy = windowy
+	
+						}
+	
+					if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 	
 						if cnt \ 10000 = 0 {
-							title "マウス座標("+mx+","+my+") 画面中央の座標("+middle_x+","+middle_y+") カメラ座標("+camx+","+camy+") FPS:"+fps+""
+							title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") FPS:"+fps+""
 						}
 		
 						//マウスがクリックされているとき
@@ -676,7 +737,9 @@
 							}
 		
 						//道路の向きを調節
-							gosub *adjustment_road
+							if category(x,y) = "road" and (mx-1 <= x and mx+1 >= x) and (my-1 <= y and my+1 >= y) {
+								gosub *adjustment_road
+							}
 						
 						//マップ作成
 							qv2 x, y
@@ -702,6 +765,12 @@
 						}
 	
 					//マウスポインタの位置のチップを光らせる
+						if opening_addon_menu = 1 {
+							menu_line_y = windowy-70-titlebar_h-32-20
+						} else {
+							menu_line_y = windowy-70-titlebar_h
+						}
+						
 						if mx=x & my=y and mousey < menu_line_y {
 							if pointer_icon = -1 {
 								if cursor_mode = "normal" {
@@ -727,76 +796,79 @@
 			loop
 	
 *menu_buttons
+			//現在のウィンドウサイズとタイトルバーの高さを取得
+				gosub *get_windowsize
+			
 			//メニュー
 				color 0, 0, 0
-				gmode 3,,,200 : boxfa 0, 410, 640, 480
+				gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h, windowx, windowy
 	
 				//標準カーソルボタン
 					if cursor_mode = "normal" {
 						gmode 2
-						pos 20, windowy-70 : gcopy 3, 0, 32, 32, 32
+						pos 20, windowy-70-titlebar_h : gcopy 3, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 20, windowy-70 : gcopy 3, 0, 0, 32, 32
+						pos 20, windowy-70-titlebar_h : gcopy 3, 0, 0, 32, 32
 					}
 	
 				//道路ボタン
 					if cursor_mode = "put_Road" {
 						gmode 2
-						pos 60, windowy-70 : gcopy 4, 0, 32, 32, 32
+						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 60, windowy-70 : gcopy 4, 0, 0, 32, 32
+						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 0, 32, 32
 					}
 	
 				//建物（住居地区）ボタン
 					if cursor_mode = "put_Residential" {
 						gmode 2
-						pos 92, windowy-70 : gcopy 5, 0, 32, 32, 32
+						pos 92, windowy-70-titlebar_h : gcopy 5, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 92, windowy-70 : gcopy 5, 0, 0, 32, 32
+						pos 92, windowy-70-titlebar_h : gcopy 5, 0, 0, 32, 32
 					}
 	
 				//建物（商業地区）ボタン
 					if cursor_mode = "put_Commercial" {
 						gmode 2
-						pos 124, windowy-70 : gcopy 12, 0, 32, 32, 32
+						pos 124, windowy-70-titlebar_h : gcopy 12, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 124, windowy-70 : gcopy 12, 0, 0, 32, 32
+						pos 124, windowy-70-titlebar_h : gcopy 12, 0, 0, 32, 32
 					}
 	
 				//建物（オフィス）ボタン
 					if cursor_mode = "put_High_density_Office" {
 						gmode 2
-						pos 156, windowy-70 : gcopy 6, 0, 32, 32, 32
+						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 156, windowy-70 : gcopy 6, 0, 0, 32, 32
+						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
 					}
 	
 				//建物（公共施設）ボタン
 					if cursor_mode = "put_Public" {
 						gmode 2
-						pos 188, windowy-70 : gcopy 7, 0, 32, 32, 32
+						pos 188, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 188, windowy-70 : gcopy 7, 0, 0, 32, 32
+						pos 188, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
 				//取り壊しボタン
 					if cursor_mode = "bulldozer" {
 						gmode 2
-						pos windowx-54, windowy-70 : gcopy 10, 0, 32, 32, 32
+						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos windowx-54, windowy-70 : gcopy 10, 0, 0, 32, 32
+						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 0, 32, 32
 					}
 	
 				//保存ボタン
 					gmode 2
-					pos windowx-54, windowy -35 : gcopy 11, 0, 0, 32, 32
+					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
 	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
@@ -811,7 +883,7 @@
 	/*------------------------------------------メニューのボタンの動作------------------------------------------------*/
 	
 		//標準カーソルボタン
-			if click_range( 20, 410, 20+32, 410+32 ) = 1 {
+			if click_range( 20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32 ) = 1 {
 				cursor_mode = "normal"
 	
 				opening_addon_menu = 0
@@ -824,7 +896,7 @@
 			}
 			
 		//道路ボタン
-			if click_range( 60, 410, 60+32, 410+32 ) = 1 {
+			if click_range( 60, windowy-70-titlebar_h, 60+32, windowy-70-titlebar_h+32 ) = 1 {
 				
 				if opening_menu_put_Road = 0 {
 					cursor_mode = "put_Road"
@@ -862,7 +934,7 @@
 			}
 	
 		//建物（住居地区）ボタン
-			if click_range( 92, 410, 92+32, 410+32 ) = 1 {
+			if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
 				
 				if opening_menu_put_Reaidential = 0 {
 					cursor_mode = "put_Residential"
@@ -893,7 +965,7 @@
 			}
 	
 		//建物（商業地区）ボタン
-			if click_range( 124, 410, 124+32, 410+32 ) = 1 {
+			if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
 	
 				if opening_menu_put_High_density_Office = 0 {
 					cursor_mode = "put_Commercial"
@@ -923,7 +995,7 @@
 			}
 	
 		//建物（オフィス）ボタン
-			if click_range( 156, 410, 156+32, 410+32 ) = 1 {
+			if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
 	
 				if opening_menu_put_High_density_Office = 0 {
 					cursor_mode = "put_High_density_Office"
@@ -952,7 +1024,7 @@
 				opening_menu_put_Public = 0
 			}
 		//建物（公共施設）ボタン
-			if click_range( 188, 410, 188+32, 410+32 ) = 1 {
+			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
 	
 				if opening_menu_put_High_density_Residential = 0 {
 					cursor_mode = "put_Public"
@@ -982,7 +1054,7 @@
 			}
 	
 		//取り壊しボタン
-			if click_range( windowx-54, windowy-70, windowx-54+32, windowy-70+32 ) = 1 {
+			if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
 				cursor_mode = "bulldozer"
 	
 				opening_addon_menu = 0
@@ -995,7 +1067,7 @@
 			}
 	
 		//保存ボタン
-			if click_range( windowx-54, windowy-35, windowx-54+32, windowy-35+32 ) = 1 {
+			if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
 				gosub *save
 			}
 	
@@ -1004,7 +1076,7 @@
 			
 			/*-------------------------------------------道路---------------------------------------------------*/
 				notesel type_Two_lane_road
-				if opening_menu_put_Road = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				if opening_menu_put_Road = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Road"
 		
 					clicked_addon_number = mousex/35 - 1
@@ -1023,7 +1095,7 @@
 	
 			//住居地区の低密度・高密度選択ボタン
 				//低密度
-					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-32, 16, windowy-70-16 ) = 1 {
+					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
 						density = "low"
 		
 					//とりあえず一番左にあるアドオンを選択させておく
@@ -1041,7 +1113,7 @@
 						gosub *open_menu_addon_menu
 					}
 				//高密度
-				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-16, 16, windowy-70 ) = 1 {
+				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
 					density = "high"
 	
 					//とりあえず一番左にあるアドオンを選択させておく
@@ -1061,7 +1133,7 @@
 			
 			//低密度住居地区
 				notesel type_low_density_residential
-				if opening_menu_put_Residential = 1 and density = "low" and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				if opening_menu_put_Residential = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Residential"
 					
 					clicked_addon_number = mousex/35 - 1
@@ -1078,7 +1150,7 @@
 				
 			//高密度住居地区
 				notesel type_high_density_residential
-				if opening_menu_put_Residential = 1 and density = "high" and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				if opening_menu_put_Residential = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Residential"
 		
 					clicked_addon_number = mousex/35 - 1
@@ -1097,7 +1169,7 @@
 			
 			//低密度商業地区
 				notesel type_high_density_commercial
-				if opening_menu_put_commercial = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				if opening_menu_put_commercial = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Commercial"
 		
 					clicked_addon_number = mousex/35 - 1
@@ -1116,7 +1188,7 @@
 			
 			//高密度オフィス
 				notesel type_high_density_office
-				if opening_menu_put_high_density_office = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				if opening_menu_put_high_density_office = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_High_density_Office"
 		
 					clicked_addon_number = mousex/35 - 1
@@ -1135,7 +1207,7 @@
 			
 			//公共施設
 				notesel type_public
-				if opening_menu_put_public = 1 and click_range( 10+35, windowy-70-32, notemax*35+10+35, windowy-70 ) = 1 {
+				if opening_menu_put_public = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Public"
 		
 					clicked_addon_number = mousex/35 - 1
@@ -1154,9 +1226,9 @@
 	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
 	
 		if opening_addon_menu = 1 {
-			menu_line_y = windowy-70-32-20
+			menu_line_y = windowy-70-titlebar_h-32-20
 		} else {
-			menu_line_y = windowy-70
+			menu_line_y = windowy-70-titlebar_h
 		}
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
@@ -1245,7 +1317,7 @@
 							}
 						}
 	
-						if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+taskbar_high&ginfo_my<=ginfo_wy2) {
+						if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
 							dialog "道路に接続されていない場所には建設できません！"
 							return
 						}
@@ -1367,7 +1439,7 @@
 		return
 	
 *open_menu_addon_menu
-	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, windowx, windowy-70
+	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, windowx, windowy-70-titlebar_h
 	
 	if cursor_mode = "put_Road" {
 		notesel type_number_Two_lane_road
@@ -1375,16 +1447,16 @@
 	if cursor_mode = "put_Residential" and density = "low" {
 		notesel type_number_low_density_residential
 	
-		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, 16, windowy-70
-		pos 0, windowy-72-32 : gmode 2 : gcopy 8, 0, 16, 16, 16
-		pos 0, windowy-72-16 : gmode 2 : gcopy 9, 0, 0, 16, 16 
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
+		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 8, 0, 16, 16, 16
+		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 9, 0, 0, 16, 16 
 	}
 	if cursor_mode = "put_Residential" and density = "high" {
 		notesel type_number_high_density_residential
 	
-		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-32-40, 16, windowy-70
-		pos 0, windowy-72-32 : gmode 2 : gcopy 8, 0, 0, 16, 16
-		pos 0, windowy-72-16 : gmode 2 : gcopy 9, 0, 16, 16, 16
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
+		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 8, 0, 0, 16, 16
+		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 9, 0, 16, 16, 16
 	}
 	if cursor_mode = "put_Commercial" and density = "low" {
 		notesel type_number_low_density_commercial
@@ -1404,16 +1476,16 @@
 	
 		gmode 2
 		if clicked_addon_number != cnt {
-			pos 30 + (cnt*35)+10, windowy-70-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
+			pos 30 + (cnt*35)+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
 		}
 		if clicked_addon_number = cnt {
 			color 255,255,255 : font "", 14
-			pos 20, (windowy-70-32-40+5) : mes addon_jp_name(int(get_addon_number))
+			pos 20, (windowy-70-titlebar_h-32-40+5) : mes addon_jp_name(int(get_addon_number))
 			
 			color 255,255,255 : font "", 10
-			pos 23, (windowy-70-32-20) : mes addon_summary(int(get_addon_number))
+			pos 23, (windowy-70-titlebar_h-32-20) : mes addon_summary(int(get_addon_number))
 			
-			pos 30 + (cnt*35)+10, windowy-70-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
+			pos 30 + (cnt*35)+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
 	
 			pointer_icon = int(get_addon_number)
 		}
@@ -1583,6 +1655,22 @@
 		
 			wait 1
 		loop
+	
+	return
+	
+*get_windowsize
+	//現在のウィンドウサイズを取得
+		windowx = ginfo_sizex
+		windowy = ginfo_sizey
+	
+	//ウィンドウ左枠の横幅とタイトルバーの高さを取得
+		dim rc, 2
+		rc(0) = 0
+		rc(1) = 0
+		ClientToScreen hwnd, varptr(rc)
+		
+		window_left_breadth = rc(0) - ginfo_wx1
+		titlebar_h = rc(1) - ginfo_wy1
 	
 	return
 	
