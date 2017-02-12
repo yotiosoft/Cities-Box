@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.6
+									   Cities Box Ver 0.3.6.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -605,11 +605,15 @@
 				loop
 			}
 	
+			randomize
+	
 			repeat 100
 				rain(cnt) = 0
 				rain_x(cnt) = rnd(windowx)
 				rain_y(cnt) = -rnd(windowy)
 			loop
+	
+			temperature = rnd(50)-20
 	
 *map_drawing
 	repeat
@@ -712,7 +716,7 @@
 					if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 	
 						if cnt \ 10000 = 0 {
-							title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+							title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") temperature : "+temperature+"℃ add_rain:"+add_rain+" FPS:"+fps+""
 						}
 		
 						//マウスがクリックされているとき
@@ -766,48 +770,10 @@
 							
 							//オブジェクトを表示
 							pos macro1, macro2 - sizey/2 + 1
-							gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
-							
+							gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey	
 							
 						}
-	
-					//雨の表示
-						if cnt \ 100000 = 1 {
-							randomize
-							
-							add_rain_increase_or_decrease = rnd(2)
-	
-							if add_rain_increase_or_decrease = 0 {
-								add_rain --
-							} else {
-								add_rain ++
-							}
-							
-							repeat 50
-								if rain_y(cnt) >= windowy or rain(cnt) = 0 {
-									rain_increase_or_decrease = rnd(2)
-									
-									if rain_increase_or_decrease = 0 and add_rain >= 0 {
-										rain(cnt) = 1
-										rain_x(cnt) = rnd(windowx)
-										rain_y(cnt) = -rnd(windowy)
-									} else {
-										rain(cnt) = 0
-										rain_x(cnt) = 0
-										rain_y(cnt) = 0
-									}
-								}
-	
-								if rain(cnt) = 1 {
-									rain_y(cnt) += 1
-									
-									color 255, 255, 255
-									line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+5
-								}
-	
-							loop
-						}
-	
+					
 					//マウスポインタの位置のチップを光らせる
 						if opening_addon_menu = 1 {
 							menu_line_y = windowy-70-titlebar_h-32-20
@@ -838,6 +804,64 @@
 				loop
 					
 			loop
+	
+			//-20℃～35℃の範囲で気温を変動
+				temperature_increase_or_decrease = rnd(100)
+		
+				if temperature_increase_or_decrease = 0 {
+					if temperature > -20 {
+						temperature --
+					}
+				} else : if temperature_increase_or_decrease = 99 {
+					if temperature < 35 {
+						temperature ++
+					}
+				}
+	
+			//雨・雪の表示、気温の変動
+				randomize
+							
+				add_rain_increase_or_decrease = rnd(2)
+	
+				if add_rain_increase_or_decrease = 0 {
+					add_rain --
+				} else {
+					add_rain ++
+				}
+				
+				repeat 50
+					if rain_y(cnt) >= windowy or rain(cnt) = 0 {
+						rain_increase_or_decrease = rnd(2)
+						
+						if rain_increase_or_decrease = 0 and add_rain >= 0 {
+							rain(cnt) = 1
+							rain_x(cnt) = rnd(windowx)
+							rain_y(cnt) = -rnd(windowy)
+							snow_size(cnt) = rnd(5)+1
+						} else {
+							rain(cnt) = 0
+							rain_x(cnt) = 0
+							rain_y(cnt) = 0
+							snow_size(cnt) = 0
+						}
+					}
+	
+					if rain(cnt) = 1 {
+						color 255, 255, 255
+	
+						if temperature >= 3 {	; 気温が3℃以上なら雨
+							rain_y(cnt) += 5
+							line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+20
+							
+						} else {				; 気温が2℃以下なら雪
+							rain_x(cnt) += (rnd(3)-1)*2
+							rain_y(cnt) += 1
+							circle rain_x(cnt), rain_y(cnt), rain_x(cnt)+snow_size(cnt), rain_y(cnt)+snow_size(cnt)
+							
+						}
+					}
+	
+				loop
 	
 *menu_buttons
 			//現在のウィンドウサイズとタイトルバーの高さを取得
@@ -914,11 +938,16 @@
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
 	
+				//気温を表示
+					color 255, 255, 255 : font "Yu Gothic UI", 14
+					pos 20, windowy-32-titlebar_h : mes ""+temperature+"℃"
+	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
 				}
 					
 			redraw 1
+			
 			await 30
 			c+=16
 	loop
