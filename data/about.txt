@@ -1,6 +1,2 @@
 Title : Cities Box (Alpha)
-<<<<<<< HEAD
 Version : 0.3.7
-=======
-Version : 0.3.6.1
->>>>>>> 4cde1e1a8baa0c535ea086b9456042ade191f0e2
