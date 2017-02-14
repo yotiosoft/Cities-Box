@@ -533,8 +533,6 @@
 		}
 		if from_new_map = 1 {
 			load_mapdata_name = save_mapdata_name
-	
-			from_new_map = 0
 		}
 		
 		chdir directory
@@ -565,7 +563,7 @@
 	
 	put_addon_name = "tile_greenfield"
 	
-	if map_mode = "load_map" {
+	if from_new_map = 0 {
 		dim buffer_number, mapx, mapy
 		dim atlx, mapx, mapy
 		dim atly, mapx, mapy
@@ -580,6 +578,9 @@
 		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
 	}
+	if from_new_map = 1 {
+		from_new_map = 0
+	}
 	
 	ix = 0 : iy = 0
 	
@@ -588,7 +589,7 @@
 	//マップ読み込み
 		if map_mode = "load_map" {
 			notesel load_mapdata
-			noteload refstr
+			noteload load_mapdata_name
 	
 			;exist refstr
 	
@@ -1946,6 +1947,11 @@
 	
 			// マップ作成時の設定の場合
 				if from_new_map = 1 {
+					City_Name = setting_City_Name
+					Mayor_Name = setting_Mayor_Name
+					Set_Change_Name = setting_Set_Change_Name
+					SystemFont = setting_SystemFont
+					
 					gosub *save
 	
 					gsel 1, -1
@@ -2058,6 +2064,8 @@
 	return
 	
 *save
+	save_mapdata = ""
+	
 	//マップ保存
 		notesel save_mapdata
 		
@@ -2088,7 +2096,7 @@
 			
 				repeat mapx
 					x = cnt
-			
+					
 					if cnt = 0 {
 						map_data_buf = name(x,y)
 					} else {
@@ -2100,7 +2108,7 @@
 			loop
 			
 			noteadd "}", -1
-	
+			
 		//category(x,y)
 			noteadd "category(x,y) {", -1
 			
