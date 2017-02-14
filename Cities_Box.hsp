@@ -46,9 +46,9 @@
 #defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
 	if ginfo_wx1 <= ginfo_mx and ginfo_wx2 >= ginfo_mx and ginfo_wy1 <= ginfo_my and ginfo_wy2 >= ginfo_my and mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
 		return 1
-	} else {
-		return 0
 	}
+	
+	return 0
 	
 /*アドオンの番号を取得する関数*/
 #defcfunc addon_num str input_addon_name
@@ -1854,6 +1854,8 @@
 	
 	gsel 1
 	
+	title "Cities Box 設定"
+	
 	onclick *setting_onclick
 	
 	color 95, 95, 95 : boxf
@@ -1925,7 +1927,7 @@
 	
 	//天候の変化(Set_Change_Weather)
 		//チェックボックス
-			if click_range(10, 43, 10+16, 43+16) = 1 {
+			if click_range(10, 73, 10+16, 73+16) = 1 {
 				if setting_Set_Change_Weather = 0 {
 					setting_Set_Change_Weather = 1
 				} else {
@@ -1935,7 +1937,7 @@
 	
 	//フォント(SystemFont)
 		//参照ボタン
-			if click_range(274, 70, 274+16, 70+16) = 1 {
+			if click_range(274, 100, 274+16, 100+16) = 1 {
 				gosub *refer_fonts
 			}
 	
