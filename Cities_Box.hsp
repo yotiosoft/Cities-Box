@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.6
+									   Cities Box Ver 0.3.7
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -44,14 +44,21 @@
 
 /*指定された範囲内にマウスがあるか確認する関数（使用例：click_range (100, 0, 300, 300) ）*/
 #defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
-	if mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
+	if ginfo_wx1 <= ginfo_mx and ginfo_wx2 >= ginfo_mx and ginfo_wy1 <= ginfo_my and ginfo_wy2 >= ginfo_my and mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
 		return 1
-	}else{
+	} else {
 		return 0
 	}
 	
 /*アドオンの番号を取得する関数*/
 #defcfunc addon_num str input_addon_name
+	chdir directory@
+	exist "data/temp/"+input_addon_name+".temp"
+	
+	if strsize = -1 {
+		return addon_num@("tile_greenfield")	; 一時ファイルが見つからない場合、とりあえず更地（greenfield）の値を返す
+	}	
+	
 	notesel temp_file
 	noteload "data/temp/"+input_addon_name+".temp"
 	
@@ -66,6 +73,7 @@
 	
 /*指定された文字列が何番目の要素にあるかを取得（2次配列用）（使用例：element2 検索するアドオン名, 検索する文字列が含まれる変数名, その変数の要素数が格納されている変数, "検索する文字列"）*/
 #defcfunc element2 str search_addon_name, array search_var, array search_var_elements, str search_word
+	chdir directory@
 	exist "data/temp/"+search_addon_name+".temp"
 	if strsize = -1 {
 		return -2
@@ -87,6 +95,7 @@
 	
 /*指定された文字列が何番目の要素にあるかを取得（3次配列用）（使用例：element3 検索するアドオン名, 検索する文字列が含まれる変数名, その変数の要素数が格納されている変数, "検索する文字列", 検索する文字列が含まれる3番目の要素の変数名, その3番目の要素の変数の要素数が格納されている変数, "3番目の要素で検索する文字列"）*/
 #defcfunc element3 str search_addon_name, array search_var, array search_var_elements, str search_word, array second_search_var, array second_search_var_elements, str second_search_word
+	chdir directory@
 	exist "data/temp/"+search_addon_name+".temp"
 	if strsize = -1 {
 		return -2
@@ -170,9 +179,9 @@
 #global
 	
 *buffering
-	//ロゴ、背景画像
-		celload "img/logo.png", 1									; ロゴ
-		celload "img/AME963_sappro_TP_V.jpg", 2						; タイトル背景画像
+	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
+		celload "img/logo.png", 2										; ロゴ
+		celload "img/AME963_sappro_TP_V.jpg", 15						; タイトル背景画像
 	
 	//メニューのアイコン
 		celload "img/menu_icons/menu/cursor.png", 3							; 標準カーソル
@@ -184,10 +193,15 @@
 	
 		celload "img/menu_icons/menu/bulldozer.png", 10						; 取り壊しボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
+		celload "img/menu_icons/setting/setting.png", 13					; 設定ボタン
 	
 	//小サイズのアイコン
 		celload "img/menu_icons/mini/low_density_residential.png", 8		; 高密度住居地区
 		celload "img/menu_icons/mini/high_density_residential.png", 9		; 低密度住居地区
+	
+	//設定で使うアイコン
+		celload "img/menu_icons/setting/check.png", 14						; チェックボタン
+		celload "img/menu_icons/setting/refer.png", 16						; 参照ボタン
 	
 	//onexit
 		onexit *exit
@@ -198,6 +212,8 @@
 		
 		GetWindowLong hwnd, -16
 		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
+	
+		gsel 0
 	
 	//タイトルとバージョンの読み込み
 		notesel about
@@ -210,6 +226,24 @@
 		split about_version, " : ", not_use, about_version
 	
 		title about_title
+	
+	//本体設定読み込み
+		notesel config
+		noteload "data/config.dat"
+	
+		SystemFont = get_chapter(config, "SystemFont", " = \"", "\"")
+	
+		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
+		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
+	
+	//ウィンドウのサイズを変更可能化
+		windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
+		screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
+		
+		GetWindowLong hwnd, -16
+		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
+	
+		gsel 0
 	
 	//バッファ番号1000以降はオブジェクト
 		//まずAddonフォルダ内のアドオンの数を取得
@@ -425,10 +459,11 @@
 			
 		redraw 0
 		
-		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 2, 0, 0, 1600, 1066 : gblur 2
+		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 1600, 1066 : gblur 2
 		
-		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 1, 0, 0, 110, 110
-		color 255, 255, 255
+		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
+	
+		color 255, 255, 255 : font SystemFont, 18
 		cmes "Ver."+about_version+"", 0, double(270./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
 	
 		//前回のループ時とウィンドウサイズが変わっている場合はclrobj
@@ -448,16 +483,65 @@
 	
 *new_map
 	map_mode = "new_map"
-	goto *map_preparating
-*load_map
-	dialog "cbd", 16, "Cities Box マップデータ"
 	
-	if stat = 1 {
-		load_mapdata_name = refstr
+	//マップ新規作成
+		mapx=100:mapy=100
+	
+		dim buffer_number, mapx, mapy
+		dim atlx, mapx, mapy
+		dim atly, mapx, mapy
+		dim abrx, mapx, mapy
+		dim abry, mapx, mapy
+		dim sizex, mapx, mapy
+		dim sizey, mapx, mapy
+	
+		dim map, mapx, mapy			//各座標のアドオン番号
+		sdim name, mapx, mapy		//各座標のアドオン名
+		sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
+		
+		repeat mapx * mapy
+			map(ix,iy) = addon_num_buf
+			name(ix,iy) = "tile_greenfield"
+			category(ix,iy) = "tile"
+			obj_type(ix,iy) = 0
+			obj_dire(ix,iy) = 0
+			
+			ix++
+			if ix = mapx {
+				ix = 0
+				iy += 1
+			}
+		loop
+	
+	City_Name = ""
+	Mayor_Name = ""
+	Set_Change_Weather = 1
+	
+	from_new_map = 1
+	goto *setting
+	
+*load_map
+	if from_new_map = 0 {
+		dialog "cbd", 16, "Cities Box マップデータ"
+	}
+	
+	if stat = 1 or from_new_map = 1 {
+		if from_new_map = 0 {
+			load_mapdata_name = refstr
+		}
+		if from_new_map = 1 {
+			load_mapdata_name = save_mapdata_name
+	
+			from_new_map = 0
+		}
+		
 		chdir directory
 		
 		map_mode = "load_map"
 		goto *map_preparating
+		
 	} else {
 		stop
 	}
@@ -481,40 +565,25 @@
 	
 	put_addon_name = "tile_greenfield"
 	
-	dim buffer_number, mapx, mapy
-	dim atlx, mapx, mapy
-	dim atly, mapx, mapy
-	dim abrx, mapx, mapy
-	dim abry, mapx, mapy
-	dim sizex, mapx, mapy
-	dim sizey, mapx, mapy
+	if map_mode = "load_map" {
+		dim buffer_number, mapx, mapy
+		dim atlx, mapx, mapy
+		dim atly, mapx, mapy
+		dim abrx, mapx, mapy
+		dim abry, mapx, mapy
+		dim sizex, mapx, mapy
+		dim sizey, mapx, mapy
 	
-	dim map, mapx, mapy			//各座標のアドオン番号
-	sdim name, mapx, mapy		//各座標のアドオン名
-	sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-	dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
-	dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
+		dim map, mapx, mapy			//各座標のアドオン番号
+		sdim name, mapx, mapy		//各座標のアドオン名
+		sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
+	}
 	
 	ix = 0 : iy = 0
 	
 	addon_num_buf = addon_num("tile_greenfield")
-	
-	//マップ新規作成
-		if map_mode = "new_map" {
-			repeat mapx * mapy
-				map(ix,iy) = addon_num_buf
-				name(ix,iy) = "tile_greenfield"
-				category(ix,iy) = "tile"
-				obj_type(ix,iy) = 0
-				obj_dire(ix,iy) = 0
-				
-				ix++
-				if ix = mapx {
-					ix = 0
-					iy += 1
-				}
-			loop
-		}
 	
 	//マップ読み込み
 		if map_mode = "load_map" {
@@ -526,6 +595,16 @@
 			;Xine load_mapdata, 332
 	
 			;dialog""+load_mapdata+""
+	
+			//都市名(City_Name)を読み込み
+				City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
+	
+			//市長名(Mayor_Name)を読み込み
+				Mayor_Name = get_chapter(load_mapdata, "Mayor_Name", " = \"", "\"")
+	
+			//設定読み込み
+				//天候の変化(Set_Change_Weather)
+					Set_Change_Weather = int( get_chapter(load_mapdata, "Set_Change_Weather", " = ", ";") )
 		
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
@@ -605,11 +684,17 @@
 				loop
 			}
 	
-			repeat 100
-				rain(cnt) = 0
-				rain_x(cnt) = rnd(windowx)
-				rain_y(cnt) = -rnd(windowy)
-			loop
+			//雨粒の初期位置
+				randomize
+	
+				repeat 1000
+					rain(cnt) = 0
+					rain_x(cnt) = rnd(windowx)
+					rain_y(cnt) = -rnd(windowy)
+				loop
+	
+			//気温の初期値（-20℃～30℃）
+				temperature = rnd(50)-20
 	
 *map_drawing
 	repeat
@@ -667,177 +752,201 @@
 		stick key,0 ; キー取得
 	
 *map_drawing_2
-			repeat mapx
-				x = cnt
+		onclick 0
+		
+		repeat mapx
+			x = cnt
 				
-				repeat mapy
-					y = cnt
+			repeat mapy
+				y = cnt
 	
-					if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
+				//マウスのどのボタンが押されているか取得
+					getkey mouse_left, 1
+					getkey mouse_right, 2
 	
-						//画面中央の座標
-							x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
-							y_=(windowy/2)+camy
-							middle_x=(y_+x_/2)/(chip_size/2)
-							middle_y=(-x_+y_*2)/chip_size
+					if mouse_left = 1 or mouse_right = 1 {
+						gosub *map_drawing_onclick
+					}
 	
-						//左上のx座標
-							left_top_x_ = 0+camx-chip_size/2
-							left_top_y_ = 0+camy
-							left_top_x = (left_top_y_+left_top_x_/2)/(chip_size/2)
+				if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
+	
+					//画面中央の座標
+						x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
+						y_=(windowy/2)+camy
+						middle_x=(y_+x_/2)/(chip_size/2)
+						middle_y=(-x_+y_*2)/chip_size
+	
+					//左上のx座標
+						left_top_x_ = 0+camx-chip_size/2
+						left_top_y_ = 0+camy
+						left_top_x = (left_top_y_+left_top_x_/2)/(chip_size/2)
 		
-						//左下のy座標
-							left_bottom_x_ = 0+camx-chip_size/2
-							left_bottom_y_ = windowy+camy
-							left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
+					//左下のy座標
+						left_bottom_x_ = 0+camx-chip_size/2
+						left_bottom_y_ = windowy+camy
+						left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
 		
-						//右上のy座標
-							right_top_x_ = windowx+camx-chip_size/2
-							right_top_y_ = 0+camy
-							right_top_y = (-right_top_x_+right_top_y_*2)/chip_size
+					//右上のy座標
+						right_top_x_ = windowx+camx-chip_size/2
+						right_top_y_ = 0+camy
+						right_top_y = (-right_top_x_+right_top_y_*2)/chip_size
 		
-						//右下のx座標
-							right_bottom_x_ = windowx+camx-chip_size/2
-							right_bottom_y_ = windowy+camy
-							right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
+					//右下のx座標
+						right_bottom_x_ = windowx+camx-chip_size/2
+						right_bottom_y_ = windowy+camy
+						right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
 	
-							before_camx = camx
-							before_camy = camy
+						before_camx = camx
+						before_camy = camy
+
+						before_windowx = windowx
+						before_windowy = windowy
 	
-							before_windowx = windowx
-							before_windowy = windowy
+				}
 	
+				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
+		
+					//周囲のオブジェクトの番号を取得
+						left_chip = ""
+						top_chip = ""
+						bottom_chip = ""
+						right_chip = ""
+		
+						if x > 0 {
+							left_chip = category(x-1, y)
 						}
-	
-					if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
-	
-						if cnt \ 10000 = 0 {
-							title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+						if y > 0 {
+							top_chip = category(x, y-1)
+						}
+						if mapy-1 > y {
+							bottom_chip = category(x, y+1)
+						}
+						if mapx-1 > x {
+							right_chip = category(x+1, y)
 						}
 		
-						//マウスがクリックされているとき
-							getkey mouse_left, 1
-							getkey mouse_right, 2
-		
-							if mouse_left = 1 or mouse_right = 1 {
-								gosub *map_drawing_onclick
-							}
-		
-						//周囲のオブジェクトの番号を取得
-							left_chip = ""
-							top_chip = ""
-							bottom_chip = ""
-							right_chip = ""
-		
-							if x > 0 {
-								left_chip = category(x-1, y)
-							}
-							if y > 0 {
-								top_chip = category(x, y-1)
-							}
-							if mapy-1 > y {
-								bottom_chip = category(x, y+1)
-							}
-							if mapx-1 > x {
-								right_chip = category(x+1, y)
-							}
-		
-						//道路の向きを調節
-							if category(x,y) = "road" and (mx-1 <= x and mx+1 >= x) and (my-1 <= y and my+1 >= y) {
-								gosub *adjustment_road
-							}
-						
-						//マップ作成
-							qv2 x, y
-		
-							if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を領する場合
-								buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
-								get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
-								
-							} else {										; ひとつのアドオンでひとつの画像を領する場合
-								buffer_number(x,y) = map(x,y) + 1000
-								get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
-								
-							}
-		
-							if sizey > 32 {
-								macro2 -= 16
-							}
-							
-							//オブジェクトを表示
-							pos macro1, macro2 - sizey/2 + 1
-							gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
-							
-							
-						}
-	
-					//雨の表示
-						if cnt \ 100000 = 1 {
-							randomize
-							
-							add_rain_increase_or_decrease = rnd(2)
-	
-							if add_rain_increase_or_decrease = 0 {
-								add_rain --
-							} else {
-								add_rain ++
-							}
-							
-							repeat 50
-								if rain_y(cnt) >= windowy or rain(cnt) = 0 {
-									rain_increase_or_decrease = rnd(2)
-									
-									if rain_increase_or_decrease = 0 and add_rain >= 0 {
-										rain(cnt) = 1
-										rain_x(cnt) = rnd(windowx)
-										rain_y(cnt) = -rnd(windowy)
-									} else {
-										rain(cnt) = 0
-										rain_x(cnt) = 0
-										rain_y(cnt) = 0
-									}
-								}
-	
-								if rain(cnt) = 1 {
-									rain_y(cnt) += 1
-									
-									color 255, 255, 255
-									line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+5
-								}
-	
-							loop
-						}
-	
-					//マウスポインタの位置のチップを光らせる
-						if opening_addon_menu = 1 {
-							menu_line_y = windowy-70-titlebar_h-32-20
-						} else {
-							menu_line_y = windowy-70-titlebar_h
+					//道路の向きを調節
+						if category(x,y) = "road" and (mx-1 <= x and mx+1 >= x) and (my-1 <= y and my+1 >= y) {
+							gosub *adjustment_road
 						}
 						
-						if mx=x & my=y and mousey < menu_line_y {
-							if pointer_icon = -1 {
-								if cursor_mode = "normal" {
-									color 0, 162, 232
-								}
-								if cursor_mode = "bulldozer" {
-									color 245, 133, 138
-								}
-								qv x,y
-							} else {
-								color 0, 162, 232
-								qv x,y
+					//マップ作成
+						qv2 x, y
+	
+						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を領する場合
+							buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
+							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
+							
+						} else {										; ひとつのアドオンでひとつの画像を領する場合
+							buffer_number(x,y) = map(x,y) + 1000
+							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
 								
-								qv2 x,y
-								color : gmode 4,,,200
-								pos macro1+16,macro2-16 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
-							}
-							continue
 						}
+		
+						if sizey > 32 {
+							macro2 -= 16
+						}
+							
+					//オブジェクトを表示
+						pos macro1, macro2 - sizey/2 + 1
+						gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
+							
+				}
+	
+				//マウスポインタの位置のチップを光らせる
+					if opening_addon_menu = 1 {
+						menu_line_y = windowy-70-titlebar_h-32-20
+					} else {
+						menu_line_y = windowy-70-titlebar_h
+					}
 					
-				loop
+					if mx=x & my=y and mousey < menu_line_y {
+						if pointer_icon = -1 {
+							if cursor_mode = "normal" {
+								color 0, 162, 232
+							}
+							if cursor_mode = "bulldozer" {
+								color 245, 133, 138
+							}
+							qv x,y
+						} else {
+							color 0, 162, 232
+							qv x,y
+								
+							qv2 x,y
+							color : gmode 4,,,200
+							pos macro1+16,macro2-16 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
+						}
+						continue
+					}
 					
 			loop
+					
+		loop
+	
+		if cnt \ 10 = 0 {
+			title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+		}
+	
+		//-20℃～35℃の範囲で気温を変動
+			temperature_increase_or_decrease = rnd(100)
+		
+			if temperature_increase_or_decrease = 0 {
+				if temperature > -20 {
+					temperature --
+				}
+			} else : if temperature_increase_or_decrease = 99 {
+				if temperature < 35 {
+					temperature ++
+				}
+			}
+	
+		//雨・雪の表示、気温の変動
+			if Set_Change_Weather = 1 {
+				randomize
+								
+				add_rain_increase_or_decrease = rnd(2)
+		
+				if add_rain_increase_or_decrease = 0 {
+					add_rain --
+				} else {
+					add_rain ++
+				}
+					
+				repeat 100
+					if rain_y(cnt) >= windowy or rain(cnt) = 0 {
+						rain_increase_or_decrease = rnd(2)
+							
+						if rain_increase_or_decrease = 0 and add_rain >= 0 {
+							rain(cnt) = 1
+							rain_x(cnt) = rnd(windowx)
+							rain_y(cnt) = -rnd(windowy)
+							snow_size(cnt) = rnd(5)+1
+						} else {
+							rain(cnt) = 0
+							rain_x(cnt) = 0
+							rain_y(cnt) = 0
+							snow_size(cnt) = 0
+						}
+					}
+		
+					if rain(cnt) = 1 {
+						color 255, 255, 255
+		
+						if temperature >= 3 {	; 気温が3℃以上なら雨
+							rain_y(cnt) += 5
+							line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+20
+								
+						} else {				; 気温が2℃以下なら雪
+							rain_x(cnt) += (rnd(3)-1)*2
+							rain_y(cnt) += 1
+							circle rain_x(cnt), rain_y(cnt), rain_x(cnt)+snow_size(cnt), rain_y(cnt)+snow_size(cnt)
+								
+						}
+					}
+	
+				loop
+			}
 	
 *menu_buttons
 			//現在のウィンドウサイズとタイトルバーの高さを取得
@@ -910,9 +1019,17 @@
 						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 0, 32, 32
 					}
 	
+				//設定ボタン
+					gmode 2
+					pos windowx-54-32, windowy-40-titlebar_h : gcopy 13, 0, 0, 32, 32
+	
 				//保存ボタン
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
+	
+				//気温を表示
+					color 255, 255, 255 : font "Yu Gothic UI", 14
+					pos 20, windowy-32-titlebar_h : mes ""+temperature+"℃"
 	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
@@ -924,8 +1041,15 @@
 	loop
 	
 *map_drawing_onclick
-	/*------------------------------------------メニューのボタンの動作------------------------------------------------*/
 	
+	if opening_addon_menu = 1 {
+		menu_line_y = windowy-70-titlebar_h-32-20
+	} else {
+		menu_line_y = windowy-70-titlebar_h
+	}
+	
+	/*------------------------------------------メニューのボタンの動作------------------------------------------------*/
+	if mousey >= menu_line_y and mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy {
 		//標準カーソルボタン
 			if click_range( 20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32 ) = 1 {
 				cursor_mode = "normal"
@@ -1110,8 +1234,17 @@
 				opening_menu_put_Public = 0
 			}
 	
+		//設定ボタン
+			if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
+				cursor_mode = "normal"
+				opening_addon_menu = 0
+				gosub *setting
+			}
+	
 		//保存ボタン
 			if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
+				cursor_mode = "normal"
+				opening_addon_menu = 0
 				gosub *save
 			}
 	
@@ -1265,15 +1398,11 @@
 						noteget addon_num_buf, clicked_addon_number
 						addon_num_buf = int(addon_num_buf)
 				}
+	
+		}
 			
 	
 	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
-	
-		if opening_addon_menu = 1 {
-			menu_line_y = windowy-70-titlebar_h-32-20
-		} else {
-			menu_line_y = windowy-70-titlebar_h
-		}
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
 			if cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0 {
@@ -1718,9 +1847,234 @@
 	
 	return
 	
+*setting
+	if from_setting_onclick = 0 {
+		screen 1, 300, 400
+	}
+	
+	gsel 1
+	
+	onclick *setting_onclick
+	
+	color 95, 95, 95 : boxf
+	
+	if from_setting_onclick = 0 {
+		setting_SystemFont = SystemFont
+	}
+	
+	color 255, 255, 255
+	font setting_SystemFont, 16
+	
+	//都市名(City_Name)
+		pos 10, 10 : mes "都市名"
+	
+		if from_setting_onclick = 0 {
+			setting_City_Name = City_Name
+		}
+		
+		objsize 210, 20
+		pos 80, 10 : input setting_City_Name
+	
+	//市長名(Mayor_Name)
+		pos 10, 40 : mes "市長名"
+	
+		if from_setting_onclick = 0 {
+			setting_Mayor_Name = Mayor_Name
+		}
+		
+		objsize 210, 20
+		pos 80, 40 : input setting_Mayor_Name
+	
+	//天候の変化(Set_Change_Weather)
+		if from_setting_onclick = 0 {
+			setting_Set_Change_Weather = Set_Change_Weather
+		}
+		
+		if setting_Set_Change_Weather = 0 {
+			pos 10, 73 : gcopy 14, 0, 0, 16, 16
+		} else {
+			pos 10, 73 : gcopy 14, 0, 16, 16, 16
+		}
+		
+		pos 35, 70 : mes "天候の変化"
+	
+	//フォント(SystemFont)
+		pos 10, 100 : mes "フォント"
+	
+		objsize 194, 20
+		pos 80, 100 : input setting_SystemFont
+	
+		gmode 2
+		pos 274, 100 : gcopy 16, 0, 0, 16, 16
+	
+	//OKボタン
+		color 255, 255, 255 : boxf 100, 360, 200, 390
+		color 95, 95, 95 : boxf 101, 361, 199, 389
+	
+		color 255, 255, 255 : font setting_SystemFont, 20
+		cmes "OK", 100, 360, 200, 390
+	
+	from_setting_onclick = 0
+		
+	stop
+	
+*setting_onclick
+	gsel 1
+	
+	from_setting_onclick = 1
+	
+	//天候の変化(Set_Change_Weather)
+		//チェックボックス
+			if click_range(10, 43, 10+16, 43+16) = 1 {
+				if setting_Set_Change_Weather = 0 {
+					setting_Set_Change_Weather = 1
+				} else {
+					setting_Set_Change_Weather = 0
+				}
+			}
+	
+	//フォント(SystemFont)
+		//参照ボタン
+			if click_range(274, 70, 274+16, 70+16) = 1 {
+				gosub *refer_fonts
+			}
+	
+	//OKボタン
+		if click_range(100, 360, 200, 390) = 1 {
+	
+			// マップ作成時の設定の場合
+				if from_new_map = 1 {
+					gosub *save
+	
+					gsel 1, -1
+					gsel 0
+	
+					load_mapdata_name = save_mapdata_name
+	
+					from_setting_onclick = 0
+	
+					onclick 0
+					
+					goto *load_map
+				}
+			
+			gosub *save_setting
+			
+			gsel 1, -1
+			onclick 0
+			from_setting_onclick = 0
+	
+			gsel 0
+			goto *map_drawing
+		}
+	
+	clrobj
+	
+	goto *setting
+	
+*save_setting
+	chdir directory
+	
+	//まずは本体設定(data/config.dat)を保存
+		notesel config
+	
+		repeat notemax
+			noteget config_buf, cnt
+	
+			if instr(config_buf, 0, "SystemFont") != -1 {
+				SystemFont = setting_SystemFont
+				noteadd "SystemFont = \""+SystemFont+"\"", cnt, 1
+			}
+		loop
+	
+		notesave "data/config.dat"
+	
+	//次に各マップデータ(*.cbd)の設定を保存
+		notesel load_mapdata
+	
+		repeat notemax
+			noteget load_mapdata_buf, cnt
+	
+			if instr(load_mapdata_buf, 0, "City_Name") != -1 {
+				City_Name = setting_City_Name
+				noteadd "City_Name = \""+City_Name+"\";", cnt, 1
+			}
+	
+			if instr(load_mapdata_buf, 0, "Mayor_Name") != -1 {
+				Mayor_Name = setting_Mayor_Name
+				noteadd "Mayor_Name = \""+Mayor_Name+"\";", cnt, 1
+			}
+	
+			if instr(load_mapdata_buf, 0, "Set_Change_Weather") != -1 {
+				Set_Change_Weather = setting_Set_Change_Weather
+				noteadd "Set_Change_Weather = "+Set_Change_Weather+";", cnt, 1
+			}
+		loop
+	
+		if load_mapdata_name = "" {
+			gosub *save
+			load_mapdata_name = save_mapdata_name
+	
+			if from_new_map = 0 {
+				return
+			}
+		}
+	
+		notesave load_mapdata_name
+	
+	return
+	
+*refer_fonts
+	#uselib "comdlg32.dll"
+	#func ChooseFont "ChooseFontA" int
+	
+	mref bmscr, 67
+	dim chfont,16
+	dim logfont,16
+	sdim setting_SystemFont,32
+	
+	chfont.0 = 60 
+	chfont.1 = bmscr.13
+	chfont.3=varptr(logfont)
+	chfont.5 = 0x01000141
+	
+	pm=varptr(chfont)
+	ChooseFont pm
+	
+	if stat = 0 {
+		return
+	}
+	
+	style=0
+	if (chfont.12 & 0x0100):style=style+1
+	if (chfont.12 & 0x0200):style=style+2 
+	if (logfont.5 & 0x0000FF00):style=style+4 
+	if (logfont.5 & 0x00FF0000):style=style+8
+	size=chfont.4/10
+	memcpy setting_SystemFont,logfont,32,0,28
+	
+	return
+	
 *save
 	//マップ保存
 		notesel save_mapdata
+		
+		//次に各マップデータ(*.cbd)の設定を保存
+			noteadd "City_Name = \""+City_Name+"\";", -1
+	
+			noteadd "Mayor_Name = \""+Mayor_Name+"\";", -1
+	
+			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -1
+	
+		//空白
+			noteadd " ", -1
+	
+		//マップサイズ
+			noteadd "mapx = "+mapx+";", -1
+			noteadd "mapy = "+mapy+";", -1
+	
+		//空白
+			noteadd " ", -1
 	
 		//name(x,y)
 			noteadd "name(x,y) {", -1
@@ -1832,20 +2186,37 @@
 		return
 			
 *exit
-	//一時ファイルを削除
-		repeat total_addons
-			exist "data/temp/"+addon_name(cnt)+".temp"
-			
-			if strsize != -1 {
-				delete "data/temp/"+addon_name(cnt)+".temp"
-			}
+	if ginfo_act != 0 {
+		gsel ginfo_act, -1
 		
-			wait 1
-		loop
+		onclick 0
 	
-	end
+		from_setting_onclick = 0
 	
-*e
-	dialog""+search_addon_number+"\n"+search_type_number+"\n"+search_direction_number+"\n\nx:"+x+"\ny:"+y+""
+		gsel 0
 	
-	return
+		if from_new_map = 1 {
+			from_new_map = 0
+			stop
+		}
+	
+		cursor_mode = "normal"
+		
+		goto *map_drawing
+	}
+	
+	if ginfo_act = 0 {
+		//一時ファイルを削除
+			repeat total_addons
+				exist "data/temp/"+addon_name(cnt)+".temp"
+				
+				if strsize != -1 {
+					delete "data/temp/"+addon_name(cnt)+".temp"
+				}
+			
+				wait 1
+			loop
+	
+		gsel 0
+		end
+	}
