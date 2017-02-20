@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.7
+									   Cities Box Ver 0.3.7.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -214,6 +214,9 @@
 		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
 	
 		gsel 0
+	
+	//mci登録
+		mci "set Cities-Box time format milliseconds"
 	
 	//タイトルとバージョンの読み込み
 		notesel about
@@ -500,6 +503,7 @@
 		sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
+		dim residents, mapx, mapy	//各建築物の住民の数（住宅地のみ）
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -507,6 +511,7 @@
 			category(ix,iy) = "tile"
 			obj_type(ix,iy) = 0
 			obj_dire(ix,iy) = 0
+			residents(ix,iy) = 0
 			
 			ix++
 			if ix = mapx {
@@ -602,6 +607,9 @@
 	
 			//市長名(Mayor_Name)を読み込み
 				Mayor_Name = get_chapter(load_mapdata, "Mayor_Name", " = \"", "\"")
+	
+			//総人口(Total_Population)
+				Total_Population = int( get_chapter(load_mapdata, "Total_Population", " = ", ";") )
 	
 			//設定読み込み
 				//天候の変化(Set_Change_Weather)
@@ -748,7 +756,9 @@
 			  }
 			  ; msecondへ現在のミリ秒値を代入
 			  msecond = gettime(7)
-			
+	
+		/*BGM再生*/
+			gosub *play_BGM
 	
 		stick key,0 ; キー取得
 	
@@ -1028,9 +1038,13 @@
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
 	
+				//人口を表示（まだ非対応）
+					;color 255, 255, 255 : font "Yu Gothic UI", 14
+					;pos 20, windowy-32-titlebar_h : mes "人口 "+Total_Population+"人"
+				
 				//気温を表示
 					color 255, 255, 255 : font "Yu Gothic UI", 14
-					pos 20, windowy-32-titlebar_h : mes ""+temperature+"℃"
+					pos 20, windowy-32-titlebar_h : mes "気温 "+temperature+"℃"
 	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
@@ -1832,6 +1846,58 @@
 	
 	return
 	
+*play_BGM
+	//現在再生しているBGMの現在の再生位置と曲の長さを取得
+		mci"status Cities-Box position"
+		BGM_Position = stat		; 現在の再生位置
+			
+		mci "status Cities-Box length"
+		BGM_Length = stat		; 曲の長さ
+	
+	//再生位置が曲の長さと同じなら次のBGMをランダムに選出
+		if BGM_Position = BGM_Length {
+			chdir "bgm"
+	
+			mci "close Cities-Box"
+					
+			//パス名を含めたファイル一覧を取得
+				dirlist2h 1, ','
+				dirlist2 buf_BGMs, "*.mp3*", 1, '\\'
+					
+				sdim BGM_filelist, buf_BGMs
+				dirlist2r BGM_filelist
+		
+				notesel BGM_filelist
+				total_BGMs = notemax
+			
+			chdir directory
+			
+			//ランダムに選出
+				randomize
+	
+				repeat
+					BGM_rnd = rnd(total_BGMs)
+					
+					//現在再生しているBGMと同じ曲でないことを確認
+						notesel BGM_filelist
+						noteget next_BGM_file, BGM_rnd
+						
+						if next_BGM_file != playing_BGM_file {
+							playing_BGM_file = next_BGM_file
+							break
+						}
+	
+					await 1
+				loop
+				
+				mci"open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"
+				mci"play Cities-Box"
+	
+				changed_BGM = 1
+		}
+	
+		return
+	
 *get_windowsize
 	//現在のウィンドウサイズを取得
 		windowx = ginfo_sizex
@@ -2071,10 +2137,11 @@
 		
 		//次に各マップデータ(*.cbd)の設定を保存
 			noteadd "City_Name = \""+City_Name+"\";", -1
-	
 			noteadd "Mayor_Name = \""+Mayor_Name+"\";", -1
 	
-			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -1
+			noteadd "Total_Population = "+Total_Population+"", -1
+	
+			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -10
 	
 		//空白
 			noteadd " ", -1
