@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.3.7.1
+									    Cities Box Ver 0.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -280,6 +280,7 @@
 				sdim addon_summary, total_addons
 				sdim addon_icon, total_addons
 				sdim addon_type, total_addons
+				dim addon_maximum_capacity, total_addons
 	
 				sdim use_type, total_addons, 100
 				dim addon_total_use_types, total_addons
@@ -348,6 +349,13 @@
 							
 						//アドオンのタイプ
 							addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
+	
+						//建物の収容可能人数（住居地区のみ）
+							if addon_type(cnt) = "low_density_residential" or addon_type(cnt) = "high_density_residential" {
+								addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
+							} else {
+								addon_maximum_capacity(cnt) = -1
+							}
 	
 						//アドオンのadatファイルの詳細の読み込みへ
 							gosub *load_adat
@@ -524,6 +532,20 @@
 	Mayor_Name = ""
 	Set_Change_Weather = 1
 	
+	demand_of_Resindential = 100	; 住宅地区の需要度
+	demand_of_Commercial = 0		; 商業地区の需要度
+	demand_of_Office = 0			; オフィス地区の需要度
+	demand_of_Industrial = 0		; 工業地区の需要度
+	
+	time_Year = gettime(0)			; ゲーム内の時間の年
+	time_Month = gettime(1)			; ゲーム内の時間の月
+	time_Date = gettime(3)			; ゲーム内の時間の日
+	time_Hour = 0					; ゲーム内の時間の時
+	time_Minutes = 0				; ゲーム内の時間の分
+	
+	Total_Population = 0			; 都市の総人口
+	total_maximum_capacity = 0		; 都市の収容可能人数
+	
 	from_new_map = 1
 	goto *setting
 	
@@ -582,6 +604,7 @@
 		sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
+		dim residents, mapx, mapy	//各建築物の住民の数（住宅地のみ）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -611,11 +634,28 @@
 			//総人口(Total_Population)
 				Total_Population = int( get_chapter(load_mapdata, "Total_Population", " = ", ";") )
 	
+			//日時
+				time_Year = int(get_chapter(load_mapdata, "time_Year", " = ", ";"))			; ゲーム内の時間の年
+				time_Month = int(get_chapter(load_mapdata, "time_Month", " = ", ";"))		; ゲーム内の時間の月
+				time_Date = int(get_chapter(load_mapdata, "time_Date", " = ", ";"))			; ゲーム内の時間の日
+				time_Hour = int(get_chapter(load_mapdata, "time_Hour", " = ", ";"))			; ゲーム内の時間の時
+				time_Minutes = int(get_chapter(load_mapdata, "time_Minutes", " = ", ";"))	; ゲーム内の時間の分
+	
+				if time_Year = 0 {
+					time_Year = gettime(0)
+				}
+				if time_Month = 0 {
+					time_Month = gettime(1)
+				}
+				if time_Date = 0 {
+					time_Date = gettime(3)
+				}
+	
 			//設定読み込み
 				//天候の変化(Set_Change_Weather)
 					Set_Change_Weather = int( get_chapter(load_mapdata, "Set_Change_Weather", " = ", ";") )
 		
-			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)も取得
+			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
 			
 				repeat mapy
@@ -631,6 +671,10 @@
 						x = cnt
 						name(x,y) = name_buf_a_tile(x)
 						map(x,y) = addon_num(name_buf_a_tile(x))
+	
+						if addon_type(map(x,y)) = "low_density_residential" or addon_type(map(x,y)) = "high_density_residential" {
+							total_maximum_capacity += addon_maximum_capacity(map(x,y))
+						}
 					loop
 			
 				loop
@@ -691,7 +735,26 @@
 					loop
 			
 				loop
-			}
+	
+			//residents(x,y)の読み込み
+				residents_buf = get_chapter(load_mapdata, "residents(x,y)", " {", "}")
+			
+				repeat mapy
+					y = cnt
+		
+					notesel residents_buf
+					noteget residents_buf_a_line, (y+1)
+		
+					sdim residents_buf_a_tile, mapx
+					split residents_buf_a_line, ", ", residents_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						;residents(x,y) = int(residents_buf_a_tile(x))
+					loop
+			
+				loop
+		}
 	
 			//雨粒の初期位置
 				randomize
@@ -707,6 +770,46 @@
 	
 *map_drawing
 	repeat
+		map_drawing_cnt ++
+	
+		//1回のループで1分とする
+			time_Minutes ++
+		
+		//time_Minutes=60で1時間とする
+			if time_Minutes = 60 {
+				time_Minutes = 0
+				time_Hour ++
+			}
+	
+		//time_Hour=24で1日とする
+			if time_Hour= 24 {
+				time_Date ++
+				time_Hour = 0
+				time_Minutes = 0
+	
+				if time_Date > 28 and time_Month = 2 and time_Year\4 != 0 {
+					time_Date = 1
+					time_Month ++
+				}
+				if time_Date > 29 and time_Month = 2 and time_Year\4 = 0 {
+					time_Date = 1
+					time_Month ++
+				}
+				if time_Date > 30 and (time_Month = 4 or time_Month = 6 or time_Month = 9 or time_Month = 11) {
+					time_Date = 1
+					time_Month ++
+				}
+				if time_Date > 31 and (time_Month = 1 or time_Month = 3 or time_Month = 5 or time_Month = 7 or time_Month = 8 or time_Month = 10 or time_Month = 12) {
+					time_Date = 1
+					time_Month ++
+				}
+	
+				if time_Month > 12 {
+					time_Year ++
+					time_Month = 1
+					time_Date = 1
+				}
+			}
 	
 		/*カメラ操作*/
 			getkey key_left, 37
@@ -962,6 +1065,9 @@
 *menu_buttons
 			//現在のウィンドウサイズとタイトルバーの高さを取得
 				gosub *get_windowsize
+	
+			//人口・需要度変動
+				gosub *fluctuation
 			
 			//メニュー
 				color 0, 0, 0
@@ -1038,13 +1144,12 @@
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
 	
-				//人口を表示（まだ非対応）
-					;color 255, 255, 255 : font "Yu Gothic UI", 14
-					;pos 20, windowy-32-titlebar_h : mes "人口 "+Total_Population+"人"
-				
-				//気温を表示
+				//人口、日付・気温を表示
 					color 255, 255, 255 : font "Yu Gothic UI", 14
-					pos 20, windowy-32-titlebar_h : mes "気温 "+temperature+"℃"
+					pos 20, windowy-32-titlebar_h : mes "人口 "+Total_Population+"人 "+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃"
+				
+				//RCI需要メータ（まだ非対応）
+					;color 34, 177, 76 : boxf windowx-100, windowy-30-(demand_of_Resindential/4), windowx-100+10, windowy-30
 	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
@@ -1516,6 +1621,9 @@
 									map(mx, my) = addon_num_buf
 									name(mx, my) = put_addon_name
 									category(mx, my) = "residential"
+									
+									residents(mx, my) = 0											; 住人数
+									total_maximum_capacity += addon_maximum_capacity(addon_num_buf)	; 都市全体の収容可能人数
 								}
 	
 							//建物（商業地区）建設
@@ -1593,6 +1701,9 @@
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+	
+						residents(mx, my) = 0											; 住人数
+						total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)	; 都市全体の収容可能人数
 					}
 	
 				//商業地区削除
@@ -1914,6 +2025,30 @@
 	
 	return
 	
+*fluctuation
+	//人口・需要度などを増減
+	
+		//毎日午前0時に増減
+			if time_Hour != 0 or time_Minutes != 0 {
+				return
+			}
+	
+		//とりあえず住宅地の需要度をMAXとして、何人増やすかを決める
+			if (total_maximum_capacity-Total_Population) > 0 {
+				add_residents = rnd(total_maximum_capacity-Total_Population)
+			}
+	
+		//何人減らすか
+			if Total_Population > 0 {
+				cut_residents = rnd(Total_Population)
+			}
+	
+		//人口の増減
+			Total_Population += add_residents
+			Total_Population -= cut_residents
+	
+	return
+	
 *setting
 	if from_setting_onclick = 0 {
 		screen 1, 300, 400
@@ -2139,7 +2274,7 @@
 			noteadd "City_Name = \""+City_Name+"\";", -1
 			noteadd "Mayor_Name = \""+Mayor_Name+"\";", -1
 	
-			noteadd "Total_Population = "+Total_Population+"", -1
+			noteadd "Total_Population = "+Total_Population+";", -1
 	
 			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -10
 	
@@ -2149,6 +2284,16 @@
 		//マップサイズ
 			noteadd "mapx = "+mapx+";", -1
 			noteadd "mapy = "+mapy+";", -1
+	
+		//空白
+			noteadd " ", -1
+	
+		//日時
+			noteadd "time_Year = "+time_Year+";", -1
+			noteadd "time_Month = "+time_Month+";", -1
+			noteadd "time_Date = "+time_Date+";", -1
+			noteadd "time_Hour = "+time_Hour+";", -1
+			noteadd "time_Minutes = "+time_Minutes+";", -1
 	
 		//空白
 			noteadd " ", -1
@@ -2237,6 +2382,29 @@
 						map_data_buf = strf("%03d", obj_dire(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_dire(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//residents(x,y)
+			noteadd "residents(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", residents(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", residents(x,y))+""
 					}
 				loop
 			

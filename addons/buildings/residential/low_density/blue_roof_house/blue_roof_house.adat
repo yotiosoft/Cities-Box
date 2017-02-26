@@ -7,6 +7,8 @@ addon_type = "low_density_residential"
 
 use_types = "null"
 
+maximum_capacity = "8"
+
 null {
 	image = "blue_roof_house.png"
 	direction = "left, top, bottom, right"
