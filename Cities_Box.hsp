@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver 0.4
+									   Cities Box Ver 0.4.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -181,7 +181,7 @@
 *buffering
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		celload "img/logo.png", 2										; ロゴ
-		celload "img/AME963_sappro_TP_V.jpg", 15						; タイトル背景画像
+		celload "img/title_background.png", 15							; タイトル背景画像
 	
 	//メニューのアイコン
 		celload "img/menu_icons/menu/cursor.png", 3							; 標準カーソル
@@ -470,7 +470,7 @@
 			
 		redraw 0
 		
-		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 1600, 1066 : gblur 2
+		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 1077, 625 : gblur 2
 		
 		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
 	
@@ -631,9 +631,6 @@
 			//市長名(Mayor_Name)を読み込み
 				Mayor_Name = get_chapter(load_mapdata, "Mayor_Name", " = \"", "\"")
 	
-			//総人口(Total_Population)
-				Total_Population = int( get_chapter(load_mapdata, "Total_Population", " = ", ";") )
-	
 			//日時
 				time_Year = int(get_chapter(load_mapdata, "time_Year", " = ", ";"))			; ゲーム内の時間の年
 				time_Month = int(get_chapter(load_mapdata, "time_Month", " = ", ";"))		; ゲーム内の時間の月
@@ -750,7 +747,8 @@
 			
 					repeat mapx
 						x = cnt
-						;residents(x,y) = int(residents_buf_a_tile(x))
+						residents(x,y) = int(residents_buf_a_tile(x))
+						Total_Population += residents(x,y)
 					loop
 			
 				loop
@@ -993,6 +991,9 @@
 						}
 						continue
 					}
+	
+				//人口・需要度変動
+					gosub *fluctuation
 					
 			loop
 					
@@ -1065,9 +1066,6 @@
 *menu_buttons
 			//現在のウィンドウサイズとタイトルバーの高さを取得
 				gosub *get_windowsize
-	
-			//人口・需要度変動
-				gosub *fluctuation
 			
 			//メニュー
 				color 0, 0, 0
@@ -1966,7 +1964,8 @@
 		BGM_Length = stat		; 曲の長さ
 	
 	//再生位置が曲の長さと同じなら次のBGMをランダムに選出
-		if BGM_Position = BGM_Length {
+		if BGM_Position = BGM_Length {	
+			chdir directory
 			chdir "bgm"
 	
 			mci "close Cities-Box"
@@ -2029,23 +2028,29 @@
 	//人口・需要度などを増減
 	
 		//毎日午前0時に増減
-			if time_Hour != 0 or time_Minutes != 0 {
+			if time_Hour != 0 or time_Minutes != 0 or category(x,y) != "residential" {
 				return
 			}
 	
-		//とりあえず住宅地の需要度をMAXとして、何人増やすかを決める
-			if (total_maximum_capacity-Total_Population) > 0 {
-				add_residents = rnd(total_maximum_capacity-Total_Population)
+		//変更前の住居地区の住民数
+			before_residents = residents(x,y)
+	
+		//とりあえず住宅地の需要度をMAXとして、各住居地区に何人増やすかを決める
+			if (addon_maximum_capacity(map(x,y)) - residents(x,y)) > 0 {
+				add_residents = rnd(addon_maximum_capacity(map(x,y)) - residents(x,y))
 			}
 	
 		//何人減らすか
-			if Total_Population > 0 {
-				cut_residents = rnd(Total_Population)
+			if residents(x,y) > 0 {
+				cut_residents = rnd(residents(x,y))
 			}
 	
-		//人口の増減
-			Total_Population += add_residents
-			Total_Population -= cut_residents
+		//各住居地区の住民の増減
+			residents(x,y) += add_residents
+			residents(x,y) -= cut_residents
+	
+		//総人口数にも反映
+			Total_Population = Total_Population - before_resudents + residents(x,y)
 	
 	return
 	
