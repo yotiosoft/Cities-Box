@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.1.1
+									  Cities Box Ver 0.4.1.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -788,7 +788,10 @@
 				loop
 	
 *map_drawing
+	randomize
+	
 	repeat
+	
 		map_drawing_cnt ++
 	
 		//1‰ñ‚Ìƒ‹[ƒv‚Å1•ª‚Æ‚·‚é
@@ -2002,31 +2005,33 @@
 			}
 	
 		//•ÏX‚·‚éê‡A‘‚â‚·‚©Œ¸‚ç‚·‚©‚ğŒˆ’è
-			add_or_cut = rnd(2)
+			//•ÏX‘O‚ÌZ‹’n‹æ‚ÌZ–¯”
+				before_residents = residents(x,y)
+				
+			add_or_cut = rnd(3)
 	
-			if add_or_cut = 0 {
+			if add_or_cut = 0 or add_or_cut = 1 {
 				//ŠeZ‹’n‹æ‚É‰½l‘‚â‚·‚©
-					if (addon_maximum_capacity(map(x,y)) - residents(x,y)) > 0 {
-						add_residents = rnd(addon_maximum_capacity(map(x,y)) - residents(x,y))
+					if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
+						add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
+						residents(x,y) = before_residents + add_residents
 					}
 			}
 	
-			if add_or_cut = 1 {
+			if add_or_cut = 2 {
 				//ŠeZ‹’n‹æ‚Å‰½lŒ¸‚ç‚·‚©
-					if residents(x,y) > 0 {
-						cut_residents = rnd(residents(x,y))
+					if before_residents > 0 {
+						cut_residents = rnd(before_residents)
+						residents(x,y) = before_residents - cut_residents
 					}
 			}
 	
-		//•ÏX‘O‚ÌZ‹’n‹æ‚ÌZ–¯”
-			before_residents = residents(x,y)
-	
-		//ŠeZ‹’n‹æ‚ÌZ–¯‚Ì‘Œ¸
-			residents(x,y) += add_residents
-			residents(x,y) -= cut_residents
+			if residents(x,y) < 0 {
+				residents(x,y) = 0
+			}
 	
 		//‘lŒû”‚É‚à”½‰f
-			Total_Population = Total_Population - before_resudents + residents(x,y)
+			Total_Population = Total_Population - before_residents + residents(x,y)
 	
 	return
 	
