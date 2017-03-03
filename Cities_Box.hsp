@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.1.2
+									  Cities Box Ver 0.4.1.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -177,6 +177,30 @@
 	return
 								
 #global
+
+*load_about
+	//タイトルとバージョンの読み込み
+		notesel about
+		noteload "data/about.txt"
+		
+		noteget about_title, 0
+		noteget about_version, 1
+	
+		split about_title, " : ", not_use, about_title
+		split about_version, " : ", not_use, about_version
+	
+		title about_title
+		
+*load_config
+	//本体設定読み込み
+		notesel config
+		noteload "data/config.dat"
+	
+		SystemFont = get_chapter(config, "SystemFont", " = \"", "\"")
+		Set_Play_BGM = int( get_chapter(config, "Set_Play_BGM", " = ", ";") )
+	
+		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
+		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
 	
 *buffering
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
@@ -203,6 +227,10 @@
 		celload "img/menu_icons/setting/check.png", 14						; チェックボタン
 		celload "img/menu_icons/setting/refer.png", 16						; 参照ボタン
 	
+	//ポインター
+		celload "img/pointer/blue.png", 17									; 青いポインター
+		celload "img/pointer/red.png", 18									; 赤いポインター
+	
 	//onexit
 		onexit *exit
 	
@@ -217,27 +245,6 @@
 	
 	//mci登録
 		mci "set Cities-Box time format milliseconds"
-	
-	//タイトルとバージョンの読み込み
-		notesel about
-		noteload "data/about.txt"
-		
-		noteget about_title, 0
-		noteget about_version, 1
-	
-		split about_title, " : ", not_use, about_title
-		split about_version, " : ", not_use, about_version
-	
-		title about_title
-	
-	//本体設定読み込み
-		notesel config
-		noteload "data/config.dat"
-	
-		SystemFont = get_chapter(config, "SystemFont", " = \"", "\"")
-	
-		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
-		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
 	
 	//ウィンドウのサイズを変更可能化
 		windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
@@ -859,8 +866,8 @@
 			color 0, 0, 0 : boxf
 	
 			if mousex != before_mousex or mousey != before_mousey or camx != before_camx or camy != before_camy {
-				mousex_=mousex+camx-chip_size/2	//mx,myにマウス座標取得
-				mousey_=mousey+camy
+				mousex_=mousex+camx-(chip_size/2)	//mx,myにマウス座標取得
+				mousey_=mousey+camy+16
 				mx=(mousey_+mousex_/2)/(chip_size/2)
 				my=(-mousex_+mousey_*2)/chip_size
 	
@@ -966,7 +973,7 @@
 							gosub *adjustment_road
 						}
 						
-					//マップ作成
+					//オブジェクト（道路や建物など）の表示
 						qv2 x, y
 	
 						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を領する場合
@@ -978,13 +985,10 @@
 							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
 								
 						}
-		
-						if sizey > 32 {
-							macro2 -= 16
-						}
 							
 					//オブジェクトを表示
-						pos macro1, macro2 - sizey/2 + 1
+						pos macro1, macro2 - sizey + 1
+						
 						gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
 							
 				}
@@ -998,20 +1002,28 @@
 					
 					if mx=x & my=y and mousey < menu_line_y {
 						if pointer_icon = -1 {
+							color 0, 0, 0
+							
+							qv2 x,y
+							pos macro1, macro2-32
+	
 							if cursor_mode = "normal" {
-								color 0, 162, 232
+								gmode 4,,,128 : gcopy 17, 0, 0, 64, 32
 							}
 							if cursor_mode = "bulldozer" {
-								color 245, 133, 138
+								gmode 4,,,128 : gcopy 18, 0, 0, 64, 32
 							}
-							qv x,y
+							
 						} else {
-							color 0, 162, 232
-							qv x,y
+							color 0, 0, 0
+							
+							qv2 x,y
+							pos macro1, macro2-32
+							gmode 4,,,128 : gcopy 17, 0, 0, 64, 32
 								
 							qv2 x,y
 							color : gmode 4,,,200
-							pos macro1+16,macro2-16 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
+							pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
 						}
 						continue
 					}
@@ -1220,7 +1232,7 @@
 		//建物（商業地区）ボタン
 			if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
 	
-				if opening_menu_put_High_density_Office = 0 {
+				if opening_menu_put_Commercial = 0 {
 					cursor_mode = "put_Commercial"
 					density = "low"
 					
@@ -1967,10 +1979,17 @@
 					await 1
 				loop
 				
-				mci"open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"
-				mci"play Cities-Box"
+				mci"open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"	; 開く
+				mci"play Cities-Box"													; 再生
 	
 				changed_BGM = 1
+		}
+	
+		; ボリューム
+		if Set_Play_BGM = 0 {
+			mci "setaudio Cities-Box volume to 0"
+		} else {
+			mci "setaudio Cities-Box volume to 1000"
 		}
 	
 		return
@@ -2239,14 +2258,27 @@
 		
 		pos 35, 70 : mes "天候の変化"
 	
+	//BGMの再生の有無(Set_Play_BGM)
+		if from_setting_onclick = 0 {
+			setting_Set_Play_BGM = Set_Play_BGM
+		}
+		
+		if setting_Set_Play_BGM = 0 {
+			pos 10, 103 : gcopy 14, 0, 0, 16, 16
+		} else {
+			pos 10, 103 : gcopy 14, 0, 16, 16, 16
+		}
+		
+		pos 35, 100 : mes "BGMの再生"
+	
 	//フォント(SystemFont)
-		pos 10, 100 : mes "フォント"
+		pos 10, 130 : mes "フォント"
 	
 		objsize 194, 20
-		pos 80, 100 : input setting_SystemFont
+		pos 80, 130 : input setting_SystemFont
 	
 		gmode 2
-		pos 274, 100 : gcopy 16, 0, 0, 16, 16
+		pos 274, 130 : gcopy 16, 0, 0, 16, 16
 	
 	//OKボタン
 		color 255, 255, 255 : boxf 100, 360, 200, 390
@@ -2274,9 +2306,19 @@
 				}
 			}
 	
+	//BGMの再生の有無(Set_Play_BGM)
+		//チェックボックス
+			if click_range(10, 103, 10+16, 103+16) = 1 {
+				if setting_Set_Play_BGM = 0 {
+					setting_Set_Play_BGM = 1
+				} else {
+					setting_Set_Play_BGM = 0
+				}
+			}
+	
 	//フォント(SystemFont)
 		//参照ボタン
-			if click_range(274, 100, 274+16, 100+16) = 1 {
+			if click_range(274, 130, 274+16, 130+16) = 1 {
 				gosub *refer_fonts
 			}
 	
@@ -2322,6 +2364,9 @@
 	chdir directory
 	
 	//まずは本体設定(data/config.dat)を保存
+		noteadd_SystemFont = 0
+		noteadd_Set_Play_BGM = 0
+		
 		notesel config
 	
 		repeat notemax
@@ -2330,12 +2375,32 @@
 			if instr(config_buf, 0, "SystemFont") != -1 {
 				SystemFont = setting_SystemFont
 				noteadd "SystemFont = \""+SystemFont+"\"", cnt, 1
+				noteadd_SystemFont = 1
+			}
+	
+			if instr(config_buf, 0, "Set_Play_BGM") != -1 {
+				Set_Play_BGM = setting_Set_Play_BGM
+				noteadd "Set_Play_BGM = "+Set_Play_BGM+";", cnt, 1
+				noteadd_Set_Play_BGM = 1
 			}
 		loop
+	
+		if noteadd_SystemFont = 0 {
+			SystemFont = setting_SystemFont
+			noteadd "SystemFont = \""+SystemFont+"\"", -1
+		}
+		if noteadd_Set_Play_BGM = 0 {
+			Set_Play_BGM = setting_Set_Play_BGM
+			noteadd "Set_Play_BGM = "+Set_Play_BGM+";", -1
+		}
 	
 		notesave "data/config.dat"
 	
 	//次に各マップデータ(*.cbd)の設定を保存
+		noteadd_City_Name = 0
+		noteadd_Mayor_Name = 0
+		noteadd_Set_Change_Weather = 0
+		
 		notesel load_mapdata
 	
 		repeat notemax
@@ -2344,18 +2409,34 @@
 			if instr(load_mapdata_buf, 0, "City_Name") != -1 {
 				City_Name = setting_City_Name
 				noteadd "City_Name = \""+City_Name+"\";", cnt, 1
+				noteadd_City_Name = 1
 			}
 	
 			if instr(load_mapdata_buf, 0, "Mayor_Name") != -1 {
 				Mayor_Name = setting_Mayor_Name
 				noteadd "Mayor_Name = \""+Mayor_Name+"\";", cnt, 1
+				noteadd_Mayor_Name = 1
 			}
 	
 			if instr(load_mapdata_buf, 0, "Set_Change_Weather") != -1 {
 				Set_Change_Weather = setting_Set_Change_Weather
 				noteadd "Set_Change_Weather = "+Set_Change_Weather+";", cnt, 1
+				noteadd_Set_Change_Weather = 1
 			}
 		loop
+	
+		if noteadd_City_Name = 0 {
+			City_Name = setting_City_Name
+			noteadd "City_Name = \""+City_Name+"\";", -1
+		}
+		if noteadd_Mayor_Name = 0 {
+			Mayor_Name = setting_Mayor_Name
+			noteadd "City_Name = \""+Mayor_Name+"\";", -1
+		}
+		if noteadd_Set_Change_Weather = 0 {
+			Set_Change_Weather = setting_Set_Change_Weather
+			noteadd "City_Name = \""+Set_Change_Weather+"\";", -1
+		}
 	
 		if load_mapdata_name = "" {
 			gosub *save
