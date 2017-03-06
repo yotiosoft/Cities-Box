@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.1.3
+									  Cities Box Ver 0.4.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -97,6 +97,7 @@
 #defcfunc element3 str search_addon_name, array search_var, array search_var_elements, str search_word, array second_search_var, array second_search_var_elements, str second_search_word
 	chdir directory@
 	exist "data/temp/"+search_addon_name+".temp"
+	
 	if strsize = -1 {
 		return -2
 	}
@@ -213,6 +214,7 @@
 		celload "img/menu_icons/menu/low_density_residential.png", 5		; メニューアイコン（住居地区建設）
 		celload "img/menu_icons/menu/commercial.png", 12					; メニューアイコン（商業地区建設）
 		celload "img/menu_icons/menu/office.png", 6							; メニューアイコン（オフィス建設）
+		celload "img/menu_icons/menu/industrial.png", 19					; メニューアイコン（工業地区建設）
 		celload "img/menu_icons/menu/post_office.png", 7					; メニューアイコン（郵便局建設）
 	
 		celload "img/menu_icons/menu/bulldozer.png", 10						; 取り壊しボタン
@@ -370,71 +372,71 @@
 						//カテゴリ分け
 							if addon_type(cnt) = "Two_lane_road" {
 								notesel type_Two_lane_road
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_Two_lane_road
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 							
 							if addon_type(cnt) = "low_density_residential" {
 								notesel type_low_density_residential
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_low_density_residential
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 							if addon_type(cnt) = "high_density_residential" {
 								notesel type_high_density_residential
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_high_density_residential
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 	
 							if addon_type(cnt) = "low_density_commercial" {
 								notesel type_low_density_commercial
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_low_density_commercial
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 							if addon_type(cnt) = "high_density_commercial" {
 								notesel type_high_density_commercial
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_high_density_commercial
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 	
 							if addon_type(cnt) = "low_density_office" {
 								notesel type_low_density_office
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_low_density_office
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 							if addon_type(cnt) = "high_density_office" {
 								notesel type_high_density_office
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_high_density_office
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 	
 							if addon_type(cnt) = "industrial" {
 								notesel type_industrial
-								noteadd addon_name(cnt)
-	
-								notesel type_industrial
-								noteadd str(cnt)
+								noteadd addon_name(cnt), -1
+								
+								notesel type_number_industrial
+								noteadd str(cnt), -1
 							}
 							
 							if addon_type(cnt) = "public" {
 								notesel type_public
-								noteadd addon_name(cnt)
+								noteadd addon_name(cnt), -1
 	
 								notesel type_number_public
-								noteadd str(cnt)
+								noteadd str(cnt), -1
 							}
 	
 						//アドオンのバッファ（1000～、複数の画像を利用する場合は1001000～）
@@ -513,19 +515,32 @@
 		dim sizex, mapx, mapy
 		dim sizey, mapx, mapy
 	
-		dim map, mapx, mapy			//各座標のアドオン番号
-		sdim name, mapx, mapy		//各座標のアドオン名
-		sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
-		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
-		dim residents, mapx, mapy	//各建築物の住民の数（住宅地のみ）
+		dim map, mapx, mapy				//各座標のアドオン番号
+		sdim name, mapx, mapy			//各座標のアドオン名
+		sdim category, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		dim obj_type, mapx, mapy		//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapx, mapy		//座標上にあるオブジェクトの向き
+		dim obj_serial_num, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
+		dim obj_use_tiles_x, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
+		dim obj_use_tiles_y, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
+		dim obj_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数（1マスの場合は0）
+		dim obj_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数（1マスの場合は0）
+		dim residents, mapx, mapy		//各建築物の住民の数（住宅地のみ）
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
 			name(ix,iy) = "tile_greenfield"
 			category(ix,iy) = "tile"
+	
 			obj_type(ix,iy) = 0
 			obj_dire(ix,iy) = 0
+	
+			obj_serial_num(ix,iy) = 0
+			obj_use_tiles_x(ix,iy) = 0
+			obj_use_tiles_y(ix,iy) = 0
+			obj_tiles_x(ix,iy) = 0
+			obj_tiles_y(ix,iy) = 0
+	
 			residents(ix,iy) = 0
 			
 			ix++
@@ -552,6 +567,8 @@
 	
 	Total_Population = 0			; 都市の総人口
 	total_maximum_capacity = 0		; 都市の収容可能人数
+	
+	next_obj_serial_num = 0			; 複数のタイルを要するオブジェクトの通し番号
 	
 	//気温の初期値
 		//12月～2月：-10℃～15℃の範囲で気温を変動
@@ -627,12 +644,17 @@
 		dim sizex, mapx, mapy
 		dim sizey, mapx, mapy
 	
-		dim map, mapx, mapy			//各座標のアドオン番号
-		sdim name, mapx, mapy		//各座標のアドオン名
-		sdim category, mapx, mapy	//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-		dim obj_type, mapx, mapy	//座標上にあるオブジェクトのタイプ
-		dim obj_dire, mapx, mapy	//座標上にあるオブジェクトの向き
-		dim residents, mapx, mapy	//各建築物の住民の数（住宅地のみ）
+		dim map, mapx, mapy				//各座標のアドオン番号
+		sdim name, mapx, mapy			//各座標のアドオン名
+		sdim category, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		dim obj_type, mapx, mapy		//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapx, mapy		//座標上にあるオブジェクトの向き
+		dim obj_serial_num, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
+		dim obj_use_tiles_x, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
+		dim obj_use_tiles_y, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
+		dim obj_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
+		dim obj_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
+		dim residents, mapx, mapy		//各建築物の住民の数（住宅地のみ）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -763,6 +785,111 @@
 					loop
 			
 				loop
+	
+			//obj_serial_num(x,y)の読み込み
+				if instr(load_mapdata, 0, "obj_serial_num(x,y)") != -1 {
+					obj_serial_num_buf = get_chapter(load_mapdata, "obj_serial_num(x,y)", " {", "}")
+					
+					repeat mapy
+						y = cnt
+			
+						notesel obj_serial_num_buf
+						noteget obj_serial_num_buf_a_line, (y+1)
+			
+						sdim obj_serial_num_buf_a_tile, mapx
+						split obj_serial_num_buf_a_line, ", ", obj_serial_num_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							obj_serial_num(x,y) = int(obj_serial_num_buf_a_tile(x))
+						loop
+				
+					loop
+				}
+	
+			//obj_use_tiles_x(x,y)の読み込み
+				if instr(load_mapdata, 0, "obj_use_tiles_x(x,y)") != -1 {
+					obj_use_tiles_x_buf = get_chapter(load_mapdata, "obj_use_tiles_x(x,y)", " {", "}")
+					
+					repeat mapy
+						y = cnt
+			
+						notesel obj_use_tiles_x_buf
+						noteget obj_use_tiles_x_buf_a_line, (y+1)
+			
+						sdim obj_use_tiles_x_buf_a_tile, mapx
+						split obj_use_tiles_x_buf_a_line, ", ", obj_use_tiles_x_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							obj_use_tiles_x(x,y) = int(obj_use_tiles_x_buf_a_tile(x))
+						loop
+				
+					loop
+				}
+	
+			//obj_use_tiles_y(x,y)の読み込み
+				if instr(load_mapdata, 0, "obj_use_tiles_y(x,y)") != -1 {
+					obj_use_tiles_y_buf = get_chapter(load_mapdata, "obj_use_tiles_y(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel obj_use_tiles_y_buf
+						noteget obj_use_tiles_y_buf_a_line, (y+1)
+			
+						sdim obj_use_tiles_y_buf_a_tile, mapx
+						split obj_use_tiles_y_buf_a_line, ", ", obj_use_tiles_y_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							obj_use_tiles_y(x,y) = int(obj_use_tiles_y_buf_a_tile(x))
+						loop
+				
+					loop
+				}
+	
+			//obj_tiles_x(x,y)の読み込み
+				if instr(load_mapdata, 0, "obj_tiles_x(x,y)") != -1 {
+					obj_tiles_x_buf = get_chapter(load_mapdata, "obj_tiles_x(x,y)", " {", "}")
+					
+					repeat mapy
+						y = cnt
+			
+						notesel obj_tiles_x_buf
+						noteget obj_tiles_x_buf_a_line, (y+1)
+			
+						sdim obj_tiles_x_buf_a_tile, mapx
+						split obj_tiles_x_buf_a_line, ", ", obj_tiles_x_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							obj_tiles_x(x,y) = int(obj_tiles_x_buf_a_tile(x))
+						loop
+				
+					loop
+				}
+	
+			//obj_tiles_y(x,y)の読み込み
+				if instr(load_mapdata, 0, "obj_tiles_y(x,y)") != -1 {
+					obj_tiles_y_buf = get_chapter(load_mapdata, "obj_tiles_y(x,y)", " {", "}")
+	
+					repeat mapy
+						y = cnt
+			
+						notesel obj_tiles_y_buf
+						noteget obj_tiles_y_buf_a_line, (y+1)
+			
+						sdim obj_tiles_y_buf_a_tile, mapx
+						split obj_tiles_y_buf_a_line, ", ", obj_tiles_y_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							obj_tiles_y(x,y) = int(obj_tiles_y_buf_a_tile(x))
+						loop
+				
+					loop
+				}
 	
 			//residents(x,y)の読み込み
 				residents_buf = get_chapter(load_mapdata, "residents(x,y)", " {", "}")
@@ -904,6 +1031,9 @@
 				y = cnt
 	
 				//マウスのどのボタンが押されているか取得
+					mouse_left = 0
+					mouse_right = 0
+					
 					getkey mouse_left, 1
 					getkey mouse_right, 2
 	
@@ -973,7 +1103,26 @@
 							gosub *adjustment_road
 						}
 						
-					//オブジェクト（道路や建物など）の表示
+					//オブジェクト（道路や建物など）の表示をするための準備
+						x_buf = x
+						y_buf = y
+						
+						if obj_use_tiles_x(x,y) > 0 {
+							if obj_tiles_x(x,y) > 0 {
+								x -= obj_tiles_x(x,y)
+							} else {
+								x -= (obj_use_tiles_x(x,y)-1) + obj_tiles_x(x,y)
+							}
+						}
+	
+						if obj_use_tiles_y(x,y) > 0 {
+							if obj_tiles_y(x,y) < 0 {
+								y -= obj_tiles_y(x,y)
+							} else {
+								y += (obj_use_tiles_y(x,y)-1) + obj_tiles_y(x,y)
+							}
+						}
+	
 						qv2 x, y
 	
 						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を領する場合
@@ -987,9 +1136,11 @@
 						}
 							
 					//オブジェクトを表示
-						pos macro1, macro2 - sizey + 1
-						
+						pos macro1, macro2 - sizey + 1 + (8*(obj_use_tiles_x(x,y)))
 						gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
+	
+						x = x_buf
+						y = y_buf
 							
 				}
 	
@@ -1036,7 +1187,7 @@
 		loop
 	
 		if cnt \ 10 = 0 {
-			title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			title ""+next_obj_serial_num+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
 		//天候の変動
@@ -1095,13 +1246,22 @@
 						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
 					}
 	
+				//建物（工業地区）ボタン
+					if cursor_mode = "put_Industrial" {
+						gmode 2
+						pos 188, windowy-70-titlebar_h : gcopy 19, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 188, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
+					}
+	
 				//建物（公共施設）ボタン
 					if cursor_mode = "put_Public" {
 						gmode 2
-						pos 188, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
+						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 188, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
+						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
 				//取り壊しボタン
@@ -1195,6 +1355,7 @@
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 			}
 	
@@ -1226,6 +1387,7 @@
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 			}
 	
@@ -1256,6 +1418,8 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 			}
 	
@@ -1286,10 +1450,43 @@
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 			}
-		//建物（公共施設）ボタン
+	
+		//建物（工業地区）ボタン
 			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
+	
+				if opening_menu_put_High_density_Office = 0 {
+					cursor_mode = "put_Industrial"
+					gosub *open_menu_addon_menu
+	
+					opening_addon_menu = 1
+					opening_menu_put_Industrial = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_industrial
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_industrial
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				} 
+	
+				opening_menu_put_Road = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Public = 0
+			}
+			
+		//建物（公共施設）ボタン
+			if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
 	
 				if opening_menu_put_High_density_Residential = 0 {
 					cursor_mode = "put_Public"
@@ -1316,6 +1513,7 @@
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Industrial = 0
 			}
 	
 		//取り壊しボタン
@@ -1477,6 +1675,25 @@
 						addon_num_buf = int(addon_num_buf)
 				}
 	
+			/*--------------------------------------------工業地区-----------------------------------------------*/
+			
+			//工業地区
+				notesel type_industrial
+				if opening_menu_put_industrial = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Industrial"
+		
+					clicked_addon_number = mousex/35 - 1
+						
+					//選択されたアドオンのアドオン名を取得
+						notesel type_industrial
+						noteget put_addon_name, clicked_addon_number
+						
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_industrial
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
+				
 			/*---------------------------------------------公共施設-----------------------------------------------*/
 			
 			//公共施設
@@ -1499,6 +1716,7 @@
 		}
 			
 	
+*build_obj
 	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
@@ -1509,11 +1727,7 @@
 	
 		//取り壊しモードの場合は選択されたマスを更地にする
 			if cursor_mode = "bulldozer" {
-				map(mx, my) = addon_num("tile_greenfield")
-				category(mx, my) = "tile"
-				obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-				obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-	
+				gosub *delete_obj
 				return
 			}
 	
@@ -1557,6 +1771,8 @@
 						if mx > 0 {
 							if category(mx-1, my) = "road" {
 								around_road_exist += 1
+	
+								direction = "left"
 								
 								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
 								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
@@ -1565,6 +1781,8 @@
 						if my > 0 {
 							if category(mx, my-1) = "road" {
 								around_road_exist += 1
+	
+								direction = "top"
 								
 								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
 								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
@@ -1574,6 +1792,8 @@
 							if category(mx, my+1) = "road" {
 								around_road_exist += 1
 	
+								direction = "bottom"
+	
 								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
 								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
 							}
@@ -1581,6 +1801,8 @@
 						if mx < mapx {
 							if category(mx+1, my) = "road" {
 								around_road_exist += 1
+	
+								direction = "right"
 	
 								obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
 								obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
@@ -1592,12 +1814,23 @@
 							return
 						}
 	
+						//オブジェクトの通し番号
+							if obj_serial_num(mx, my) = 0 {
+								next_obj_serial_num += 1
+							}
+	
 						if around_road_exist >= 0 {
 							//建物（住居地区）建設
 								if cursor_mode = "put_Residential" {
 									map(mx, my) = addon_num_buf
 									name(mx, my) = put_addon_name
 									category(mx, my) = "residential"
+	
+									obj_serial_num(mx, my) = next_obj_serial_num
+									obj_use_tiles_x(mx,my) = 0
+									obj_use_tiles_y(mx,my) = 0
+									obj_tiles_x(mx, my) = 0
+									obj_tiles_y(mx, my) = 0
 									
 									residents(mx, my) = 0											; 住人数
 									total_maximum_capacity += addon_maximum_capacity(addon_num_buf)	; 都市全体の収容可能人数
@@ -1608,6 +1841,12 @@
 									map(mx, my) = addon_num_buf
 									name(mx, my) = put_addon_name
 									category(mx, my) = "commercial"
+	
+									obj_serial_num(mx, my) = next_obj_serial_num
+									obj_use_tiles_x(mx,my) = 0
+									obj_use_tiles_y(mx,my) = 0
+									obj_tiles_x(mx, my) = 0
+									obj_tiles_y(mx, my) = 0
 								}
 				
 							//建物（高密度オフィス）建設
@@ -1615,6 +1854,25 @@
 									map(mx, my) = addon_num_buf
 									name(mx, my) = put_addon_name
 									category(mx, my) = "office"
+	
+									obj_serial_num(mx, my) = next_obj_serial_num
+									obj_use_tiles_x(mx,my) = 0
+									obj_use_tiles_y(mx,my) = 0
+									obj_tiles_x(mx, my) = 0
+									obj_tiles_y(mx, my) = 0
+								}
+	
+							//建物（工業地区）建設
+								if cursor_mode = "put_Industrial" {
+									map(mx, my) = addon_num_buf
+									name(mx, my) = put_addon_name
+									category(mx, my) = "industrial"
+	
+									obj_serial_num(mx, my) = next_obj_serial_num
+									obj_use_tiles_x(mx,my) = 0
+									obj_use_tiles_y(mx,my) = 0
+									obj_tiles_x(mx, my) = 0
+									obj_tiles_y(mx, my) = 0
 								}
 				
 							//建物（公共施設）建設
@@ -1622,7 +1880,77 @@
 									map(mx, my) = addon_num_buf
 									name(mx, my) = put_addon_name
 									category(mx, my) = "public"
+	
+									obj_serial_num(mx, my) = next_obj_serial_num
+									obj_use_tiles_x(mx,my) = 0
+									obj_use_tiles_y(mx,my) = 0
+									obj_tiles_x(mx, my) = 0
+									obj_tiles_y(mx, my) = 0
 								}
+							
+							//2マス以上の建築物の場合
+								if addon_chip_x(addon_num_buf, 0, obj_dire(mx,my)) >= 2 {
+									if direction = "left" {
+										repeat addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+											map(mx+cnt, my) = map(mx, my)
+											name(mx+cnt, my) = name(mx, my)
+											category(mx+cnt, my) = category(mx, my)
+	
+											obj_type(mx+cnt, my) = obj_type(mx, my)
+											obj_dire(mx+cnt, my) = obj_dire(mx, my)
+	
+											obj_serial_num(mx+cnt, my) = obj_serial_num(mx, my)
+											obj_use_tiles_x(mx+cnt, my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+											obj_tiles_x(mx+cnt, my) = cnt
+										loop
+									}
+									if direction = "right" {
+										repeat addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+											map(mx-cnt, my) = map(mx, my)
+											name(mx-cnt, my) = name(mx, my)
+											category(mx-cnt, my) = category(mx, my)
+	
+											obj_type(mx-cnt, my) = obj_type(mx, my)
+											obj_dire(mx-cnt, my) = obj_dire(mx, my)
+											
+											obj_serial_num(mx-cnt, my) = obj_serial_num(mx, my)
+											obj_use_tiles_x(mx-cnt, my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+											obj_tiles_x(mx-cnt, my) = -cnt
+										loop
+									}
+								}
+	
+								if addon_chip_y(addon_num_buf, 0, obj_dire(mx,my)) >= 2 {
+									if direction = "top" {
+										repeat addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
+											map(mx, my+cnt) = map(mx, my)
+											name(mx, my+cnt) = name(mx, my)
+											category(mx, my+cnt) = category(mx, my)
+	
+											obj_type(mx, my+cnt) = obj_type(mx, my)
+											obj_dire(mx, my+cnt) = obj_dire(mx, my)
+											
+											obj_serial_num(mx, my+cnt) = obj_serial_num(mx, my)
+											obj_use_tiles_y(mx, my+cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
+											obj_tiles_y(mx, my+cnt) = cnt
+										loop
+									}
+									if direction = "bottom" {
+										repeat addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
+											map(mx, my-cnt) = map(mx, my)
+											name(mx, my-cnt) = name(mx, my)
+											category(mx, my-cnt) = category(mx, my)
+	
+											obj_type(mx, my-cnt) = obj_type(mx, my)
+											obj_dire(mx, my-cnt) = obj_dire(mx, my)
+	
+											obj_serial_num(mx, my-cnt) = obj_serial_num(mx, my)
+											obj_use_tiles_y(mx, my-cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
+											obj_tiles_y(mx, my-cnt) = -cnt
+										loop
+									}
+								}
+							
 						/*
 							//周辺にある道路の向きを揃える
 								cursor_mode_buf = cursor_mode
@@ -1658,58 +1986,67 @@
 					}	
 					
 			}
-			
+	
+*delete_obj
 		//取り壊し
-			if mouse_right = 1 {
+			if mouse_right = 1 or cursor_mode = "bulldozer" {
+				//オブジェクトの向きを取得
+					addon_num_buf = addon_num(name(mx,my))
+					obj_direction_buf = addon_direction(addon_num_buf, 0, obj_dire(mx,my))
 	
-				//道路削除
-					if cursor_mode = "put_Road" and category(mx, my) = "road" {
-						map(mx, my) = addon_num("tile_greenfield")
-						name(mx, my) = "tile_greenfield"
-						category(mx, my) = "tile"
-						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-					}
+				if obj_direction_buf = "left" {
+					repeat obj_use_tiles_x(mx,my)
+						map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
+						name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
+						category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
+						obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+							
+						obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+						obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+						obj_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+					loop
+				}
+				if obj_direction_buf = "right" {
+					repeat obj_use_tiles_x(mx,my)
+						map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
+						name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
+						category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
+						obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+							
+						obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+						obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+						obj_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+					loop
+				}
 	
-				//住居地区削除
-					if cursor_mode = "put_Residential" and category(mx, my) = "residential" {
-						map(mx, my) = addon_num("tile_greenfield")
-						name(mx, my) = "tile_greenfield"
-						category(mx, my) = "tile"
-						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-	
-						residents(mx, my) = 0											; 住人数
-						total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)	; 都市全体の収容可能人数
-					}
-	
-				//商業地区削除
-					if cursor_mode = "put_Commercial" and category(mx, my) = "commercial" {
-						map(mx, my) = addon_num("tile_greenfield")
-						name(mx, my) = "tile_greenfield"
-						category(mx, my) = "tile"
-						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-					}
-	
-				//オフィス削除
-					if (cursor_mode = "put_High_density_Office" or cursor_mode = "put_Low_density_Office") and category(mx, my) = "office" {
-						map(mx, my) = addon_num("tile_greenfield")
-						name(mx, my) = "tile_greenfield"
-						category(mx, my) = "tile"
-						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-					}
-	
-				//公共事業削除
-					if cursor_mode = "put_Public" and category(mx, my) = "public" {
-						map(mx, my) = addon_num("tile_greenfield")
-						name(mx, my) = "tile_greenfield"
-						category(mx, my) = "tile"
-						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-					}
-	
+				if obj_direction_buf = "top" {
+					repeat obj_use_tiles_y(mx,my)
+						map(mx, my-obj_tiles_y(mx,my)+cnt) = addon_num("tile_greenfield")
+						name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
+						category(mx, my-obj_tiles_y(mx,my)+cnt) = "tile"
+						obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						obj_dire(mx, my-obj_tiles_y(mx,my)+cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+						
+						obj_serial_num(mx, my-obj_tiles_y(mx,my)+cnt) = 0
+						obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
+						obj_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
+					loop
+				}
+				if obj_direction_buf = "bottom" {
+					repeat obj_use_tiles_y(mx,my)
+						map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+						name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
+						category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
+						obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+						
+						obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+						obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+						obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+					loop
+				}
 			}
 		
 		return
@@ -1742,6 +2079,9 @@
 	}
 	if cursor_mode = "put_High_density_Office" {
 		notesel type_number_high_density_office
+	}
+	if cursor_mode = "put_Industrial" {
+		notesel type_number_industrial
 	}
 	if cursor_mode = "put_Public" {
 		notesel type_number_public
@@ -1776,6 +2116,8 @@
 		return
 	}
 	if category(x, y) = "road" and (cursor_mode = "put_Road" or cursor_mode = "bulldozer") {
+	
+		gosub *delete_obj
 		
 		//縦向き
 			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
@@ -1855,7 +2197,7 @@
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
 			}
 	
-		}
+	}
 	
 	return
 	
@@ -2601,6 +2943,121 @@
 						map_data_buf = strf("%03d", obj_dire(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_dire(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_serial_num(x,y)
+			noteadd "obj_serial_num(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_serial_num(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_serial_num(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_use_tiles_x(x,y)
+			noteadd "obj_use_tiles_x(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_use_tiles_x(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_use_tiles_x(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_use_tiles_y(x,y)
+			noteadd "obj_use_tiles_y(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_use_tiles_y(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_use_tiles_y(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_tiles_x(x,y)
+			noteadd "obj_tiles_x(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_tiles_x(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_tiles_x(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//obj_tiles_y(x,y)
+			noteadd "obj_tiles_y(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_tiles_y(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_tiles_y(x,y))+""
 					}
 				loop
 			
