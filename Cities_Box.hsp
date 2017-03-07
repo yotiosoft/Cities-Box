@@ -1764,7 +1764,7 @@
 					}
 	
 				//ŒšÝ’n‚É“¹˜H‚ª‚ ‚éê‡
-					if category(mx,my) = "road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
+					if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
 						dialog "‚±‚Ì‹æ‰æ‚ÍŠù‚Éè—L‚³‚ê‚Ä‚¢‚Ü‚·"
 						return
 					}
