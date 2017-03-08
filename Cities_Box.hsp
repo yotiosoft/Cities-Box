@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.2
+									  Cities Box Ver 0.4.2.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1755,12 +1755,19 @@
 				
 				//“¹˜H•~Ý
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
+						//“¹˜H‚ÌŒü‚«‚ð‘µ‚¦‚é
+							from_build_obj = 1
+							gosub *adjustment_road
+							
 						map(mx, my) = addon_num_normal_road
 						name(mx, my) = put_addon_name
 						category(mx, my) = "road"
 	
-						//“¹˜H‚ÌŒü‚«‚ð‘µ‚¦‚é
-							gosub *adjustment_road
+						obj_serial_num(mx, my) = 0
+						obj_use_tiles_x(mx,my) = 0
+						obj_use_tiles_y(mx,my) = 0
+						obj_tiles_x(mx, my) = 0
+						obj_tiles_y(mx, my) = 0
 					}
 	
 				//ŒšÝ’n‚É“¹˜H‚ª‚ ‚éê‡
@@ -1999,15 +2006,27 @@
 			if mouse_right = 1 or (cursor_mode = "bulldozer" and mouse_left = 1) or from_build_obj = 1 {
 				//ƒIƒuƒWƒFƒNƒg‚ÌŒü‚«‚ðŽæ“¾
 					addon_num_buf = addon_num(name(mx,my))
-					obj_direction_buf = addon_direction(addon_num_buf, obj_type(x,y), obj_dire(mx,my))
+					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
 	
-					if obj_use_tiles_x(mx,my) = 0 {
-						p=1
-					} else {
-						p=0
-					}
+					p=0
 	
+				if obj_type = "road" {
+					map(mx, my) = addon_num("tile_greenfield")
+					name(mx, my) = "tile_greenfield"
+					category(mx, my) = "tile"
+					obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+					obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+						
+					obj_serial_num(mx, my) = 0
+					obj_use_tiles_x(mx, my) = 0
+					obj_tiles_x(mx, my) = 0
+				}
+				
 				if obj_direction_buf = "left" {
+					if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+						p=1
+					}
+					
 					repeat obj_use_tiles_x(mx,my) +p
 						map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
 						name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
@@ -2021,6 +2040,10 @@
 					loop
 				}
 				if obj_direction_buf = "right" {
+					if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+						p=1
+					}
+					
 					repeat obj_use_tiles_x(mx,my) +p
 						map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
 						name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
@@ -2035,6 +2058,10 @@
 				}
 	
 				if obj_direction_buf = "top" {
+					if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+						p=1
+					}
+					
 					repeat obj_use_tiles_y(mx,my) +p
 						map(mx, my-obj_tiles_y(mx,my)+cnt) = addon_num("tile_greenfield")
 						name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
@@ -2048,6 +2075,10 @@
 					loop
 				}
 				if obj_direction_buf = "bottom" {
+					if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+						p=1
+					}
+					
 					repeat obj_use_tiles_y(mx,my) +p
 						map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
 						name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
@@ -2077,12 +2108,6 @@
 						right_chip = category(mx+1, my)
 					}
 					
-					if mx>0 and my>0 and mx<mapx and my<mapy and category(mx,my) = "road" {
-						x = mx : y = my
-						put_addon_name = name(x,y)
-						from_delete_obj = 1
-						gosub *adjustment_road
-					}
 					if mx-1>0 and my>0 and mx-1<mapx and my<mapy and category(mx-1,my) = "road" {
 						x = mx-1 : y = my
 						put_addon_name = name(x,y)
@@ -2179,13 +2204,14 @@
 	if instr(put_addon_name, 0, "road") = -1 {
 		return
 	}
-	if category(x, y) = "road" and (cursor_mode = "put_Road" or cursor_mode = "bulldozer") {
+	if (category(x, y) = "road" and (cursor_mode = "put_Road" or cursor_mode = "bulldozer")) or from_build_obj = 1 {
 	
 		if from_delete_obj = 0 {
 			gosub *delete_obj
-		} else {
-			from_delete_obj = 0
 		}
+		
+		from_delete_obj = 0
+		from_build_obj = 0
 		
 		//cŒü‚«
 			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
