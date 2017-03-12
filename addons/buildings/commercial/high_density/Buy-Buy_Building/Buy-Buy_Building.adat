@@ -1,0 +1,59 @@
+addon_name = "Buy-Buy_Building"
+addon_jp_name = "îÉÇ¶îÉÇ¶ÉrÉã"
+addon_summary = "Ç–Ç‚Ç©ÇµãqÇ®ífÇËÇÃè§ã∆ÉrÉãÅB"
+addon_icon = "icon_Buy-Buy_Building.png"
+
+addon_type = "high_density_commercial"
+
+use_types = "null"
+
+null {
+	image = "Buy-Buy_Building.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+	
+	left {
+		size_x = "96"
+		size_y = "117"
+		chip_x = "1"
+		chip_y = "2"
+		
+		top_left_x = "0"
+		top_left_y = "7"
+		bottom_right_x = "96"
+		bottom_right_y = "124"
+	}
+	top {
+		size_x = "96"
+		size_y = "108"
+		chip_x = "2"
+		chip_y = "1"
+		
+		top_left_x = "96"
+		top_left_y = "16"
+		bottom_right_x = "192"
+		bottom_right_y = "124"
+	}
+	bottom {
+		size_x = "96"
+		size_y = "119"
+		chip_x = "2"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "131"
+		bottom_right_x = "96"
+		bottom_right_y = "250"
+	}
+	right {
+		size_x = "96"
+		size_y = "109"
+		chip_x = "1"
+		chip_y = "2"
+		
+		top_left_x = "96"
+		top_left_y = "141"
+		bottom_right_x = "192"
+		bottom_right_y = "250"
+	}
+};

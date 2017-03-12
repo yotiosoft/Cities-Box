@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.3
+									  Cities Box Ver 0.4.2.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -215,15 +215,17 @@
 		celload "img/menu_icons/menu/commercial.png", 12					; メニューアイコン（商業地区建設）
 		celload "img/menu_icons/menu/office.png", 6							; メニューアイコン（オフィス建設）
 		celload "img/menu_icons/menu/industrial.png", 19					; メニューアイコン（工業地区建設）
-		celload "img/menu_icons/menu/post_office.png", 7					; メニューアイコン（郵便局建設）
+		celload "img/menu_icons/menu/public.png", 7							; メニューアイコン（郵便局建設）
 	
 		celload "img/menu_icons/menu/bulldozer.png", 10						; 取り壊しボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
 		celload "img/menu_icons/setting/setting.png", 13					; 設定ボタン
 	
 	//小サイズのアイコン
-		celload "img/menu_icons/mini/low_density_residential.png", 8		; 高密度住居地区
-		celload "img/menu_icons/mini/high_density_residential.png", 9		; 低密度住居地区
+		celload "img/menu_icons/mini/low_density_residential.png", 8		; 低密度住居地区
+		celload "img/menu_icons/mini/high_density_residential.png", 9		; 高密度住居地区
+		celload "img/menu_icons/mini/low_density_commercial.png", 20		; 低密度商業地区
+		celload "img/menu_icons/mini/high_density_commercial.png", 21		; 高密度商業地区
 	
 	//設定で使うアイコン
 		celload "img/menu_icons/setting/check.png", 14						; チェックボタン
@@ -1638,10 +1640,48 @@
 				}
 	
 			/*--------------------------------------------商業地区---------------------------------------------*/
+	
+			//商業地区の低密度・高密度選択ボタン
+				//低密度
+					if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
+						density = "low"
+		
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+			
+						//選択されたアドオンのアドオン名を取得
+							notesel type_low_density_commercial
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_low_density_commercial
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+								
+						gosub *open_menu_addon_menu
+					}
+				//高密度
+				if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
+					density = "high"
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_high_density_commercial
+						noteget put_addon_name, clicked_addon_number
+			
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_high_density_commercial
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+						
+					gosub *open_menu_addon_menu
+				}
 			
 			//低密度商業地区
-				notesel type_high_density_commercial
-				if opening_menu_put_commercial = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				notesel type_low_density_commercial
+				if opening_menu_put_commercial = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Commercial"
 		
 					clicked_addon_number = mousex/35 - 1
@@ -1652,6 +1692,23 @@
 		
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_low_density_commercial
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
+	
+			//高密度商業地区
+				notesel type_high_density_commercial
+				if opening_menu_put_commercial = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Commercial"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_high_density_commercial
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_high_density_commercial
 						noteget addon_num_buf, clicked_addon_number
 						addon_num_buf = int(addon_num_buf)
 				}
@@ -1904,97 +1961,34 @@
 							
 							//2マス以上の建築物の場合
 								if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) >= 2 {
-									if direction = "left" {
-										repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-											map(mx+cnt, my) = map(mx, my)
-											name(mx+cnt, my) = name(mx, my)
-											category(mx+cnt, my) = category(mx, my)
+									repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
+										map(mx+cnt, my) = map(mx, my)
+										name(mx+cnt, my) = name(mx, my)
+										category(mx+cnt, my) = category(mx, my)
+
+										obj_type(mx+cnt, my) = obj_type(mx, my)
+										obj_dire(mx+cnt, my) = obj_dire(mx, my)
 	
-											obj_type(mx+cnt, my) = obj_type(mx, my)
-											obj_dire(mx+cnt, my) = obj_dire(mx, my)
-	
-											obj_serial_num(mx+cnt, my) = obj_serial_num(mx, my)
-											obj_use_tiles_x(mx+cnt, my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
-											obj_tiles_x(mx+cnt, my) = cnt
-										loop
-									}
-									if direction = "right" {
-										repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-											map(mx-cnt, my) = map(mx, my)
-											name(mx-cnt, my) = name(mx, my)
-											category(mx-cnt, my) = category(mx, my)
-	
-											obj_type(mx-cnt, my) = obj_type(mx, my)
-											obj_dire(mx-cnt, my) = obj_dire(mx, my)
-											
-											obj_serial_num(mx-cnt, my) = obj_serial_num(mx, my)
-											obj_use_tiles_x(mx-cnt, my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
-											obj_tiles_x(mx-cnt, my) = -cnt
-										loop
-									}
+										obj_serial_num(mx+cnt, my) = obj_serial_num(mx, my)
+										obj_use_tiles_x(mx+cnt, my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+										obj_tiles_x(mx+cnt, my) = cnt
+									loop
 								}
 	
 								if addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) >= 2 {
-									if direction = "top" {
-										repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-											map(mx, my+cnt) = map(mx, my)
-											name(mx, my+cnt) = name(mx, my)
-											category(mx, my+cnt) = category(mx, my)
+									repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
+										map(mx, my-cnt) = map(mx, my)
+										name(mx, my-cnt) = name(mx, my)
+										category(mx, my-cnt) = category(mx, my)
 	
-											obj_type(mx, my+cnt) = obj_type(mx, my)
-											obj_dire(mx, my+cnt) = obj_dire(mx, my)
-											
-											obj_serial_num(mx, my+cnt) = obj_serial_num(mx, my)
-											obj_use_tiles_y(mx, my+cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
-											obj_tiles_y(mx, my+cnt) = cnt
-										loop
-									}
-									if direction = "bottom" {
-										repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-											map(mx, my-cnt) = map(mx, my)
-											name(mx, my-cnt) = name(mx, my)
-											category(mx, my-cnt) = category(mx, my)
-	
-											obj_type(mx, my-cnt) = obj_type(mx, my)
-											obj_dire(mx, my-cnt) = obj_dire(mx, my)
-	
-											obj_serial_num(mx, my-cnt) = obj_serial_num(mx, my)
-											obj_use_tiles_y(mx, my-cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
-											obj_tiles_y(mx, my-cnt) = -cnt
-										loop
-									}
+										obj_type(mx, my-cnt) = obj_type(mx, my)
+										obj_dire(mx, my-cnt) = obj_dire(mx, my)
+
+										obj_serial_num(mx, my-cnt) = obj_serial_num(mx, my)
+										obj_use_tiles_y(mx, my-cnt) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+										obj_tiles_y(mx, my-cnt) = cnt
+									loop
 								}
-							
-						/*
-							//周辺にある道路の向きを揃える
-								cursor_mode_buf = cursor_mode
-								x_buf = x : y_buf = y
-								
-								repeat 4
-									if cnt = 0 {
-										x = mx-1
-									}
-									if cnt = 1 {
-										y = my-1
-									}
-									if cnt = 2 {
-										y = my+1
-									}
-									if cnt = 3 {
-										x = mx+1
-									}
-									
-									if category(x,y) = "road" {
-										dialog"A"
-										cursor_mode = "put_Road"
-										put_addon_name = "normal_road(orange_line)
-										gosub *adjustment_road
-									}
-								loop
-	
-								cursor_mode = cursor_mode_buf
-								x = x_buf : y = y_buf
-						*/
 								
 						}
 					}	
@@ -2162,6 +2156,17 @@
 	}
 	if cursor_mode = "put_Commercial" and density = "low" {
 		notesel type_number_low_density_commercial
+	
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
+		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 20, 0, 16, 16, 16
+		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 21, 0, 0, 16, 16 
+	}
+	if cursor_mode = "put_Commercial" and density = "high" {
+		notesel type_number_high_density_commercial
+	
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
+		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 20, 0, 0, 16, 16
+		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 21, 0, 16, 16, 16
 	}
 	if cursor_mode = "put_Low_density_Office" {
 		notesel type_number_low_density_office
