@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.4
+									  Cities Box Ver 0.4.2.5
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -804,8 +804,11 @@
 						repeat mapx
 							x = cnt
 							obj_serial_num(x,y) = int(obj_serial_num_buf_a_tile(x))
+	
+							if obj_serial_num(x,y) > next_obj_serial_num {
+								next_obj_serial_num = obj_serial_num(x,y)
+							}
 						loop
-				
 					loop
 				}
 	
@@ -1125,8 +1128,10 @@
 							}
 						}
 	
+					//クォータービューの座標を画面上の座標に変換
 						qv2 x, y
 	
+					//オブジェクトのバッファ番号、オブジェクトの左上の座標（atlx）、左下の座標（atly）、右上の座標（abrx）、右下の座標（abry）、サイズ（sizex, sizey）を取得
 						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を領する場合
 							buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
 							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
@@ -1146,47 +1151,46 @@
 							
 				}
 	
-				//マウスポインタの位置のチップを光らせる
-					if opening_addon_menu = 1 {
-						menu_line_y = windowy-70-titlebar_h-32-20
-					} else {
-						menu_line_y = windowy-70-titlebar_h
-					}
-					
-					if mx=x & my=y and mousey < menu_line_y {
-						if pointer_icon = -1 {
-							color 0, 0, 0
-							
-							qv2 x,y
-							pos macro1, macro2-32
-	
-							if cursor_mode = "normal" {
-								gmode 4,,,128 : gcopy 17, 0, 0, 64, 32
-							}
-							if cursor_mode = "bulldozer" {
-								gmode 4,,,128 : gcopy 18, 0, 0, 64, 32
-							}
-							
-						} else {
-							color 0, 0, 0
-							
-							qv2 x,y
-							pos macro1, macro2-32
-							gmode 4,,,128 : gcopy 17, 0, 0, 64, 32
-								
-							qv2 x,y
-							color : gmode 4,,,200
-							pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
-						}
-						continue
-					}
-	
 				//人口・需要度変動
 					gosub *fluctuation
 					
 			loop
 					
 		loop
+	
+		//マウスポインタの位置のチップを光らせる
+			if opening_addon_menu = 1 {
+				menu_line_y = windowy-70-titlebar_h-32-20
+			} else {
+				menu_line_y = windowy-70-titlebar_h
+			}
+					
+			if mousey < menu_line_y {
+				if pointer_icon = -1 {
+					color 0, 0, 0
+					
+					qv2 mx,my
+					pos macro1, macro2-32
+	
+					if cursor_mode = "normal" {
+						gmode 4,,,128 : gcopy 17, 0, 0, 64, 32
+					}
+					if cursor_mode = "bulldozer" {
+						gmode 4,,,128 : gcopy 18, 0, 0, 64, 32
+					}
+							
+				} else {
+					color 0, 0, 0
+					
+					qv2 mx,my
+					pos macro1, macro2-32
+					gmode 4,,,128 : gcopy 17, 0, 0, 64, 32
+								
+					qv2 mx,my
+					color : gmode 4,,,200
+					pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
+				}
+			}
 	
 		if cnt \ 10 = 0 {
 			title ""+next_obj_serial_num+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
@@ -1974,19 +1978,19 @@
 										obj_tiles_x(mx+cnt, my) = cnt
 									loop
 								}
-	
+								
 								if addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) >= 2 {
 									repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-										map(mx, my-cnt) = map(mx, my)
-										name(mx, my-cnt) = name(mx, my)
-										category(mx, my-cnt) = category(mx, my)
+										map(mx, my+cnt) = map(mx, my)
+										name(mx, my+cnt) = name(mx, my)
+										category(mx, my+cnt) = category(mx, my)
 	
-										obj_type(mx, my-cnt) = obj_type(mx, my)
-										obj_dire(mx, my-cnt) = obj_dire(mx, my)
+										obj_type(mx, my+cnt) = obj_type(mx, my)
+										obj_dire(mx, my+cnt) = obj_dire(mx, my)
 
-										obj_serial_num(mx, my-cnt) = obj_serial_num(mx, my)
-										obj_use_tiles_y(mx, my-cnt) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
-										obj_tiles_y(mx, my-cnt) = cnt
+										obj_serial_num(mx, my+cnt) = obj_serial_num(mx, my)
+										obj_use_tiles_y(mx, my+cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
+										obj_tiles_y(mx, my+cnt) = cnt
 									loop
 								}
 								
@@ -2001,10 +2005,10 @@
 				//オブジェクトの向きを取得
 					addon_num_buf = addon_num(name(mx,my))
 					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-	
+					
 					p=0
-	
-				if obj_type = "road" {
+				
+				if category(mx,my) = "road" {
 					map(mx, my) = addon_num("tile_greenfield")
 					name(mx, my) = "tile_greenfield"
 					category(mx, my) = "tile"
@@ -2015,76 +2019,183 @@
 					obj_use_tiles_x(mx, my) = 0
 					obj_tiles_x(mx, my) = 0
 				}
-				
-				if obj_direction_buf = "left" {
-					if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-						p=1
-					}
-					
-					repeat obj_use_tiles_x(mx,my) +p
-						map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
-						name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
-						category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
-						obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-							
-						obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-						obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-						obj_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-					loop
-				}
-				if obj_direction_buf = "right" {
-					if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-						p=1
-					}
-					
-					repeat obj_use_tiles_x(mx,my) +p
-						map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
-						name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
-						category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
-						obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-							
-						obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-						obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-						obj_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-					loop
-				}
 	
-				if obj_direction_buf = "top" {
-					if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-						p=1
+				//x方向、y方向、いずれも1マスのオブジェクトの場合
+					if obj_use_tiles_x(mx,my) = 0 and obj_use_tiles_y(mx,my) = 0 {
+						map(mx, my) = addon_num("tile_greenfield")
+						name(mx, my) = "tile_greenfield"
+						category(mx, my) = "tile"
+						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+							
+						obj_serial_num(mx, my) = 0
+						obj_use_tiles_x(mx, my) = 0
+						obj_use_tiles_y(mx, my) = 0
+						obj_tiles_x(mx, my) = 0
+						obj_tiles_y(mx, my) = 0
 					}
 					
-					repeat obj_use_tiles_y(mx,my) +p
-						map(mx, my-obj_tiles_y(mx,my)+cnt) = addon_num("tile_greenfield")
-						name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
-						category(mx, my-obj_tiles_y(mx,my)+cnt) = "tile"
-						obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my-obj_tiles_y(mx,my)+cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-						
-						obj_serial_num(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-						obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-						obj_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-					loop
-				}
-				if obj_direction_buf = "bottom" {
-					if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-						p=1
+				//x方向に2マス以上要する場合
+					if obj_use_tiles_x(mx,my) != 0 {
+						if obj_direction_buf = "left" {
+							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_x(mx,my) +p
+								map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
+								name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
+								category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
+								obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+									
+								obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+								obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+								obj_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+							loop
+						}
+						if obj_direction_buf = "right" {
+							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_x(mx,my) +p
+								map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
+								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
+								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
+								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+									
+								obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+								obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+								obj_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+							loop
+						}
+						if obj_direction_buf = "top" {
+							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_x(mx,my) +p
+								map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
+								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
+								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
+								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								
+								obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+								obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+								obj_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
+							loop
+						}
+						if obj_direction_buf = "bottom" {
+							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							if obj_use_tiles_x(mx,my) != 0 {
+								repeat obj_use_tiles_x(mx,my) +p
+									map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
+									name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
+									category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
+									obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+									obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+									
+									obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+									obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+									obj_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
+								loop
+							}
+						}
 					}
-					
-					repeat obj_use_tiles_y(mx,my) +p
-						map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
-						name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
-						category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-						obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
-						
-						obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-						obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-						obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-					loop
-				}
+	
+				//y方向に2マス以上要する場合
+					if obj_use_tiles_y(mx,my) != 0 {
+						if obj_direction_buf = "left" {
+							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_y(mx,my) +p
+								map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
+								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
+								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+									
+								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+								obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+							loop
+						}
+						if obj_direction_buf = "right" {
+							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_y(mx,my) +p
+								map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
+								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
+								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+									
+								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+								obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+							loop
+						}
+						if obj_direction_buf = "top" {
+							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_y(mx,my) +p
+								map(mx, my-obj_tiles_y(mx,my)+cnt) = addon_num("tile_greenfield")
+								name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
+								category(mx, my-obj_tiles_y(mx,my)+cnt) = "tile"
+								obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx, my-obj_tiles_y(mx,my)+cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								
+								obj_serial_num(mx, my-obj_tiles_y(mx,my)+cnt) = 0
+								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
+								obj_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
+							loop
+						}
+						if obj_direction_buf = "bottom" {
+							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
+								p=1
+							} else {
+								p=0
+							}
+							
+							repeat obj_use_tiles_y(mx,my) +p
+								map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
+								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
+								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								
+								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+								obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
+							loop
+						}
+					}
 	
 				//周囲の道路の向き・タイプを直す
 					x_buf = x : y_buf = y
