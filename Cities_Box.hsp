@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.5
+									  Cities Box Ver 0.4.2.6
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -2213,29 +2213,37 @@
 						right_chip = category(mx+1, my)
 					}
 					
-					if mx-1>0 and my>0 and mx-1<mapx and my<mapy and category(mx-1,my) = "road" {
-						x = mx-1 : y = my
-						put_addon_name = name(x,y)
-						from_delete_obj = 1
-						gosub *adjustment_road
+					if mx-1>0 and my>0 and mx-1<mapx and my<mapy {
+						if category(mx-1,my) = "road" {
+							x = mx-1 : y = my
+							put_addon_name = name(x,y)
+							from_delete_obj = 1
+							gosub *adjustment_road
+						}
 					}
-					if mx+1>0 and my>0 and mx+1<mapx and my<mapy and category(mx+1,my) = "road" {
-						x = mx+1 : y = my
-						put_addon_name = name(x,y)
-						from_delete_obj = 1
-						gosub *adjustment_road
+					if mx+1>0 and my>0 and mx+1<mapx and my<mapy {
+						if category(mx+1,my) = "road" {
+							x = mx+1 : y = my
+							put_addon_name = name(x,y)
+							from_delete_obj = 1
+							gosub *adjustment_road
+						}
 					}
-					if mx>0 and my-1>0 and mx<mapx and my-1<mapy and category(mx,my-1) = "road" {
-						x = mx : y = my-1
-						put_addon_name = name(x,y)
-						from_delete_obj = 1
-						gosub *adjustment_road
+					if mx>0 and my-1>0 and mx<mapx and my-1<mapy {
+						if category(mx,my-1) = "road" {
+							x = mx : y = my-1
+							put_addon_name = name(x,y)
+							from_delete_obj = 1
+							gosub *adjustment_road
+						}
 					}
-					if mx>0 and my+1>0 and mx<mapx and my+1<mapy and category(mx,my+1) = "road" {
-						x = mx : y = my+1
-						put_addon_name = name(x,y)
-						from_delete_obj = 1
-						gosub *adjustment_road
+					if mx>0 and my+1>0 and mx<mapx and my+1<mapy {
+						if category(mx,my+1) = "road" {
+							x = mx : y = my+1
+							put_addon_name = name(x,y)
+							from_delete_obj = 1
+							gosub *adjustment_road
+						}
 					}
 	
 					x = x_buf : y = y_buf
