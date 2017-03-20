@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.6
+									  Cities Box Ver 0.4.2.7
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1104,7 +1104,7 @@
 						}
 		
 					//道路の向きを調節
-						if category(x,y) = "road" and (mx-1 <= x and mx+1 >= x) and (my-1 <= y and my+1 >= y) {
+						if (mx-1 <= x and mx+1 >= x) and (my-1 <= y and my+1 >= y) {
 							gosub *adjustment_road
 						}
 						
@@ -1562,7 +1562,7 @@
 					//選択されたアドオンのアドオン名を取得
 						notesel type_Two_lane_road
 						noteget put_addon_name, clicked_addon_number
-		
+						
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_Two_lane_road
 						noteget addon_num_normal_road, clicked_addon_number
@@ -1767,7 +1767,7 @@
 					//選択されたアドオンのアドオン名を取得
 						notesel type_public
 						noteget put_addon_name, clicked_addon_number
-		
+						
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_public
 						noteget addon_num_buf, clicked_addon_number
@@ -1817,18 +1817,25 @@
 				//道路敷設
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
 						//道路の向きを揃える
+							x_buf = x : y_buf = y
+							x = mx : y = my
+							
 							from_build_obj = 1
 							gosub *adjustment_road
+							
+							x = x_buf : y = y_buf
 							
 						map(mx, my) = addon_num_normal_road
 						name(mx, my) = put_addon_name
 						category(mx, my) = "road"
-	
+						
 						obj_serial_num(mx, my) = 0
 						obj_use_tiles_x(mx,my) = 0
 						obj_use_tiles_y(mx,my) = 0
 						obj_tiles_x(mx, my) = 0
 						obj_tiles_y(mx, my) = 0
+	
+						return
 					}
 	
 				//建設地に道路がある場合
@@ -1999,9 +2006,11 @@
 					
 			}
 	
+			return
+	
 *delete_obj
 		//取り壊し
-			if mouse_right = 1 or (cursor_mode = "bulldozer" and mouse_left = 1) or from_build_obj = 1 {
+			if mouse_right = 1 or (cursor_mode = "bulldozer" and mouse_left = 1) or from_build_obj = 1 and (mx-1 >= 0 and mx+1 <= mapx) and (my-1 >= 0 and my+1 <= mapy) {
 				//オブジェクトの向きを取得
 					addon_num_buf = addon_num(name(mx,my))
 					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
@@ -2012,8 +2021,6 @@
 					map(mx, my) = addon_num("tile_greenfield")
 					name(mx, my) = "tile_greenfield"
 					category(mx, my) = "tile"
-					obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-					obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 						
 					obj_serial_num(mx, my) = 0
 					obj_use_tiles_x(mx, my) = 0
@@ -2216,7 +2223,7 @@
 					if mx-1>0 and my>0 and mx-1<mapx and my<mapy {
 						if category(mx-1,my) = "road" {
 							x = mx-1 : y = my
-							put_addon_name = name(x,y)
+							;put_addon_name = name(x,y)
 							from_delete_obj = 1
 							gosub *adjustment_road
 						}
@@ -2224,7 +2231,7 @@
 					if mx+1>0 and my>0 and mx+1<mapx and my<mapy {
 						if category(mx+1,my) = "road" {
 							x = mx+1 : y = my
-							put_addon_name = name(x,y)
+							;put_addon_name = name(x,y)
 							from_delete_obj = 1
 							gosub *adjustment_road
 						}
@@ -2232,7 +2239,7 @@
 					if mx>0 and my-1>0 and mx<mapx and my-1<mapy {
 						if category(mx,my-1) = "road" {
 							x = mx : y = my-1
-							put_addon_name = name(x,y)
+							;put_addon_name = name(x,y)
 							from_delete_obj = 1
 							gosub *adjustment_road
 						}
@@ -2240,7 +2247,7 @@
 					if mx>0 and my+1>0 and mx<mapx and my+1<mapy {
 						if category(mx,my+1) = "road" {
 							x = mx : y = my+1
-							put_addon_name = name(x,y)
+							;put_addon_name = name(x,y)
 							from_delete_obj = 1
 							gosub *adjustment_road
 						}
@@ -2328,7 +2335,8 @@
 	if instr(put_addon_name, 0, "road") = -1 {
 		return
 	}
-	if (category(x, y) = "road" and (cursor_mode = "put_Road" or cursor_mode = "bulldozer")) or from_build_obj = 1 {
+	
+	if (category(x,y) = "road" and (cursor_mode = "put_Road" or cursor_mode = "bulldozer")) or from_build_obj = 1 {
 	
 		if from_delete_obj = 0 {
 			gosub *delete_obj
