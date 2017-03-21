@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.7
+									  Cities Box Ver 0.4.2.8
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1104,7 +1104,7 @@
 						}
 		
 					//道路の向きを調節
-						if (mx-1 <= x and mx+1 >= x) and (my-1 <= y and my+1 >= y) {
+						if category(x,y) = "road" {
 							gosub *adjustment_road
 						}
 						
@@ -1193,7 +1193,7 @@
 			}
 	
 		if cnt \ 10 = 0 {
-			title ""+next_obj_serial_num+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
 		//天候の変動
@@ -1792,12 +1792,17 @@
 				return
 			}
 	
+		//カーソルがマップ外にある場合はreturn
+			if mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1 {
+				return
+			}
+	
 		//周囲のオブジェクトのカテゴリを取得
 			left_chip = ""
 			top_chip = ""
 			bottom_chip = ""
 			right_chip = ""
-	
+			
 			if mx > 0 {
 				left_chip = category(mx-1, my)
 			}
@@ -2010,26 +2015,22 @@
 	
 *delete_obj
 		//取り壊し
-			if mouse_right = 1 or (cursor_mode = "bulldozer" and mouse_left = 1) or from_build_obj = 1 and (mx-1 >= 0 and mx+1 <= mapx) and (my-1 >= 0 and my+1 <= mapy) {
+			//カーソルがマップ外にある場合はreturn
+				if mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1 {
+					return
+				}
+			
+			if mouse_right = 1 or (cursor_mode = "bulldozer" and mouse_left = 1) or from_build_obj = 1 {
 				//オブジェクトの向きを取得
 					addon_num_buf = addon_num(name(mx,my))
+					tile_addon_num_buf = addon_num("tile_greenfield")
 					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-					
-					p=0
-				
-				if category(mx,my) = "road" {
-					map(mx, my) = addon_num("tile_greenfield")
-					name(mx, my) = "tile_greenfield"
-					category(mx, my) = "tile"
-						
-					obj_serial_num(mx, my) = 0
-					obj_use_tiles_x(mx, my) = 0
-					obj_tiles_x(mx, my) = 0
-				}
 	
-				//x方向、y方向、いずれも1マスのオブジェクトの場合
-					if obj_use_tiles_x(mx,my) = 0 and obj_use_tiles_y(mx,my) = 0 {
-						map(mx, my) = addon_num("tile_greenfield")
+					p = 0
+	
+				//道路またはx方向、y方向、いずれも1マスのオブジェクトの場合
+					if category(mx,my) = "road" or (obj_use_tiles_x(mx,my) = 0 and obj_use_tiles_y(mx,my) = 0) {
+						map(mx, my) = tile_addon_num_buf
 						name(mx, my) = "tile_greenfield"
 						category(mx, my) = "tile"
 						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2052,7 +2053,7 @@
 							}
 							
 							repeat obj_use_tiles_x(mx,my) +p
-								map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
+								map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
 								name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
 								category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
 								obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2071,7 +2072,7 @@
 							}
 							
 							repeat obj_use_tiles_x(mx,my) +p
-								map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
+								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
 								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
 								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
 								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2090,7 +2091,7 @@
 							}
 							
 							repeat obj_use_tiles_x(mx,my) +p
-								map(mx-obj_tiles_x(mx,my)-cnt, my) = addon_num("tile_greenfield")
+								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
 								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
 								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
 								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2110,7 +2111,7 @@
 							
 							if obj_use_tiles_x(mx,my) != 0 {
 								repeat obj_use_tiles_x(mx,my) +p
-									map(mx-obj_tiles_x(mx,my)+cnt, my) = addon_num("tile_greenfield")
+									map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
 									name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
 									category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
 									obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2134,7 +2135,7 @@
 							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
-								map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
 								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2153,7 +2154,7 @@
 							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
-								map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
 								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2172,7 +2173,7 @@
 							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
-								map(mx, my-obj_tiles_y(mx,my)+cnt) = addon_num("tile_greenfield")
+								map(mx, my-obj_tiles_y(mx,my)+cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)+cnt) = "tile"
 								obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2191,7 +2192,7 @@
 							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
-								map(mx, my-obj_tiles_y(mx,my)-cnt) = addon_num("tile_greenfield")
+								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
 								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
@@ -2203,57 +2204,6 @@
 							loop
 						}
 					}
-	
-				//周囲の道路の向き・タイプを直す
-					x_buf = x : y_buf = y
-	
-					if mx > 0 {
-						left_chip = category(mx-1, my)
-					}
-					if my > 0 {
-						top_chip = category(mx, my-1)
-					}
-					if mapy-1 > my {
-						bottom_chip = category(mx, my+1)
-					}
-					if mapx-1 > mx {
-						right_chip = category(mx+1, my)
-					}
-					
-					if mx-1>0 and my>0 and mx-1<mapx and my<mapy {
-						if category(mx-1,my) = "road" {
-							x = mx-1 : y = my
-							;put_addon_name = name(x,y)
-							from_delete_obj = 1
-							gosub *adjustment_road
-						}
-					}
-					if mx+1>0 and my>0 and mx+1<mapx and my<mapy {
-						if category(mx+1,my) = "road" {
-							x = mx+1 : y = my
-							;put_addon_name = name(x,y)
-							from_delete_obj = 1
-							gosub *adjustment_road
-						}
-					}
-					if mx>0 and my-1>0 and mx<mapx and my-1<mapy {
-						if category(mx,my-1) = "road" {
-							x = mx : y = my-1
-							;put_addon_name = name(x,y)
-							from_delete_obj = 1
-							gosub *adjustment_road
-						}
-					}
-					if mx>0 and my+1>0 and mx<mapx and my+1<mapy {
-						if category(mx,my+1) = "road" {
-							x = mx : y = my+1
-							;put_addon_name = name(x,y)
-							from_delete_obj = 1
-							gosub *adjustment_road
-						}
-					}
-	
-					x = x_buf : y = y_buf
 			}
 	
 		from_build_obj = 0
@@ -3118,9 +3068,9 @@
 			
 				repeat mapx
 					x = cnt
-			
+					
 					if cnt = 0 {
-						map_data_buf = map_data_buf = category(x,y)
+						map_data_buf = category(x,y)
 					} else {
 						map_data_buf = ""+map_data_buf+", "+category(x,y)+""
 					}
