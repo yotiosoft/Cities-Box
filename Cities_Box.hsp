@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.2.8
+									   Cities Box Ver 0.4.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -234,6 +234,13 @@
 	//ポインター
 		celload "img/pointer/blue.png", 17									; 青いポインター
 		celload "img/pointer/red.png", 18									; 赤いポインター
+	
+	//地区を示すタイル
+		celload "img/quarter/residential.png", 22							; 住居地区
+		celload "img/quarter/commercial.png", 23							; 商業地区
+		celload "img/quarter/office.png", 24								; オフィス地区
+		celload "img/quarter/industrial.png", 25							; 工業地区
+		celload "img/quarter/public.png", 26								; 公共施設
 	
 	//onexit
 		onexit *exit
@@ -1148,7 +1155,30 @@
 	
 						x = x_buf
 						y = y_buf
-							
+	
+					//メニューを開いているときは地区を示す色を表示する
+						if cursor_mode != "normal" and cursor_mode != "put_Road" {
+							if category(x,y) = "residential" {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 22, 0, 0, 64, 32
+							}
+							if category(x,y) = "commercial" {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 23, 0, 0, 64, 32
+							}
+							if category(x,y) = "office" {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 24, 0, 0, 64, 32
+							}
+							if category(x,y) = "industrial" {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 25, 0, 0, 64, 32
+							}
+							if category(x,y) = "public" {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 26, 0, 0, 64, 32
+							}
+						}
 				}
 	
 				//人口・需要度変動
@@ -1843,14 +1873,14 @@
 						return
 					}
 	
-				//建設地に道路がある場合
-					if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
-						dialog "この区画は既に占有されています"
-						return
-					}
-	
 				//道路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
 					if cursor_mode != "put_Road" {
+	
+						//そもそも建設地に道路がある場合
+							if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
+								dialog "この区画は既に占有されています"
+								return
+							}
 	
 						around_road_exist = -1
 						
@@ -1976,33 +2006,42 @@
 								}
 							
 							//2マス以上の建築物の場合
+								px = 0 : py = 0
+								
+								if direction = "bottom" {
+									py = addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) - 1
+								}
+								if direction = "right" {
+									px = addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) - 1
+								}
+								
 								if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) >= 2 {
 									repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-										map(mx+cnt, my) = map(mx, my)
-										name(mx+cnt, my) = name(mx, my)
-										category(mx+cnt, my) = category(mx, my)
+										map(mx+cnt-px,my) = map(mx, my)
+										name(mx+cnt-px,my) = name(mx, my)
+										category(mx+cnt-px,my) = category(mx, my)
 
-										obj_type(mx+cnt, my) = obj_type(mx, my)
-										obj_dire(mx+cnt, my) = obj_dire(mx, my)
+										obj_type(mx+cnt-px,my) = obj_type(mx, my)
+										obj_dire(mx+cnt-px,my) = obj_dire(mx, my)
 	
-										obj_serial_num(mx+cnt, my) = obj_serial_num(mx, my)
-										obj_use_tiles_x(mx+cnt, my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
-										obj_tiles_x(mx+cnt, my) = cnt
+										obj_serial_num(mx+cnt-px,my) = obj_serial_num(mx, my)
+										obj_use_tiles_x(mx+cnt-px,my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
+										obj_tiles_x(mx+cnt-px,my) = cnt
 									loop
 								}
 								
 								if addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) >= 2 {
 									repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-										map(mx, my+cnt) = map(mx, my)
-										name(mx, my+cnt) = name(mx, my)
-										category(mx, my+cnt) = category(mx, my)
+										map(mx,my+cnt-py) = map(mx, my)
+										name(mx,my+cnt-py) = name(mx, my)
+										category(mx,my+cnt-py) = category(mx, my)
 	
-										obj_type(mx, my+cnt) = obj_type(mx, my)
-										obj_dire(mx, my+cnt) = obj_dire(mx, my)
+										obj_type(mx,my+cnt-py) = obj_type(mx, my)
+										obj_dire(mx,my+cnt-py) = obj_dire(mx, my)
 
-										obj_serial_num(mx, my+cnt) = obj_serial_num(mx, my)
-										obj_use_tiles_y(mx, my+cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
-										obj_tiles_y(mx, my+cnt) = cnt
+										obj_serial_num(mx,my+cnt-py) = obj_serial_num(mx, my)
+										obj_use_tiles_y(mx,my+cnt-py) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
+										obj_tiles_y(mx,my+cnt-py) = cnt
 									loop
 								}
 								
