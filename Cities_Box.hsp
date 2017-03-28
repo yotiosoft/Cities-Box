@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.4.3
+									  Cities Box Ver 0.4.3.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -241,6 +241,10 @@
 		celload "img/quarter/office.png", 24								; オフィス地区
 		celload "img/quarter/industrial.png", 25							; 工業地区
 		celload "img/quarter/public.png", 26								; 公共施設
+	
+	//最初のメニュー画面のボタン
+		celload "img/start_menu/hoe.png", 27								; 鍬
+		celload "img/start_menu/city.png", 28								; 都市
 	
 	//onexit
 		onexit *exit
@@ -493,22 +497,46 @@
 		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
 	
 		color 255, 255, 255 : font SystemFont, 18
-		cmes "Ver."+about_version+"", 0, double(270./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
+		cmes "Ver."+about_version+"", 0, double(200./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
 	
-		//前回のループ時とウィンドウサイズが変わっている場合はclrobj
-			if before_windowy != windowy {
-				clrobj
+		onclick gosub *menu_onclick
 	
-				objsize 100, 20
-				pos windowx/2-50, double(350./483)*(windowy-titlebar_h) : button "新規マップ作成", *new_map
-				pos windowx/2-50, double(350./483)*(windowy-titlebar_h)+20 : button "マップ読み込み", *load_map
-			}
+		font SystemFont, 14
+	
+		color 0, 162, 232
+	
+		if click_range(windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
+			gmode 3,,,200 : boxfa windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+		}
+		if click_range(windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
+			gmode 3,,,200 : boxfa windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+		}
+	
+		color 255, 255, 255
+	
+		gmode 2
+		pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
+			cmes "新しいマップ", windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+			
+		pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
+			cmes "読み込み", windowx/2+20, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50, double(300./483)*(windowy-titlebar_h)+50+2+20
 	
 		before_windowy = windowy
 	
 		redraw 1
-		wait 1
+		wait 2
 	loop
+	
+*menu_onclick
+	//メニュー画面でクリックされたときに動作
+	if click_range(windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
+		goto *new_map
+	}
+	if click_range(windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
+		goto *load_map
+	}
+	
+	return
 	
 *new_map
 	map_mode = "new_map"
@@ -622,7 +650,7 @@
 		goto *map_preparating
 		
 	} else {
-		stop
+		goto *menu
 	}
 	
 *map_preparating
@@ -1133,6 +1161,11 @@
 							} else {
 								y += (obj_use_tiles_y(x,y)-1) + obj_tiles_y(x,y)
 							}
+						}
+	
+					//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
+						if name(x,y) = "tile_greenfield" and obj_type(x,y) != element2( "tile_greenfield", use_type, addon_total_use_types, "null") {
+							obj_type(x,y) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 						}
 	
 					//クォータービューの座標を画面上の座標に変換
@@ -3333,7 +3366,7 @@
 	
 		if from_new_map = 1 {
 			from_new_map = 0
-			stop
+			goto *menu
 		}
 	
 		cursor_mode = "normal"
