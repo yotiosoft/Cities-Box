@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.3.1
+									   Cities Box Ver 0.4.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -166,15 +166,21 @@
 	
 	return
 	
-/*暗号化＆復号*/
-#define global PublicKey	1234
-#deffunc Xine var p1, int p2
-	randomize (PublicKey+strlen(p1)+p2)
-	repeat strlen(p1)
-	p = peek(p1,cnt)
-	p = (p^rnd(255))&255 : if ((cnt\2) == 0) {p = (p^2)&255}
-	poke p1,cnt,p
+/*暗号化＆復号（言うほど難しいものでもないけど…）*/
+//暗号化
+#deffunc enc var p1, int key, int size
+	repeat size
+	    poke p1, cnt, peek(p1, cnt) + key
 	loop
+	
+	return
+
+//復号
+#deffunc dec var p1, int key, int size
+	repeat size
+	    poke p1, cnt, peek(p1, cnt) - key
+	loop
+	
 	return
 								
 #global
@@ -203,7 +209,23 @@
 		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
 		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
 	
+*changeable
+	//ウィンドウのサイズを変更可能化
+		windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
+		screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
+		
+		GetWindowLong hwnd, -16
+		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
+	
+		gsel 0
+	
 *buffering
+	//読み込み中画面
+		color 0, 0, 0 : boxf
+	
+		color 255, 255, 255 : font SystemFont, 14
+		pos 10, 10 : mes "しばらくお待ちください\nLoading images..."
+		
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		celload "img/logo.png", 2										; ロゴ
 		celload "img/title_background.png", 15							; タイトル背景画像
@@ -246,29 +268,21 @@
 		celload "img/start_menu/hoe.png", 27								; 鍬
 		celload "img/start_menu/city.png", 28								; 都市
 	
+*preparation
+	//読み込み中画面
+		color 0, 0, 0 : boxf
+	
+		color 255, 255, 255 : font SystemFont, 14
+		pos 10, 10 : mes "しばらくお待ちください\nIn preparation..."
+		
 	//onexit
 		onexit *exit
-	
-	//ウィンドウのサイズを変更可能化
-		windowx=640 : windowy=480
-		screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
-		
-		GetWindowLong hwnd, -16
-		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
-	
-		gsel 0
 	
 	//mci登録
 		mci "set Cities-Box time format milliseconds"
 	
-	//ウィンドウのサイズを変更可能化
-		windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
-		screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
-		
-		GetWindowLong hwnd, -16
-		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
-	
-		gsel 0
+	//暗号化キー
+		iCipherKey = 2147483647
 	
 	//バッファ番号1000以降はオブジェクト
 		//まずAddonフォルダ内のアドオンの数を取得
@@ -343,188 +357,194 @@
 				sdim type_high_density_office, 128
 				sdim type_industrial, 128
 				sdim type_public, 128
+	
+*load_addons
+	//オブジェクトのadatファイルを読み込み
+		repeat total_addons
+			notesel filelist
+			noteget buf_filelist, cnt
+	
+			notesel buf_adat
+			noteload buf_filelist
+	
+			//現在のパス名のみ取得
+				addon_path = getpath(buf_filelist, 32)
+	
+			//ディレクトリ変更
+				chdir addon_path
+	
+			//アドオン名取得
+					addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
+	
+			//読み込み中画面
+				color 0, 0, 0 : boxf
 				
-			//オブジェクトのadatファイルを読み込み
-				repeat total_addons
-					notesel filelist
-					noteget buf_filelist, cnt
+				color 255, 255, 255 : font SystemFont, 14
+				pos 10, 10 : mes "しばらくお待ちください\nLoading addons : "+addon_name(cnt)+""
 	
-					notesel buf_adat
-					noteload buf_filelist
+			//各項目の読み込み
 	
-					//現在のパス名のみ取得
-						addon_path = getpath(buf_filelist, 32)
+				//日本語のアドオン名と説明
+					addon_jp_name(cnt) = get_chapter(buf_adat, "addon_jp_name", " = \\", "\"")
+					addon_summary(cnt) = get_chapter(buf_adat, "addon_summary", " = \\", "\"")
 	
-					//ディレクトリ変更
-						chdir addon_path
-	
-					//各項目の読み込み
-						//アドオン名
-							addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
-	
-						//日本語のアドオン名と説明
-							addon_jp_name(cnt) = get_chapter(buf_adat, "addon_jp_name", " = \\", "\"")
-							addon_summary(cnt) = get_chapter(buf_adat, "addon_summary", " = \\", "\"")
-	
-						//アドオンのアイコン
-							addon_icon(cnt) = get_chapter(buf_adat, "addon_icon", " = \\", "\"")
+				//アドオンのアイコン
+					addon_icon(cnt) = get_chapter(buf_adat, "addon_icon", " = \\", "\"")
 							
-						//アドオンのタイプ
-							addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
+				//アドオンのタイプ
+					addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
 	
-						//建物の収容可能人数（住居地区のみ）
-							if addon_type(cnt) = "low_density_residential" or addon_type(cnt) = "high_density_residential" {
-								addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
-							} else {
-								addon_maximum_capacity(cnt) = -1
-							}
+				//建物の収容可能人数（住居地区のみ）
+					if addon_type(cnt) = "low_density_residential" or addon_type(cnt) = "high_density_residential" {
+						addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
+					} else {
+						addon_maximum_capacity(cnt) = -1
+					}
 	
-						//アドオンのadatファイルの詳細の読み込みへ
-							gosub *load_adat
+				//アドオンのadatファイルの詳細の読み込みへ
+					gosub *load_adat
 	
-						//カテゴリ分け
-							if addon_type(cnt) = "Two_lane_road" {
-								notesel type_Two_lane_road
-								noteadd addon_name(cnt), -1
+				//カテゴリ分け
+					if addon_type(cnt) = "Two_lane_road" {
+						notesel type_Two_lane_road
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_Two_lane_road
-								noteadd str(cnt), -1
-							}
+						notesel type_number_Two_lane_road
+						noteadd str(cnt), -1
+					}
 							
-							if addon_type(cnt) = "low_density_residential" {
-								notesel type_low_density_residential
-								noteadd addon_name(cnt), -1
+					if addon_type(cnt) = "low_density_residential" {
+						notesel type_low_density_residential
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_low_density_residential
-								noteadd str(cnt), -1
-							}
-							if addon_type(cnt) = "high_density_residential" {
-								notesel type_high_density_residential
-								noteadd addon_name(cnt), -1
+						notesel type_number_low_density_residential
+						noteadd str(cnt), -1
+					}
+					if addon_type(cnt) = "high_density_residential" {
+						notesel type_high_density_residential
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_high_density_residential
-								noteadd str(cnt), -1
-							}
+						notesel type_number_high_density_residential
+						noteadd str(cnt), -1
+					}
 	
-							if addon_type(cnt) = "low_density_commercial" {
-								notesel type_low_density_commercial
-								noteadd addon_name(cnt), -1
+					if addon_type(cnt) = "low_density_commercial" {
+						notesel type_low_density_commercial
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_low_density_commercial
-								noteadd str(cnt), -1
-							}
-							if addon_type(cnt) = "high_density_commercial" {
-								notesel type_high_density_commercial
-								noteadd addon_name(cnt), -1
+						notesel type_number_low_density_commercial
+						noteadd str(cnt), -1
+					}
+					if addon_type(cnt) = "high_density_commercial" {
+						notesel type_high_density_commercial
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_high_density_commercial
-								noteadd str(cnt), -1
-							}
+						notesel type_number_high_density_commercial
+						noteadd str(cnt), -1
+					}
 	
-							if addon_type(cnt) = "low_density_office" {
-								notesel type_low_density_office
-								noteadd addon_name(cnt), -1
+					if addon_type(cnt) = "low_density_office" {
+						notesel type_low_density_office
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_low_density_office
-								noteadd str(cnt), -1
-							}
-							if addon_type(cnt) = "high_density_office" {
-								notesel type_high_density_office
-								noteadd addon_name(cnt), -1
+						notesel type_number_low_density_office
+						noteadd str(cnt), -1
+					}
+					if addon_type(cnt) = "high_density_office" {
+						notesel type_high_density_office
+						noteadd addon_name(cnt), -1
 	
-								notesel type_number_high_density_office
-								noteadd str(cnt), -1
-							}
+						notesel type_number_high_density_office
+						noteadd str(cnt), -1
+					}
 	
-							if addon_type(cnt) = "industrial" {
-								notesel type_industrial
-								noteadd addon_name(cnt), -1
-								
-								notesel type_number_industrial
-								noteadd str(cnt), -1
-							}
-							
-							if addon_type(cnt) = "public" {
-								notesel type_public
-								noteadd addon_name(cnt), -1
+					if addon_type(cnt) = "industrial" {
+						notesel type_industrial
+						noteadd addon_name(cnt), -1
+						
+						notesel type_number_industrial
+						noteadd str(cnt), -1
+					}
+					
+					if addon_type(cnt) = "public" {
+						notesel type_public
+						noteadd addon_name(cnt), -1
+
+						notesel type_number_public
+						noteadd str(cnt), -1
+					}
 	
-								notesel type_number_public
-								noteadd str(cnt), -1
-							}
+				//アドオンのバッファ（1000～、複数の画像を利用する場合は1001000～）
+					if addon_total_use_types(addon_number) > 1 {
+						repeat addon_total_use_types(addon_number)
+							addon_buffer_number = (1000 + addon_number) * 1001 + cnt
+							celload addon_image(addon_number, cnt), addon_buffer_number
+							await 1
+						loop
+					} else {
+						celload addon_image(addon_number, 0), (1000 + addon_number)
+					}
 	
-						//アドオンのバッファ（1000～、複数の画像を利用する場合は1001000～）
-							if addon_total_use_types(addon_number) > 1 {
-								repeat addon_total_use_types(addon_number)
-									addon_buffer_number = (1000 + addon_number) * 1001 + cnt
-									celload addon_image(addon_number, cnt), addon_buffer_number
-									await 1
-								loop
-							} else {
-								celload addon_image(addon_number, 0), (1000 + addon_number)
-							}
+				//アドオンのアイコンのバッファ（10001000～）
+					celload addon_icon(addon_number), (10001000 + addon_number)
+
+				//ディレクトリを戻す
+					chdir directory
 	
-						//アドオンのアイコンのバッファ（10001000～）
-							celload addon_icon(addon_number), (10001000 + addon_number)
+				//一時ファイルを保存
+					temp_file = str(addon_number)
+					
+					notesel temp_file
+					notesave "data/temp/"+addon_name(cnt)+".temp"
 	
-						//ディレクトリを戻す
-							chdir directory
+				//ディレクトリを戻す
+					chdir ""+directory+"\\addons"
 	
-						//一時ファイルを保存
-							temp_file = str(addon_number)
-							
-							notesel temp_file
-							notesave "data/temp/"+addon_name(cnt)+".temp"
+				addon_number++
 	
-						//ディレクトリを戻す
-							chdir ""+directory+"\\addons"
+			await 1
+		loop
 	
-						addon_number++
-	
-					await 1
-				loop
-	
-			chdir directory
+	chdir directory
 	
 *menu
+	onclick gosub *menu_onclick
+	
 	repeat
 		//ウィンドウサイズとタイトルバーの高さを取得
 			gosub *get_windowsize
-			
-		redraw 0
-		
-		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 1077, 625 : gblur 2
-		
-		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
 	
+		redraw 0
+				
+		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 1077, 625 : gblur 2
+				
+		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
+			
 		color 255, 255, 255 : font SystemFont, 18
 		cmes "Ver."+about_version+"", 0, double(200./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
-	
-		onclick gosub *menu_onclick
-	
+			
 		font SystemFont, 14
-	
+			
 		color 0, 162, 232
-	
+			
 		if click_range(windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
 			gmode 3,,,200 : boxfa windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 		}
 		if click_range(windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
 			gmode 3,,,200 : boxfa windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 		}
-	
+			
 		color 255, 255, 255
-	
+			
 		gmode 2
 		pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
 			cmes "新しいマップ", windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
-			
+					
 		pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
 			cmes "読み込み", windowx/2+20, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50, double(300./483)*(windowy-titlebar_h)+50+2+20
-	
-		before_windowy = windowy
-	
+		
+		wait 1
 		redraw 1
-		wait 2
 	loop
 	
 *menu_onclick
@@ -633,7 +653,7 @@
 	
 *load_map
 	if from_new_map = 0 {
-		dialog "cbd", 16, "Cities Box マップデータ"
+		dialog "cbx;*.cbd", 16, "Cities Box 簡易暗号化マップデータ（Ver.0.4.4以降）, Cities Box 非暗号化マップデータ（Ver.0.4.3.1以前）"
 	}
 	
 	if stat = 1 or from_new_map = 1 {
@@ -703,14 +723,33 @@
 	
 	//マップ読み込み
 		if map_mode = "load_map" {
-			notesel load_mapdata
-			noteload load_mapdata_name
 	
-			;exist refstr
+			//暗号化済みのマップデータの場合
+			if instr(load_mapdata_name, 0, "cbx") != -1 {
+				
+				notesel load_mapdata_Cipher
+				noteload load_mapdata_name
+		
+				l = notemax
+		
+				//復号
+					repeat l
+						notesel load_mapdata_Cipher
+						noteget load_mapdata_Cipher_buf, cnt
+		
+						load_mapdata_Cipher_buf_strlen = strlen(load_mapdata_Cipher_buf)
+						dec load_mapdata_Cipher_buf, (strlen(load_mapdata_name)/2), load_mapdata_Cipher_buf_strlen
+		
+						notesel load_mapdata
+						noteadd load_mapdata_Cipher_buf, cnt
+					loop
 	
-			;Xine load_mapdata, 332
+			} else {
 	
-			;dialog""+load_mapdata+""
+				notesel load_mapdata
+				noteload load_mapdata_name
+	
+			}
 	
 			//都市名(City_Name)を読み込み
 				City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
@@ -952,14 +991,21 @@
 				loop
 		}
 	
-			//雨粒の初期位置
-				randomize
+	//雨粒の初期位置
+		randomize
 	
-				repeat 1000
-					rain(cnt) = 0
-					rain_x(cnt) = rnd(windowx)
-					rain_y(cnt) = -rnd(windowy)
-				loop
+		repeat 1000
+			rain(cnt) = 0
+			rain_x(cnt) = rnd(windowx)
+			rain_y(cnt) = -rnd(windowy)
+		loop
+	
+	//element2、element3関数は何度も使うと動作が重くなるため、よく使うtile_greenfieldの"null"のelement2およびelement3関数の内容を別の変数に保存
+		//更地（tile_greenfield）の"null"のobj_type番号
+			tile_greenfield_null_type_buf = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+		
+		//更地（tile_greenfield）の"null"のobj_dire番号
+			tile_greenfield_null_dire_buf = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 	
 *map_drawing
 	randomize
@@ -1164,8 +1210,8 @@
 						}
 	
 					//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
-						if name(x,y) = "tile_greenfield" and obj_type(x,y) != element2( "tile_greenfield", use_type, addon_total_use_types, "null") {
-							obj_type(x,y) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
+						if name(x,y) = "tile_greenfield" and obj_type(x,y) != tile_greenfield_null_type_buf {
+							obj_type(x,y) = tile_greenfield_null_type_buf
 						}
 	
 					//クォータービューの座標を画面上の座標に変換
@@ -1191,23 +1237,25 @@
 	
 					//メニューを開いているときは地区を示す色を表示する
 						if cursor_mode != "normal" and cursor_mode != "put_Road" {
-							if category(x,y) = "residential" {
+							category_buf = category(x,y)
+							
+							if category_buf = "residential" {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 22, 0, 0, 64, 32
 							}
-							if category(x,y) = "commercial" {
+							if category_buf = "commercial" {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 23, 0, 0, 64, 32
 							}
-							if category(x,y) = "office" {
+							if category_buf = "office" {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 24, 0, 0, 64, 32
 							}
-							if category(x,y) = "industrial" {
+							if category_buf = "industrial" {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 25, 0, 0, 64, 32
 							}
-							if category(x,y) = "public" {
+							if category_buf = "public" {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 26, 0, 0, 64, 32
 							}
@@ -2105,8 +2153,8 @@
 						map(mx, my) = tile_addon_num_buf
 						name(mx, my) = "tile_greenfield"
 						category(mx, my) = "tile"
-						obj_type(mx, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-						obj_dire(mx, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+						obj_type(mx, my) = tile_greenfield_null_type_buf
+						obj_dire(mx, my) = tile_greenfield_null_dire_buf
 							
 						obj_serial_num(mx, my) = 0
 						obj_use_tiles_x(mx, my) = 0
@@ -2128,8 +2176,8 @@
 								map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
 								name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
 								category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_type_buf
+								obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_dire_buf
 									
 								obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
 								obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
@@ -2147,8 +2195,8 @@
 								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
 								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
 								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_type_buf
+								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_dire_buf
 									
 								obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
 								obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
@@ -2166,8 +2214,8 @@
 								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
 								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
 								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_type_buf
+								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_dire_buf
 								
 								obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
 								obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
@@ -2186,8 +2234,8 @@
 									map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
 									name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
 									category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
-									obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-									obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+									obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_type_buf
+									obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_dire_buf
 									
 									obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
 									obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
@@ -2210,8 +2258,8 @@
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_type_buf
+								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_dire_buf
 									
 								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
 								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
@@ -2229,8 +2277,8 @@
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_type_buf
+								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_dire_buf
 									
 								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
 								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
@@ -2248,8 +2296,8 @@
 								map(mx, my-obj_tiles_y(mx,my)+cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)+cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx, my-obj_tiles_y(mx,my)+cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = tile_greenfield_null_type_buf
+								obj_dire(mx, my-obj_tiles_y(mx,my)+cnt) = tile_greenfield_null_dire_buf
 								
 								obj_serial_num(mx, my-obj_tiles_y(mx,my)+cnt) = 0
 								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
@@ -2267,8 +2315,8 @@
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
 								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
 								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
-								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_type_buf
+								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_dire_buf
 								
 								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
 								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
@@ -3337,18 +3385,34 @@
 			
 			noteadd "}", -1
 	
-		//保存
-			dialog "cbd", 17, "Cities Box マップデータ"
+		//保存先ファイルの選択
+			dialog "cbx", 17, "Cities Box 簡易暗号化マップデータ"
 	
 			save_mapdata_name = refstr
-			if instr(save_mapdata_name, 0, ".cbd") = -1 {
-				save_mapdata_name = ""+save_mapdata_name+".cbd"
+			if instr(save_mapdata_name, 0, ".cbx") = -1 {
+				save_mapdata_name = ""+save_mapdata_name+".cbx"
 			}
 	
-			;Xine save_mapdata, strlen(save_mapdata)
+		//暗号化
+			notesel save_mapdata
+			l = notemax
 			
-			if stat = 1 {
+			repeat l
+				sdim save_mapdata_buf, 4096
+				
 				notesel save_mapdata
+				noteget save_mapdata_buf, cnt
+				
+				save_mapdata_buf_strlen = strlen(save_mapdata_buf)
+				enc save_mapdata_buf, (strlen(save_mapdata_name)/2), save_mapdata_buf_strlen
+	
+				notesel save_mapdata_Cipher
+				noteadd save_mapdata_buf, cnt
+			loop
+	
+		//保存
+			if stat = 1 {
+				notesel save_mapdata_Cipher
 				notesave save_mapdata_name
 			}
 	
