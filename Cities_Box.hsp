@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.4.4
+									  Cities Box Ver 0.4.4.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1940,16 +1940,23 @@
 							gosub *adjustment_road
 							
 							x = x_buf : y = y_buf
+	
+						//敷設した地点の情報を書き換え
+							map(mx, my) = addon_num_normal_road
+							name(mx, my) = put_addon_name
+							category(mx, my) = "road"
 							
-						map(mx, my) = addon_num_normal_road
-						name(mx, my) = put_addon_name
-						category(mx, my) = "road"
-						
-						obj_serial_num(mx, my) = 0
-						obj_use_tiles_x(mx,my) = 0
-						obj_use_tiles_y(mx,my) = 0
-						obj_tiles_x(mx, my) = 0
-						obj_tiles_y(mx, my) = 0
+							obj_serial_num(mx, my) = 0
+							obj_use_tiles_x(mx,my) = 0
+							obj_use_tiles_y(mx,my) = 0
+							obj_tiles_x(mx, my) = 0
+							obj_tiles_y(mx, my) = 0
+							
+							if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+								Total_Population -= residents(mx, my)
+								total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx, my) = 0
+							}
 	
 						return
 					}
@@ -2029,8 +2036,13 @@
 									obj_use_tiles_y(mx,my) = 0
 									obj_tiles_x(mx, my) = 0
 									obj_tiles_y(mx, my) = 0
+	
+									if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+										Total_Population -= residents(mx, my)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx, my) = 0
+									}
 									
-									residents(mx, my) = 0											; 住人数
 									total_maximum_capacity += addon_maximum_capacity(addon_num_buf)	; 都市全体の収容可能人数
 								}
 	
@@ -2045,6 +2057,12 @@
 									obj_use_tiles_y(mx,my) = 0
 									obj_tiles_x(mx, my) = 0
 									obj_tiles_y(mx, my) = 0
+	
+									if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+										Total_Population -= residents(mx, my)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx, my) = 0
+									}
 								}
 				
 							//建物（高密度オフィス）建設
@@ -2058,6 +2076,12 @@
 									obj_use_tiles_y(mx,my) = 0
 									obj_tiles_x(mx, my) = 0
 									obj_tiles_y(mx, my) = 0
+	
+									if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+										Total_Population -= residents(mx, my)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx, my) = 0
+									}
 								}
 	
 							//建物（工業地区）建設
@@ -2071,6 +2095,12 @@
 									obj_use_tiles_y(mx,my) = 0
 									obj_tiles_x(mx, my) = 0
 									obj_tiles_y(mx, my) = 0
+	
+									if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+										Total_Population -= residents(mx, my)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx, my) = 0
+									}
 								}
 				
 							//建物（公共施設）建設
@@ -2084,6 +2114,12 @@
 									obj_use_tiles_y(mx,my) = 0
 									obj_tiles_x(mx, my) = 0
 									obj_tiles_y(mx, my) = 0
+	
+									if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+										Total_Population -= residents(mx, my)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx, my) = 0
+									}
 								}
 							
 							//2マス以上の建築物の場合
@@ -2108,6 +2144,10 @@
 										obj_serial_num(mx+cnt-px,my) = obj_serial_num(mx, my)
 										obj_use_tiles_x(mx+cnt-px,my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my))
 										obj_tiles_x(mx+cnt-px,my) = cnt
+	
+										Total_Population -= residents(mx+cnt-px,my)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx+cnt-px,my) = 0
 									loop
 								}
 								
@@ -2123,6 +2163,10 @@
 										obj_serial_num(mx,my+cnt-py) = obj_serial_num(mx, my)
 										obj_use_tiles_y(mx,my+cnt-py) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my))
 										obj_tiles_y(mx,my+cnt-py) = cnt
+	
+										Total_Population -= residents(mx,my+cnt-py)
+										total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx,my+cnt-py) = 0
 									loop
 								}
 								
@@ -2161,6 +2205,10 @@
 						obj_use_tiles_y(mx, my) = 0
 						obj_tiles_x(mx, my) = 0
 						obj_tiles_y(mx, my) = 0
+	
+						Total_Population -= residents(mx, my)
+						total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+						residents(mx, my) = 0
 					}
 					
 				//x方向に2マス以上要する場合
@@ -2171,6 +2219,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_x(mx,my) +p
 								map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
@@ -2190,6 +2242,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_x(mx,my) +p
 								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
@@ -2209,6 +2265,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_x(mx,my) +p
 								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
@@ -2228,6 +2288,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							if obj_use_tiles_x(mx,my) != 0 {
 								repeat obj_use_tiles_x(mx,my) +p
@@ -2253,6 +2317,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
@@ -2272,6 +2340,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
@@ -2291,6 +2363,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)+cnt) = tile_addon_num_buf
@@ -2310,6 +2386,10 @@
 							} else {
 								p=0
 							}
+	
+							Total_Population -= residents(mx, my)
+							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx, my) = 0
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
@@ -2395,8 +2475,6 @@
 	
 			pointer_icon = int(get_addon_number)
 		}
-	
-		await 1
 	loop
 	
 	return
@@ -3391,6 +3469,10 @@
 			save_mapdata_name = refstr
 			if instr(save_mapdata_name, 0, ".cbx") = -1 {
 				save_mapdata_name = ""+save_mapdata_name+".cbx"
+			}
+	
+			if stat = 0 {
+				return
 			}
 	
 		//暗号化
