@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.4.2
+									  Cities Box Ver 0.4.4.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1012,6 +1012,8 @@
 	
 	repeat
 	
+		dim done_build, mapx, mapy
+	
 		map_drawing_cnt ++
 	
 		//1回のループで1分とする
@@ -1428,7 +1430,6 @@
 	loop
 	
 *map_drawing_onclick
-	
 	if opening_addon_menu = 1 {
 		menu_line_y = windowy-70-titlebar_h-32-20
 	} else {
@@ -1474,12 +1475,6 @@
 							noteget addon_num_normal_road, clicked_addon_number
 							addon_num_normal_road = int(addon_num_normal_road)
 				} 
-				/*
-				if opening_menu_put_Road = 1 {
-					cursor_mode = "normal"
-					opening_menu_put_Road = 0
-				}
-				*/
 	
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
@@ -1899,7 +1894,10 @@
 				}
 	
 		}
-			
+	
+	gosub *build_obj
+	
+	return
 	
 *build_obj
 	dim cannot_build, 4
@@ -2061,18 +2059,36 @@
 								if cursor_mode = "put_Public" {
 									category_buf = "public"
 								}
+	
+							//向きに応じてobj_type_bufとobj_dire_bufを代入
+								if direction = "left" {
+									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
+									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
+								}
+								if direction = "top" {
+									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
+									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
+								}
+								if direction = "bottom" {
+									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
+									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
+								}
+								if direction = "right" {
+									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
+									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
+								}
 							
 							//2マス以上の建築物の場合、建設する方向にほかの建築物がないか確認
-								if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) >= 2 {
+								if addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf) >= 2 or addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf) >= 2 {
 									found_other_obj = 0
-		
-									able_build_here = 0
-									cannot_build_here = 0
 									
-									repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-									
-										//ほかの建築物がある場合、向きを変えてもう一度試す
-											if instr(category(mx+cnt-px,my), 0, "road") != -1 or obj_use_tiles_x(mx+cnt-px,my) != 0 or obj_use_tiles_y(mx+cnt-px,my) != 0 {
+									repeat addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf)
+										rx = mx + cnt
+										
+										repeat addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf)
+											ry = my + cnt
+	
+											if done_build(rx,ry) = 0 and category(rx,ry) != "tile" and (category(rx,ry) = "road" or obj_use_tiles_x(rx,ry) != 0 or obj_use_tiles_y(rx,ry) != 0) {
 												found_other_obj = 1
 												
 												if direction = "left" {
@@ -2131,8 +2147,11 @@
 														break
 													}
 											}
+	
+											done_build(rx,ry) = 1
+										loop
 									loop
-		
+	
 									if able_build_here = 1 and found_other_obj = 1 {
 										able_build_here = 0
 										found_other_obj = 0
@@ -2141,34 +2160,19 @@
 									}
 									
 									if cannot_build_here = 1 and found_other_obj = 1 {
-										;dialog "この区画は既に占有されています"
+										dialog "この区画は既に占有されています"
 										
 										cannot_build_here = 0
 										found_other_obj = 0
-		
-										;dialog""+name(mx,my)+""
 										
 										return
 									}
+										
 								}
-								
-							//向きに応じてobj_typeとobj_direを代入
-								if direction = "left" {
-									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
-								}
-								if direction = "top" {
-									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "top")
-								}
-								if direction = "bottom" {
-									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "bottom")
-								}
-								if direction = "right" {
-									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "null")
-									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
-								}
+	
+							//obj_type_bufをobj_type(mx,my)に、obj_dire_bufをobj_dire(mx,my)に代入
+								obj_type(mx,my) = obj_type_buf
+								obj_dire(mx,my) = obj_dire_buf
 	
 							//x方向に1マスしか使わない建築物の場合、obj_use_tiles_xは0に
 								if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
