@@ -8,6 +8,8 @@ addon_type_2 = "post_office"
 
 use_types = "null"
 
+maximum_capacity = "100"
+
 null {
 	image = "post_office.png"
 	direction = "left, top, bottom, right"

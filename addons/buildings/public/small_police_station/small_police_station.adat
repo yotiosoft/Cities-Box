@@ -8,6 +8,8 @@ addon_type_2 = "police_station"
 
 use_types = "null"
 
+maximum_capacity = "200"
+
 null {
 	image = "small_police_station.png"
 	direction = "left, top, bottom, right"

@@ -7,6 +7,8 @@ addon_type = "low_density_commercial"
 
 use_types = "null"
 
+maximum_capacity = "30"
+
 null {
 	image = "Normal_Supermarket.png"
 	direction = "left, top, bottom, right"

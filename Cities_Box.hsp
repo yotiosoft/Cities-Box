@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.4.4.3
+									  	Cities Box Ver 0.5
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -394,12 +394,8 @@
 				//アドオンのタイプ
 					addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
 	
-				//建物の収容可能人数（住居地区のみ）
-					if addon_type(cnt) = "low_density_residential" or addon_type(cnt) = "high_density_residential" {
-						addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
-					} else {
-						addon_maximum_capacity(cnt) = -1
-					}
+				//建物の収容可能人数（住居地区の場合は住民数、商業・オフィス・工業・公共施設は労働者数）
+					addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
 	
 				//アドオンのadatファイルの詳細の読み込みへ
 					gosub *load_adat
@@ -572,17 +568,22 @@
 		dim sizex, mapx, mapy
 		dim sizey, mapx, mapy
 	
-		dim map, mapx, mapy				//各座標のアドオン番号
-		sdim name, mapx, mapy			//各座標のアドオン名
-		sdim category, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-		dim obj_type, mapx, mapy		//座標上にあるオブジェクトのタイプ
-		dim obj_dire, mapx, mapy		//座標上にあるオブジェクトの向き
-		dim obj_serial_num, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
-		dim obj_use_tiles_x, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
-		dim obj_use_tiles_y, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
-		dim obj_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数（1マスの場合は0）
-		dim obj_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数（1マスの場合は0）
-		dim residents, mapx, mapy		//各建築物の住民の数（住宅地のみ）
+		dim map, mapx, mapy					//各座標のアドオン番号
+		sdim name, mapx, mapy				//各座標のアドオン名
+		sdim category, mapx, mapy			//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
+		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
+		dim obj_use_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
+		dim obj_use_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
+		dim obj_tiles_x, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数（1マスの場合は0）
+		dim obj_tiles_y, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数（1マスの場合は0）
+		
+		dim residents, mapx, mapy			//各建築物の住民の数（住宅地のみ）
+		dim workers_Commercial, mapx, mapy	//商業地区の従業員数（商業地区のみ）
+		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
+		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
+		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -599,6 +600,10 @@
 			obj_tiles_y(ix,iy) = 0
 	
 			residents(ix,iy) = 0
+			workers_Commercial(ix,iy) = 0
+			workers_Office(ix,iy) = 0
+			workers_Industrial(ix,iy) = 0
+			workers_Public(ix,iy) = 0
 			
 			ix++
 			if ix = mapx {
@@ -665,8 +670,10 @@
 		}
 		
 		chdir directory
-		
-		map_mode = "load_map"
+	
+		if from_new_map = 0 {
+			map_mode = "load_map"
+		}
 		goto *map_preparating
 		
 	} else {
@@ -701,17 +708,22 @@
 		dim sizex, mapx, mapy
 		dim sizey, mapx, mapy
 	
-		dim map, mapx, mapy				//各座標のアドオン番号
-		sdim name, mapx, mapy			//各座標のアドオン名
-		sdim category, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-		dim obj_type, mapx, mapy		//座標上にあるオブジェクトのタイプ
-		dim obj_dire, mapx, mapy		//座標上にあるオブジェクトの向き
-		dim obj_serial_num, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
-		dim obj_use_tiles_x, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
-		dim obj_use_tiles_y, mapx, mapy	//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
-		dim obj_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
-		dim obj_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
-		dim residents, mapx, mapy		//各建築物の住民の数（住宅地のみ）
+		dim map, mapx, mapy					//各座標のアドオン番号
+		sdim name, mapx, mapy				//各座標のアドオン名
+		sdim category, mapx, mapy			//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
+		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
+		dim obj_use_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
+		dim obj_use_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
+		dim obj_tiles_x, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
+		dim obj_tiles_y, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
+		
+		dim residents, mapx, mapy			//各建築物の住民の数（住宅地のみ）
+		dim workers_Commercial, mapx, mapy	//商業地区の従業員数（商業地区のみ）
+		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
+		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
+		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -722,7 +734,7 @@
 	addon_num_buf = addon_num("tile_greenfield")
 	
 	//マップ読み込み
-		if map_mode = "load_map" {
+		;if map_mode = "load_map" {
 	
 			//暗号化済みのマップデータの場合
 			if instr(load_mapdata_name, 0, "cbx") != -1 {
@@ -798,9 +810,22 @@
 						name(x,y) = name_buf_a_tile(x)
 						map(x,y) = addon_num(name_buf_a_tile(x))
 	
-						if addon_type(map(x,y)) = "low_density_residential" or addon_type(map(x,y)) = "high_density_residential" {
-							total_maximum_capacity += addon_maximum_capacity(map(x,y))
-						}
+						//各種の地区の収容可能人数に加算
+							if addon_type(map(x,y)) = "low_density_residential" or addon_type(map(x,y)) = "high_density_residential" {
+								total_Residential_maximum_capacity += addon_maximum_capacity(map(x,y))
+							}
+							if addon_type(map(x,y)) = "low_density_commercial" or addon_type(map(x,y)) = "high_density_commercial" {
+								total_Commercial_maximum_capacity += addon_maximum_capacity(map(x,y))
+							}
+							if addon_type(map(x,y)) = "low_density_office" or addon_type(map(x,y)) = "high_density_office" {
+								total_Office_maximum_capacity += addon_maximum_capacity(map(x,y))
+							}
+							if addon_type(map(x,y)) = "low_density_industrial" or addon_type(map(x,y)) = "high_density_industrial" {
+								total_Industrial_maximum_capacity += addon_maximum_capacity(map(x,y))
+							}
+							if addon_type(map(x,y)) = "public" {
+								total_Public_maximum_capacity += addon_maximum_capacity(map(x,y))
+							}
 					loop
 			
 				loop
@@ -989,7 +1014,95 @@
 					loop
 			
 				loop
-		}
+	
+			//workers_Commercial(x,y)の読み込み
+				if instr(load_mapdata, 0, "workers_Commercial(x,y)") != -1 {
+					workers_Commercial_buf = get_chapter(load_mapdata, "workers_Commercial(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel workers_Commercial_buf
+						noteget workers_Commercial_buf_a_line, (y+1)
+			
+						sdim workers_Commercial_buf_a_tile, mapx
+						split workers_Commercial_buf_a_line, ", ", workers_Commercial_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							workers_Commercial(x,y) = int(workers_Commercial_buf_a_tile(x))
+							Total_workers_Commercial += workers_Commercial(x,y)
+						loop
+				
+					loop
+				}
+	
+			//workers_Office(x,y)の読み込み
+				if instr(load_mapdata, 0, "workers_Office(x,y)") != -1 {
+					workers_Office_buf = get_chapter(load_mapdata, "workers_Office(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel workers_Office_buf
+						noteget workers_Office_buf_a_line, (y+1)
+			
+						sdim workers_Office_buf_a_tile, mapx
+						split workers_Office_buf_a_line, ", ", workers_Office_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							workers_Office(x,y) = int(workers_Office_buf_a_tile(x))
+							Total_workers_Office += workers_Office(x,y)
+						loop
+				
+					loop
+				}
+	
+			//workers_Industrial(x,y)の読み込み
+				if instr(load_mapdata, 0, "workers_Industrial(x,y)") != -1 {
+					workers_Industrial_buf = get_chapter(load_mapdata, "workers_Industrial(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel workers_Industrial_buf
+						noteget workers_Industrial_buf_a_line, (y+1)
+			
+						sdim workers_Industrial_buf_a_tile, mapx
+						split workers_Industrial_buf_a_line, ", ", workers_Industrial_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							workers_Industrial(x,y) = int(workers_Industrial_buf_a_tile(x))
+							Total_workers_Industrial += workers_Industrial(x,y)
+						loop
+				
+					loop
+				}
+	
+			//workers_Public(x,y)の読み込み
+				if instr(load_mapdata, 0, "workers_Public(x,y)") != -1 {
+					workers_Public_buf = get_chapter(load_mapdata, "workers_Public(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel workers_Public_buf
+						noteget workers_Public_buf_a_line, (y+1)
+			
+						sdim workers_Public_buf_a_tile, mapx
+						split workers_Public_buf_a_line, ", ", workers_Public_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							workers_Public(x,y) = int(workers_Public_buf_a_tile(x))
+							Total_workers_Public += workers_Public(x,y)
+						loop
+				
+					loop
+				}
+		;}
 	
 	//雨粒の初期位置
 		randomize
@@ -1007,12 +1120,45 @@
 		//更地（tile_greenfield）の"null"のobj_dire番号
 			tile_greenfield_null_dire_buf = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 	
+	//需要度を増減
+		//総求人数を取得
+			Vacancies = (total_Commercial_maximum_capacity-Total_workers_Commercial) + (total_Office_maximum_capacity-Total_workers_Office) + (total_Industrial_maximum_capacity-Total_workers_Industrial) + (total_Public_maximum_capacity-Total_workers_Public)
+		
+		//総浮浪者数を取得
+			Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
+				
+		//RCOI需要メーターを変動
+			if Vacancies > 0 and Total_Vagrants > 0 {
+				if Total_Population > 0 {
+					demand_Residential 	= 100 - ((Total_Population / Vacancies) * 100) + Special_demand_Residential
+				} else {
+					demand_Residential = 100
+				}
+				if Total_Commercial_maximum_capacity > 0 {
+					demand_Commercial 	= 100 - ((Total_Vagrants / (total_Commercial_maximum_capacity-Total_workers_Commercial)) * 100)  + Special_demand_Commercial
+				} else {
+					demand_Commercial = 100
+				}
+				if Total_Office_maximum_capacity > 0 {
+					demand_Office 	= 100 - ((Total_Vagrants / (total_Office_maximum_capacity-Total_workers_Office)) * 100)  + Special_demand_Office
+				} else {
+					demand_Office = 100
+				}
+				if Total_Industrial_maximum_capacity > 0 {
+					demand_Industrial 	= 100 - ((Total_Vagrants / (total_Industrial_maximum_capacity-Total_workers_Industrial)) * 100)  + Special_demand_Industrial
+				} else {
+					demand_Industrial = 100
+				}
+			}
+	
 *map_drawing
 	randomize
 	
 	repeat
 	
 		dim done_build, mapx, mapy
+		dim done_build_2, mapx, mapy
+		dim done_build_3, mapx, mapy
 	
 		map_drawing_cnt ++
 	
@@ -1285,7 +1431,7 @@
 			}
 	
 		if cnt \ 10 = 0 {
-			title "マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			title "demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
 		repeat mapx
@@ -1417,8 +1563,21 @@
 					color 255, 255, 255 : font "Yu Gothic UI", 14
 					pos 20, windowy-32-titlebar_h : mes "人口 "+Total_Population+"人 "+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃"
 				
-				//RCI需要メータ（まだ非対応）
-					;color 34, 177, 76 : boxf windowx-100, windowy-30-(demand_of_Resindential/4), windowx-100+10, windowy-30
+				//RCOI需要メータ
+					font SystemFont, 10
+					
+					//R - 住居区画
+						color 34, 177, 76 : boxf windowx-200, windowy-titlebar_h-20-(demand_Residential/3), windowx-200+10, windowy-titlebar_h-20
+						cmes "R", windowx-200, windowy-titlebar_h-20, windowx-200+10, windowy-titlebar_h-10
+					//C - 商業区画
+						color 63, 72, 204 : boxf windowx-190, windowy-titlebar_h-20-(demand_Commercial/3), windowx-190+10, windowy-titlebar_h-20
+						cmes "C", windowx-190, windowy-titlebar_h-20, windowx-190+10, windowy-titlebar_h-10
+					//O - オフィス区画
+						color 0, 162, 232 : boxf windowx-180, windowy-titlebar_h-20-(demand_Office/3), windowx-180+10, windowy-titlebar_h-20
+						cmes "O", windowx-180, windowy-titlebar_h-20, windowx-180+10, windowy-titlebar_h-10
+					//I - 工業区画
+						color 255, 242, 0 : boxf windowx-170, windowy-titlebar_h-20-(demand_Residential/3), windowx-170+10, windowy-titlebar_h-20
+						cmes "I", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
 	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
@@ -1956,6 +2115,8 @@
 							
 							x = x_buf : y = y_buf
 	
+							cetegory_buf = category(mx,my)
+	
 						//敷設した地点の情報を書き換え
 							map(mx, my) = addon_num_normal_road
 							name(mx, my) = put_addon_name
@@ -1967,10 +2128,36 @@
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
 							
-							if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
-								Total_Population -= residents(mx, my)
-								total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-								residents(mx, my) = 0
+							if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
+								if category_buf = "residential" {
+									Total_Population -= residents(mx,my)
+									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+									residents(mx,my) = 0
+								}
+			
+								if category_buf = "commercial" {
+									Total_workers_Commercial -= workers_Commercial(mx, my)
+									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+									workers_Commercial(mx, my) = 0
+								}
+			
+								if category_buf = "office" {
+									Total_workers_Office -= workers_Office(mx, my)
+									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+									workers_Office(mx, my) = 0
+								}
+			
+								if category_buf = "industrial" {
+									Total_workers_Industrial -= workers_Industrial(mx, my)
+									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+									workers_Industrial(mx, my) = 0
+								}
+			
+								if category_buf = "public" {
+									Total_workers_Public -= workers_Public(mx, my)
+									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+									workers_Public(mx, my) = 0
+								}
 							}
 	
 						return
@@ -2192,14 +2379,11 @@
 								if obj_serial_num(mx, my) = 0 {
 									next_obj_serial_num += 1
 								}
-										
-							//住居地区なら都市全体の収容可能人数を増やす
-								if category_buf = "residential" {
-									total_maximum_capacity += addon_maximum_capacity(addon_num_buf)
-								}
 								
 							//建設処理（x方向）
 								repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
+									before_category = category(mx+cnt,my)
+									
 									map(mx+cnt,my) = addon_num_buf
 									name(mx+cnt,my) = put_addon_name
 									category(mx+cnt,my) = category_buf
@@ -2210,10 +2394,36 @@
 									obj_serial_num(mx+cnt,my) = next_obj_serial_num
 									obj_use_tiles_x(mx+cnt,my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my)) * acx
 									obj_tiles_x(mx+cnt,my) = cnt
-		
-									Total_Population -= residents(mx+cnt,my)
-									total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx+cnt,my) = 0
+									
+									if before_category = "residential" and x = mx and y = my {
+										Total_Population -= residents(mx+cnt,my)
+										total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx+cnt,my) = 0
+									}
+	
+									if before_category = "commercial" and x = mx and y = my {
+										Total_workers_Commercial -= workers_Commercial(mx+cnt, my)
+										total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										workers_Commercial(mx+cnt, my) = 0
+									}
+									
+									if before_category = "office" and x = mx and y = my {
+										Total_workers_Office -= workers_Office(mx+cnt, my)
+										total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										workers_Office(mx+cnt, my) = 0
+									}
+	
+									if before_category = "industrial" and x = mx and y = my {
+										Total_workers_Industrial -= workers_Industrial(mx+cnt, my)
+										total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										workers_Industrial(mx+cnt, my) = 0
+									}
+	
+									if before_category = "public" and x = mx and y = my {
+										Total_workers_Public -= workers_Public(mx+cnt, my)
+										total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										workers_Public(mx+cnt, my) = 0
+									}
 								loop
 	
 							//建設処理（y方向）
@@ -2228,11 +2438,69 @@
 									obj_serial_num(mx,my+cnt) = next_obj_serial_num
 									obj_use_tiles_y(mx,my+cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my)) * acy
 									obj_tiles_y(mx,my+cnt) = cnt
+									
+									if before_category = "residential" and done_build_2(mx,my) = 0 {
+										Total_Population -= residents(mx+cnt,my)
+										total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										residents(mx+cnt,my) = 0
 	
-									Total_Population -= residents(mx,my+cnt)
-									total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx,my+cnt) = 0
+										done_build_2(mx,my) = 1
+									}
+	
+									if before_category = "commercial" and done_build_2(mx,my) = 0 {
+										;Total_workers_Commercial -= workers_Commercial(mx+cnt, my)
+										;total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										;workers_Commercial(mx+cnt, my) = 0
+	
+										;done_build_2(mx,my) = 1
+									}
+	
+									if before_category = "office" and done_build_2(mx,my) = 0 {
+										;Total_workers_Office -= workers_Office(mx+cnt, my)
+										;total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										;workers_Office(mx+cnt, my) = 0
+	
+										;done_build_2(mx,my) = 1
+									}
+	
+									if before_category = "industrial" and done_build_2(mx,my) = 0 {
+										;Total_workers_Industrial -= workers_Industrial(mx+cnt, my)
+										;total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										;workers_Industrial(mx+cnt, my) = 0
+	
+										;done_build_2(mx,my) = 1
+									}
+	
+									if before_category = "public" and done_build_2(mx,my) = 0 {
+										;Total_workers_Public -= workers_Public(mx+cnt, my)
+										;total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+										;workers_Public(mx+cnt, my) = 0
+	
+										;done_build_2(mx,my) = 1
+									}
 								loop
+	
+							//都市全体の収容可能人数を増やす
+								if category_buf = "residential" and done_build_3(mx,my) = 0 {
+									total_Residential_maximum_capacity += addon_maximum_capacity(addon_num_buf)
+									done_build_3(mx,my) = 1
+								}
+								if category_buf = "commercial" and done_build_3(mx,my) = 0 {
+									total_Commercial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
+									done_build_3(mx,my) = 1
+								}
+								if category_buf = "office" and done_build_3(mx,my) = 0 {
+									total_Office_maximum_capacity += addon_maximum_capacity(addon_num_buf)
+									done_build_3(mx,my) = 1
+								}
+								if category_buf = "industrial" and done_build_3(mx,my) = 0 {
+									total_Industrial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
+									done_build_3(mx,my) = 1
+								}
+								if category_buf = "public" and done_build_3(mx,my) = 0 {
+									total_Public_maximum_capacity += addon_maximum_capacity(addon_num_buf)
+									done_build_3(mx,my) = 1
+								}
 						}
 					}	
 					
@@ -2253,6 +2521,8 @@
 					tile_addon_num_buf = addon_num("tile_greenfield")
 					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
 	
+					category_buf = category(mx,my)
+	
 					p = 0
 	
 				//道路またはx方向、y方向、いずれも1マスのオブジェクトの場合
@@ -2269,9 +2539,35 @@
 						obj_tiles_x(mx, my) = 0
 						obj_tiles_y(mx, my) = 0
 	
-						Total_Population -= residents(mx, my)
-						total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-						residents(mx, my) = 0
+						if category_buf = "residential" {
+							Total_Population -= residents(mx,my)
+							total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							residents(mx,my) = 0
+						}
+	
+						if category_buf = "commercial" {
+							Total_workers_Commercial -= workers_Commercial(mx, my)
+							total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							workers_Commercial(mx, my) = 0
+						}
+	
+						if category_buf = "office" {
+							Total_workers_Office -= workers_Office(mx, my)
+							total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							workers_Office(mx, my) = 0
+						}
+	
+						if category_buf = "industrial" {
+							Total_workers_Industrial -= workers_Industrial(mx, my)
+							total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							workers_Industrial(mx, my) = 0
+						}
+	
+						if category_buf = "public" {
+							Total_workers_Public -= workers_Public(mx, my)
+							total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+							workers_Public(mx, my) = 0
+						}
 					}
 					
 				//x方向に2マス以上要する場合
@@ -2283,9 +2579,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_x(mx,my) +p
 								map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
@@ -2306,9 +2628,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_x(mx,my) +p
 								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
@@ -2329,9 +2677,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_x(mx,my) +p
 								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
@@ -2352,9 +2726,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							if obj_use_tiles_x(mx,my) != 0 {
 								repeat obj_use_tiles_x(mx,my) +p
@@ -2381,9 +2781,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
@@ -2404,9 +2830,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
@@ -2427,9 +2879,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)+cnt) = tile_addon_num_buf
@@ -2450,9 +2928,35 @@
 								p=0
 							}
 	
-							Total_Population -= residents(mx, my)
-							total_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-							residents(mx, my) = 0
+							if category_buf = "residential" {
+								Total_Population -= residents(mx,my)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx,my) = 0
+							}
+		
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx, my)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx, my) = 0
+							}
+		
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx, my)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx, my) = 0
+							}
+		
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx, my)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx, my) = 0
+							}
+		
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx, my)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx, my) = 0
+							}
 							
 							repeat obj_use_tiles_y(mx,my) +p
 								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
@@ -2790,46 +3294,226 @@
 	return
 	
 *fluctuation
-	//人口・需要度などを増減
+	//人口・労働人口・需要度などを増減
 	
 		//毎日午前0時に増減
-			if time_Hour != 0 or time_Minutes != 0 or category(x,y) != "residential" {
+			if time_Hour != 0 or time_Minutes != 0 {
 				return
 			}
 	
-		//住民数を変更するかどうかをランダムに決める（後々に需要度によって確率が変動するようにする予定）
-			if rnd(5) != 0 {
-				return
-			}
+		//変数初期化
+			before_residents = 0
+			before_workers_Commericial = 0
+			before_workers_Office = 0
+			before_workers_Industrial = 0
+			before_workers_Public = 0
 	
-		//変更する場合、増やすか減らすかを決定
-			//変更前の住居地区の住民数
-				before_residents = residents(x,y)
+		//人口の増減
+			if category(x,y) = "residential" {
+				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					rndv = 10+(demand_Residential/10)
+					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
+						
+				//変更前の住居地区の住民数
+					before_residents = residents(x,y)
+		
+				//人口の増減処理
+					if f < 10+(demand_Residential/10) {
+						//各住居地区に何人増やすか
+							if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
+								add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
+								residents(x,y) = before_residents + add_residents
+							}
+					}
 				
-			add_or_cut = rnd(3)
-	
-			if add_or_cut = 0 or add_or_cut = 1 {
-				//各住居地区に何人増やすか
-					if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
-						add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
-						residents(x,y) = before_residents + add_residents
+					if f > 10+(demand_Residential/10) {
+						//各住居地区で何人減らすか
+							if before_residents > 0 {
+								cut_residents = rnd(before_residents)
+								residents(x,y) = before_residents - cut_residents
+							}
 					}
-			}
-	
-			if add_or_cut = 2 {
-				//各住居地区で何人減らすか
-					if before_residents > 0 {
-						cut_residents = rnd(before_residents)
-						residents(x,y) = before_residents - cut_residents
+				
+					if residents(x,y) < 0 {
+						residents(x,y) = 0
 					}
+		
+				//総人口数にも反映
+					Total_Population = Total_Population - before_residents + residents(x,y)
 			}
 	
-			if residents(x,y) < 0 {
-				residents(x,y) = 0
+		//商業区画の労働人口の増減
+			if category(x,y) = "commercial" {
+				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					rndv = 10+(demand_Commercial/10)
+					f = rnd(rndv)+1		; fの値は商業地区の需要度が100％なら20～0
+						
+				//変更前の商業区画の労働者数
+					before_workers_Commercial = workers_Commercial(x,y)
+		
+				//増減処理
+					if f < 10+(demand_Commercial/10) {
+						//各商業地区に何人増やすか
+							if addon_maximum_capacity(map(x,y)) - before_workers_Commercial > 0 {
+								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Commercial)
+								workers_Commercial(x,y) = before_workers_Commercial + add_workers
+							}
+					}
+				
+					if f > 10+(demand_Commercial/10) {
+						//各商業地区で何人減らすか
+							if before_workers_Commercial > 0 {
+								cut_workers = rnd(before_workers_Commercial)
+								workers_Commercial(x,y) = before_workers_Commercial - cut_workers
+							}
+					}
+				
+					if workers_Commercial(x,y) < 0 {
+						workers_Commercial(x,y) = 0
+					}
+		
+				//総労働人口数にも反映
+					Total_workers_Commercial = Total_workers_Commercial - before_workers_Commercial + workers_Commercial(x,y)
 			}
 	
-		//総人口数にも反映
-			Total_Population = Total_Population - before_residents + residents(x,y)
+		//オフィス区画の労働人口の増減
+			if category(x,y) = "office" {
+				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					rndv = 10+(demand_Office/10)
+					f = rnd(rndv)+1		; fの値はオフィス地区の需要度が100％なら20～0
+						
+				//変更前のオフィス区画の労働者数
+					before_workers_Office = workers_Office(x,y)
+		
+				//増減処理
+					if f < 10+(demand_Office/10) {
+						//各オフィス地区に何人増やすか
+							if addon_maximum_capacity(map(x,y)) - before_workers_Office > 0 {
+								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Office)
+								workers_Office(x,y) = before_workers_Office + add_workers
+							}
+					}
+				
+					if f > 10+(demand_Office/10) {
+						//各オフィス地区で何人減らすか
+							if before_workers_Office > 0 {
+								cut_workers = rnd(before_workers_Office)
+								workers_Office(x,y) = before_workers_Office - cut_workers
+							}
+					}
+				
+					if workers_Office(x,y) < 0 {
+						workers_Office(x,y) = 0
+					}
+		
+				//総労働人口数にも反映
+					Total_workers_Office = Total_workers_Office - before_workers_Office + workers_Office(x,y)
+			}
+	
+		//工業区画の労働人口の増減
+			if category(x,y) = "industrial" {
+				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					rndv = 10+(demand_Industrial/10)
+					f = rnd(rndv)+1		; fの値は工業地区の需要度が100％なら20～0
+						
+				//変更前の工業区画の労働者数
+					before_workers_Industrial = workers_Industrial(x,y)
+		
+				//増減処理
+					if f < 10+(demand_Industrial/10) {
+						//各工業地区に何人増やすか
+							if addon_maximum_capacity(map(x,y)) - before_workers_Industrial > 0 {
+								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Industrial)
+								workers_Industrial(x,y) = before_workers_Industrial + add_workers
+							}
+					}
+				
+					if f > 10+(demand_Industrial/10) {
+						//各工業地区で何人減らすか
+							if before_workers_Industrial > 0 {
+								cut_workers = rnd(before_workers_Industrial)
+								workers_Industrial(x,y) = before_workers_Industrial - cut_workers
+							}
+					}
+				
+					if workers_Industrial(x,y) < 0 {
+						workers_Industrial(x,y) = 0
+					}
+		
+				//総労働人口数にも反映
+					Total_workers_Industrial = Total_workers_Industrial - before_workers_Industrial + workers_Industrial(x,y)
+			}
+	
+		//公共施設の労働人口の増減
+			if category(x,y) = "public" {
+				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					f = rnd(2)
+						
+				//変更前の公共施設の労働者数
+					before_workers_Public = workers_Public(x,y)
+		
+				//増減処理
+					if f = 0 {
+						//各公共施設に何人増やすか
+							if addon_maximum_capacity(map(x,y)) - before_workers_Public > 0 {
+								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Public)
+								workers_Public(x,y) = before_workers_Public + add_workers
+							}
+					}
+				
+					if f = 1 {
+						//各公共施設で何人減らすか
+							if before_workers_Public > 0 {
+								cut_workers = rnd(before_workers_Public)
+								workers_Public(x,y) = before_workers_Public - cut_workers
+							}
+					}
+				
+					if workers_Public(x,y) < 0 {
+						workers_Public(x,y) = 0
+					}
+		
+				//総労働人口数にも反映
+					Total_workers_Public = Total_workers_Public - before_workers_Public + workers_Public(x,y)
+			}
+	
+		//需要度を増減
+			//総求人数を取得
+				before_Vacancies = Vacancies
+				Vacancies = (total_Commercial_maximum_capacity-Total_workers_Commercial) + (total_Office_maximum_capacity-Total_workers_Office) + (total_Industrial_maximum_capacity-Total_workers_Industrial) + (total_Public_maximum_capacity-Total_workers_Public)
+				
+			//総浮浪者数を取得
+				before_Vagrants = Vagrants
+				Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
+	
+				if Total_Vagrants < 0 {
+				;	Vacancies = before_Vacancies
+				;	Vagrants = before_Vagrants	
+				}
+				
+			//RCOI需要メーターを変動
+				if Vacancies > 0 and Total_Vagrants > 0 {
+					if Total_Population > 0 {
+						demand_Residential 	= 100 - ((Total_Population / Vacancies) * 100) + Special_demand_Residential
+					} else {
+						demand_Residential = 100
+					}
+					if Total_Commercial_maximum_capacity > 0 {
+						demand_Commercial 	= 100 - ((Total_Vagrants / (total_Commercial_maximum_capacity-Total_workers_Commercial)) * 100)  + Special_demand_Commercial
+					} else {
+						demand_Commercial = 100
+					}
+					if Total_Office_maximum_capacity > 0 {
+						demand_Office 	= 100 - ((Total_Vagrants / (total_Office_maximum_capacity-Total_workers_Office)) * 100)  + Special_demand_Office
+					} else {
+						demand_Office = 100
+					}
+					if Total_Industrial_maximum_capacity > 0 {
+						demand_Industrial 	= 100 - ((Total_Vagrants / (total_Industrial_maximum_capacity-Total_workers_Industrial)) * 100)  + Special_demand_Industrial
+					} else {
+						demand_Industrial = 100
+					}
+				}
 	
 	return
 	
@@ -3526,6 +4210,98 @@
 			
 			noteadd "}", -1
 	
+		//workers_Commercial(x,y)
+			noteadd "workers_Commercial(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", workers_Commercial(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Commercial(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//workers_Office(x,y)
+			noteadd "workers_Office(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", workers_Office(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Office(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//workers_Industrial(x,y)
+			noteadd "workers_Industrial(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", workers_Industrial(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Industrial(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//workers_Public(x,y)
+			noteadd "workers_Public(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", workers_Public(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Public(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
 		//保存先ファイルの選択
 			dialog "cbx", 17, "Cities Box マップデータ"
 	
@@ -3571,7 +4347,22 @@
 		return
 			
 *exit
-	if ginfo_act != 0 {
+	if ginfo_act = 0 {
+		//一時ファイルを削除
+			repeat total_addons
+				exist "data/temp/"+addon_name(cnt)+".temp"
+				
+				if strsize != -1 {
+					delete "data/temp/"+addon_name(cnt)+".temp"
+				}
+			
+				wait 1
+			loop
+	
+		gsel 0
+		end
+		
+	} else {
 		gsel ginfo_act, -1
 		
 		onclick 0
@@ -3588,20 +4379,4 @@
 		cursor_mode = "normal"
 		
 		goto *map_drawing
-	}
-	
-	if ginfo_act = 0 {
-		//一時ファイルを削除
-			repeat total_addons
-				exist "data/temp/"+addon_name(cnt)+".temp"
-				
-				if strsize != -1 {
-					delete "data/temp/"+addon_name(cnt)+".temp"
-				}
-			
-				wait 1
-			loop
-	
-		gsel 0
-		end
 	}

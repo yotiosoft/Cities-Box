@@ -8,6 +8,8 @@ addon_type_2 = "fire_depertment"
 
 use_types = "null"
 
+maximum_capacity = "50"
+
 null {
 	image = "small_fire_depertment.png"
 	direction = "left, top, bottom, right"

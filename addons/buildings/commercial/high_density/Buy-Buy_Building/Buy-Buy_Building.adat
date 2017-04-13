@@ -7,6 +7,8 @@ addon_type = "high_density_commercial"
 
 use_types = "null"
 
+maximum_capacity = "300"
+
 null {
 	image = "Buy-Buy_Building.png"
 	direction = "left, top, bottom, right"
