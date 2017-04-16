@@ -2,4 +2,4 @@ SystemFont = "Yu Gothic UI"
 
 Config_WindowSize_X = 640;
 Config_WindowSize_Y = 480;
-Set_Play_BGM = 1;
+Set_Play_BGM = 0;
