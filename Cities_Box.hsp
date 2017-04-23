@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.5.0.1
+									   Cities Box Ver 0.5.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -239,7 +239,7 @@
 		celload "img/menu_icons/menu/industrial.png", 19					; メニューアイコン（工業地区建設）
 		celload "img/menu_icons/menu/public.png", 7							; メニューアイコン（郵便局建設）
 	
-		celload "img/menu_icons/menu/bulldozer.png", 10						; 取り壊しボタン
+		celload "img/menu_icons/menu/bulldozer.png", 10						; 撤去ボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
 		celload "img/menu_icons/setting/setting.png", 13					; 設定ボタン
 	
@@ -1539,7 +1539,7 @@
 						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
-				//取り壊しボタン
+				//撤去ボタン
 					if cursor_mode = "bulldozer" {
 						gmode 2
 						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 32, 32, 32
@@ -1797,7 +1797,7 @@
 				opening_menu_put_Industrial = 0
 			}
 	
-		//取り壊しボタン
+		//撤去ボタン
 			if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
 				cursor_mode = "bulldozer"
 	
@@ -2060,7 +2060,7 @@
 	dim direction_check, 4
 	
 *build_obj_2
-	/*-----------------道路・建物の建設・敷設（左クリック）、削除（右クリック or 取り壊しモード）---------------------*/
+	/*-----------------道路・建物の建設・敷設（左クリック）、撤去（右クリック or 撤去モード）---------------------*/
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
 			if cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0 {
@@ -2068,7 +2068,7 @@
 				return
 			}
 	
-		//取り壊しモードの場合は選択されたマスを更地にする
+		//撤去モードの場合は選択されたマスを更地にする
 			if cursor_mode = "bulldozer" {
 				gosub *delete_obj
 				return
@@ -2270,9 +2270,17 @@
 									
 									repeat addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf)
 										rx = mx + cnt
+	
+										if direction = "right" and addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf) > 1 {
+											rx -= 1
+										}
 										
 										repeat addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf)
 											ry = my + cnt
+	
+											if direction = "bottom" and addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf) > 1 {
+												ry -= 1
+											}
 	
 											if done_build(rx,ry) = 0 and category(rx,ry) != "tile" and (category(rx,ry) = "road" or obj_use_tiles_x(rx,ry) != 0 or obj_use_tiles_y(rx,ry) != 0) {
 												found_other_obj = 1
@@ -2379,114 +2387,76 @@
 									next_obj_serial_num += 1
 								}
 								
-							//建設処理（x方向）
+							//建設処理
 								repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-									before_category = category(mx+cnt,my)
+									rx = cnt
 									
-									map(mx+cnt,my) = addon_num_buf
-									name(mx+cnt,my) = put_addon_name
-									category(mx+cnt,my) = category_buf
-
-									obj_type(mx+cnt,my) = obj_type(mx, my)
-									obj_dire(mx+cnt,my) = obj_dire(mx, my)
+									if direction = "right" and addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf) > 1 {
+										rx -= 1
+									}
+									
+									repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
+										ry = cnt
+	
+										if direction = "bottom" and addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf) > 1 {
+											ry -= 1
+										}
+										
+										before_category = category(mx+rx,my+ry)
+										
+										map(mx+rx,my+ry) = addon_num_buf
+										name(mx+rx,my+ry) = put_addon_name
+										category(mx+rx,my+ry) = category_buf
+	
+										obj_type(mx+rx,my+ry) = obj_type(mx, my)
+										obj_dire(mx+rx,my+ry) = obj_dire(mx, my)
+			
+										obj_serial_num(mx+rx,my+ry) = next_obj_serial_num
+										obj_use_tiles_x(mx+rx,my+ry) = addon_chip_x(addon_num_buf, 0, obj_dire(mx+rx,my+ry)) * acx
+										obj_use_tiles_y(mx+rx,my+ry) = addon_chip_y(addon_num_buf, 0, obj_dire(mx+rx,my+ry)) * acy
+										obj_tiles_x(mx+rx,my+ry) = rx
+										obj_tiles_y(mx+rx,my+ry) = ry
+										
+										if before_category = "residential" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+											Total_Population -= residents(mx+rx,my+ry)
+											total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+											residents(mx+rx,my+ry) = 0
 		
-									obj_serial_num(mx+cnt,my) = next_obj_serial_num
-									obj_use_tiles_x(mx+cnt,my) = addon_chip_x(addon_num_buf, 0, obj_dire(mx,my)) * acx
-									obj_tiles_x(mx+cnt,my) = cnt
-									
-									if before_category = "residential" and x = mx and y = my and done_build_2(mx,my) = 0 {
-										Total_Population -= residents(mx+cnt,my)
-										total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										residents(mx+cnt,my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "commercial" and x = mx and y = my and done_build_2(mx,my) = 0 {
-										Total_workers_Commercial -= workers_Commercial(mx+cnt, my)
-										total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Commercial(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-									
-									if before_category = "office" and x = mx and y = my and done_build_2(mx,my) = 0 {
-										Total_workers_Office -= workers_Office(mx+cnt, my)
-										total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Office(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "industrial" and x = mx and y = my and done_build_2(mx,my) = 0 {
-										Total_workers_Industrial -= workers_Industrial(mx+cnt, my)
-										total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Industrial(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "public" and x = mx and y = my and done_build_2(mx,my) = 0 {
-										Total_workers_Public -= workers_Public(mx+cnt, my)
-										total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Public(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-								loop
-	
-							//建設処理（y方向）
-								repeat addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-									map(mx,my+cnt) = addon_num_buf
-									name(mx,my+cnt) = put_addon_name
-									category(mx,my+cnt) = category_buf
-	
-									obj_type(mx,my+cnt) = obj_type(mx, my)
-									obj_dire(mx,my+cnt) = obj_dire(mx, my)
-
-									obj_serial_num(mx,my+cnt) = next_obj_serial_num
-									obj_use_tiles_y(mx,my+cnt) = addon_chip_y(addon_num_buf, 0, obj_dire(mx,my)) * acy
-									obj_tiles_y(mx,my+cnt) = cnt
-									
-									if before_category = "residential" and done_build_2(mx,my) = 0 {
-										Total_Population -= residents(mx+cnt,my)
-										total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										residents(mx+cnt,my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "commercial" and done_build_2(mx,my) = 0 {
-										Total_workers_Commercial -= workers_Commercial(mx+cnt, my)
-										total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Commercial(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "office" and done_build_2(mx,my) = 0 {
-										Total_workers_Office -= workers_Office(mx+cnt, my)
-										total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Office(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "industrial" and done_build_2(mx,my) = 0 {
-										Total_workers_Industrial -= workers_Industrial(mx+cnt, my)
-										total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Industrial(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
-	
-									if before_category = "public" and done_build_2(mx,my) = 0 {
-										Total_workers_Public -= workers_Public(mx+cnt, my)
-										total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-										workers_Public(mx+cnt, my) = 0
-	
-										done_build_2(mx,my) = 1
-									}
+											done_build_2(mx+rx,my+ry) = 1
+										}
+		
+										if before_category = "commercial" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+											Total_workers_Commercial -= workers_Commercial(mx+rx,my+ry)
+											total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+											workers_Commercial(mx+rx,my+ry) = 0
+		
+											done_build_2(mx+rx,my+ry) = 1
+										}
+										
+										if before_category = "office" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+											Total_workers_Office -= workers_Office(mx+rx,my+ry)
+											total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+											workers_Office(mx+rx,my+ry) = 0
+		
+											done_build_2(mx+rx,my+ry) = 1
+										}
+		
+										if before_category = "industrial" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+											Total_workers_Industrial -= workers_Industrial(mx+rx,my+ry)
+											total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+											workers_Industrial(mx+rx,my+ry) = 0
+		
+											done_build_2(mx+rx,my+ry) = 1
+										}
+		
+										if before_category = "public" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+											Total_workers_Public -= workers_Public(mx+rx,my+ry)
+											total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+											workers_Public(mx+rx,my+ry) = 0
+		
+											done_build_2(mx+rx,my+ry) = 1
+										}
+									loop
 								loop
 	
 							//都市全体の収容可能人数を増やす
@@ -2523,7 +2493,7 @@
 			return
 	
 *delete_obj
-		//取り壊し
+		//撤去
 			//カーソルがマップ外にある場合はreturn
 				if mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1 {
 					return
@@ -2538,487 +2508,70 @@
 					category_buf = category(mx,my)
 	
 					p = 0
-					
-					map(mx, my) = tile_addon_num_buf
-					name(mx, my) = "tile_greenfield"
-					category(mx, my) = "tile"
-					obj_type(mx, my) = tile_greenfield_null_type_buf
-					obj_dire(mx, my) = tile_greenfield_null_dire_buf
-						
-					obj_serial_num(mx, my) = 0
-					obj_use_tiles_x(mx, my) = 0
-					obj_use_tiles_y(mx, my) = 0
-					obj_tiles_x(mx, my) = 0
-					obj_tiles_y(mx, my) = 0
 	
-					if category_buf = "residential" {
-						Total_Population -= residents(mx,my)
-						total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-						residents(mx,my) = 0
+					if obj_use_tiles_x(mx,my) = 0 {
+						px = 1
+					}
+					if obj_use_tiles_y(mx,my) = 0 {
+						py = 1
 					}
 	
-					if category_buf = "commercial" {
-						Total_workers_Commercial -= workers_Commercial(mx, my)
-						total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-						Vacancies -= addon_maximum_capacity(addon_num_buf)
-						workers_Commercial(mx, my) = 0
-					}
-		
-					if category_buf = "office" {
-						Total_workers_Office -= workers_Office(mx, my)
-						total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-						Vacancies -= addon_maximum_capacity(addon_num_buf)
-						workers_Office(mx, my) = 0
-					}
-		
-					if category_buf = "industrial" {
-						Total_workers_Industrial -= workers_Industrial(mx, my)
-						total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-						Vacancies -= addon_maximum_capacity(addon_num_buf)
-						workers_Industrial(mx, my) = 0
-					}
-		
-					if category_buf = "public" {
-						Total_workers_Public -= workers_Public(mx, my)
-						total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-						Vacancies -= addon_maximum_capacity(addon_num_buf)
-						workers_Public(mx, my) = 0
-					}
-					
-				//x方向に2マス以上要する場合
-					if obj_use_tiles_x(mx,my) != 0 {
-						if obj_direction_buf = "left" {
-							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
-							}
-							
-							repeat obj_use_tiles_x(mx,my) +p
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "residential" {
-									Total_Population -= residents(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-				
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-								
-								map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
-								name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
-								category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_type_buf
-								obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_dire_buf
-									
-								obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								obj_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-							loop
-						}
-						
-						if obj_direction_buf = "right" {
-							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
-							}
-							
-							repeat obj_use_tiles_x(mx,my) +p
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "residential" {
-									Total_Population -= residents(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-				
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-								
-								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
-								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
-								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_type_buf
-								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_dire_buf
-									
-								obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								obj_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-							loop
-						}
-						
-						if obj_direction_buf = "top" {
-							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
-							}
-							
-							repeat obj_use_tiles_x(mx,my) +p
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "residential" {
-									Total_Population -= residents(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-				
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)-cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx-obj_tiles_x(mx,my)-cnt, my)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								}
-								
-								map(mx-obj_tiles_x(mx,my)-cnt, my) = tile_addon_num_buf
-								name(mx-obj_tiles_x(mx,my)-cnt, my) = "tile_greenfield"
-								category(mx-obj_tiles_x(mx,my)-cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_type_buf
-								obj_dire(mx-obj_tiles_x(mx,my)-cnt, my) = tile_greenfield_null_dire_buf
-								
-								obj_serial_num(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								obj_use_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-								obj_tiles_x(mx-obj_tiles_x(mx,my)-cnt, my) = 0
-							loop
-						}
-						
-						if obj_direction_buf = "bottom" {
-							if obj_use_tiles_x(mx,my) = 0 and addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
-							}
-							
-							repeat obj_use_tiles_x(mx,my) +p
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "residential" {
-									Total_Population -= residents(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-				
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx-obj_tiles_x(mx,my)+cnt, my)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-								
-								map(mx-obj_tiles_x(mx,my)+cnt, my) = tile_addon_num_buf
-								name(mx-obj_tiles_x(mx,my)+cnt, my) = "tile_greenfield"
-								category(mx-obj_tiles_x(mx,my)+cnt, my) = "tile"
-								obj_type(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_type_buf
-								obj_dire(mx-obj_tiles_x(mx,my)+cnt, my) = tile_greenfield_null_dire_buf
-								
-								obj_serial_num(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								obj_use_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								obj_tiles_x(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-							loop
-						}
-					}
+					repeat obj_use_tiles_x(mx,my) + px
+						rx = cnt
 	
-				//y方向に2マス以上要する場合
-					if obj_use_tiles_y(mx,my) != 0 {
-						if obj_direction_buf = "left" {
-							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
-							}
+						repeat obj_use_tiles_y(mx,my) + py
+							ry = cnt
 							
-							repeat obj_use_tiles_y(mx,my) +p
-								if category(mx, my-obj_tiles_y(mx,my)-cnt) = "residential" {
-									Total_Population -= residents(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								}
-				
-								if category(mx, my-obj_tiles_y(mx,my)-cnt) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
+							map(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = tile_addon_num_buf
+							name(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = "tile_greenfield"
+							category(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = "tile"
+							obj_type(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = tile_greenfield_null_type_buf
+							obj_dire(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = tile_greenfield_null_dire_buf
 								
-								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
-								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
-								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_type_buf
-								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_dire_buf
-									
-								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-							loop
-						}
-						if obj_direction_buf = "right" {
-							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
+							obj_serial_num(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							obj_use_tiles_x(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							obj_tiles_x(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							obj_use_tiles_y(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							obj_tiles_x(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							obj_tiles_y(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+	
+							if category_buf = "residential" {
+								Total_Population -= residents(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry)
+								total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								residents(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
 							}
-							
-							repeat obj_use_tiles_y(mx,my) +p
-								if category(mx, my-obj_tiles_y(mx,my)-cnt) = "residential" {
-									Total_Population -= residents(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								}
-				
-								if category(mx, my-obj_tiles_y(mx,my)-cnt) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-								
-								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
-								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
-								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_type_buf
-								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_dire_buf
-									
-								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-							loop
-						}
-						if obj_direction_buf = "top" {
-							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
+			
+							if category_buf = "commercial" {
+								Total_workers_Commercial -= workers_Commercial(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry)
+								total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								Vacancies -= addon_maximum_capacity(addon_num_buf)
+								workers_Commercial(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
 							}
-							
-							repeat obj_use_tiles_y(mx,my) +p
-								if category(mx, my-obj_tiles_y(mx,my)+cnt) = "residential" {
-									Total_Population -= residents(mx, my-obj_tiles_y(mx,my)+cnt)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-								}
 				
-								if category(mx, my-obj_tiles_y(mx,my)+cnt) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx, my-obj_tiles_y(mx,my)+cnt)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx, my-obj_tiles_y(mx,my)+cnt)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx, my-obj_tiles_y(mx,my)+cnt)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx, my-obj_tiles_y(mx,my)+cnt)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-								
-								map(mx, my-obj_tiles_y(mx,my)+cnt) = tile_addon_num_buf
-								name(mx, my-obj_tiles_y(mx,my)+cnt) = "tile_greenfield"
-								category(mx, my-obj_tiles_y(mx,my)+cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)+cnt) = tile_greenfield_null_type_buf
-								obj_dire(mx, my-obj_tiles_y(mx,my)+cnt) = tile_greenfield_null_dire_buf
-								
-								obj_serial_num(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-								obj_tiles_y(mx, my-obj_tiles_y(mx,my)+cnt) = 0
-							loop
-						}
-						if obj_direction_buf = "bottom" {
-							if obj_use_tiles_y(mx,my) = 0 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) > 0 {
-								p=1
-							} else {
-								p=0
+							if category_buf = "office" {
+								Total_workers_Office -= workers_Office(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry)
+								total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								Vacancies -= addon_maximum_capacity(addon_num_buf)
+								workers_Office(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
 							}
-							
-							repeat obj_use_tiles_y(mx,my) +p
-								if category(mx, my-obj_tiles_y(mx,my)-cnt) = "residential" {
-									Total_Population -= residents(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								}
 				
-								if category(mx, my-obj_tiles_y(mx,my)-cnt) = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "office" {
-									Total_workers_Office -= workers_Office(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-					
-								if category(mx-obj_tiles_x(mx,my)+cnt, my) = "public" {
-									Total_workers_Public -= workers_Public(mx, my-obj_tiles_y(mx,my)-cnt)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									Vacancies -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx-obj_tiles_x(mx,my)+cnt, my) = 0
-								}
-								
-								map(mx, my-obj_tiles_y(mx,my)-cnt) = tile_addon_num_buf
-								name(mx, my-obj_tiles_y(mx,my)-cnt) = "tile_greenfield"
-								category(mx, my-obj_tiles_y(mx,my)-cnt) = "tile"
-								obj_type(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_type_buf
-								obj_dire(mx, my-obj_tiles_y(mx,my)-cnt) = tile_greenfield_null_dire_buf
-								
-								obj_serial_num(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								obj_use_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-								obj_tiles_y(mx, my-obj_tiles_y(mx,my)-cnt) = 0
-							loop
-						}
-					}
+							if category_buf = "industrial" {
+								Total_workers_Industrial -= workers_Industrial(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry)
+								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								Vacancies -= addon_maximum_capacity(addon_num_buf)
+								workers_Industrial(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							}
+				
+							if category_buf = "public" {
+								Total_workers_Public -= workers_Public(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry)
+								total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								Vacancies -= addon_maximum_capacity(addon_num_buf)
+								workers_Public(mx-obj_use_tiles_x(mx,my)+rx, my-obj_use_tiles_y(mx,my)+ry) = 0
+							}
+	
+						loop
+	
+					loop
 			}
 	
 		from_build_obj = 0
