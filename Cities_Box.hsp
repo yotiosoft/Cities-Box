@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.5.1.1
+									   Cities Box Ver 0.5.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -64,7 +64,7 @@
 	
 	return int(temp_file)
 	
-/*adatの各項目の読み込み（使用例：get_chapter(元の変数, "検索する項目", "始点区切りコード", "終端コード") ）*/
+/*各項目の読み込み（使用例：get_chapter(元の変数, "検索する項目", "始点区切りコード", "終端コード") ）*/
 #defcfunc get_chapter var underlying_var, str search_chapter, str punctuate, str end_word
 	value = instr(underlying_var, 0, search_chapter)
 	get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), instr(underlying_var, value + strlen(""+search_chapter+""+punctuate+""), end_word) )
@@ -150,6 +150,14 @@
 #deffunc boxfa int ax, int ay, int bx, int by
 	pdx = ax, bx, bx, ax
 	pdy = ay, ay, by, by
+	gsquare -1,pdx, pdy
+	return
+	
+/*半透明色表示命令（機能はboxfaと同じ）*/
+#deffunc sboxf int depth, int ax, int ay, int bx, int by
+	pdx = ax, bx, bx, ax
+	pdy = ay, ay, by, by
+	gmode 3,,,depth
 	gsquare -1,pdx, pdy
 	return
 	
@@ -1392,6 +1400,22 @@
 			loop
 					
 		loop
+	
+		//時間帯に応じて明るさを調節
+			//夜間
+			if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
+				color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
+			}
+	
+			//夕方（だんだん暗く）
+			if time_Hour = 17 {
+				color 0, 0, 0 : sboxf double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
+			}
+	
+			//明け方（だんだん明るく）
+			if time_Hour = 6 {
+				color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
+			}
 	
 		//マウスポインタの位置のチップを光らせる
 			if opening_addon_menu = 1 {

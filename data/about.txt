@@ -1,2 +1,2 @@
 Title : Cities BoxiAlphaj
-Version : 0.5.1.1
+Version : 0.5.2
