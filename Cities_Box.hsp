@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.5.2
+									   Cities Box Ver 0.5.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -246,6 +246,7 @@
 		celload "img/menu_icons/menu/office.png", 6							; メニューアイコン（オフィス建設）
 		celload "img/menu_icons/menu/industrial.png", 19					; メニューアイコン（工業地区建設）
 		celload "img/menu_icons/menu/public.png", 7							; メニューアイコン（郵便局建設）
+		celload "img/menu_icons/menu/park.png", 29							; メニューアイコン（公園建設）
 	
 		celload "img/menu_icons/menu/bulldozer.png", 10						; 撤去ボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
@@ -475,6 +476,14 @@
 						noteadd addon_name(cnt), -1
 
 						notesel type_number_public
+						noteadd str(cnt), -1
+					}
+	
+					if addon_type(cnt) = "park" {
+						notesel type_park
+						noteadd addon_name(cnt), -1
+
+						notesel type_number_park
 						noteadd str(cnt), -1
 					}
 	
@@ -1563,6 +1572,15 @@
 						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
+				//公園ボタン
+					if cursor_mode = "put_Park" {
+						gmode 2
+						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
+					}
+	
 				//撤去ボタン
 					if cursor_mode = "bulldozer" {
 						gmode 2
@@ -1629,6 +1647,7 @@
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 			}
 			
 		//道路ボタン
@@ -1662,6 +1681,7 @@
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 			}
 	
 		//建物（住居地区）ボタン
@@ -1694,6 +1714,7 @@
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 			}
 	
 		//建物（商業地区）ボタン
@@ -1726,6 +1747,7 @@
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 			}
 	
 		//建物（オフィス）ボタン
@@ -1757,6 +1779,7 @@
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 			}
 	
 		//建物（工業地区）ボタン
@@ -1788,12 +1811,13 @@
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 			}
 			
 		//建物（公共施設）ボタン
 			if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
 	
-				if opening_menu_put_High_density_Residential = 0 {
+				if opening_menu_put_Public = 0 {
 					cursor_mode = "put_Public"
 					gosub *open_menu_addon_menu
 	
@@ -1819,6 +1843,39 @@
 				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_High_density_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Park = 0
+			}
+	
+		//建物（公園）ボタン
+			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
+	
+				if opening_menu_put_Park = 0 {
+					cursor_mode = "put_Park"
+					gosub *open_menu_addon_menu
+	
+					opening_addon_menu = 1
+					opening_menu_put_Park = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_park
+							noteget put_addon_name, clicked_addon_number
+			
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_park
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				} 
+	
+				opening_menu_put_Road = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
+				opening_menu_put_Low_density_Office = 0
+				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Industrial = 0
+				opening_menu_put_Public = 0
 			}
 	
 		//撤去ボタン
@@ -2073,6 +2130,27 @@
 						addon_num_buf = int(addon_num_buf)
 				}
 	
+			/*---------------------------------------------公共施設-----------------------------------------------*/
+			
+			//公共施設
+				notesel type_public
+				if opening_menu_put_Park = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Park"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_park
+						noteget put_addon_name, clicked_addon_number
+						
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_park
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+				}
+	
+			/*----------------------------------------------------------------------------------------------------*/
+	
 		}
 	
 	gosub *build_obj
@@ -2270,6 +2348,11 @@
 									category_buf = "public"
 								}
 	
+							//建物（公園）建設
+								if cursor_mode = "put_Park" {
+									category_buf = "park"
+								}
+	
 							//向きに応じてobj_type_bufとobj_dire_bufを代入
 								if direction = "left" {
 									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
@@ -2441,7 +2524,7 @@
 										obj_tiles_x(mx+rx,my+ry) = rx
 										obj_tiles_y(mx+rx,my+ry) = ry
 										
-										if before_category = "residential" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "residential" and done_build_2(mx+rx,my+ry) = 0 {
 											Total_Population -= residents(mx+rx,my+ry)
 											total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											residents(mx+rx,my+ry) = 0
@@ -2449,7 +2532,7 @@
 											done_build_2(mx+rx,my+ry) = 1
 										}
 		
-										if before_category = "commercial" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "commercial" and done_build_2(mx+rx,my+ry) = 0 {
 											Total_workers_Commercial -= workers_Commercial(mx+rx,my+ry)
 											total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Commercial(mx+rx,my+ry) = 0
@@ -2457,7 +2540,7 @@
 											done_build_2(mx+rx,my+ry) = 1
 										}
 										
-										if before_category = "office" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "office" and done_build_2(mx+rx,my+ry) = 0 {
 											Total_workers_Office -= workers_Office(mx+rx,my+ry)
 											total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Office(mx+rx,my+ry) = 0
@@ -2465,7 +2548,7 @@
 											done_build_2(mx+rx,my+ry) = 1
 										}
 		
-										if before_category = "industrial" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "industrial" and done_build_2(mx+rx,my+ry) = 0 {
 											Total_workers_Industrial -= workers_Industrial(mx+rx,my+ry)
 											total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Industrial(mx+rx,my+ry) = 0
@@ -2473,7 +2556,7 @@
 											done_build_2(mx+rx,my+ry) = 1
 										}
 		
-										if before_category = "public" and x = mx and y = my and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "public" and done_build_2(mx+rx,my+ry) = 0 {
 											Total_workers_Public -= workers_Public(mx+rx,my+ry)
 											total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Public(mx+rx,my+ry) = 0
@@ -2483,7 +2566,7 @@
 									loop
 								loop
 	
-							//都市全体の収容可能人数を増やす
+							//都市全体の収容可能人数或いは求人数を増やす
 								if category_buf = "residential" and done_build_3(mx,my) = 0 {
 									total_Residential_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
@@ -2665,6 +2748,9 @@
 	}
 	if cursor_mode = "put_Public" {
 		notesel type_number_public
+	}
+	if cursor_mode = "put_Park" {
+		notesel type_number_park
 	}
 	
 	repeat notemax
