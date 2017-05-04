@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.5.3
+									   Cities Box Ver 0.5.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -356,6 +356,9 @@
 				dim addon_bottom_right_x, total_addons, 100, 100
 				dim addon_bottom_right_y, total_addons, 100, 100
 	
+				dim addon_land_price_influence, 100, 100
+				dim addon_land_price_influence_grid, 100, 100
+	
 				sdim type_Two_lane_road, 128
 				sdim type_number_Two_lane_road, 128
 				sdim type_low_density_residential, 128
@@ -405,6 +408,10 @@
 	
 				//建物の収容可能人数（住居地区の場合は住民数、商業・オフィス・工業・公共施設は労働者数）
 					addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
+	
+				//地価の影響力
+					addon_land_price_influence(cnt) = int( get_chapter(buf_adat, "land_price_influence", " = \"", "\"") )
+					addon_land_price_influence_grid(cnt) = int( get_chapter(buf_adat, "land_price_influence_grid", " = \"", "\"") )
 	
 				//アドオンのadatファイルの詳細の読み込みへ
 					gosub *load_adat
@@ -601,6 +608,8 @@
 		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
+	
+		dim land_price, mapx, mapy			//地価（万円/坪）
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -621,6 +630,8 @@
 			workers_Office(ix,iy) = 0
 			workers_Industrial(ix,iy) = 0
 			workers_Public(ix,iy) = 0
+	
+			land_price(ix,iy) = 20
 			
 			ix++
 			if ix = mapx {
@@ -741,6 +752,8 @@
 		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
+	
+		dim land_price, mapx, mapy			//地価（万円/坪）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -1138,6 +1151,38 @@
 				
 					loop
 				}
+	
+			//land_price(x,y)の読み込み
+				if instr(load_mapdata, 0, "land_price(x,y)") != -1 {
+					land_price_buf = get_chapter(load_mapdata, "land_price(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel land_price_buf
+						noteget land_price_buf_a_line, (y+1)
+			
+						sdim land_price_buf_a_tile, mapx
+						split land_price_buf_a_line, ", ", land_price_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							land_price(x,y) = int(land_price_buf_a_tile(x))
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにland_priceの情報がない場合は全て20万円/坪に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								land_price(x,y) = 20
+							loop
+						loop
+				}
 		;}
 	
 	//雨粒の初期位置
@@ -1168,9 +1213,7 @@
 	
 	repeat
 	
-		dim done_build, mapx, mapy
-		dim done_build_2, mapx, mapy
-		dim done_build_3, mapx, mapy
+		dim done_build, 4, mapx, mapy
 	
 		map_drawing_cnt ++
 	
@@ -1460,8 +1503,8 @@
 				}
 			}
 	
-		if cnt \ 10 = 0 {
-			title "demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
+			title "land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
 		repeat mapx
@@ -2389,7 +2432,7 @@
 												ry -= 1
 											}
 	
-											if done_build(rx,ry) = 0 and category(rx,ry) != "tile" and (category(rx,ry) = "road" or obj_use_tiles_x(rx,ry) != 0 or obj_use_tiles_y(rx,ry) != 0) {
+											if done_build(0,rx,ry) = 0 and category(rx,ry) != "tile" and (category(rx,ry) = "road" or obj_use_tiles_x(rx,ry) != 0 or obj_use_tiles_y(rx,ry) != 0) {
 												found_other_obj = 1
 												
 												if direction = "left" {
@@ -2449,7 +2492,7 @@
 													}
 											}
 	
-											done_build(rx,ry) = 1
+											done_build(0,rx,ry) = 1
 										loop
 									loop
 	
@@ -2524,73 +2567,113 @@
 										obj_tiles_x(mx+rx,my+ry) = rx
 										obj_tiles_y(mx+rx,my+ry) = ry
 										
-										if before_category = "residential" and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "residential" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_Population -= residents(mx+rx,my+ry)
 											total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											residents(mx+rx,my+ry) = 0
 		
-											done_build_2(mx+rx,my+ry) = 1
+											done_build(1,mx+rx,my+ry) = 1
 										}
 		
-										if before_category = "commercial" and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "commercial" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_workers_Commercial -= workers_Commercial(mx+rx,my+ry)
 											total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Commercial(mx+rx,my+ry) = 0
 		
-											done_build_2(mx+rx,my+ry) = 1
+											done_build(1,mx+rx,my+ry) = 1
 										}
 										
-										if before_category = "office" and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "office" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_workers_Office -= workers_Office(mx+rx,my+ry)
 											total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Office(mx+rx,my+ry) = 0
 		
-											done_build_2(mx+rx,my+ry) = 1
+											done_build(1,mx+rx,my+ry) = 1
 										}
 		
-										if before_category = "industrial" and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "industrial" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_workers_Industrial -= workers_Industrial(mx+rx,my+ry)
 											total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Industrial(mx+rx,my+ry) = 0
 		
-											done_build_2(mx+rx,my+ry) = 1
+											done_build(1,x+rx,my+ry) = 1
 										}
 		
-										if before_category = "public" and done_build_2(mx+rx,my+ry) = 0 {
+										if before_category = "public" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_workers_Public -= workers_Public(mx+rx,my+ry)
 											total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Public(mx+rx,my+ry) = 0
 		
-											done_build_2(mx+rx,my+ry) = 1
+											done_build(1,mx+rx,my+ry) = 1
 										}
 									loop
 								loop
 	
+							//地価の変動
+								addon_land_price_influence__tmp = addon_land_price_influence(addon_num_buf)
+	
+								addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_buf)
+								
+								add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp
+								round = 0
+	
+								alpigt = addon_land_price_influence_grid__tmp	; 長いので省略
+								
+								for round, 1, alpigt+1, 1
+									repeat (round*2-1)
+										if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
+											land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+											done_build(2, mx+cnt-(round-1), my+round-1) = 1
+										}
+									loop
+									
+									repeat (round*2-1)
+										if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
+											land_price(mx+cnt-(round-1),my-round+1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+											done_build(2, mx+cnt-(round-1), my-round+1) = 1
+										}
+									loop
+	
+									repeat (round*2-1)
+										if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
+											land_price(mx+round-1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+											done_build(2, mx+round-1, my+cnt-(round-1)) = 1
+										}
+									loop
+	
+									repeat (round*2-1)
+										if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
+											land_price(mx-round+1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+											done_build(2, mx-round+1, my+cnt-(round-1)) = 1
+										}
+									loop
+								next
+	
 							//都市全体の収容可能人数或いは求人数を増やす
-								if category_buf = "residential" and done_build_3(mx,my) = 0 {
+								if category_buf = "residential" and done_build(3,mx,my) = 0 {
 									total_Residential_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build_3(mx,my) = 1
+									done_build(3,mx,my) = 1
 								}
-								if category_buf = "commercial" and done_build_3(mx,my) = 0 {
+								if category_buf = "commercial" and done_build(3,mx,my) = 0 {
 									total_Commercial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build_3(mx,my) = 1
+									done_build(3,mx,my) = 1
 								}
-								if category_buf = "office" and done_build_3(mx,my) = 0 {
+								if category_buf = "office" and done_build(3,mx,my) = 0 {
 									total_Office_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build_3(mx,my) = 1
+									done_build(3,mx,my) = 1
 								}
-								if category_buf = "industrial" and done_build_3(mx,my) = 0 {
+								if category_buf = "industrial" and done_build(3,mx,my) = 0 {
 									total_Industrial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build_3(mx,my) = 1
+									done_build(3,mx,my) = 1
 								}
-								if category_buf = "public" and done_build_3(mx,my) = 0 {
+								if category_buf = "public" and done_build(3,mx,my) = 0 {
 									total_Public_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build_3(mx,my) = 1
+									done_build(3,mx,my) = 1
 								}
 						}
 					}	
@@ -4069,6 +4152,29 @@
 						map_data_buf = strf("%03d", workers_Public(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Public(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//land_price(x,y)
+			noteadd "land_price(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", land_price(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", land_price(x,y))+""
 					}
 				loop
 			

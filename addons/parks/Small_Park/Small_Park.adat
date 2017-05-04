@@ -6,6 +6,8 @@ addon_icon = "icon_Small_Park.png"
 addon_type = "park"
 
 use_types = "null"
+land_price_influence = "40"
+land_price_influence_grid = "7"
 
 null {
 	image = "Small_Park.png"

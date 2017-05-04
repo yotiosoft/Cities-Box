@@ -8,6 +8,8 @@ addon_type = "high_density_office"
 use_types = "null"
 
 maximum_capacity = "1000"
+land_price_influence = "40"
+land_price_influence_grid = "5"
 
 null {
 	image = "24-storied_Office.png"

@@ -8,6 +8,8 @@ addon_type = "low_density_residential"
 use_types = "null"
 
 maximum_capacity = "6"
+land_price_influence = "15"
+land_price_influence_grid = "2"
 
 null {
 	image = "North-American_House.png"

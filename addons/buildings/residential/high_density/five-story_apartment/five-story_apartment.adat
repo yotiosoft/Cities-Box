@@ -8,6 +8,8 @@ addon_type = "high_density_residential"
 use_types = "null"
 
 maximum_capacity = "100"
+land_price_influence = "40"
+land_price_influence_grid = "3"
 
 null {
 	image = "five-story_apartment.png"

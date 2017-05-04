@@ -8,6 +8,8 @@ addon_type = "industrial"
 use_types = "null"
 
 maximum_capacity = "50"
+land_price_influence = "-10"
+land_price_influence_grid = "5"
 
 null {
 	image = "Charlie's_chocolate_factory.png"
