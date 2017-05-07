@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.5.4
+									  Cities Box Ver 0.5.4.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -325,6 +325,7 @@
 				sdim addon_summary, total_addons
 				sdim addon_icon, total_addons
 				sdim addon_type, total_addons
+				sdim addon_type_2, total_addons
 				dim addon_maximum_capacity, total_addons
 	
 				sdim use_type, total_addons, 100
@@ -356,8 +357,11 @@
 				dim addon_bottom_right_x, total_addons, 100, 100
 				dim addon_bottom_right_y, total_addons, 100, 100
 	
-				dim addon_land_price_influence, 100, 100
-				dim addon_land_price_influence_grid, 100, 100
+				dim addon_land_price_influence, 128
+				dim addon_land_price_influence_grid, 128
+	
+				dim addon_crime_rate_influence, 128
+				dim addon_crime_rate_influence_grid, 128
 	
 				sdim type_Two_lane_road, 128
 				sdim type_number_Two_lane_road, 128
@@ -405,6 +409,7 @@
 							
 				//アドオンのタイプ
 					addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
+					addon_type_2(cnt) = get_chapter(buf_adat, "addon_type_2", " = \"", "\"")
 	
 				//建物の収容可能人数（住居地区の場合は住民数、商業・オフィス・工業・公共施設は労働者数）
 					addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
@@ -412,6 +417,10 @@
 				//地価の影響力
 					addon_land_price_influence(cnt) = int( get_chapter(buf_adat, "land_price_influence", " = \"", "\"") )
 					addon_land_price_influence_grid(cnt) = int( get_chapter(buf_adat, "land_price_influence_grid", " = \"", "\"") )
+	
+				//犯罪率への影響力（+なら犯罪率増、-なら犯罪率減）
+					addon_crime_rate_influence(cnt) = int( get_chapter(buf_adat, "crime_rate_influence", " = \"", "\"") )
+					addon_crime_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "crime_rate_influence_grid", " = \"", "\"") )
 	
 				//アドオンのadatファイルの詳細の読み込みへ
 					gosub *load_adat
@@ -609,7 +618,8 @@
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 	
-		dim land_price, mapx, mapy			//地価（万円/坪）
+		dim land_price, mapx, mapy			//地価（万円/マス）
+		dim crime_rate, mapx, mapy			//犯罪率
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -632,6 +642,7 @@
 			workers_Public(ix,iy) = 0
 	
 			land_price(ix,iy) = 20
+			crime_rate(ix,iy) = 0
 			
 			ix++
 			if ix = mapx {
@@ -753,7 +764,8 @@
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 	
-		dim land_price, mapx, mapy			//地価（万円/坪）
+		dim land_price, mapx, mapy			//地価（万円/マス）
+		dim crime_rate, mapx, mapy
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -1173,13 +1185,45 @@
 					loop
 	
 				} else {
-					//セーブデータにland_priceの情報がない場合は全て20万円/坪に設定
+					//セーブデータにland_priceの情報がない場合は全て50万円/マスに設定
 						repeat mapx
 							x = cnt
 							repeat mapy
 								y = cnt
 	
-								land_price(x,y) = 20
+								land_price(x,y) = 50
+							loop
+						loop
+				}
+	
+				//crime_rate(x,y)の読み込み
+				if instr(load_mapdata, 0, "crime_rate(x,y)") != -1 {
+					crime_rate_buf = get_chapter(load_mapdata, "crime_rate(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel crime_rate_buf
+						noteget crime_rate_buf_a_line, (y+1)
+			
+						sdim crime_rate_buf_a_tile, mapx
+						split crime_rate_buf_a_line, ", ", crime_rate_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							crime_rate(x,y) = int(crime_rate_buf_a_tile(x))
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにcrime_rateの情報がない場合は全て0に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								crime_rate(x,y) = 0
 							loop
 						loop
 				}
@@ -1213,7 +1257,7 @@
 	
 	repeat
 	
-		dim done_build, 4, mapx, mapy
+		dim done_build, 5, mapx, mapy
 	
 		map_drawing_cnt ++
 	
@@ -2616,10 +2660,8 @@
 								
 								add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp
 								round = 0
-	
-								alpigt = addon_land_price_influence_grid__tmp	; 長いので省略
 								
-								for round, 1, alpigt+1, 1
+								for round, 1, addon_land_price_influence_grid__tmp+1, 1
 									repeat (round*2-1)
 										if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
 											land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
@@ -2649,31 +2691,73 @@
 									loop
 								next
 	
+							//犯罪率の変動
+								addon_crime_rate_influence__tmp = addon_crime_rate_influence(addon_num_buf)
+	
+								if addon_crime_rate_influence__tmp != 0 {
+	
+									addon_crime_rate_influence_grid__tmp = addon_crime_rate_influence_grid(addon_num_buf)
+									
+									add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp
+									round = 0
+									
+									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
+										repeat (round*2-1)
+											if done_build(3, mx+cnt-(round-1), my+round-1) = 0 {
+												crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+												done_build(3, mx+cnt-(round-1), my+round-1) = 1
+											}
+										loop
+										
+										repeat (round*2-1)
+											if done_build(3, mx+cnt-(round-1), my-round+1) = 0 {
+												crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+												done_build(3, mx+cnt-(round-1), my-round+1) = 1
+											}
+										loop
+		
+										repeat (round*2-1)
+											if done_build(3, mx+round-1, my+cnt-(round-1)) = 0 {
+												crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+												done_build(3, mx+round-1, my+cnt-(round-1)) = 1
+											}
+										loop
+		
+										repeat (round*2-1)
+											if done_build(3, mx-round+1, my+cnt-(round-1)) = 0 {
+												crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+												done_build(3, mx-round+1, my+cnt-(round-1)) = 1
+											}
+										loop
+									next
+	
+								}
+	
 							//都市全体の収容可能人数或いは求人数を増やす
-								if category_buf = "residential" and done_build(3,mx,my) = 0 {
+								if category_buf = "residential" and done_build(4,mx,my) = 0 {
 									total_Residential_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build(3,mx,my) = 1
+									done_build(4,mx,my) = 1
 								}
-								if category_buf = "commercial" and done_build(3,mx,my) = 0 {
+								if category_buf = "commercial" and done_build(4,mx,my) = 0 {
 									total_Commercial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build(3,mx,my) = 1
+									done_build(4,mx,my) = 1
 								}
-								if category_buf = "office" and done_build(3,mx,my) = 0 {
+								if category_buf = "office" and done_build(4,mx,my) = 0 {
 									total_Office_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build(3,mx,my) = 1
+									done_build(4,mx,my) = 1
 								}
-								if category_buf = "industrial" and done_build(3,mx,my) = 0 {
+								if category_buf = "industrial" and done_build(4,mx,my) = 0 {
 									total_Industrial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build(3,mx,my) = 1
+									done_build(4,mx,my) = 1
 								}
-								if category_buf = "public" and done_build(3,mx,my) = 0 {
+								if category_buf = "public" and done_build(4,mx,my) = 0 {
 									total_Public_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
-									done_build(3,mx,my) = 1
+									done_build(4,mx,my) = 1
 								}
 						}
 					}	
@@ -3797,6 +3881,11 @@
 *save
 	save_mapdata = ""
 	
+	//誤反応防止
+		if from_new_map = 0 and click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 {
+			return
+		}
+	
 	//マップ保存
 		notesel save_mapdata
 		
@@ -4182,6 +4271,29 @@
 			loop
 			
 			noteadd "}", -1
+		
+		//crime_rate(x,y)
+			noteadd "crime_rate(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", crime_rate(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", crime_rate(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
 	
 		//保存先ファイルの選択
 			dialog "cbx", 17, "Cities Box マップデータ"
@@ -4196,7 +4308,7 @@
 			}
 	
 		//暗号化（cbxで保存した場合のみ）
-			if instr(save_mapdata_name, 0, ".cbd") = -1 {
+			if instr(save_mapdata_name, 0, ".cbd") = -1 and stat = 1 {
 				notesel save_mapdata
 				l = notemax
 				
