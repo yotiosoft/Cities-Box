@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.5.4.1
+									   Cities Box Ver 0.5.5
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -251,6 +251,7 @@
 		celload "img/menu_icons/menu/bulldozer.png", 10						; 撤去ボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
 		celload "img/menu_icons/setting/setting.png", 13					; 設定ボタン
+		celload "img/menu_icons/stat/stat.png", 30							; 統計ボタン
 	
 	//小サイズのアイコン
 		celload "img/menu_icons/mini/low_density_residential.png", 8		; 低密度住居地区
@@ -261,6 +262,19 @@
 	//設定で使うアイコン
 		celload "img/menu_icons/setting/check.png", 14						; チェックボタン
 		celload "img/menu_icons/setting/refer.png", 16						; 参照ボタン
+	
+	//統計メニューで使うアイコン
+		celload "img/menu_icons/stat/type.png", 31							; 建築物の種類
+		celload "img/menu_icons/stat/land_price.png", 32					; 地価
+		celload "img/menu_icons/stat/crime_rate.png", 33					; 犯罪率
+	
+	//犯罪率、地価の統計で使うタイル
+		celload "img/quarter/+3.png", 34									; 地価/犯罪率 : 最良
+		celload "img/quarter/+2.png", 35									; 地価/犯罪率 : 良
+		celload "img/quarter/+1.png", 36									; 地価/犯罪率 : 概ね良
+		celload "img/quarter/-1.png", 37									; 地価/犯罪率 : 少し低い/悪い
+		celload "img/quarter/-2.png", 38									; 地価/犯罪率 : 低い/悪い
+		celload "img/quarter/-3.png", 39									; 地価/犯罪率 : 最低/最悪
 	
 	//ポインター
 		celload "img/pointer/blue.png", 17									; 青いポインター
@@ -421,6 +435,19 @@
 				//犯罪率への影響力（+なら犯罪率増、-なら犯罪率減）
 					addon_crime_rate_influence(cnt) = int( get_chapter(buf_adat, "crime_rate_influence", " = \"", "\"") )
 					addon_crime_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "crime_rate_influence_grid", " = \"", "\"") )
+	
+				//窓の色（RGB値）
+					addon_window_color_tmp = get_chapter(buf_adat, "window_color", " = (", ")")
+	
+					if instr(buf_adat, 0, "window_color") != -1 {
+						split addon_window_color_tmp, ", ", addon_window_color_R_tmp, addon_window_color_G_tmp, addon_window_color_B_tmp
+						addon_window_color_R(cnt) = int(addon_window_color_R_tmp) : addon_window_color_G(cnt) = int(addon_window_color_G_tmp) : addon_window_color_B(cnt) = int(addon_window_color_B_tmp)
+	
+					} else {
+						addon_window_color_R(cnt) = -1 : addon_window_color_G(cnt) = -1 : addon_window_color_B(cnt) = -1
+	
+					}
+					
 	
 				//アドオンのadatファイルの詳細の読み込みへ
 					gosub *load_adat
@@ -722,21 +749,24 @@
 *map_preparating
 	clrobj
 	
-	camx=-300:camy=-150		//カメラの位地
-	mapx=100:mapy=100
+	//変数を初期化
+		camx=-300:camy=-150		//カメラの位地
+		mapx=100:mapy=100
+		
+		menu_line_y = 400		//メニューとの境界線
+		cursor_mode = "normal"	//カーソルのモード
+		
+		pointer_icon = -1		//ポインタのアイコン（-1で四角形）
+		
+		before_mousex = 0
+		before_mousey = 0
+		
+		before_camx = 0
+		before_camy = 0
+		
+		put_addon_name = "tile_greenfield"
 	
-	menu_line_y = 400		//メニューとの境界線
-	cursor_mode = "normal"	//カーソルのモード
-	
-	pointer_icon = -1		//ポインタのアイコン（-1で四角形）
-	
-	before_mousex = 0
-	before_mousey = 0
-	
-	before_camx = 0
-	before_camy = 0
-	
-	put_addon_name = "tile_greenfield"
+		stat_mode = ""
 	
 	if from_new_map = 0 {
 		dim buffer_number, mapx, mapy
@@ -1498,6 +1528,20 @@
 		loop
 	
 		//時間帯に応じて明るさを調節
+		/*
+			//暗くする前に色を取得
+			repeat windowx
+				wx = cnt
+				repeat windowy
+					wy = cnt
+					pget wx, wy
+	
+					ginfo_tmp(wx,wy,0) = ginfo_r
+					ginfo_tmp(wx,wy,1) = ginfo_g
+					ginfo_tmp(wx,wy,2) = ginfo_b
+				loop
+			loop
+		*/
 			//夜間
 			if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
 				color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
@@ -1512,6 +1556,46 @@
 			if time_Hour = 6 {
 				color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 			}
+	
+		//夜間は窓を光らせる
+			/*repeat windowx
+				wx = cnt
+				
+				repeat windowy
+					wy = cnt
+					
+					if ginfo_r = 195 and ginfo_g = 195 and ginfo_b = 195 {
+						color 255, 242, 0
+						pset wx, wy
+					}
+				loop
+			loop
+	
+					/*
+					
+					if addon_window_color_R(addon_number) != -1 {
+						buffer (1000 + addon_number)
+							pos 0, 0 : gcopy (1000 + addon_number), 0, 0, addon_img_size_X(addon_number), addon_img_size_Y(addon_number)
+							
+							repeat addon_img_size_X(addon_number)
+								rx = cnt
+								repeat addon_img_size_Y(addon_number)
+									ry = cnt
+	
+									pget rx, ry
+									
+									if ginfo_r = addon_window_color_R(addon_number) and ginfo_g = addon_window_color_G(addon_number) and ginfo_b = addon_window_color_B(addon_number) {
+										color 234, 222, 0
+										pset rx, ry
+									}
+	
+								loop
+							loop
+	
+						gsel 0
+					}
+	
+					gsel 0*/
 	
 		//マウスポインタの位置のチップを光らせる
 			if opening_addon_menu = 1 {
@@ -1551,13 +1635,19 @@
 			title "land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
-		repeat mapx
-			x = cnt
-			repeat mapy
-				y = cnt
+		//メニューを開いているときはstat_mode = "type"にする
+			if cursor_mode != "normal" and cursor_mode != "put_Road" {
+				stat_mode = "type"
+			}
 	
-				//メニューを開いているときは地区を示す色を表示する
-					if cursor_mode != "normal" and cursor_mode != "put_Road" {
+		//stat_mode = "type"の場合は地区を示す色を表示する
+			if stat_mode = "type" {
+		
+				repeat mapx
+					x = cnt
+					repeat mapy
+						y = cnt
+						
 						qv2 x,y
 						category_buf = category(x,y)
 						
@@ -1581,9 +1671,104 @@
 							color : gmode 4,,,128
 							pos macro1, macro2-32 : gcopy 26, 0, 0, 64, 32
 						}
-					}
-			loop
-		loop
+					loop
+				loop
+		
+			}
+	
+		//stat_mode = "land_price"の場合は地価を示す色を表示する
+			if stat_mode = "land_price" {
+		
+				repeat mapx
+					x = cnt
+					repeat mapy
+						y = cnt
+	
+						category_buf = category(x,y)
+	
+						if category_buf != "road" and category_buf != "tile" {
+						
+							qv2 x,y
+							land_price_buf = land_price(x,y)
+							
+							if land_price_buf > 100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 34, 0, 0, 64, 32
+								
+							} else : if land_price_buf > 50 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
+		
+							} else : if land_price_buf > 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
+		
+							} else : if land_price_buf > -50 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
+		
+							} else : if land_price_buf > -100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
+		
+							} else {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
+							}
+	
+						}
+		
+					loop
+				loop
+		
+			}
+	
+		//stat_mode = "crime_rate"の場合は犯罪率を示す色を表示する
+			if stat_mode = "crime_rate" {
+		
+				repeat mapx
+					x = cnt
+					repeat mapy
+						y = cnt
+	
+						category_buf = category(x,y)
+	
+						if category_buf != "road" and category_buf != "tile" {
+						
+							qv2 x,y
+							crime_rate_buf = crime_rate(x,y)
+							
+							if crime_rate_buf <= -100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 34, 0, 0, 64, 32
+								
+							} else : if crime_rate_buf <= -30 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
+		
+							} else : if crime_rate_buf <= 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
+		
+							} else : if crime_rate_buf <= 30 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
+		
+							} else : if crime_rate_buf <= 100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
+		
+							} else {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
+							}
+	
+						}
+		
+					loop
+				loop
+		
+			}
 	
 		//天候の変動
 			gosub *climate
@@ -1685,12 +1870,43 @@
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
 	
+				//統計ボタン
+					gmode 2
+					pos windowx-54-32, windowy-70-titlebar_h : gcopy 30, 0, 0, 32, 32
+	
+				//統計メニュー（oepn_stat_menu = 1のとき）
+					if open_stat_menu = 1 {
+						sboxf 128, windowx-54-32-1, windowy-70-titlebar_h-20-1, windowx-54-32-1+(20*3)+1, windowy-70-titlebar_h
+	
+						gmode 2
+	
+						if stat_mode = "type" {
+							pos windowx-54-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 20, 20, 20
+						} else {
+							pos windowx-54-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 0, 20, 20
+						}
+	
+						if stat_mode = "land_price" {
+							pos windowx-54-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 20, 20, 20
+						} else {
+							pos windowx-54-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 0, 20, 20
+						}
+	
+						if stat_mode = "crime_rate" {
+							pos windowx-54-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 20, 20, 20
+						} else {
+							pos windowx-54-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 0, 20, 20
+						}
+					}
+	
 				//人口、日付・気温を表示
 					color 255, 255, 255 : font "Yu Gothic UI", 14
 					pos 20, windowy-32-titlebar_h : mes "人口 "+Total_Population+"人 "+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃"
 				
 				//RCOI需要メータ
 					font SystemFont, 10
+	
+					redraw 0
 					
 					//R - 住居区画
 						color 34, 177, 76 : boxf windowx-200, windowy-titlebar_h-20-(demand_Residential/3), windowx-200+10, windowy-titlebar_h-20
@@ -1705,6 +1921,8 @@
 						color 255, 242, 0 : boxf windowx-170, windowy-titlebar_h-20-(demand_Residential/3), windowx-170+10, windowy-titlebar_h-20
 						cmes "I", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
 	
+					redraw 1
+	
 				if opening_addon_menu = 1 {
 					gosub *open_menu_addon_menu
 				}
@@ -1715,283 +1933,320 @@
 	loop
 	
 *map_drawing_onclick
-	if opening_addon_menu = 1 {
-		menu_line_y = windowy-70-titlebar_h-32-20
-	} else {
-		menu_line_y = windowy-70-titlebar_h
-	}
 	
 	/*------------------------------------------メニューのボタンの動作------------------------------------------------*/
-	if mousey >= menu_line_y and mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy {
-		//標準カーソルボタン
-			if click_range( 20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32 ) = 1 {
-				cursor_mode = "normal"
+	//標準カーソルボタン
+		if click_range( 20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32 ) = 1 {
+			cursor_mode = "normal"
 	
-				opening_addon_menu = 0
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Public = 0
-				opening_menu_put_Park = 0
-			}
+			opening_addon_menu = 0
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Public = 0
+			opening_menu_put_Park = 0
+		}
 			
-		//道路ボタン
-			if click_range( 60, windowy-70-titlebar_h, 60+32, windowy-70-titlebar_h+32 ) = 1 {
+	//道路ボタン
+		if click_range( 60, windowy-70-titlebar_h, 60+32, windowy-70-titlebar_h+32 ) = 1 {
 				
-				if opening_menu_put_Road = 0 {
-					cursor_mode = "put_Road"
-					density = ""
+			if opening_menu_put_Road = 0 {
+				cursor_mode = "put_Road"
+				density = ""
 					
-					gosub *open_menu_addon_menu
+				gosub *open_menu_addon_menu
 	
-					opening_addon_menu = 1
-					opening_menu_put_Road = 1
+				opening_addon_menu = 1
+				opening_menu_put_Road = 1
+
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
 	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
-		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_Two_lane_road
-							noteget put_addon_name, clicked_addon_number
+					//選択されたアドオンのアドオン名を取得
+						notesel type_Two_lane_road
+						noteget put_addon_name, clicked_addon_number
 			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_Two_lane_road
-							noteget addon_num_normal_road, clicked_addon_number
-							addon_num_normal_road = int(addon_num_normal_road)
-				} 
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_Two_lane_road
+						noteget addon_num_normal_road, clicked_addon_number
+						addon_num_normal_road = int(addon_num_normal_road)
+			} 
 	
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Industrial = 0
-				opening_menu_put_Public = 0
-				opening_menu_put_Park = 0
-			}
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Industrial = 0
+			opening_menu_put_Public = 0
+			opening_menu_put_Park = 0
+		}
 	
-		//建物（住居地区）ボタン
-			if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
+	//建物（住居地区）ボタン
+		if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
 				
-				if opening_menu_put_Reaidential = 0 {
-					cursor_mode = "put_Residential"
-					density = "low"
+			if opening_menu_put_Reaidential = 0 {
+				cursor_mode = "put_Residential"
+				density = "low"
 					
-					gosub *open_menu_addon_menu
-					opening_addon_menu = 1
-					opening_menu_put_Residential = 1
-	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
+				gosub *open_menu_addon_menu
+				opening_addon_menu = 1
+				opening_menu_put_Residential = 1
+
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
 		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_low_density_residential
-							noteget put_addon_name, clicked_addon_number
+					//選択されたアドオンのアドオン名を取得
+						notesel type_low_density_residential
+						noteget put_addon_name, clicked_addon_number
 			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_low_density_residential
-							noteget addon_num_buf, clicked_addon_number
-							addon_num_buf = int(addon_num_buf)
-				} 
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_low_density_residential
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+			} 
 				
-				opening_menu_put_Road = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Industrial = 0
-				opening_menu_put_Public = 0
-				opening_menu_put_Park = 0
-			}
+			opening_menu_put_Road = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Industrial = 0
+			opening_menu_put_Public = 0
+			opening_menu_put_Park = 0
+		}
 	
-		//建物（商業地区）ボタン
-			if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
+	//建物（商業地区）ボタン
+		if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
 	
-				if opening_menu_put_Commercial = 0 {
-					cursor_mode = "put_Commercial"
-					density = "low"
+			if opening_menu_put_Commercial = 0 {
+				cursor_mode = "put_Commercial"
+				density = "low"
 					
-					gosub *open_menu_addon_menu
-					opening_addon_menu = 1
-					opening_menu_put_Commercial = 1
+				gosub *open_menu_addon_menu
+				opening_addon_menu = 1
+				opening_menu_put_Commercial = 1
 	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
 		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_low_density_commercial
-							noteget put_addon_name, clicked_addon_number
-			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_low_density_commercial
-							noteget addon_num_buf, clicked_addon_number
-							addon_num_buf = int(addon_num_buf)
-				} 
-	
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Industrial = 0
-				opening_menu_put_Public = 0
-				opening_menu_put_Park = 0
-			}
-	
-		//建物（オフィス）ボタン
-			if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
-	
-				if opening_menu_put_High_density_Office = 0 {
-					cursor_mode = "put_High_density_Office"
-					gosub *open_menu_addon_menu
-	
-					opening_addon_menu = 1
-					opening_menu_put_High_density_Office = 1
-	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
+					//選択されたアドオンのアドオン名を取得
+						notesel type_low_density_commercial
+						noteget put_addon_name, clicked_addon_number
 		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_high_density_office
-							noteget put_addon_name, clicked_addon_number
-			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_high_density_office
-							noteget addon_num_buf, clicked_addon_number
-							addon_num_buf = int(addon_num_buf)
-				} 
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_low_density_commercial
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+			} 
 	
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_Industrial = 0
-				opening_menu_put_Public = 0
-				opening_menu_put_Park = 0
-			}
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Industrial = 0
+			opening_menu_put_Public = 0
+			opening_menu_put_Park = 0
+		}
 	
-		//建物（工業地区）ボタン
-			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
+	//建物（オフィス）ボタン
+		if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
 	
-				if opening_menu_put_High_density_Office = 0 {
-					cursor_mode = "put_Industrial"
-					gosub *open_menu_addon_menu
+			if opening_menu_put_High_density_Office = 0 {
+				cursor_mode = "put_High_density_Office"
+				gosub *open_menu_addon_menu
 	
-					opening_addon_menu = 1
-					opening_menu_put_Industrial = 1
+				opening_addon_menu = 1
+				opening_menu_put_High_density_Office = 1
 	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
 		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_industrial
-							noteget put_addon_name, clicked_addon_number
+					//選択されたアドオンのアドオン名を取得
+						notesel type_high_density_office
+						noteget put_addon_name, clicked_addon_number
 			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_industrial
-							noteget addon_num_buf, clicked_addon_number
-							addon_num_buf = int(addon_num_buf)
-				} 
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_high_density_office
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+			} 
 	
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Public = 0
-				opening_menu_put_Park = 0
-			}
-			
-		//建物（公共施設）ボタン
-			if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_Industrial = 0
+			opening_menu_put_Public = 0
+			opening_menu_put_Park = 0
+		}
 	
-				if opening_menu_put_Public = 0 {
-					cursor_mode = "put_Public"
-					gosub *open_menu_addon_menu
+	//建物（工業地区）ボタン
+		if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
 	
-					opening_addon_menu = 1
-					opening_menu_put_Public = 1
-	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
+			if opening_menu_put_High_density_Office = 0 {
+				cursor_mode = "put_Industrial"
+				gosub *open_menu_addon_menu
+
+				opening_addon_menu = 1
+				opening_menu_put_Industrial = 1
+
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
 		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_public
-							noteget put_addon_name, clicked_addon_number
+					//選択されたアドオンのアドオン名を取得
+						notesel type_industrial
+						noteget put_addon_name, clicked_addon_number
 			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_public
-							noteget addon_num_buf, clicked_addon_number
-							addon_num_buf = int(addon_num_buf)
-				} 
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_industrial
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+			} 
 	
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Industrial = 0
-				opening_menu_put_Park = 0
-			}
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Public = 0
+			opening_menu_put_Park = 0
+		}
+			
+	//建物（公共施設）ボタン
+		if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
 	
-		//建物（公園）ボタン
-			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
+			if opening_menu_put_Public = 0 {
+				cursor_mode = "put_Public"
+				gosub *open_menu_addon_menu
 	
-				if opening_menu_put_Park = 0 {
-					cursor_mode = "put_Park"
-					gosub *open_menu_addon_menu
+				opening_addon_menu = 1
+				opening_menu_put_Public = 1
 	
-					opening_addon_menu = 1
-					opening_menu_put_Park = 1
-	
-					//とりあえず一番左にあるアドオンを選択させておく
-						clicked_addon_number = 0
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
 		
-						//選択されたアドオンのアドオン名を取得
-							notesel type_park
-							noteget put_addon_name, clicked_addon_number
+					//選択されたアドオンのアドオン名を取得
+						notesel type_public
+						noteget put_addon_name, clicked_addon_number
+		
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_public
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+			} 
+	
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Industrial = 0
+			opening_menu_put_Park = 0
+		}
+	
+	//建物（公園）ボタン
+		if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
+	
+			if opening_menu_put_Park = 0 {
+				cursor_mode = "put_Park"
+				gosub *open_menu_addon_menu
+	
+				opening_addon_menu = 1
+				opening_menu_put_Park = 1
+	
+				//とりあえず一番左にあるアドオンを選択させておく
+					clicked_addon_number = 0
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_park
+						noteget put_addon_name, clicked_addon_number
 			
-						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_park
-							noteget addon_num_buf, clicked_addon_number
-							addon_num_buf = int(addon_num_buf)
-				} 
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_park
+						noteget addon_num_buf, clicked_addon_number
+						addon_num_buf = int(addon_num_buf)
+			} 
 	
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Industrial = 0
-				opening_menu_put_Public = 0
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Industrial = 0
+			opening_menu_put_Public = 0
+		}
+	
+	//撤去ボタン
+		if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
+			cursor_mode = "bulldozer"
+	
+			opening_addon_menu = 0
+			opening_menu_put_Road = 0
+			opening_menu_put_Residential = 0
+			opening_menu_put_Commercial = 0
+			opening_menu_put_Low_density_Office = 0
+			opening_menu_put_High_density_Office = 0
+			opening_menu_put_Public = 0
+		}
+	
+	//設定ボタン
+		if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
+			cursor_mode = "normal"
+			opening_addon_menu = 0
+			gosub *setting
+		}
+	
+	//保存ボタン
+		if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
+			cursor_mode = "normal"
+			opening_addon_menu = 0
+			gosub *save
+		}
+	
+	//統計ボタン
+		if click_range( windowx-54-32, windowy-70-titlebar_h, windowx-54, windowy-70-titlebar_h+32 ) = 1 {
+			if open_stat_menu = 0 {
+				open_stat_menu = 1
+				stat_mode = ""
+	
+			} else {
+				open_stat_menu = 0
+				stat_mode = ""
 			}
+		}
 	
-		//撤去ボタン
-			if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
-				cursor_mode = "bulldozer"
-	
-				opening_addon_menu = 0
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
-				opening_menu_put_Public = 0
+	//統計メニュー
+		if open_stat_menu = 1 and click_range( windowx-54-32, windowy-70-titlebar_h-20, windowx-54-32+20, windowy-70-titlebar_h ) = 1 {
+			if stat_mode != "type" {
+				stat_mode = "type"
+			} else {
+				stat_mode = ""
 			}
-	
-		//設定ボタン
-			if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
-				cursor_mode = "normal"
-				opening_addon_menu = 0
-				gosub *setting
+		}
+		if open_stat_menu = 1 and click_range( windowx-54-32+20, windowy-70-titlebar_h-20, windowx-54-32+40, windowy-70-titlebar_h ) = 1 {
+			if stat_mode != "land_price" {
+				stat_mode = "land_price"
+			} else {
+				stat_mode = ""
 			}
-	
-		//保存ボタン
-			if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
-				cursor_mode = "normal"
-				opening_addon_menu = 0
-				gosub *save
+		}
+		if open_stat_menu = 1 and click_range( windowx-54-32+40, windowy-70-titlebar_h-20, windowx-54-32+60, windowy-70-titlebar_h ) = 1 {
+			if stat_mode != "crime_rate" {
+				stat_mode = "crime_rate"
+			} else {
+				stat_mode = ""
 			}
+		}
 	
+	//メニューバーの上辺（windowy-70-titlebar_h）より上がクリックされた場合はreturn
+		if opening_addon_menu = 1 {
+			menu_line_y = windowy-70-titlebar_h-32-20
+		} else {
+			menu_line_y = windowy-70-titlebar_h
+		}
+	
+		if mousey >= menu_line_y and mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy {
 	
 		//アドオン選択ボタン（水色のメニューバー）
 			

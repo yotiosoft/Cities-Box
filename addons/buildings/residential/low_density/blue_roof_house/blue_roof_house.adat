@@ -11,6 +11,8 @@ maximum_capacity = "8"
 land_price_influence = "10"
 land_price_influence_grid = "2"
 
+window_color = (195, 195, 195)
+
 null {
 	image = "blue_roof_house.png"
 	direction = "left, top, bottom, right"
