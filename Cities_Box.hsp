@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.5.5.1
+									   Cities Box Ver 0.5.6
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -722,7 +722,7 @@
 		}
 	
 	from_new_map = 1
-	goto *setting
+	goto *new_map_setting
 	
 *load_map
 	if from_new_map = 0 {
@@ -1284,6 +1284,9 @@
 		//総浮浪者数を取得
 			Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
 	
+	//読み込み後最初のループであることを示す
+		first_loop = 1
+		
 *map_drawing
 	randomize
 	
@@ -1902,32 +1905,37 @@
 					}
 	
 				//人口、日付・気温を表示
-					color 255, 255, 255 : font "Yu Gothic UI", 14
-					pos 20, windowy-32-titlebar_h : mes "人口 "+Total_Population+"人 "+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃"
+					color 255, 255, 255 : font "Yu Gothic UI", 12
+					pos 300, windowy-70-titlebar_h+5 : mes "人口 "+Total_Population+"人\n"+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃"
+	
+				//ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
+					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
+						gosub *get_news
+					}
+	
+					color 255, 255, 255 : font "Yu Gothic UI", 10
+					pos 20, windowy-32-titlebar_h+5 : mes "News : "+news_content+""
+	
+				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
+					if opening_addon_menu = 1 {
+						gosub *open_menu_addon_menu
+					}
 				
 				//RCOI需要メータ
 					font SystemFont, 10
-	
-					redraw 0
 					
 					//R - 住居区画
-						color 34, 177, 76 : boxf windowx-200, windowy-titlebar_h-20-(demand_Residential/3), windowx-200+10, windowy-titlebar_h-20
-						cmes "R", windowx-200, windowy-titlebar_h-20, windowx-200+10, windowy-titlebar_h-10
+						color 34, 177, 76 : boxf windowx-150, windowy-titlebar_h-20-(demand_Residential/3), windowx-150+10, windowy-titlebar_h-20
+						cmes "R", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
 					//C - 商業区画
-						color 63, 72, 204 : boxf windowx-190, windowy-titlebar_h-20-(demand_Commercial/3), windowx-190+10, windowy-titlebar_h-20
-						cmes "C", windowx-190, windowy-titlebar_h-20, windowx-190+10, windowy-titlebar_h-10
+						color 63, 72, 204 : boxf windowx-140, windowy-titlebar_h-20-(demand_Commercial/3), windowx-140+10, windowy-titlebar_h-20
+						cmes "C", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
 					//O - オフィス区画
-						color 0, 162, 232 : boxf windowx-180, windowy-titlebar_h-20-(demand_Office/3), windowx-180+10, windowy-titlebar_h-20
-						cmes "O", windowx-180, windowy-titlebar_h-20, windowx-180+10, windowy-titlebar_h-10
+						color 0, 162, 232 : boxf windowx-130, windowy-titlebar_h-20-(demand_Office/3), windowx-130+10, windowy-titlebar_h-20
+						cmes "O", windowx-130, windowy-titlebar_h-20, windowx-130+10, windowy-titlebar_h-10
 					//I - 工業区画
-						color 255, 242, 0 : boxf windowx-170, windowy-titlebar_h-20-(demand_Residential/3), windowx-170+10, windowy-titlebar_h-20
-						cmes "I", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
-	
-					redraw 1
-	
-				if opening_addon_menu = 1 {
-					gosub *open_menu_addon_menu
-				}
+						color 255, 242, 0 : boxf windowx-120, windowy-titlebar_h-20-(demand_Residential/3), windowx-120+10, windowy-titlebar_h-20
+						cmes "I", windowx-120, windowy-titlebar_h-20, windowx-120+10, windowy-titlebar_h-10
 					
 			redraw 1
 			await 30
@@ -3875,11 +3883,68 @@
 		
 		return
 	
-*setting
-	if from_setting_onclick = 0 {
-		screen 1, 300, 400
-	}
+*get_news
+	//都市のニュースの取得
 	
+		first_loop = 0
+		news_content = ""
+	
+		//特殊ニュース
+			notesel news_file
+			noteload "data/news/special.news"
+			
+			; マップ作成直後
+				if not_displayed_news_new_map = 1 {
+					not_displayed_news_new_map = 0
+	
+					same_news = 0
+	
+					; 同じ内容のニュースを複数読み込む
+					repeat notemax
+						noteget news_tmp, cnt
+	
+						if instr(news_tmp, 0, "case=\"new_map\"") != -1 {
+							split news_tmp, ", ", tmp, news_content_candidate_tmp
+							news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; 表示するニュースの候補
+							same_news ++	; 同じ内容のニュースの数
+						}
+					loop
+					
+					if same_news > 0 {
+						news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
+					}
+				}
+	
+		//特に報じることがない場合、どうでもいいニュースを表示
+			notesel news_file
+			noteload "data/news/others.news"
+			
+			if news_content = "" {
+				not_displayed_news_new_map = 0
+
+				same_news = 0
+	
+				; 同じ内容のニュースを複数読み込む
+				repeat notemax
+					noteget news_tmp, cnt
+	
+					if instr(news_tmp, 0, "case=\"others\"") != -1 {
+						split news_tmp, ", ", tmp, news_content_candidate_tmp
+						news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; 表示するニュースの候補
+						same_news ++	; 同じ内容のニュースの数
+					}
+				loop
+				
+				if same_news > 0 {
+					news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
+				}
+			}
+	
+	return
+					
+	
+*setting
+	screen 1, 300, 400
 	gsel 1
 	
 	title "Cities Box 設定"
@@ -4029,6 +4094,104 @@
 	clrobj
 	
 	goto *setting
+	
+*new_map_setting
+	screen 1, 400, 300
+	
+	gsel 1
+	title "新規マップ作成"
+	
+	onclick gosub *new_map_setting_onclick
+	
+	color 95, 95, 95 : boxf
+	
+	color 255, 255, 255
+	font SystemFont, 16
+	
+	//都市名(City_Name)
+		pos 10, 10 : mes "都市名"
+	
+		if from_setting_onclick = 0 {
+			setting_City_Name = City_Name
+		}
+		
+		objsize 280, 20
+		pos 80, 10 : input setting_City_Name
+	
+	//市長名(Mayor_Name)
+		pos 10, 40 : mes "市長名"
+	
+		if from_setting_onclick = 0 {
+			setting_Mayor_Name = Mayor_Name
+		}
+		
+		objsize 280, 20
+		pos 80, 40 : input setting_Mayor_Name
+	
+	//天候の変化(Set_Change_Weather)
+		if from_setting_onclick = 0 {
+			setting_Set_Change_Weather = Set_Change_Weather
+		}
+		
+		if setting_Set_Change_Weather = 0 {
+			pos 10, 73 : gcopy 14, 0, 0, 16, 16
+		} else {
+			pos 10, 73 : gcopy 14, 0, 16, 16, 16
+		}
+		
+		pos 35, 70 : mes "天候の変化"
+	
+	//OKボタン
+		color 255, 255, 255 : boxf 150, 260, 250, 290
+		color 95, 95, 95 : boxf 151, 261, 249, 289
+	
+		color 255, 255, 255 : font SystemFont, 20
+		cmes "OK", 150, 260, 250, 290
+		
+	stop
+	
+*new_map_setting_onclick
+	gsel 1
+	
+	from_setting_onclick = 1
+	
+	//天候の変化(Set_Change_Weather)
+		//チェックボックス
+			if click_range(10, 73, 10+16, 73+16) = 1 {
+				if setting_Set_Change_Weather = 0 {
+					setting_Set_Change_Weather = 1
+				} else {
+					setting_Set_Change_Weather = 0
+				}
+			}
+	
+	//OKボタン
+		if click_range(150, 260, 250, 290) = 1 {
+	
+		// マップ作成時の初期設定
+			City_Name = setting_City_Name
+			Mayor_Name = setting_Mayor_Name
+			Set_Change_Name = setting_Set_Change_Name
+			
+			gosub *save
+
+			gsel 1, -1
+			gsel 0
+	
+			load_mapdata_name = save_mapdata_name
+			
+			from_setting_onclick = 0
+	
+			not_displayed_news_new_map = 1
+
+			onclick 0
+			
+			goto *load_map
+		}
+	
+	clrobj
+	
+	goto *new_map_setting
 	
 *save_setting
 	chdir directory
