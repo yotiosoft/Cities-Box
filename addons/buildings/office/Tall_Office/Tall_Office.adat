@@ -1,63 +1,63 @@
-addon_name = "white_office"
-addon_jp_name = "白い壁のオフィス"
-addon_summary = "8階建ての白い壁のオフィスです。外観が白いからといって中の会社がホワイト企業とは限りません！"
-addon_icon = "icon_white_office.png"
+addon_name = "Tall_Office"
+addon_jp_name = "ガラス張りの高層オフィス"
+addon_summary = "ガラス張りの21階建てのオフィスです。"
+addon_icon = "icon_Tall_Office.png"
 
-addon_type = "high_density_office"
+addon_type = "office"
 
 use_types = "null"
 
-maximum_capacity = "500"
-land_price_influence = "10"
+maximum_capacity = "800"
+land_price_influence = "30"
 land_price_influence_grid = "3"
 
 null {
-	image = "white_office.png"
+	image = "Tall_Office.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
 	left {
 		size_x = "64"
-		size_y = "64"
+		size_y = "128"
 		chip_x = "1"
 		chip_y = "1"
 		
 		top_left_x = "0"
 		top_left_y = "0"
 		bottom_right_x = "64"
-		bottom_right_y = "64"
+		bottom_right_y = "128"
 	}
 	top {
 		size_x = "64"
-		size_y = "64"
+		size_y = "128"
 		chip_x = "1"
 		chip_y = "1"
 		
 		top_left_x = "64"
 		top_left_y = "0"
 		bottom_right_x = "128"
-		bottom_right_y = "64"
+		bottom_right_y = "128"
 	}
 	bottom {
 		size_x = "64"
-		size_y = "64"
+		size_y = "128"
 		chip_x = "1"
 		chip_y = "1"
 		
 		top_left_x = "0"
-		top_left_y = "64"
+		top_left_y = "128"
 		bottom_right_x = "64"
-		bottom_right_y = "128"
+		bottom_right_y = "256"
 	}
 	right {
 		size_x = "64"
-		size_y = "64"
+		size_y = "128"
 		chip_x = "1"
 		chip_y = "1"
 		
 		top_left_x = "64"
-		top_left_y = "64"
+		top_left_y = "128"
 		bottom_right_x = "128"
-		bottom_right_y = "128"
+		bottom_right_y = "256"
 	}
 };

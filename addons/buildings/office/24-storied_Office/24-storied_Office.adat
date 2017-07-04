@@ -3,7 +3,7 @@ addon_jp_name = "24階建ての高層オフィス"
 addon_summary = "24階建てのオフィスです。"
 addon_icon = "icon_24-storied_Office.png"
 
-addon_type = "high_density_office"
+addon_type = "office"
 
 use_types = "null"
 

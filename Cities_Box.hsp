@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.5.6
+									    Cities Box Ver 0.6
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -276,6 +276,12 @@
 		celload "img/quarter/-2.png", 38									; 地価/犯罪率 : 低い/悪い
 		celload "img/quarter/-3.png", 39									; 地価/犯罪率 : 最低/最悪
 	
+	//エリア設定で使うアイコン
+		celload "img/area/residential.png", 40								; エリア : 住居地区
+		celload "img/area/commercial.png", 41								; エリア : 商業地区
+		celload "img/area/office.png", 42									; エリア : オフィス地区
+		celload "img/area/industrial.png", 43								; エリア : 工業地区
+	
 	//ポインター
 		celload "img/pointer/blue.png", 17									; 青いポインター
 		celload "img/pointer/red.png", 18									; 赤いポインター
@@ -286,6 +292,9 @@
 		celload "img/quarter/office.png", 24								; オフィス地区
 		celload "img/quarter/industrial.png", 25							; 工業地区
 		celload "img/quarter/public.png", 26								; 公共施設
+		celload "img/quarter/h_residential.png", 44							; 高密度住居地区
+		celload "img/quarter/h_commercial.png", 45							; 高密度商業地区
+		celload "img/quarter/h_office.png", 46								; 高密度オフィス地区
 	
 	//最初のメニュー画面のボタン
 		celload "img/start_menu/hoe.png", 27								; 鍬
@@ -383,8 +392,7 @@
 				sdim type_number_low_density_residential, 128
 				sdim type_high_density_residential, 128
 				sdim type_number_high_density_residential, 128
-				sdim type_low_density_office, 128
-				sdim type_high_density_office, 128
+				sdim type_office, 128
 				sdim type_industrial, 128
 				sdim type_public, 128
 	
@@ -490,19 +498,12 @@
 						notesel type_number_high_density_commercial
 						noteadd str(cnt), -1
 					}
-	
-					if addon_type(cnt) = "low_density_office" {
-						notesel type_low_density_office
+					
+					if addon_type(cnt) = "office" {
+						notesel type_office
 						noteadd addon_name(cnt), -1
 	
-						notesel type_number_low_density_office
-						noteadd str(cnt), -1
-					}
-					if addon_type(cnt) = "high_density_office" {
-						notesel type_high_density_office
-						noteadd addon_name(cnt), -1
-	
-						notesel type_number_high_density_office
+						notesel type_number_office
 						noteadd str(cnt), -1
 					}
 	
@@ -572,7 +573,7 @@
 	
 		redraw 0
 				
-		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 1077, 625 : gblur 2
+		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 948, 635 : gblur 2
 				
 		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
 			
@@ -647,6 +648,8 @@
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
+	
+		sdim reservation, 100, 100			//地区の予約（地域設定されたがまだ建物が立っていない区域）
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -670,6 +673,8 @@
 	
 			land_price(ix,iy) = 20
 			crime_rate(ix,iy) = 0
+	
+			reservation(ix,iy) = "none"
 			
 			ix++
 			if ix = mapx {
@@ -751,6 +756,8 @@
 *map_preparating
 	clrobj
 	
+	title "マップ読み込み中..."
+	
 	//変数を初期化
 		camx=-300:camy=-150		//カメラの位地
 		mapx=100:mapy=100
@@ -797,7 +804,9 @@
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
-		dim crime_rate, mapx, mapy
+		dim crime_rate, mapx, mapy			//犯罪率
+		
+		sdim reservation, 100, 100			//地区の予約（地域設定されたがまだ建物が立っていない区域）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -817,14 +826,14 @@
 				noteload load_mapdata_name
 		
 				l = notemax
-		
+				
 				//復号
 					repeat l
 						notesel load_mapdata_Cipher
 						noteget load_mapdata_Cipher_buf, cnt
 		
 						load_mapdata_Cipher_buf_strlen = strlen(load_mapdata_Cipher_buf)
-						dec load_mapdata_Cipher_buf, (strlen(load_mapdata_name)/2), load_mapdata_Cipher_buf_strlen
+						dec load_mapdata_Cipher_buf, (strlen(getpath(load_mapdata_name,8+1))/2), load_mapdata_Cipher_buf_strlen
 		
 						notesel load_mapdata
 						noteadd load_mapdata_Cipher_buf, cnt
@@ -910,10 +919,10 @@
 							if addon_type(map(x,y)) = "low_density_commercial" or addon_type(map(x,y)) = "high_density_commercial" {
 								total_Commercial_maximum_capacity += addon_maximum_capacity(map(x,y))
 							}
-							if addon_type(map(x,y)) = "low_density_office" or addon_type(map(x,y)) = "high_density_office" {
+							if addon_type(map(x,y)) = "office" {
 								total_Office_maximum_capacity += addon_maximum_capacity(map(x,y))
 							}
-							if addon_type(map(x,y)) = "low_density_industrial" or addon_type(map(x,y)) = "high_density_industrial" {
+							if addon_type(map(x,y)) = "industrial" {
 								total_Industrial_maximum_capacity += addon_maximum_capacity(map(x,y))
 							}
 							if addon_type(map(x,y)) = "public" {
@@ -1228,7 +1237,7 @@
 						loop
 				}
 	
-				//crime_rate(x,y)の読み込み
+			//crime_rate(x,y)の読み込み
 				if instr(load_mapdata, 0, "crime_rate(x,y)") != -1 {
 					crime_rate_buf = get_chapter(load_mapdata, "crime_rate(x,y)", " {", "}")
 				
@@ -1256,6 +1265,38 @@
 								y = cnt
 	
 								crime_rate(x,y) = 0
+							loop
+						loop
+				}
+	
+			//reservation(x,y)の読み込み
+				if instr(load_mapdata, 0, "reservation(x,y)") != -1 {
+					reservation_buf = get_chapter(load_mapdata, "reservation(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel reservation_buf
+						noteget reservation_buf_a_line, (y+1)
+			
+						sdim reservation_buf_a_tile, mapx
+						split reservation_buf_a_line, ", ", reservation_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							reservation(x,y) = reservation_buf_a_tile(x)
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにreservationの情報がない場合は全て0に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								reservation(x,y) = "none"
 							loop
 						loop
 				}
@@ -1287,14 +1328,14 @@
 	//読み込み後最初のループであることを示す
 		first_loop = 1
 		
-*map_drawing
+*main
 	randomize
 	
 	repeat
 	
 		dim done_build, 5, mapx, mapy
 	
-		map_drawing_cnt ++
+		main_cnt ++
 	
 		//1回のループで1分とする
 			time_Minutes ++
@@ -1389,7 +1430,7 @@
 	
 		stick key,0 ; キー取得
 	
-*map_drawing_2
+*main_2
 		onclick 0
 		
 		repeat mapx
@@ -1397,6 +1438,11 @@
 				
 			repeat mapy
 				y = cnt
+	
+				//予約地区に建物を建設
+					if reservation(x,y) != "none" and rnd(500) = 0 {
+						gosub *Build_on_Reservation_area
+					}
 	
 				//マウスのどのボタンが押されているか取得
 					mouse_left = 0
@@ -1406,7 +1452,7 @@
 					getkey mouse_right, 2
 	
 					if mouse_left = 1 or mouse_right = 1 {
-						gosub *map_drawing_onclick
+						gosub *main_onclick
 					}
 	
 				if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
@@ -1632,7 +1678,13 @@
 								
 					qv2 mx,my
 					color : gmode 4,,,200
-					pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32
+	
+					if instr(put_addon_name, 0, "Area : ") != -1 or (pointer_icon >= 22 and pointer_icon <= 25) {
+						pos macro1,macro2-32 : gcopy pointer_icon, 0, 0, 64, 32					; 地区設定の場合
+	
+					} else {
+						pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32	; 個別の建物の場合
+					}
 				}
 			}
 	
@@ -1643,6 +1695,8 @@
 		//メニューを開いているときはstat_mode = "type"にする
 			if cursor_mode != "normal" and cursor_mode != "put_Road" {
 				stat_mode = "type"
+			} else {
+				stat_mode = ""
 			}
 	
 		//stat_mode = "type"の場合は地区を示す色を表示する
@@ -1655,20 +1709,21 @@
 						
 						qv2 x,y
 						category_buf = category(x,y)
+						reservation_buf = reservation(x,y)
 						
-						if category_buf = "residential" {
+						if category_buf = "residential" or instr(reservation_buf, 0, "residential") != -1 {
 							color : gmode 4,,,128
 							pos macro1, macro2-32 : gcopy 22, 0, 0, 64, 32
 						}
-						if category_buf = "commercial" {
+						if category_buf = "commercial" or instr(reservation_buf, 0, "commercial") != -1 {
 							color : gmode 4,,,128
 							pos macro1, macro2-32 : gcopy 23, 0, 0, 64, 32
 						}
-						if category_buf = "office" {
+						if category_buf = "office" or instr(reservation_buf, 0, "office") != -1 {
 							color : gmode 4,,,128
 							pos macro1, macro2-32 : gcopy 24, 0, 0, 64, 32
 						}
-						if category_buf = "industrial" {
+						if category_buf = "industrial" or instr(reservation_buf, 0, "industrial") != -1 {
 							color : gmode 4,,,128
 							pos macro1, macro2-32 : gcopy 25, 0, 0, 64, 32
 						}
@@ -1823,7 +1878,7 @@
 					}
 	
 				//建物（オフィス）ボタン
-					if cursor_mode = "put_High_density_Office" {
+					if cursor_mode = "put_Office" {
 						gmode 2
 						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 32, 32, 32
 					} else {
@@ -1934,7 +1989,7 @@
 						color 0, 162, 232 : boxf windowx-130, windowy-titlebar_h-20-(demand_Office/3), windowx-130+10, windowy-titlebar_h-20
 						cmes "O", windowx-130, windowy-titlebar_h-20, windowx-130+10, windowy-titlebar_h-10
 					//I - 工業区画
-						color 255, 242, 0 : boxf windowx-120, windowy-titlebar_h-20-(demand_Residential/3), windowx-120+10, windowy-titlebar_h-20
+						color 255, 242, 0 : boxf windowx-120, windowy-titlebar_h-20-(demand_Industrial/3), windowx-120+10, windowy-titlebar_h-20
 						cmes "I", windowx-120, windowy-titlebar_h-20, windowx-120+10, windowy-titlebar_h-10
 					
 			redraw 1
@@ -1942,7 +1997,7 @@
 			c+=16
 	loop
 	
-*map_drawing_onclick
+*main_onclick
 	//メニューバーの上辺（windowy-70-titlebar_h）より上がクリックされた場合はreturn
 		if opening_addon_menu = 1 {
 			menu_line_y = windowy-70-titlebar_h-32-20
@@ -1964,8 +2019,7 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -1997,8 +2051,7 @@
 		
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
@@ -2031,8 +2084,7 @@
 					
 				opening_menu_put_Road = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
@@ -2065,8 +2117,7 @@
 		
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
@@ -2077,21 +2128,21 @@
 		//建物（オフィス）ボタン
 			if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
 		
-				if opening_menu_put_High_density_Office = 0 {
-					cursor_mode = "put_High_density_Office"
+				if opening_menu_put_Office = 0 {
+					cursor_mode = "put_Office"
 		
 					opening_addon_menu = 1
-					opening_menu_put_High_density_Office = 1
+					opening_menu_put_Office = 1
 		
 					//とりあえず一番左にあるアドオンを選択させておく
 						clicked_addon_number = 0
 			
 						//選択されたアドオンのアドオン名を取得
-							notesel type_high_density_office
+							notesel type_office
 							noteget put_addon_name, clicked_addon_number
 				
 						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_high_density_office
+							notesel type_number_office
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
 				} 
@@ -2099,7 +2150,6 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
@@ -2110,7 +2160,7 @@
 		//建物（工業地区）ボタン
 			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
 		
-				if opening_menu_put_High_density_Office = 0 {
+				if opening_menu_put_Office = 0 {
 					cursor_mode = "put_Industrial"
 	
 					opening_addon_menu = 1
@@ -2132,8 +2182,7 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -2165,8 +2214,7 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Park = 0
 	
@@ -2198,8 +2246,7 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Public = 0
 	
@@ -2214,8 +2261,7 @@
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
-				opening_menu_put_Low_density_Office = 0
-				opening_menu_put_High_density_Office = 0
+				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 			}
 		
@@ -2294,7 +2340,7 @@
 					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
 						density = "low"
 		
-					//とりあえず一番左にあるアドオンを選択させておく
+					//とりあえず地区設定アイコンを選択させておく
 						clicked_addon_number = 0
 			
 						//選択されたアドオンのアドオン名を取得
@@ -2309,55 +2355,55 @@
 						gosub *open_menu_addon_menu
 					}
 				//高密度
-				if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
-					density = "high"
-	
-					//とりあえず一番左にあるアドオンを選択させておく
-					clicked_addon_number = 0
+					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
+						density = "high"
 		
-					//選択されたアドオンのアドオン名を取得
-						notesel type_high_density_residential
-						noteget put_addon_name, clicked_addon_number
+						//とりあえず地区設定アイコンを選択させておく
+							clicked_addon_number = 0
 			
-					//選択されたアドオンのアドオン番号を取得
-						notesel type_number_high_density_residential
-						noteget addon_num_buf, clicked_addon_number
-						addon_num_buf = int(addon_num_buf)
-						
-					gosub *open_menu_addon_menu
-				}
+						//選択されたアドオンのアドオン名を取得
+							notesel type_high_density_residential
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_high_density_residential
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+							
+						gosub *open_menu_addon_menu
+					}
 			
 			//低密度住居地区
 				notesel type_low_density_residential
-				if opening_menu_put_Residential = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_Residential = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Residential"
 					
 					clicked_addon_number = mousex/35 - 1
 					
 					//選択されたアドオンのアドオン名を取得
 						notesel type_low_density_residential
-						noteget put_addon_name, clicked_addon_number
+						noteget put_addon_name, clicked_addon_number - 1
 		
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_low_density_residential
-						noteget addon_num_buf, clicked_addon_number
+						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 				
 			//高密度住居地区
 				notesel type_high_density_residential
-				if opening_menu_put_Residential = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_Residential = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Residential"
 		
 					clicked_addon_number = mousex/35 - 1
 		
 					//選択されたアドオンのアドオン名を取得
 						notesel type_high_density_residential
-						noteget put_addon_name, clicked_addon_number
+						noteget put_addon_name, clicked_addon_number - 1
 		
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_high_density_residential
-						noteget addon_num_buf, clicked_addon_number
+						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
@@ -2368,7 +2414,7 @@
 					if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
 						density = "low"
 		
-					//とりあえず一番左にあるアドオンを選択させておく
+					//とりあえず地区設定アイコンを選択させておく
 						clicked_addon_number = 0
 			
 						//選択されたアドオンのアドオン名を取得
@@ -2383,74 +2429,74 @@
 						gosub *open_menu_addon_menu
 					}
 				//高密度
-				if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
-					density = "high"
-	
-					//とりあえず一番左にあるアドオンを選択させておく
-					clicked_addon_number = 0
+					if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
+						density = "high"
 		
-					//選択されたアドオンのアドオン名を取得
-						notesel type_high_density_commercial
-						noteget put_addon_name, clicked_addon_number
+						//とりあえず地区設定アイコンを選択させておく
+							clicked_addon_number = 0
 			
-					//選択されたアドオンのアドオン番号を取得
-						notesel type_number_high_density_commercial
-						noteget addon_num_buf, clicked_addon_number
-						addon_num_buf = int(addon_num_buf)
-						
-					gosub *open_menu_addon_menu
-				}
+						//選択されたアドオンのアドオン名を取得
+							notesel type_high_density_commercial
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_high_density_commercial
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+							
+						gosub *open_menu_addon_menu
+					}
 			
 			//低密度商業地区
 				notesel type_low_density_commercial
-				if opening_menu_put_commercial = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_commercial = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Commercial"
 		
 					clicked_addon_number = mousex/35 - 1
 		
 					//選択されたアドオンのアドオン名を取得
 						notesel type_low_density_commercial
-						noteget put_addon_name, clicked_addon_number
+						noteget put_addon_name, clicked_addon_number - 1
 		
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_low_density_commercial
-						noteget addon_num_buf, clicked_addon_number
+						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
 			//高密度商業地区
 				notesel type_high_density_commercial
-				if opening_menu_put_commercial = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_commercial = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Commercial"
 		
 					clicked_addon_number = mousex/35 - 1
 		
 					//選択されたアドオンのアドオン名を取得
 						notesel type_high_density_commercial
-						noteget put_addon_name, clicked_addon_number
+						noteget put_addon_name, clicked_addon_number - 1
 		
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_high_density_commercial
-						noteget addon_num_buf, clicked_addon_number
+						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
 			/*--------------------------------------------オフィス-----------------------------------------------*/
 			
 			//高密度オフィス
-				notesel type_high_density_office
-				if opening_menu_put_high_density_office = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
-					cursor_mode = "put_High_density_Office"
+				notesel type_office
+				if opening_menu_put_Office = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Office"
 		
 					clicked_addon_number = mousex/35 - 1
 		
 					//選択されたアドオンのアドオン名を取得
-						notesel type_high_density_office
-						noteget put_addon_name, clicked_addon_number
+						notesel type_office
+						noteget put_addon_name, clicked_addon_number - 1
 		
 					//選択されたアドオンのアドオン番号を取得
-						notesel type_number_high_density_office
-						noteget addon_num_buf, clicked_addon_number
+						notesel type_number_office
+						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
@@ -2458,18 +2504,18 @@
 			
 			//工業地区
 				notesel type_industrial
-				if opening_menu_put_industrial = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_industrial = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Industrial"
 		
 					clicked_addon_number = mousex/35 - 1
 						
 					//選択されたアドオンのアドオン名を取得
 						notesel type_industrial
-						noteget put_addon_name, clicked_addon_number
+						noteget put_addon_name, clicked_addon_number - 1
 						
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_industrial
-						noteget addon_num_buf, clicked_addon_number
+						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 				
@@ -2492,9 +2538,9 @@
 						addon_num_buf = int(addon_num_buf)
 				}
 	
-			/*---------------------------------------------公共施設-----------------------------------------------*/
+			/*-----------------------------------------------公園-------------------------------------------------*/
 			
-			//公共施設
+			//公園
 				notesel type_public
 				if opening_menu_put_Park = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Park"
@@ -2525,19 +2571,19 @@
 	/*-----------------道路・建物の建設・敷設（左クリック）、撤去（右クリック or 撤去モード）---------------------*/
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
-			if cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0 {
+			if from_Build_on_Reservation_area = 0 and (cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0) {
 				pointer_icon = -1
 				return
 			}
 	
 		//撤去モードの場合は選択されたマスを更地にする
-			if cursor_mode = "bulldozer" {
+			if from_Build_on_Reservation_area = 0 and cursor_mode = "bulldozer" {
 				gosub *delete_obj
 				return
 			}
 	
 		//カーソルがマップ外にある場合はreturn
-			if mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1 {
+			if from_Build_on_Reservation_area = 0 and (mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1) {
 				return
 			}
 	
@@ -2629,7 +2675,7 @@
 	
 						//そもそも建設地に道路がある場合
 							if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
-								dialog "この区画は既に占有されています"
+								;dialog "この区画は既に占有されています"
 								return
 							}
 	
@@ -2682,6 +2728,16 @@
 								return
 							}
 	
+						//地区設定の場合
+							if instr(put_addon_name, 0, "Area : ") != -1 {
+								gosub *set_area
+								return
+							}
+	
+							if addon_num_buf <= 0 or addon_num_buf > total_addons {
+								return
+							}
+	
 						if around_road_exist >= 0 {
 							//建物（住居地区）建設
 								if cursor_mode = "put_Residential" {
@@ -2694,7 +2750,7 @@
 								}
 				
 							//建物（高密度オフィス）建設
-								if cursor_mode = "put_High_density_Office" {
+								if cursor_mode = "put_Office" {
 									category_buf = "office"
 								}
 	
@@ -2730,7 +2786,11 @@
 									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
 									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
 								}
-							
+	
+								if obj_type_buf = -1 or obj_dire_buf = -1 {
+									return
+								}
+								
 							//2マス以上の建築物の場合、建設する方向にほかの建築物がないか確認
 								if addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf) >= 2 or addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf) >= 2 {
 									found_other_obj = 0
@@ -2821,7 +2881,9 @@
 									}
 									
 									if cannot_build_here = 1 and found_other_obj = 1 {
-										dialog "この区画は既に占有されています"
+										if from_Build_on_Reservation_area = 0 {
+											dialog "この区画は既に占有されています"
+										}
 										
 										cannot_build_here = 0
 										found_other_obj = 0
@@ -2829,6 +2891,11 @@
 										return
 									}
 										
+								}
+	
+							//Build_on_Reservation_areaからきた場合はfrom_Build_on_Reservation_area = 0に
+								if from_Build_on_Reservation_area = 1 {
+									from_Build_on_Reservation_area = 0
 								}
 	
 							//obj_type_bufをobj_type(mx,my)に、obj_dire_bufをobj_dire(mx,my)に代入
@@ -2883,6 +2950,8 @@
 										obj_use_tiles_y(mx+rx,my+ry) = addon_chip_y(addon_num_buf, 0, obj_dire(mx+rx,my+ry)) * acy
 										obj_tiles_x(mx+rx,my+ry) = rx
 										obj_tiles_y(mx+rx,my+ry) = ry
+	
+										reservation(mx+rx,my+ry) = "none"
 										
 										if before_category = "residential" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_Population -= residents(mx+rx,my+ry)
@@ -2935,31 +3004,40 @@
 								round = 0
 								
 								for round, 1, addon_land_price_influence_grid__tmp+1, 1
+									
 									repeat (round*2-1)
-										if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
-											land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-											done_build(2, mx+cnt-(round-1), my+round-1) = 1
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my+round-1>0 and my+round-1<mapy {
+											if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
+												land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx+cnt-(round-1), my+round-1) = 1
+											}
 										}
 									loop
 									
 									repeat (round*2-1)
-										if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
-											land_price(mx+cnt-(round-1),my-round+1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-											done_build(2, mx+cnt-(round-1), my-round+1) = 1
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my-round+1>0 and my-round+1<mapy {
+											if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
+												land_price(mx+cnt-(round-1),my-round+1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx+cnt-(round-1), my-round+1) = 1
+											}
 										}
 									loop
 	
 									repeat (round*2-1)
-										if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
-											land_price(mx+round-1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-											done_build(2, mx+round-1, my+cnt-(round-1)) = 1
+										if mx+round-1>0 and mx+round-1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+											if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
+												land_price(mx+round-1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx+round-1, my+cnt-(round-1)) = 1
+											}
 										}
 									loop
 	
 									repeat (round*2-1)
-										if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
-											land_price(mx-round+1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-											done_build(2, mx-round+1, my+cnt-(round-1)) = 1
+										if mx-round+1>0 and mx-round+1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+											if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
+												land_price(mx-round+1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx-round+1, my+cnt-(round-1)) = 1
+											}
 										}
 									loop
 								next
@@ -3073,6 +3151,8 @@
 					} else {
 						py = 0
 					}
+	
+					reservation(mx,my) = "none"
 					
 					repeat obj_use_tiles_x_buf + px
 						rx = cnt
@@ -3143,6 +3223,158 @@
 		
 		return
 	
+*set_area
+	//地区設定
+	
+	;住居地区の設定
+	if put_addon_name = "Area : low_density_Residential" {
+		reservation(mx,my) = "low_density_residential"
+	}
+	if put_addon_name = "Area : high_density_Residential" {
+		reservation(mx,my) = "high_density_residential"
+	}
+	
+	;商業地区の設定
+	if put_addon_name = "Area : low_density_Commercial" {
+		reservation(mx,my) = "low_density_commercial"
+	}
+	if put_addon_name = "Area : high_density_Commercial" {
+		reservation(mx,my) = "high_density_commercial"
+	}
+	
+	;オフィス地区の設定
+	if put_addon_name = "Area : Office" {
+		reservation(mx,my) = "office"
+	}
+	
+	;工業地区の設定
+	if put_addon_name = "Area : Industrial" {
+		reservation(mx,my) = "industrial"
+	}
+	
+	return
+	
+*Build_on_Reservation_area
+	//予約地区に建物を建設
+	
+	;住居地区
+		if instr(reservation(x,y), 0, "residential") != -1 and demand_Residential > 0 {
+			demand_Residential -= 1
+	
+			if reservation(x,y) = "low_density_residential" {
+				notesel type_low_density_residential
+				rnd_num = rnd(notemax)
+				noteget put_addon_name, rnd_num
+				
+				notesel type_number_low_density_residential
+				noteget addon_num_buf, rnd_num
+				
+			} else : if reservation(x,y) = "high_density_residential" {
+				notesel type_high_density_residential
+				rnd_num = rnd(notemax)
+				noteget put_addon_name, rnd_num
+				
+				notesel type_number_high_density_residential
+				noteget addon_num_buf, rnd_num
+				
+			}
+	
+			addon_num_buf = int(addon_num_buf)
+	
+			from_Build_on_Reservation_area = 1
+	
+			cursor_mode_tmp = cursor_mode
+			cursor_mode = "put_Residential"
+			mouse_left = 1
+		}
+	
+	;商業地区
+		if instr(reservation(x,y), 0, "commercial") != -1 and demand_Commercial > 0 {
+			demand_Commercial -= 1
+	
+			if reservation(x,y) = "low_density_commercial" {
+				notesel type_low_density_commercial
+				rnd_num = rnd(notemax)
+				noteget put_addon_name, rnd_num
+				
+				notesel type_number_low_density_commercial
+				noteget addon_num_buf, rnd_num
+				
+			} else : if reservation(x,y) = "high_density_commercial" {
+				notesel type_high_density_commercial
+				rnd_num = rnd(notemax)
+				noteget put_addon_name, rnd_num
+				
+				notesel type_number_high_density_commercial
+				noteget addon_num_buf, rnd_num
+				
+			}
+	
+			addon_num_buf = int(addon_num_buf)
+	
+			from_Build_on_Reservation_area = 1
+	
+			cursor_mode_tmp = cursor_mode
+			cursor_mode = "put_Commercial"
+			mouse_left = 1
+		}
+	
+	;オフィス地区
+		if instr(reservation(x,y), 0, "office") != -1 and demand_Office > 0 {
+			demand_Office -= 1
+	
+			notesel type_office
+			rnd_num = rnd(notemax)
+			noteget put_addon_name, rnd_num
+			
+			notesel type_number_office
+			noteget addon_num_buf, rnd_num
+	
+			addon_num_buf = int(addon_num_buf)
+	
+			from_Build_on_Reservation_area = 1
+	
+			cursor_mode_tmp = cursor_mode
+			cursor_mode = "put_Office"
+			mouse_left = 1
+		}
+	
+	;工業地区
+		if instr(reservation(x,y), 0, "industrial") != -1 and demand_Industrial > 0 {
+			demand_Industrial -= 1
+	
+			notesel type_industrial
+			rnd_num = rnd(notemax)
+			noteget put_addon_name, rnd_num
+			
+			notesel type_number_industrial
+			noteget addon_num_buf, rnd_num
+	
+			addon_num_buf = int(addon_num_buf)
+	
+			from_Build_on_Reservation_area = 1
+	
+			cursor_mode_tmp = cursor_mode
+			cursor_mode = "put_Industrial"
+			mouse_left = 1
+		}
+	
+	x_tmp = x : y_tmp = y
+	mx_tmp = mx : my_tmp = my
+	mx = x : my = y
+	gosub *build_obj
+	
+	x = x_tmp : y = y_tmp
+	mx = mx_tmp : my = my_tmp
+	
+	reservation(x,y) = "none"
+	cursor_mode = cursor_mode_tmp
+	
+	put_addon_name = ""
+	addon_num_buf = 0
+		
+	return
+	
 *open_menu_addon_menu
 	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, windowx, windowy-70-titlebar_h
 	
@@ -3177,11 +3409,8 @@
 		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 20, 0, 0, 16, 16
 		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 21, 0, 16, 16, 16
 	}
-	if cursor_mode = "put_Low_density_Office" {
-		notesel type_number_low_density_office
-	}
-	if cursor_mode = "put_High_density_Office" {
-		notesel type_number_high_density_office
+	if cursor_mode = "put_Office" {
+		notesel type_number_office
 	}
 	if cursor_mode = "put_Industrial" {
 		notesel type_number_industrial
@@ -3193,25 +3422,140 @@
 		notesel type_number_park
 	}
 	
-	repeat notemax
-		noteget get_addon_number, cnt
+	if cursor_mode != "put_Road" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
+		p = 1
+	} else {
+		p = 0
+	}
+	
+	repeat notemax + p
+		noteget get_addon_number, cnt - p
 	
 		gmode 2
-		if clicked_addon_number != cnt {
-			pos 30 + (cnt*35)+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
-		}
-		if clicked_addon_number = cnt {
-			color 255,255,255 : font "", 14
-			pos 20, (windowy-70-titlebar_h-32-40+5) : mes addon_jp_name(int(get_addon_number))
-			
-			color 255,255,255 : font "", 10
-			pos 23, (windowy-70-titlebar_h-32-20) : mes addon_summary(int(get_addon_number))
-			
-			pos 30 + (cnt*35)+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
 	
-			pointer_icon = int(get_addon_number)
+		if p = 0 or (p = 1 and cnt > 0) {
+			if clicked_addon_number != cnt {
+				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
+			}
+			if clicked_addon_number = cnt {
+				color 255,255,255 : font "", 14
+				pos 20, (windowy-70-titlebar_h-32-40+5) : mes addon_jp_name(int(get_addon_number))
+				
+				color 255,255,255 : font "", 10
+				pos 23, (windowy-70-titlebar_h-32-20) : mes addon_summary(int(get_addon_number))
+				
+				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
+		
+				pointer_icon = int(get_addon_number)
+			}
 		}
 	loop
+	
+	// 地区設定のアイコンを表示
+	if cursor_mode != "put_Road" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
+	
+		gmode 2
+		
+		if cursor_mode = "put_Residential" {
+			if clicked_addon_number = 0 {
+				if density = "low" {
+					color 255,255,255 : font "", 14
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "低密度な住居地区"
+					
+					color 255,255,255 : font "", 10
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が住む場所を提供します。住居地区を設定すると住居建築物が建設されます。"
+					
+					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 32, 32, 32
+					
+					put_addon_name = "Area : low_density_Residential"
+					
+				} else : if density = "high" {
+					color 255,255,255 : font "", 14
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "高密度な住居地区"
+					
+					color 255,255,255 : font "", 10
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が住む場所を提供します。住居地区を設定すると住居建築物が建設されます。"
+					
+					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 32, 32, 32
+					
+					put_addon_name = "Area : high_density_Residential"
+				}
+				pointer_icon = 22
+				
+			} else {
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 0, 32, 32
+			}
+		}
+	
+		if cursor_mode = "put_Commercial" {
+			if clicked_addon_number = 0 {
+				if density = "low" {
+					color 255,255,255 : font "", 14
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "低密度な商業地区"
+					
+					color 255,255,255 : font "", 10
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が商業を営む場所を提供します。商業地区を設定すると商業建築物が建設されます。"
+					
+					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 32, 32, 32
+					
+					put_addon_name = "Area : low_density_Commercial"
+					
+				} else : if density = "high" {
+					color 255,255,255 : font "", 14
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "高密度な商業地区"
+					
+					color 255,255,255 : font "", 10
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が商業を営む場所を提供します。商業地区を設定すると商業建築物が建設されます。"
+					
+					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 32, 32, 32
+					
+					put_addon_name = "Area : high_density_Commercial"
+				}
+				pointer_icon = 23
+				
+			} else {
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 0, 32, 32
+			}
+		}
+	
+		if cursor_mode = "put_Office" {
+			if clicked_addon_number = 0 {
+				color 255,255,255 : font "", 14
+				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "オフィス地区"
+				
+				color 255,255,255 : font "", 10
+				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が仕事する場を提供します。オフィス地区を設定するとオフィス建築物が建設されます。"
+				
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 42, 0, 32, 32, 32
+				
+				put_addon_name = "Area : office"
+				
+				pointer_icon = 24
+				
+			} else {
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 42, 0, 0, 32, 32
+			}
+		}
+	
+		if cursor_mode = "put_Industrial" {
+			if clicked_addon_number = 0 {
+				color 255,255,255 : font "", 14
+				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "工業地区"
+				
+				color 255,255,255 : font "", 10
+				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民がモノを生産する場を提供します。工業地区を設定すると工業建築物が建設されます。"
+				
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 43, 0, 32, 32, 32
+	
+				put_addon_name = "Area : Industrial"
+				pointer_icon = 25
+				
+			} else {
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 43, 0, 0, 32, 32
+			}
+		}
+	
+	}
 	
 	return
 		
@@ -3437,6 +3781,19 @@
 				if Not_Played_NewMap_BGM = 1 {
 					Not_Played_NewMap_BGM = 0
 					playing_BGM_file = "[Sp]PROKOFIEV-PeterAndTheWolf.mp3"
+				}
+	
+			//天気が雨なら、1/3の確率でランダムで雨っぽい曲を流す
+				if add_rain > 0 {
+					if rnd(3) = 2 {
+						p = rnd(2)
+	
+						if p = 0 {
+							playing_BGM_file = "[Sp]Satie-Jeteveux.mp3"
+						} else : p = 1 {
+							playing_BGM_file = "[Sp]Rainy_Day.mp3"
+						}
+					}
 				}
 	
 			//再生
@@ -3693,7 +4050,7 @@
 				}
 				
 			//RCOI需要メーターを変動
-				if Vacancies >= 0 and Total_Vagrants >= 0 {
+				if Vacancies > 0 and Total_Vagrants >= 0 {
 					if Total_Population > 0 {
 						demand_Residential 	= 100 - ((Total_Population / Vacancies) * 100) + Special_demand_Residential
 					} else {
@@ -4088,7 +4445,7 @@
 			from_setting_onclick = 0
 	
 			gsel 0
-			goto *map_drawing
+			goto *main
 		}
 	
 	clrobj
@@ -4324,6 +4681,8 @@
 		}
 	
 	//マップ保存
+		title "保存中..."
+		
 		notesel save_mapdata
 		
 		//次に各マップデータ(*.cbd)の設定を保存
@@ -4732,6 +5091,29 @@
 			
 			noteadd "}", -1
 	
+		//reservation(x,y)
+			noteadd "reservation(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = reservation(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+reservation(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
 		//保存先ファイルの選択
 			dialog "cbx", 17, "Cities Box マップデータ"
 	
@@ -4756,7 +5138,7 @@
 					noteget save_mapdata_buf, cnt
 					
 					save_mapdata_buf_strlen = strlen(save_mapdata_buf)
-					enc save_mapdata_buf, (strlen(save_mapdata_name)/2), save_mapdata_buf_strlen
+					enc save_mapdata_buf, (strlen(getpath(save_mapdata_name,8+1))/2), save_mapdata_buf_strlen
 		
 					notesel save_mapdata_Cipher
 					noteadd save_mapdata_buf, cnt
@@ -4808,5 +5190,5 @@
 	
 		cursor_mode = "normal"
 		
-		goto *map_drawing
+		goto *main
 	}
