@@ -1,5 +1,6 @@
 addon_name = "24-storied_Office"
 addon_jp_name = "24階建ての高層オフィス"
+addon_author = "YotioSoft"
 addon_summary = "24階建てのオフィスです。"
 addon_icon = "icon_24-storied_Office.png"
 

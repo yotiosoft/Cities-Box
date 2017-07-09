@@ -1,5 +1,6 @@
 addon_name = "blue_roof_house"
 addon_jp_name = "青い屋根の家"
+addon_author = "YotioSoft"
 addon_summary = "2階建ての一軒家、3LDKで23年ローンです。"
 addon_icon = "icon_blue_roof_house.png"
 

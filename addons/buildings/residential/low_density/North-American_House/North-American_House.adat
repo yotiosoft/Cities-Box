@@ -1,5 +1,6 @@
 addon_name = "North-American_House"
 addon_jp_name = "北米風の一軒家"
+addon_author = "YotioSoft"
 addon_summary = "アメリカやカナダによくありそうな一軒家。"
 addon_icon = "icon_North-American_House.png"
 

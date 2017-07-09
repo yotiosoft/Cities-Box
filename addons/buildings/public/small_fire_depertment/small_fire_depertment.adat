@@ -1,5 +1,6 @@
 addon_name = "small_fire_depertment"
 addon_jp_name = "小規模な消防署"
+addon_author = "YotioSoft"
 addon_summary = "この街の安心と安全を守るために必要な施設です。"
 addon_icon = "icon_small_fire_depertment.png"
 

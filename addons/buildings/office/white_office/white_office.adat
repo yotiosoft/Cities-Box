@@ -1,5 +1,6 @@
 addon_name = "white_office"
 addon_jp_name = "白い壁のオフィス"
+addon_author = "YotioSoft"
 addon_summary = "8階建ての白い壁のオフィスです。外観が白いからといって中の会社がホワイト企業とは限りません！"
 addon_icon = "icon_white_office.png"
 

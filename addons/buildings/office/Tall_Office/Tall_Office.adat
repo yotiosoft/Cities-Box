@@ -1,5 +1,6 @@
 addon_name = "Tall_Office"
 addon_jp_name = "ガラス張りの高層オフィス"
+addon_author = "YotioSoft"
 addon_summary = "ガラス張りの21階建てのオフィスです。"
 addon_icon = "icon_Tall_Office.png"
 

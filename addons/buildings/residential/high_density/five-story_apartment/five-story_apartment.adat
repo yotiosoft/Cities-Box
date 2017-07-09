@@ -1,5 +1,6 @@
 addon_name = "five-story_apartment"
 addon_jp_name = "5階建てのマンション"
+addon_author = "YotioSoft"
 addon_summary = "5階建ての賃貸マンションです。大家さんは家賃を払わない住民を屋上から落とすほどの怖い人。"
 addon_icon = "icon_five-story_apartment.png"
 

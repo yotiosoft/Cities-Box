@@ -1,5 +1,6 @@
 addon_name = "Normal_Supermarket"
 addon_jp_name = "普通のスーパーマーケット"
+addon_author = "YotioSoft"
 addon_summary = "安心と信頼の地域密着型スーパー。"
 addon_icon = "icon_Normal_Supermarket.png"
 

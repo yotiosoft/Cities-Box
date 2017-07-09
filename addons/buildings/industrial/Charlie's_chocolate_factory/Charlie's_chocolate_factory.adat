@@ -1,5 +1,6 @@
 addon_name = "Charlie's_chocolate_factory"
 addon_jp_name = "チャーリーのチョコレート工場"
+addon_author = "YotioSoft"
 addon_summary = "世界的に有名なチョコレート工場。中は完全非公開。"
 addon_icon = "icon_Charlie's_chocolate_factory.png"
 

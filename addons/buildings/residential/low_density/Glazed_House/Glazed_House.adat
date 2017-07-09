@@ -1,5 +1,6 @@
 addon_name = "Glazed_House"
 addon_jp_name = "ガラス張りの家"
+addon_author = "YotioSoft"
 addon_summary = "ガラス張りでモダンな一軒家。外から丸見えです。トイレも丸見え。"
 addon_icon = "icon_Glazed_House.png"
 

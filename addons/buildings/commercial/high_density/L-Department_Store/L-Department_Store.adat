@@ -1,23 +1,19 @@
-addon_name = "small_police_station"
-addon_jp_name = "小規模な警察署"
+addon_name = "L-Department_Store"
+addon_jp_name = "L字デパート"
 addon_author = "YotioSoft"
-addon_summary = "この街の安全と平和を守るために必要な施設です。"
-addon_icon = "icon_small_police_station.png"
+addon_summary = "街角によくありそうなデパート。"
+addon_icon = "icon_L-Department_Store.png"
 
-addon_type = "public"
-addon_type_2 = "police_station"
+addon_type = "high_density_commercial"
 
 use_types = "null"
 
-maximum_capacity = "200"
-land_price_influence = "40"
+maximum_capacity = "400"
+land_price_influence  = "50"
 land_price_influence_grid = "8"
 
-crime_rate_influence = "-50"
-crime_rate_influence_grid = "10"
-
 null {
-	image = "small_police_station.png"
+	image = "L-Department_Store.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

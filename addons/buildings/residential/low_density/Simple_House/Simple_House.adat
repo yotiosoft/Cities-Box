@@ -1,5 +1,6 @@
 addon_name = "Simple_House"
 addon_jp_name = "シンプルな一軒家"
+addon_author = "YotioSoft"
 addon_summary = "とてもシンプルな一軒家です。"
 addon_icon = "Simple_House_icon.png"
 

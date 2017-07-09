@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver 0.6
+									  Cities Box Ver 0.6.0.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1974,6 +1974,8 @@
 				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
 					if opening_addon_menu = 1 {
 						gosub *open_menu_addon_menu
+					} else : if cursor_mode = "normal" {
+						put_addon_name = ""
 					}
 				
 				//RCOI需要メータ
@@ -2733,11 +2735,7 @@
 								gosub *set_area
 								return
 							}
-	
-							if addon_num_buf <= 0 or addon_num_buf > total_addons {
-								return
-							}
-	
+							
 						if around_road_exist >= 0 {
 							//建物（住居地区）建設
 								if cursor_mode = "put_Residential" {
@@ -2787,7 +2785,7 @@
 									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "right")
 								}
 	
-								if obj_type_buf = -1 or obj_dire_buf = -1 {
+								if obj_type_buf < 0 or obj_dire_buf < 0 {
 									return
 								}
 								
@@ -3044,7 +3042,7 @@
 	
 							//犯罪率の変動
 								addon_crime_rate_influence__tmp = addon_crime_rate_influence(addon_num_buf)
-	
+								
 								if addon_crime_rate_influence__tmp != 0 {
 	
 									addon_crime_rate_influence_grid__tmp = addon_crime_rate_influence_grid(addon_num_buf)
@@ -3256,6 +3254,11 @@
 	
 *Build_on_Reservation_area
 	//予約地区に建物を建設
+	
+		//他の建物を建設しようとしている場合はreturn
+			if put_addon_name != "" {
+				return
+			}
 	
 	;住居地区
 		if instr(reservation(x,y), 0, "residential") != -1 and demand_Residential > 0 {
