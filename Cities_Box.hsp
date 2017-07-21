@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.6.0.1
+									   Cities Box Ver 0.6.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -267,14 +267,16 @@
 		celload "img/menu_icons/stat/type.png", 31							; 建築物の種類
 		celload "img/menu_icons/stat/land_price.png", 32					; 地価
 		celload "img/menu_icons/stat/crime_rate.png", 33					; 犯罪率
+		celload "img/menu_icons/stat/education_rate.png", 47				; 教育率
 	
 	//犯罪率、地価の統計で使うタイル
-		celload "img/quarter/+3.png", 34									; 地価/犯罪率 : 最良
-		celload "img/quarter/+2.png", 35									; 地価/犯罪率 : 良
-		celload "img/quarter/+1.png", 36									; 地価/犯罪率 : 概ね良
-		celload "img/quarter/-1.png", 37									; 地価/犯罪率 : 少し低い/悪い
-		celload "img/quarter/-2.png", 38									; 地価/犯罪率 : 低い/悪い
-		celload "img/quarter/-3.png", 39									; 地価/犯罪率 : 最低/最悪
+		celload "img/quarter/+3.png", 34									; 地価/犯罪率/教育率 : 最良
+		celload "img/quarter/+2.png", 35									; 地価/犯罪率/教育率 : 良
+		celload "img/quarter/+1.png", 36									; 地価/犯罪率/教育率 : 概ね良
+		celload "img/quarter/0.png" , 48									; 地価/犯罪率/教育率 : 0
+		celload "img/quarter/-1.png", 37									; 地価/犯罪率/教育率 : 少し低い/悪い
+		celload "img/quarter/-2.png", 38									; 地価/犯罪率/教育率 : 低い/悪い
+		celload "img/quarter/-3.png", 39									; 地価/犯罪率/教育率 : 最低/最悪
 	
 	//エリア設定で使うアイコン
 		celload "img/area/residential.png", 40								; エリア : 住居地区
@@ -386,6 +388,9 @@
 				dim addon_crime_rate_influence, 128
 				dim addon_crime_rate_influence_grid, 128
 	
+				dim addon_education_rate_influence, 128
+				dim addon_education_rate_influence_grid, 128
+	
 				sdim type_Two_lane_road, 128
 				sdim type_number_Two_lane_road, 128
 				sdim type_low_density_residential, 128
@@ -443,6 +448,10 @@
 				//犯罪率への影響力（+なら犯罪率増、-なら犯罪率減）
 					addon_crime_rate_influence(cnt) = int( get_chapter(buf_adat, "crime_rate_influence", " = \"", "\"") )
 					addon_crime_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "crime_rate_influence_grid", " = \"", "\"") )
+	
+				//教育率への影響率
+					addon_education_rate_influence(cnt) = int( get_chapter(buf_adat, "education_rate_influence", " = \"", "\"") )
+					addon_education_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "education_rate_influence_grid", " = \"", "\"") )
 	
 				//窓の色（RGB値）
 					addon_window_color_tmp = get_chapter(buf_adat, "window_color", " = (", ")")
@@ -648,6 +657,7 @@
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
+		dim education_rate, mapx, mapy		//教育率
 	
 		sdim reservation, 100, 100			//地区の予約（地域設定されたがまだ建物が立っていない区域）
 		
@@ -673,6 +683,7 @@
 	
 			land_price(ix,iy) = 20
 			crime_rate(ix,iy) = 0
+			education_rate(ix,iy) = 0
 	
 			reservation(ix,iy) = "none"
 			
@@ -805,6 +816,7 @@
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
+		dim education_rate, mapx, mapy		//教育率
 		
 		sdim reservation, 100, 100			//地区の予約（地域設定されたがまだ建物が立っていない区域）
 	}
@@ -1269,6 +1281,38 @@
 						loop
 				}
 	
+			//education_rate(x,y)の読み込み
+				if instr(load_mapdata, 0, "education_rate(x,y)") != -1 {
+					education_rate_buf = get_chapter(load_mapdata, "education_rate(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel education_rate_buf
+						noteget education_rate_buf_a_line, (y+1)
+			
+						sdim education_rate_buf_a_tile, mapx
+						split education_rate_buf_a_line, ", ", education_rate_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							education_rate(x,y) = int(education_rate_buf_a_tile(x))
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにeducation_rateの情報がない場合は全て0に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								education_rate(x,y) = 0
+							loop
+						loop
+				}
+	
 			//reservation(x,y)の読み込み
 				if instr(load_mapdata, 0, "reservation(x,y)") != -1 {
 					reservation_buf = get_chapter(load_mapdata, "reservation(x,y)", " {", "}")
@@ -1333,7 +1377,7 @@
 	
 	repeat
 	
-		dim done_build, 5, mapx, mapy
+		dim done_build, 6, mapx, mapy
 	
 		main_cnt ++
 	
@@ -1689,14 +1733,18 @@
 			}
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			title "land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
 			if cursor_mode != "normal" and cursor_mode != "put_Road" {
 				stat_mode = "type"
-			} else {
+				stat_mode_changed = 1
+			}
+	
+			if cursor_mode = "normal" and stat_mode_changed = 1 {
 				stat_mode = ""
+				stat_mode_changed = 0
 			}
 	
 		//stat_mode = "type"の場合は地区を示す色を表示する
@@ -1762,6 +1810,10 @@
 							} else : if land_price_buf > 0 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
+	
+							} else : if land_price_buf = 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
 		
 							} else : if land_price_buf > -50 {
 								color : gmode 4,,,128
@@ -1785,7 +1837,6 @@
 	
 		//stat_mode = "crime_rate"の場合は犯罪率を示す色を表示する
 			if stat_mode = "crime_rate" {
-		
 				repeat mapx
 					x = cnt
 					repeat mapy
@@ -1805,8 +1856,12 @@
 							} else : if crime_rate_buf <= -30 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
+	
+							} else : if crime_rate_buf = 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
 		
-							} else : if crime_rate_buf <= 0 {
+							} else : if crime_rate_buf < 0 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
 		
@@ -1821,6 +1876,57 @@
 							} else {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
+							}
+	
+						}
+		
+					loop
+				loop
+		
+			}
+	
+		//stat_mode = "educaton_rate"の場合は犯罪率を示す色を表示する
+			if stat_mode = "education_rate" {
+		
+				repeat mapx
+					x = cnt
+					repeat mapy
+						y = cnt
+	
+						category_buf = category(x,y)
+	
+						if category_buf != "road" and category_buf != "tile" {
+						
+							qv2 x,y
+							education_rate_buf = education_rate(x,y)
+							
+							if education_rate_buf <= -100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
+								
+							} else : if education_rate_buf <= -30 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
+	
+							} else : if education_rate_buf = 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
+		
+							} else : if education_rate_buf < 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
+		
+							} else : if education_rate_buf <= 30 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
+		
+							} else : if education_rate_buf <= 100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
+		
+							} else {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 34, 0, 0, 64, 32
 							}
 	
 						}
@@ -1936,26 +2042,32 @@
 	
 				//統計メニュー（oepn_stat_menu = 1のとき）
 					if open_stat_menu = 1 {
-						sboxf 128, windowx-54-32-1, windowy-70-titlebar_h-20-1, windowx-54-32-1+(20*3)+1, windowy-70-titlebar_h
+						sboxf 128, windowx-72-32-1, windowy-70-titlebar_h-20-1, windowx-72-32-1+(20*4)+1, windowy-70-titlebar_h
 	
 						gmode 2
 	
 						if stat_mode = "type" {
-							pos windowx-54-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 20, 20, 20
+							pos windowx-72-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 20, 20, 20
 						} else {
-							pos windowx-54-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 0, 20, 20
+							pos windowx-72-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 0, 20, 20
 						}
 	
 						if stat_mode = "land_price" {
-							pos windowx-54-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 20, 20, 20
+							pos windowx-72-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 20, 20, 20
 						} else {
-							pos windowx-54-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 0, 20, 20
+							pos windowx-72-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 0, 20, 20
 						}
 	
 						if stat_mode = "crime_rate" {
-							pos windowx-54-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 20, 20, 20
+							pos windowx-72-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 20, 20, 20
 						} else {
-							pos windowx-54-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 0, 20, 20
+							pos windowx-72-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 0, 20, 20
+						}
+	
+						if stat_mode = "education_rate" {
+							pos windowx-72-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 20, 20, 20
+						} else {
+							pos windowx-72-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 0, 20, 20
 						}
 					}
 	
@@ -2294,23 +2406,30 @@
 			}
 		
 		//統計メニュー
-			if open_stat_menu = 1 and click_range( windowx-54-32, windowy-70-titlebar_h-20, windowx-54-32+20, windowy-70-titlebar_h ) = 1 {
+			if open_stat_menu = 1 and click_range( windowx-72-32, windowy-70-titlebar_h-20, windowx-72-32+20, windowy-70-titlebar_h ) = 1 {
 				if stat_mode != "type" {
 					stat_mode = "type"
 				} else {
 					stat_mode = ""
 				}
 			}
-			if open_stat_menu = 1 and click_range( windowx-54-32+20, windowy-70-titlebar_h-20, windowx-54-32+40, windowy-70-titlebar_h ) = 1 {
+			if open_stat_menu = 1 and click_range( windowx-72-32+20, windowy-70-titlebar_h-20, windowx-72-32+40, windowy-70-titlebar_h ) = 1 {
 				if stat_mode != "land_price" {
 					stat_mode = "land_price"
 				} else {
 					stat_mode = ""
 				}
 			}
-			if open_stat_menu = 1 and click_range( windowx-54-32+40, windowy-70-titlebar_h-20, windowx-54-32+60, windowy-70-titlebar_h ) = 1 {
+			if open_stat_menu = 1 and click_range( windowx-72-32+40, windowy-70-titlebar_h-20, windowx-72-32+60, windowy-70-titlebar_h ) = 1 {
 				if stat_mode != "crime_rate" {
 					stat_mode = "crime_rate"
+				} else {
+					stat_mode = ""
+				}
+			}
+			if open_stat_menu = 1 and click_range( windowx-72-32+60, windowy-70-titlebar_h-20, windowx-72-32+80, windowy-70-titlebar_h ) = 1 {
+				if stat_mode != "education_rate" {
+					stat_mode = "education_rate"
 				} else {
 					stat_mode = ""
 				}
@@ -3052,30 +3171,88 @@
 									
 									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 										repeat (round*2-1)
-											if done_build(3, mx+cnt-(round-1), my+round-1) = 0 {
-												crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-												done_build(3, mx+cnt-(round-1), my+round-1) = 1
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
+													crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+cnt-(round-1), my+round-1) = 1
+												}
 											}
 										loop
 										
 										repeat (round*2-1)
-											if done_build(3, mx+cnt-(round-1), my-round+1) = 0 {
-												crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-												done_build(3, mx+cnt-(round-1), my-round+1) = 1
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
+													crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+cnt-(round-1), my-round+1) = 1
+												}
 											}
 										loop
 		
 										repeat (round*2-1)
-											if done_build(3, mx+round-1, my+cnt-(round-1)) = 0 {
-												crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-												done_build(3, mx+round-1, my+cnt-(round-1)) = 1
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
+													crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
+												}
 											}
 										loop
 		
 										repeat (round*2-1)
-											if done_build(3, mx-round+1, my+cnt-(round-1)) = 0 {
-												crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-												done_build(3, mx-round+1, my+cnt-(round-1)) = 1
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
+													crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+									next
+	
+								}
+	
+							//教育率の変動
+								addon_education_rate_influence__tmp = addon_education_rate_influence(addon_num_buf)
+								
+								if addon_education_rate_influence__tmp != 0 {
+	
+									addon_education_rate_influence_grid__tmp = addon_education_rate_influence_grid(addon_num_buf)
+									
+									add_value = addon_education_rate_influence__tmp / addon_education_rate_influence_grid__tmp
+									round = 0
+									
+									for round, 1, addon_education_rate_influence_grid__tmp+1, 1
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
+													education_rate(mx+cnt-(round-1),my+round-1) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+cnt-(round-1), my+round-1) = 1
+												}
+											}
+										loop
+										
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
+													education_rate(mx+cnt-(round-1),my-round+1) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+cnt-(round-1), my-round+1) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
+													education_rate(mx+round-1,my+cnt-(round-1)) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
+													education_rate(mx-round+1,my+cnt-(round-1)) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
+												}
 											}
 										loop
 									next
@@ -5086,6 +5263,29 @@
 						map_data_buf = strf("%03d", crime_rate(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", crime_rate(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//education_rate(x,y)
+			noteadd "education_rate(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", education_rate(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", education_rate(x,y))+""
 					}
 				loop
 			
