@@ -11,17 +11,17 @@
 #include "hspinet.as"
 
 *define
-/*ƒ`ƒbƒvƒTƒCƒYi64x64j*/
+/*ãƒãƒƒãƒ—ã‚µã‚¤ã‚ºï¼ˆ64x64ï¼‰*/
 #define chip_size		64
 
-/*ƒ^ƒCƒ‹‚ğ“h‚è‚Â‚Ô‚·‚½‚ß‚Ìƒ}ƒNƒ*/
+/*ã‚¿ã‚¤ãƒ«ã‚’å¡—ã‚Šã¤ã¶ã™ãŸã‚ã®ãƒã‚¯ãƒ­*/
 #define qv(%1,%2)	macro1=%1*chip_size/2-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
 					macro1(2)=%1*chip_size/2+chip_size-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
 					macro2=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4-camy+%1*chip_size/4:\
 					macro2(2)=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4+chip_size/2-camy+%1*chip_size/4:\
 					gmode 3,,,128 : gsquare -1,macro1,macro2
 	
-/*ƒNƒEƒH[ƒ^[ƒrƒ…[‚ÌˆÊ’u‚ğæ“¾‚·‚é‚½‚ß‚Ìƒ}ƒNƒiƒ`ƒbƒv•\¦—pj*/
+/*ã‚¯ã‚¦ã‚©ãƒ¼ã‚¿ãƒ¼ãƒ“ãƒ¥ãƒ¼ã®ä½ç½®ã‚’å–å¾—ã™ã‚‹ãŸã‚ã®ãƒã‚¯ãƒ­ï¼ˆãƒãƒƒãƒ—è¡¨ç¤ºç”¨ï¼‰*/
 #define qv2(%1,%2)	macro1@=%1*chip_size/2-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
 					macro1@(2)=%1*chip_size/2+chip_size-camx-%2*chip_size/2,%1*chip_size/2+chip_size/2-camx-%2*chip_size/2:\
 					macro2@=%2*chip_size/4+chip_size/4-camy+%1*chip_size/4,%2*chip_size/4-camy+%1*chip_size/4:\
@@ -38,14 +38,14 @@
 		#func GetWindowLong "GetWindowLongA" int,int
 		#func SetWindowLong "SetWindowLongA" int,int,int
 	
-		#define WM_SIZE	0x00005	//ƒEƒBƒ“ƒhƒEƒTƒCƒY•ÏX
-		#define WS_MAXIMIZEBOX	0x10000	//Å‘å‰»ƒ{ƒ^ƒ“
-		#define WS_THICKFRAME	0x40000	//ƒTƒCƒY•ÏX‰Â”\
+		#define WM_SIZE	0x00005	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºå¤‰æ›´
+		#define WS_MAXIMIZEBOX	0x10000	//æœ€å¤§åŒ–ãƒœã‚¿ãƒ³
+		#define WS_THICKFRAME	0x40000	//ã‚µã‚¤ã‚ºå¤‰æ›´å¯èƒ½
 	
 *module
 #module
 
-/*w’è‚³‚ê‚½”ÍˆÍ“à‚Éƒ}ƒEƒX‚ª‚ ‚é‚©Šm”F‚·‚éŠÖ”ig—p—áFclick_range (100, 0, 300, 300) j*/
+/*æŒ‡å®šã•ã‚ŒãŸç¯„å›²å†…ã«ãƒã‚¦ã‚¹ãŒã‚ã‚‹ã‹ç¢ºèªã™ã‚‹é–¢æ•°ï¼ˆä½¿ç”¨ä¾‹ï¼šclick_range (100, 0, 300, 300) ï¼‰*/
 #defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
 	if ginfo_wx1 <= ginfo_mx and ginfo_wx2 >= ginfo_mx and ginfo_wy1 <= ginfo_my and ginfo_wy2 >= ginfo_my and mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
 		return 1
@@ -53,13 +53,13 @@
 	
 	return 0
 	
-/*ƒAƒhƒIƒ“‚Ì”Ô†‚ğæ“¾‚·‚éŠÖ”*/
+/*ã‚¢ãƒ‰ã‚ªãƒ³ã®ç•ªå·ã‚’å–å¾—ã™ã‚‹é–¢æ•°*/
 #defcfunc addon_num str input_addon_name
 	chdir directory@
 	exist "data/temp/"+input_addon_name+".temp"
 	
 	if strsize = -1 {
-		return addon_num@("tile_greenfield")	; ˆêƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚ç‚È‚¢ê‡A‚Æ‚è‚ ‚¦‚¸X’nigreenfieldj‚Ì’l‚ğ•Ô‚·
+		return addon_num@("tile_greenfield")	; ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã„å ´åˆã€ã¨ã‚Šã‚ãˆãšæ›´åœ°ï¼ˆgreenfieldï¼‰ã®å€¤ã‚’è¿”ã™
 	}	
 	
 	notesel temp_file
@@ -67,14 +67,14 @@
 	
 	return int(temp_file)
 	
-/*Še€–Ú‚Ì“Ç‚İ‚İig—p—áFget_chapter(Œ³‚Ì•Ï”, "ŒŸõ‚·‚é€–Ú", "n“_‹æØ‚èƒR[ƒh", "I’[ƒR[ƒh") j*/
+/*å„é …ç›®ã®èª­ã¿è¾¼ã¿ï¼ˆä½¿ç”¨ä¾‹ï¼šget_chapter(å…ƒã®å¤‰æ•°, "æ¤œç´¢ã™ã‚‹é …ç›®", "å§‹ç‚¹åŒºåˆ‡ã‚Šã‚³ãƒ¼ãƒ‰", "çµ‚ç«¯ã‚³ãƒ¼ãƒ‰") ï¼‰*/
 #defcfunc get_chapter var underlying_var, str search_chapter, str punctuate, str end_word
 	value = instr(underlying_var, 0, search_chapter)
 	get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), instr(underlying_var, value + strlen(""+search_chapter+""+punctuate+""), end_word) )
 	
 	return get_chapter_buf
 	
-/*w’è‚³‚ê‚½•¶š—ñ‚ª‰½”Ô–Ú‚Ì—v‘f‚É‚ ‚é‚©‚ğæ“¾i2Ÿ”z—ñ—pjig—p—áFelement2 ŒŸõ‚·‚éƒAƒhƒIƒ“–¼, ŒŸõ‚·‚é•¶š—ñ‚ªŠÜ‚Ü‚ê‚é•Ï”–¼, ‚»‚Ì•Ï”‚Ì—v‘f”‚ªŠi”[‚³‚ê‚Ä‚¢‚é•Ï”, "ŒŸõ‚·‚é•¶š—ñ"j*/
+/*æŒ‡å®šã•ã‚ŒãŸæ–‡å­—åˆ—ãŒä½•ç•ªç›®ã®è¦ç´ ã«ã‚ã‚‹ã‹ã‚’å–å¾—ï¼ˆ2æ¬¡é…åˆ—ç”¨ï¼‰ï¼ˆä½¿ç”¨ä¾‹ï¼šelement2 æ¤œç´¢ã™ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³å, æ¤œç´¢ã™ã‚‹æ–‡å­—åˆ—ãŒå«ã¾ã‚Œã‚‹å¤‰æ•°å, ãã®å¤‰æ•°ã®è¦ç´ æ•°ãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚‹å¤‰æ•°, "æ¤œç´¢ã™ã‚‹æ–‡å­—åˆ—"ï¼‰*/
 #defcfunc element2 str search_addon_name, array search_var, array search_var_elements, str search_word
 	chdir directory@
 	exist "data/temp/"+search_addon_name+".temp"
@@ -96,7 +96,7 @@
 	
 	return finish
 	
-/*w’è‚³‚ê‚½•¶š—ñ‚ª‰½”Ô–Ú‚Ì—v‘f‚É‚ ‚é‚©‚ğæ“¾i3Ÿ”z—ñ—pjig—p—áFelement3 ŒŸõ‚·‚éƒAƒhƒIƒ“–¼, ŒŸõ‚·‚é•¶š—ñ‚ªŠÜ‚Ü‚ê‚é•Ï”–¼, ‚»‚Ì•Ï”‚Ì—v‘f”‚ªŠi”[‚³‚ê‚Ä‚¢‚é•Ï”, "ŒŸõ‚·‚é•¶š—ñ", ŒŸõ‚·‚é•¶š—ñ‚ªŠÜ‚Ü‚ê‚é3”Ô–Ú‚Ì—v‘f‚Ì•Ï”–¼, ‚»‚Ì3”Ô–Ú‚Ì—v‘f‚Ì•Ï”‚Ì—v‘f”‚ªŠi”[‚³‚ê‚Ä‚¢‚é•Ï”, "3”Ô–Ú‚Ì—v‘f‚ÅŒŸõ‚·‚é•¶š—ñ"j*/
+/*æŒ‡å®šã•ã‚ŒãŸæ–‡å­—åˆ—ãŒä½•ç•ªç›®ã®è¦ç´ ã«ã‚ã‚‹ã‹ã‚’å–å¾—ï¼ˆ3æ¬¡é…åˆ—ç”¨ï¼‰ï¼ˆä½¿ç”¨ä¾‹ï¼šelement3 æ¤œç´¢ã™ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³å, æ¤œç´¢ã™ã‚‹æ–‡å­—åˆ—ãŒå«ã¾ã‚Œã‚‹å¤‰æ•°å, ãã®å¤‰æ•°ã®è¦ç´ æ•°ãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚‹å¤‰æ•°, "æ¤œç´¢ã™ã‚‹æ–‡å­—åˆ—", æ¤œç´¢ã™ã‚‹æ–‡å­—åˆ—ãŒå«ã¾ã‚Œã‚‹3ç•ªç›®ã®è¦ç´ ã®å¤‰æ•°å, ãã®3ç•ªç›®ã®è¦ç´ ã®å¤‰æ•°ã®è¦ç´ æ•°ãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚‹å¤‰æ•°, "3ç•ªç›®ã®è¦ç´ ã§æ¤œç´¢ã™ã‚‹æ–‡å­—åˆ—"ï¼‰*/
 #defcfunc element3 str search_addon_name, array search_var, array search_var_elements, str search_word, array second_search_var, array second_search_var_elements, str second_search_word
 	chdir directory@
 	exist "data/temp/"+search_addon_name+".temp"
@@ -124,7 +124,7 @@
 	
 	return finish
 
-/*•¶š‚ğ’†‰›‚É•\¦ig—p—áFcmes "hogehoge", 0, 640, 0, 480, 0j*/
+/*æ–‡å­—ã‚’ä¸­å¤®ã«è¡¨ç¤ºï¼ˆä½¿ç”¨ä¾‹ï¼šcmes "hogehoge", 0, 640, 0, 480, 0ï¼‰*/
 #deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
 	RECT = cx, cy, cx2, cy2
 	DrawText@ hdc, ctext, -1, varptr(RECT), $01
@@ -132,7 +132,7 @@
 	if redraw_exist = 0 : redraw 1
 	return
 
-/*‰æ‘œ‚ğ‚Ú‚©‚·ihsp/sample/new/gblur.hsp | g—p—áFgblur 2j*/
+/*ç”»åƒã‚’ã¼ã‹ã™ï¼ˆhsp/sample/new/gblur.hsp | ä½¿ç”¨ä¾‹ï¼šgblur 2ï¼‰*/
 #deffunc gblur int p1, int p2
 	gmode 3, ginfo_sx, ginfo_sy, 128
 	if (p2&1)=0 {
@@ -149,14 +149,14 @@
 	}
 	return
 	
-/*”¼“§–¾F•\¦–½—ß*/
+/*åŠé€æ˜è‰²è¡¨ç¤ºå‘½ä»¤*/
 #deffunc boxfa int ax, int ay, int bx, int by
 	pdx = ax, bx, bx, ax
 	pdy = ay, ay, by, by
 	gsquare -1,pdx, pdy
 	return
 	
-/*”¼“§–¾F•\¦–½—ßi‹@”\‚Íboxfa‚Æ“¯‚¶j*/
+/*åŠé€æ˜è‰²è¡¨ç¤ºå‘½ä»¤ï¼ˆæ©Ÿèƒ½ã¯boxfaã¨åŒã˜ï¼‰*/
 #deffunc sboxf int depth, int ax, int ay, int bx, int by
 	pdx = ax, bx, bx, ax
 	pdy = ay, ay, by, by
@@ -164,9 +164,9 @@
 	gsquare -1,pdx, pdy
 	return
 	
-/*ƒAƒhƒIƒ“‚Ìî•ñ‚ğæ“¾*/
+/*ã‚¢ãƒ‰ã‚ªãƒ³ã®æƒ…å ±ã‚’å–å¾—*/
 #deffunc get_about_addon int search_addon_number@, int search_type_number@, int search_direction_number@, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y
-	//ƒIƒuƒWƒFƒNƒg‚Ì‰æ‘œã‚ÌÀ•W‚ğæ“¾
+	//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”»åƒä¸Šã®åº§æ¨™ã‚’å–å¾—
 		input_top_left_x = addon_top_left_x@( search_addon_number@, search_type_number@, search_direction_number@ )
 		input_top_left_y = addon_top_left_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 		input_bottom_right_x = addon_bottom_right_x@( search_addon_number@, search_type_number@, search_direction_number@ )
@@ -177,8 +177,8 @@
 	
 	return
 	
-/*ˆÃ†‰»••œ†iŒ¾‚¤‚Ù‚Ç“ï‚µ‚¢‚à‚Ì‚Å‚à‚È‚¢‚¯‚Çcj*/
-//ˆÃ†‰»
+/*æš—å·åŒ–ï¼†å¾©å·ï¼ˆè¨€ã†ã»ã©é›£ã—ã„ã‚‚ã®ã§ã‚‚ãªã„ã‘ã©â€¦ï¼‰*/
+//æš—å·åŒ–
 #deffunc enc var p1, int key, int size
 	repeat size
 	    poke p1, cnt, peek(p1, cnt) + key
@@ -186,7 +186,7 @@
 	
 	return
 
-//•œ†
+//å¾©å·
 #deffunc dec var p1, int key, int size
 	repeat size
 	    poke p1, cnt, peek(p1, cnt) - key
@@ -216,7 +216,7 @@
 #global
 
 *load_about
-	//ƒ^ƒCƒgƒ‹‚Æƒo[ƒWƒ‡ƒ“‚Ì“Ç‚İ‚İ
+	//ã‚¿ã‚¤ãƒˆãƒ«ã¨ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã®èª­ã¿è¾¼ã¿
 		notesel about
 		noteload "data/about.txt"
 		
@@ -229,7 +229,7 @@
 		title about_title
 		
 *load_config
-	//–{‘Ìİ’è“Ç‚İ‚İ
+	//æœ¬ä½“è¨­å®šèª­ã¿è¾¼ã¿
 		notesel config
 		noteload "data/config.dat"
 	
@@ -240,7 +240,7 @@
 		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
 	
 *changeable
-	//ƒEƒBƒ“ƒhƒE‚ÌƒTƒCƒY‚ğ•ÏX‰Â”\‰»
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ã‚µã‚¤ã‚ºã‚’å¤‰æ›´å¯èƒ½åŒ–
 		windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
 		screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
 		
@@ -250,111 +250,111 @@
 		gsel 0
 	
 *buffering
-	//“Ç‚İ‚İ’†‰æ–Ê
+	//èª­ã¿è¾¼ã¿ä¸­ç”»é¢
 		color 0, 0, 0 : boxf
 	
 		color 255, 255, 255 : font SystemFont, 14
-		pos 10, 10 : mes "‚µ‚Î‚ç‚­‚¨‘Ò‚¿‚­‚¾‚³‚¢\nLoading images..."
+		pos 10, 10 : mes "ã—ã°ã‚‰ããŠå¾…ã¡ãã ã•ã„\nLoading images..."
 		
-	//ƒƒSA”wŒi‰æ‘œibuffer 1‚Íİ’èƒEƒBƒ“ƒhƒE‚Åg‚¤‚½‚ßg—p•s‰Âj
-		celload "img/logo.png", 2										; ƒƒS
-		celload "img/title_background.png", 15							; ƒ^ƒCƒgƒ‹”wŒi‰æ‘œ
+	//ãƒ­ã‚´ã€èƒŒæ™¯ç”»åƒï¼ˆbuffer 1ã¯è¨­å®šã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã§ä½¿ã†ãŸã‚ä½¿ç”¨ä¸å¯ï¼‰
+		celload "img/logo.png", 2										; ãƒ­ã‚´
+		celload "img/title_background.png", 15							; ã‚¿ã‚¤ãƒˆãƒ«èƒŒæ™¯ç”»åƒ
 	
-	//ƒƒjƒ…[‚ÌƒAƒCƒRƒ“
-		celload "img/menu_icons/menu/cursor.png", 3							; •W€ƒJ[ƒ\ƒ‹
-		celload "img/menu_icons/menu/road.png", 4							; ƒƒjƒ…[ƒAƒCƒRƒ“i“¹˜H•~İj
-		celload "img/menu_icons/menu/low_density_residential.png", 5		; ƒƒjƒ…[ƒAƒCƒRƒ“iZ‹’n‹æŒšİj
-		celload "img/menu_icons/menu/commercial.png", 12					; ƒƒjƒ…[ƒAƒCƒRƒ“i¤‹Æ’n‹æŒšİj
-		celload "img/menu_icons/menu/office.png", 6							; ƒƒjƒ…[ƒAƒCƒRƒ“iƒIƒtƒBƒXŒšİj
-		celload "img/menu_icons/menu/industrial.png", 19					; ƒƒjƒ…[ƒAƒCƒRƒ“iH‹Æ’n‹æŒšİj
-		celload "img/menu_icons/menu/public.png", 7							; ƒƒjƒ…[ƒAƒCƒRƒ“i—X•Ö‹ÇŒšİj
-		celload "img/menu_icons/menu/park.png", 29							; ƒƒjƒ…[ƒAƒCƒRƒ“iŒö‰€Œšİj
+	//ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã‚¢ã‚¤ã‚³ãƒ³
+		celload "img/menu_icons/menu/cursor.png", 3							; æ¨™æº–ã‚«ãƒ¼ã‚½ãƒ«
+		celload "img/menu_icons/menu/road.png", 4							; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆé“è·¯æ•·è¨­ï¼‰
+		celload "img/menu_icons/menu/low_density_residential.png", 5		; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆä½å±…åœ°åŒºå»ºè¨­ï¼‰
+		celload "img/menu_icons/menu/commercial.png", 12					; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆå•†æ¥­åœ°åŒºå»ºè¨­ï¼‰
+		celload "img/menu_icons/menu/office.png", 6							; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆã‚ªãƒ•ã‚£ã‚¹å»ºè¨­ï¼‰
+		celload "img/menu_icons/menu/industrial.png", 19					; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆå·¥æ¥­åœ°åŒºå»ºè¨­ï¼‰
+		celload "img/menu_icons/menu/public.png", 7							; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆéƒµä¾¿å±€å»ºè¨­ï¼‰
+		celload "img/menu_icons/menu/park.png", 29							; ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆå…¬åœ’å»ºè¨­ï¼‰
 	
-		celload "img/menu_icons/menu/bulldozer.png", 10						; “P‹ƒ{ƒ^ƒ“
-		celload "img/menu_icons/save/save.png", 11							; •Û‘¶ƒ{ƒ^ƒ“
-		celload "img/menu_icons/setting/setting.png", 13					; İ’èƒ{ƒ^ƒ“
-		celload "img/menu_icons/stat/stat.png", 30							; “Œvƒ{ƒ^ƒ“
+		celload "img/menu_icons/menu/bulldozer.png", 10						; æ’¤å»ãƒœã‚¿ãƒ³
+		celload "img/menu_icons/save/save.png", 11							; ä¿å­˜ãƒœã‚¿ãƒ³
+		celload "img/menu_icons/setting/setting.png", 13					; è¨­å®šãƒœã‚¿ãƒ³
+		celload "img/menu_icons/stat/stat.png", 30							; çµ±è¨ˆãƒœã‚¿ãƒ³
 	
-	//¬ƒTƒCƒY‚ÌƒAƒCƒRƒ“
-		celload "img/menu_icons/mini/low_density_residential.png", 8		; ’á–§“xZ‹’n‹æ
-		celload "img/menu_icons/mini/high_density_residential.png", 9		; ‚–§“xZ‹’n‹æ
-		celload "img/menu_icons/mini/low_density_commercial.png", 20		; ’á–§“x¤‹Æ’n‹æ
-		celload "img/menu_icons/mini/high_density_commercial.png", 21		; ‚–§“x¤‹Æ’n‹æ
+	//å°ã‚µã‚¤ã‚ºã®ã‚¢ã‚¤ã‚³ãƒ³
+		celload "img/menu_icons/mini/low_density_residential.png", 8		; ä½å¯†åº¦ä½å±…åœ°åŒº
+		celload "img/menu_icons/mini/high_density_residential.png", 9		; é«˜å¯†åº¦ä½å±…åœ°åŒº
+		celload "img/menu_icons/mini/low_density_commercial.png", 20		; ä½å¯†åº¦å•†æ¥­åœ°åŒº
+		celload "img/menu_icons/mini/high_density_commercial.png", 21		; é«˜å¯†åº¦å•†æ¥­åœ°åŒº
 	
-	//İ’è‚Åg‚¤ƒAƒCƒRƒ“
-		celload "img/menu_icons/setting/check.png", 14						; ƒ`ƒFƒbƒNƒ{ƒ^ƒ“
-		celload "img/menu_icons/setting/refer.png", 16						; QÆƒ{ƒ^ƒ“
+	//è¨­å®šã§ä½¿ã†ã‚¢ã‚¤ã‚³ãƒ³
+		celload "img/menu_icons/setting/check.png", 14						; ãƒã‚§ãƒƒã‚¯ãƒœã‚¿ãƒ³
+		celload "img/menu_icons/setting/refer.png", 16						; å‚ç…§ãƒœã‚¿ãƒ³
 	
-	//“Œvƒƒjƒ…[‚Åg‚¤ƒAƒCƒRƒ“
-		celload "img/menu_icons/stat/type.png", 31							; Œš’z•¨‚Ìí—Ş
-		celload "img/menu_icons/stat/land_price.png", 32					; ’n‰¿
-		celload "img/menu_icons/stat/crime_rate.png", 33					; ”Æß—¦
-		celload "img/menu_icons/stat/education_rate.png", 47				; ‹³ˆç—¦
+	//çµ±è¨ˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ã§ä½¿ã†ã‚¢ã‚¤ã‚³ãƒ³
+		celload "img/menu_icons/stat/type.png", 31							; å»ºç¯‰ç‰©ã®ç¨®é¡
+		celload "img/menu_icons/stat/land_price.png", 32					; åœ°ä¾¡
+		celload "img/menu_icons/stat/crime_rate.png", 33					; çŠ¯ç½ªç‡
+		celload "img/menu_icons/stat/education_rate.png", 47				; æ•™è‚²ç‡
 	
-	//”Æß—¦A’n‰¿‚Ì“Œv‚Åg‚¤ƒ^ƒCƒ‹
-		celload "img/quarter/+3.png", 34									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : Å—Ç
-		celload "img/quarter/+2.png", 35									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : —Ç
-		celload "img/quarter/+1.png", 36									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : ŠT‚Ë—Ç
-		celload "img/quarter/0.png" , 48									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : 0
-		celload "img/quarter/-1.png", 37									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : ­‚µ’á‚¢/ˆ«‚¢
-		celload "img/quarter/-2.png", 38									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : ’á‚¢/ˆ«‚¢
-		celload "img/quarter/-3.png", 39									; ’n‰¿/”Æß—¦/‹³ˆç—¦ : Å’á/Åˆ«
+	//çŠ¯ç½ªç‡ã€åœ°ä¾¡ã®çµ±è¨ˆã§ä½¿ã†ã‚¿ã‚¤ãƒ«
+		celload "img/quarter/+3.png", 34									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : æœ€è‰¯
+		celload "img/quarter/+2.png", 35									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : è‰¯
+		celload "img/quarter/+1.png", 36									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : æ¦‚ã­è‰¯
+		celload "img/quarter/0.png" , 48									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : 0
+		celload "img/quarter/-1.png", 37									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : å°‘ã—ä½ã„/æ‚ªã„
+		celload "img/quarter/-2.png", 38									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : ä½ã„/æ‚ªã„
+		celload "img/quarter/-3.png", 39									; åœ°ä¾¡/çŠ¯ç½ªç‡/æ•™è‚²ç‡ : æœ€ä½/æœ€æ‚ª
 	
-	//ƒGƒŠƒAİ’è‚Åg‚¤ƒAƒCƒRƒ“
-		celload "img/area/residential.png", 40								; ƒGƒŠƒA : Z‹’n‹æ
-		celload "img/area/commercial.png", 41								; ƒGƒŠƒA : ¤‹Æ’n‹æ
-		celload "img/area/office.png", 42									; ƒGƒŠƒA : ƒIƒtƒBƒX’n‹æ
-		celload "img/area/industrial.png", 43								; ƒGƒŠƒA : H‹Æ’n‹æ
+	//ã‚¨ãƒªã‚¢è¨­å®šã§ä½¿ã†ã‚¢ã‚¤ã‚³ãƒ³
+		celload "img/area/residential.png", 40								; ã‚¨ãƒªã‚¢ : ä½å±…åœ°åŒº
+		celload "img/area/commercial.png", 41								; ã‚¨ãƒªã‚¢ : å•†æ¥­åœ°åŒº
+		celload "img/area/office.png", 42									; ã‚¨ãƒªã‚¢ : ã‚ªãƒ•ã‚£ã‚¹åœ°åŒº
+		celload "img/area/industrial.png", 43								; ã‚¨ãƒªã‚¢ : å·¥æ¥­åœ°åŒº
 	
-	//ƒ|ƒCƒ“ƒ^[
-		celload "img/pointer/blue.png", 17									; Â‚¢ƒ|ƒCƒ“ƒ^[
-		celload "img/pointer/red.png", 18									; Ô‚¢ƒ|ƒCƒ“ƒ^[
+	//ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+		celload "img/pointer/blue.png", 17									; é’ã„ãƒã‚¤ãƒ³ã‚¿ãƒ¼
+		celload "img/pointer/red.png", 18									; èµ¤ã„ãƒã‚¤ãƒ³ã‚¿ãƒ¼
 	
-	//’n‹æ‚ğ¦‚·ƒ^ƒCƒ‹
-		celload "img/quarter/residential.png", 22							; Z‹’n‹æ
-		celload "img/quarter/commercial.png", 23							; ¤‹Æ’n‹æ
-		celload "img/quarter/office.png", 24								; ƒIƒtƒBƒX’n‹æ
-		celload "img/quarter/industrial.png", 25							; H‹Æ’n‹æ
-		celload "img/quarter/public.png", 26								; Œö‹¤{İ
-		celload "img/quarter/h_residential.png", 44							; ‚–§“xZ‹’n‹æ
-		celload "img/quarter/h_commercial.png", 45							; ‚–§“x¤‹Æ’n‹æ
-		celload "img/quarter/h_office.png", 46								; ‚–§“xƒIƒtƒBƒX’n‹æ
+	//åœ°åŒºã‚’ç¤ºã™ã‚¿ã‚¤ãƒ«
+		celload "img/quarter/residential.png", 22							; ä½å±…åœ°åŒº
+		celload "img/quarter/commercial.png", 23							; å•†æ¥­åœ°åŒº
+		celload "img/quarter/office.png", 24								; ã‚ªãƒ•ã‚£ã‚¹åœ°åŒº
+		celload "img/quarter/industrial.png", 25							; å·¥æ¥­åœ°åŒº
+		celload "img/quarter/public.png", 26								; å…¬å…±æ–½è¨­
+		celload "img/quarter/h_residential.png", 44							; é«˜å¯†åº¦ä½å±…åœ°åŒº
+		celload "img/quarter/h_commercial.png", 45							; é«˜å¯†åº¦å•†æ¥­åœ°åŒº
+		celload "img/quarter/h_office.png", 46								; é«˜å¯†åº¦ã‚ªãƒ•ã‚£ã‚¹åœ°åŒº
 	
-	//Å‰‚Ìƒƒjƒ…[‰æ–Ê‚Ìƒ{ƒ^ƒ“
-		celload "img/start_menu/hoe.png", 27								; ŒL
-		celload "img/start_menu/city.png", 28								; “ss
+	//æœ€åˆã®ãƒ¡ãƒ‹ãƒ¥ãƒ¼ç”»é¢ã®ãƒœã‚¿ãƒ³
+		celload "img/start_menu/hoe.png", 27								; é¬
+		celload "img/start_menu/city.png", 28								; éƒ½å¸‚
 	
 *preparation
-	//“Ç‚İ‚İ’†‰æ–Ê
+	//èª­ã¿è¾¼ã¿ä¸­ç”»é¢
 		color 0, 0, 0 : boxf
 	
 		color 255, 255, 255 : font SystemFont, 14
-		pos 10, 10 : mes "‚µ‚Î‚ç‚­‚¨‘Ò‚¿‚­‚¾‚³‚¢\nIn preparation..."
+		pos 10, 10 : mes "ã—ã°ã‚‰ããŠå¾…ã¡ãã ã•ã„\nIn preparation..."
 		
 	//onexit
 		onexit *exit
 	
-	//mci“o˜^
+	//mciç™»éŒ²
 		mci "set Cities-Box time format milliseconds"
 	
-	//ˆÃ†‰»ƒL[
+	//æš—å·åŒ–ã‚­ãƒ¼
 		iCipherKey = 2147483647
 	
-	//ƒoƒbƒtƒ@”Ô†1000ˆÈ~‚ÍƒIƒuƒWƒFƒNƒg
-		//‚Ü‚¸AddonƒtƒHƒ‹ƒ_“à‚ÌƒAƒhƒIƒ“‚Ì”‚ğæ“¾
+	//ãƒãƒƒãƒ•ã‚¡ç•ªå·1000ä»¥é™ã¯ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+		//ã¾ãšAddonãƒ•ã‚©ãƒ«ãƒ€å†…ã®ã‚¢ãƒ‰ã‚ªãƒ³ã®æ•°ã‚’å–å¾—
 			directory = dirinfo(0)
 	
 			#include "hspext.as"
 				chdir "addons"
 	
-				//‚Ü‚¸ƒpƒX–¼‚ğ”`‚¢‚½ƒtƒ@ƒCƒ‹ˆê——‚ğæ“¾
+				//ã¾ãšãƒ‘ã‚¹åã‚’è¦—ã„ãŸãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§ã‚’å–å¾—
 					dirlist2h 2, ','
 					dirlist2 buf_addons, "*.adat*", 1, '\\'
 		
 					sdim addon_file_name, buf_addons
 					dirlist2r addon_file_name
 					
-				//Ÿ‚ÉƒpƒX–¼‚ğŠÜ‚ß‚½ƒtƒ@ƒCƒ‹ˆê——‚ğæ“¾
+				//æ¬¡ã«ãƒ‘ã‚¹åã‚’å«ã‚ãŸãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§ã‚’å–å¾—
 					dirlist2h 1, ','
 					dirlist2 buf_addons, "*.adat*", 1, '\\'
 					
@@ -366,7 +366,7 @@
 	
 					addon_number = 0
 	
-			//sdim•dim
+			//sdimï¼†dim
 				sdim addon_name, total_addons
 				sdim addon_jp_name, total_addons
 				sdim addon_summary, total_addons
@@ -424,7 +424,7 @@
 				sdim type_public, 128
 	
 *load_addons
-	//ƒIƒuƒWƒFƒNƒg‚Ìadatƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚İ
+	//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®adatãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã¿
 		repeat total_addons
 			notesel filelist
 			noteget buf_filelist, cnt
@@ -432,50 +432,50 @@
 			notesel buf_adat
 			noteload buf_filelist
 	
-			//Œ»İ‚ÌƒpƒX–¼‚Ì‚İæ“¾
+			//ç¾åœ¨ã®ãƒ‘ã‚¹åã®ã¿å–å¾—
 				addon_path = getpath(buf_filelist, 32)
 	
-			//ƒfƒBƒŒƒNƒgƒŠ•ÏX
+			//ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªå¤‰æ›´
 				chdir addon_path
 	
-			//ƒAƒhƒIƒ“–¼æ“¾
+			//ã‚¢ãƒ‰ã‚ªãƒ³åå–å¾—
 					addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
 	
-			//“Ç‚İ‚İ’†‰æ–Ê
+			//èª­ã¿è¾¼ã¿ä¸­ç”»é¢
 				color 0, 0, 0 : boxf
 				
 				color 255, 255, 255 : font SystemFont, 14
-				pos 10, 10 : mes "‚µ‚Î‚ç‚­‚¨‘Ò‚¿‚­‚¾‚³‚¢\nLoading addons : "+addon_name(cnt)+""
+				pos 10, 10 : mes "ã—ã°ã‚‰ããŠå¾…ã¡ãã ã•ã„\nLoading addons : "+addon_name(cnt)+""
 	
-			//Še€–Ú‚Ì“Ç‚İ‚İ
+			//å„é …ç›®ã®èª­ã¿è¾¼ã¿
 	
-				//“ú–{Œê‚ÌƒAƒhƒIƒ“–¼‚Æà–¾
+				//æ—¥æœ¬èªã®ã‚¢ãƒ‰ã‚ªãƒ³åã¨èª¬æ˜
 					addon_jp_name(cnt) = get_chapter(buf_adat, "addon_jp_name", " = \\", "\"")
 					addon_summary(cnt) = get_chapter(buf_adat, "addon_summary", " = \\", "\"")
 	
-				//ƒAƒhƒIƒ“‚ÌƒAƒCƒRƒ“
+				//ã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ã‚¤ã‚³ãƒ³
 					addon_icon(cnt) = get_chapter(buf_adat, "addon_icon", " = \\", "\"")
 							
-				//ƒAƒhƒIƒ“‚Ìƒ^ƒCƒv
+				//ã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¿ã‚¤ãƒ—
 					addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
 					addon_type_2(cnt) = get_chapter(buf_adat, "addon_type_2", " = \"", "\"")
 	
-				//Œš•¨‚Ìû—e‰Â”\l”iZ‹’n‹æ‚Ìê‡‚ÍZ–¯”A¤‹ÆEƒIƒtƒBƒXEH‹ÆEŒö‹¤{İ‚Í˜J“­Ò”j
+				//å»ºç‰©ã®åå®¹å¯èƒ½äººæ•°ï¼ˆä½å±…åœ°åŒºã®å ´åˆã¯ä½æ°‘æ•°ã€å•†æ¥­ãƒ»ã‚ªãƒ•ã‚£ã‚¹ãƒ»å·¥æ¥­ãƒ»å…¬å…±æ–½è¨­ã¯åŠ´åƒè€…æ•°ï¼‰
 					addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
 	
-				//’n‰¿‚Ì‰e‹¿—Í
+				//åœ°ä¾¡ã®å½±éŸ¿åŠ›
 					addon_land_price_influence(cnt) = int( get_chapter(buf_adat, "land_price_influence", " = \"", "\"") )
 					addon_land_price_influence_grid(cnt) = int( get_chapter(buf_adat, "land_price_influence_grid", " = \"", "\"") )
 	
-				//”Æß—¦‚Ö‚Ì‰e‹¿—Íi+‚È‚ç”Æß—¦‘A-‚È‚ç”Æß—¦Œ¸j
+				//çŠ¯ç½ªç‡ã¸ã®å½±éŸ¿åŠ›ï¼ˆ+ãªã‚‰çŠ¯ç½ªç‡å¢—ã€-ãªã‚‰çŠ¯ç½ªç‡æ¸›ï¼‰
 					addon_crime_rate_influence(cnt) = int( get_chapter(buf_adat, "crime_rate_influence", " = \"", "\"") )
 					addon_crime_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "crime_rate_influence_grid", " = \"", "\"") )
 	
-				//‹³ˆç—¦‚Ö‚Ì‰e‹¿—¦
+				//æ•™è‚²ç‡ã¸ã®å½±éŸ¿ç‡
 					addon_education_rate_influence(cnt) = int( get_chapter(buf_adat, "education_rate_influence", " = \"", "\"") )
 					addon_education_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "education_rate_influence_grid", " = \"", "\"") )
 	
-				//‘‹‚ÌFiRGB’lj
+				//çª“ã®è‰²ï¼ˆRGBå€¤ï¼‰
 					addon_window_color_tmp = get_chapter(buf_adat, "window_color", " = (", ")")
 	
 					if instr(buf_adat, 0, "window_color") != -1 {
@@ -488,10 +488,10 @@
 					}
 					
 	
-				//ƒAƒhƒIƒ“‚Ìadatƒtƒ@ƒCƒ‹‚ÌÚ×‚Ì“Ç‚İ‚İ‚Ö
+				//ã‚¢ãƒ‰ã‚ªãƒ³ã®adatãƒ•ã‚¡ã‚¤ãƒ«ã®è©³ç´°ã®èª­ã¿è¾¼ã¿ã¸
 					gosub *load_adat
 	
-				//ƒJƒeƒSƒŠ•ª‚¯
+				//ã‚«ãƒ†ã‚´ãƒªåˆ†ã‘
 					if addon_type(cnt) = "Two_lane_road" {
 						notesel type_Two_lane_road
 						noteadd addon_name(cnt), -1
@@ -562,7 +562,7 @@
 						noteadd str(cnt), -1
 					}
 	
-				//ƒAƒhƒIƒ“‚Ìƒoƒbƒtƒ@i1000`A•¡”‚Ì‰æ‘œ‚ğ—˜—p‚·‚éê‡‚Í1001000`j
+				//ã‚¢ãƒ‰ã‚ªãƒ³ã®ãƒãƒƒãƒ•ã‚¡ï¼ˆ1000ï½ã€è¤‡æ•°ã®ç”»åƒã‚’åˆ©ç”¨ã™ã‚‹å ´åˆã¯1001000ï½ï¼‰
 					if addon_total_use_types(addon_number) > 1 {
 						repeat addon_total_use_types(addon_number)
 							addon_buffer_number = (1000 + addon_number) * 1001 + cnt
@@ -573,19 +573,19 @@
 						celload addon_image(addon_number, 0), (1000 + addon_number)
 					}
 	
-				//ƒAƒhƒIƒ“‚ÌƒAƒCƒRƒ“‚Ìƒoƒbƒtƒ@i10001000`j
+				//ã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ã‚¤ã‚³ãƒ³ã®ãƒãƒƒãƒ•ã‚¡ï¼ˆ10001000ï½ï¼‰
 					celload addon_icon(addon_number), (10001000 + addon_number)
 
-				//ƒfƒBƒŒƒNƒgƒŠ‚ğ–ß‚·
+				//ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’æˆ»ã™
 					chdir directory
 	
-				//ˆêƒtƒ@ƒCƒ‹‚ğ•Û‘¶
+				//ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
 					temp_file = str(addon_number)
 					
 					notesel temp_file
 					notesave "data/temp/"+addon_name(cnt)+".temp"
 	
-				//ƒfƒBƒŒƒNƒgƒŠ‚ğ–ß‚·
+				//ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’æˆ»ã™
 					chdir ""+directory+"\\addons"
 	
 				addon_number++
@@ -645,7 +645,7 @@
 	}
 	
 	repeat
-		//ƒEƒBƒ“ƒhƒEƒTƒCƒY‚Æƒ^ƒCƒgƒ‹ƒo[‚Ì‚‚³‚ğæ“¾
+		//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã¨ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã®é«˜ã•ã‚’å–å¾—
 			gosub *get_windowsize
 	
 		redraw 0
@@ -672,9 +672,10 @@
 			
 		gmode 2
 		pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
-			cmes "V‚µ‚¢ƒ}ƒbƒv", windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+			cmes "æ–°ã—ã„ãƒãƒƒãƒ—", windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 					
 		pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
+<<<<<<< HEAD
 			cmes "“Ç‚İ‚İ", windowx/2+20, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50, double(300./483)*(windowy-titlebar_h)+50+2+20
 	
 		//ƒAƒbƒvƒf[ƒg‚ª‚ ‚Á‚½ê‡
@@ -683,13 +684,16 @@
 				color 255, 255, 255
 				pos 10, windowy-titlebar_h-60+5 : mes "ƒAƒbƒvƒf[ƒg‚ª‚ ‚è‚Ü‚·IXV‚µ‚Ü‚·‚©H\n"+latest_version__Title+" Ver."+latest_version__Version+""
 			}
+=======
+			cmes "èª­ã¿è¾¼ã¿", windowx/2+20, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+>>>>>>> 28d86f9c04c6273608186df0ff49b05f12686fb4
 		
 		wait 1
 		redraw 1
 	loop
 	
 *menu_onclick
-	//ƒƒjƒ…[‰æ–Ê‚ÅƒNƒŠƒbƒN‚³‚ê‚½‚Æ‚«‚É“®ì
+	//ãƒ¡ãƒ‹ãƒ¥ãƒ¼ç”»é¢ã§ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã¨ãã«å‹•ä½œ
 	if click_range(windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
 		goto *new_map
 	}
@@ -702,7 +706,7 @@
 *new_map
 	map_mode = "new_map"
 	
-	//ƒ}ƒbƒvV‹Kì¬
+	//ãƒãƒƒãƒ—æ–°è¦ä½œæˆ
 		mapx=100:mapy=100
 	
 		dim buffer_number, mapx, mapy
@@ -713,28 +717,28 @@
 		dim sizex, mapx, mapy
 		dim sizey, mapx, mapy
 	
-		dim map, mapx, mapy					//ŠeÀ•W‚ÌƒAƒhƒIƒ“”Ô†
-		sdim name, mapx, mapy				//ŠeÀ•W‚ÌƒAƒhƒIƒ“–¼
-		sdim category, mapx, mapy			//Šeƒ}ƒX‚É’u‚©‚ê‚Ä‚¢‚éƒAƒhƒIƒ“‚ÌƒJƒeƒSƒŠ[iroad, residential‚È‚Çj
-		dim obj_type, mapx, mapy			//À•Wã‚É‚ ‚éƒIƒuƒWƒFƒNƒg‚Ìƒ^ƒCƒv
-		dim obj_dire, mapx, mapy			//À•Wã‚É‚ ‚éƒIƒuƒWƒFƒNƒg‚ÌŒü‚«
-		dim obj_serial_num, mapx, mapy		//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌAƒIƒuƒWƒFƒNƒg‚Ì’Ê‚µ”Ô†i1ƒ}ƒX‚Ìê‡‚Í0j
-		dim obj_use_tiles_x, mapx, mapy		//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌA•K—v‚Èx•ûŒü‚Ìƒ^ƒCƒ‹”
-		dim obj_use_tiles_y, mapx, mapy		//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌA•K—v‚Èy•ûŒü‚Ìƒ^ƒCƒ‹”
-		dim obj_tiles_x, mapx, mapy			//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌAƒIƒuƒWƒFƒNƒg‚ğİ’u‚µ‚½êŠ‚©‚ç‚Ìx•ûŒü‚Ìƒ^ƒCƒ‹‚Ì”i1ƒ}ƒX‚Ìê‡‚Í0j
-		dim obj_tiles_y, mapx, mapy			//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌAƒIƒuƒWƒFƒNƒg‚ğİ’u‚µ‚½êŠ‚©‚ç‚Ìy•ûŒü‚Ìƒ^ƒCƒ‹‚Ì”i1ƒ}ƒX‚Ìê‡‚Í0j
+		dim map, mapx, mapy					//å„åº§æ¨™ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·
+		sdim name, mapx, mapy				//å„åº§æ¨™ã®ã‚¢ãƒ‰ã‚ªãƒ³å
+		sdim category, mapx, mapy			//å„ãƒã‚¹ã«ç½®ã‹ã‚Œã¦ã„ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚«ãƒ†ã‚´ãƒªãƒ¼ï¼ˆroad, residentialãªã©ï¼‰
+		dim obj_type, mapx, mapy			//åº§æ¨™ä¸Šã«ã‚ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¿ã‚¤ãƒ—
+		dim obj_dire, mapx, mapy			//åº§æ¨™ä¸Šã«ã‚ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‘ã
+		dim obj_serial_num, mapx, mapy		//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®é€šã—ç•ªå·ï¼ˆ1ãƒã‚¹ã®å ´åˆã¯0ï¼‰
+		dim obj_use_tiles_x, mapx, mapy		//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€å¿…è¦ãªxæ–¹å‘ã®ã‚¿ã‚¤ãƒ«æ•°
+		dim obj_use_tiles_y, mapx, mapy		//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€å¿…è¦ãªyæ–¹å‘ã®ã‚¿ã‚¤ãƒ«æ•°
+		dim obj_tiles_x, mapx, mapy			//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¨­ç½®ã—ãŸå ´æ‰€ã‹ã‚‰ã®xæ–¹å‘ã®ã‚¿ã‚¤ãƒ«ã®æ•°ï¼ˆ1ãƒã‚¹ã®å ´åˆã¯0ï¼‰
+		dim obj_tiles_y, mapx, mapy			//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¨­ç½®ã—ãŸå ´æ‰€ã‹ã‚‰ã®yæ–¹å‘ã®ã‚¿ã‚¤ãƒ«ã®æ•°ï¼ˆ1ãƒã‚¹ã®å ´åˆã¯0ï¼‰
 		
-		dim residents, mapx, mapy			//ŠeŒš’z•¨‚ÌZ–¯‚Ì”iZ‘î’n‚Ì‚İj
-		dim workers_Commercial, mapx, mapy	//¤‹Æ’n‹æ‚Ì]‹Æˆõ”i¤‹Æ’n‹æ‚Ì‚İj
-		dim workers_Office, mapx, mapy		//ƒIƒtƒBƒX’n‹æ‚Ì]‹Æˆõ”iƒIƒtƒBƒX’n‹æ‚Ì‚İj
-		dim workers_Industrial, mapx, mapy	//H‹Æ’n‹æ‚Ì]‹Æˆõ”iH‹Æ’n‹æ‚Ì‚İj
-		dim workers_Public, mapx, mapy		//Œö‹¤{İ‚Ì]‹Æˆõ”iŒö‹¤{İ‚Ì‚İj
+		dim residents, mapx, mapy			//å„å»ºç¯‰ç‰©ã®ä½æ°‘ã®æ•°ï¼ˆä½å®…åœ°ã®ã¿ï¼‰
+		dim workers_Commercial, mapx, mapy	//å•†æ¥­åœ°åŒºã®å¾“æ¥­å“¡æ•°ï¼ˆå•†æ¥­åœ°åŒºã®ã¿ï¼‰
+		dim workers_Office, mapx, mapy		//ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®å¾“æ¥­å“¡æ•°ï¼ˆã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®ã¿ï¼‰
+		dim workers_Industrial, mapx, mapy	//å·¥æ¥­åœ°åŒºã®å¾“æ¥­å“¡æ•°ï¼ˆå·¥æ¥­åœ°åŒºã®ã¿ï¼‰
+		dim workers_Public, mapx, mapy		//å…¬å…±æ–½è¨­ã®å¾“æ¥­å“¡æ•°ï¼ˆå…¬å…±æ–½è¨­ã®ã¿ï¼‰
 	
-		dim land_price, mapx, mapy			//’n‰¿i–œ‰~/ƒ}ƒXj
-		dim crime_rate, mapx, mapy			//”Æß—¦
-		dim education_rate, mapx, mapy		//‹³ˆç—¦
+		dim land_price, mapx, mapy			//åœ°ä¾¡ï¼ˆä¸‡å††/ãƒã‚¹ï¼‰
+		dim crime_rate, mapx, mapy			//çŠ¯ç½ªç‡
+		dim education_rate, mapx, mapy		//æ•™è‚²ç‡
 	
-		sdim reservation, 100, 100			//’n‹æ‚Ì—\–ñi’nˆæİ’è‚³‚ê‚½‚ª‚Ü‚¾Œš•¨‚ª—§‚Á‚Ä‚¢‚È‚¢‹æˆæj
+		sdim reservation, 100, 100			//åœ°åŒºã®äºˆç´„ï¼ˆåœ°åŸŸè¨­å®šã•ã‚ŒãŸãŒã¾ã å»ºç‰©ãŒç«‹ã£ã¦ã„ãªã„åŒºåŸŸï¼‰
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -773,41 +777,41 @@
 	Mayor_Name = ""
 	Set_Change_Weather = 1
 	
-	demand_of_Resindential = 100	; Z‘î’n‹æ‚Ìù—v“x
-	demand_of_Commercial = 100		; ¤‹Æ’n‹æ‚Ìù—v“x
-	demand_of_Office = 100			; ƒIƒtƒBƒX’n‹æ‚Ìù—v“x
-	demand_of_Industrial = 100		; H‹Æ’n‹æ‚Ìù—v“x
+	demand_of_Resindential = 100	; ä½å®…åœ°åŒºã®éœ€è¦åº¦
+	demand_of_Commercial = 100		; å•†æ¥­åœ°åŒºã®éœ€è¦åº¦
+	demand_of_Office = 100			; ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®éœ€è¦åº¦
+	demand_of_Industrial = 100		; å·¥æ¥­åœ°åŒºã®éœ€è¦åº¦
 	
-	time_Year = gettime(0)			; ƒQ[ƒ€“à‚ÌŠÔ‚Ì”N
-	time_Month = gettime(1)			; ƒQ[ƒ€“à‚ÌŠÔ‚ÌŒ
-	time_Date = gettime(3)			; ƒQ[ƒ€“à‚ÌŠÔ‚Ì“ú
-	time_Hour = 0					; ƒQ[ƒ€“à‚ÌŠÔ‚Ì
-	time_Minutes = 0				; ƒQ[ƒ€“à‚ÌŠÔ‚Ì•ª
+	time_Year = gettime(0)			; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®å¹´
+	time_Month = gettime(1)			; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®æœˆ
+	time_Date = gettime(3)			; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®æ—¥
+	time_Hour = 0					; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®æ™‚
+	time_Minutes = 0				; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®åˆ†
 	
-	Total_Population = 0			; “ss‚Ì‘lŒû
-	total_maximum_capacity = 0		; “ss‚Ìû—e‰Â”\l”
+	Total_Population = 0			; éƒ½å¸‚ã®ç·äººå£
+	total_maximum_capacity = 0		; éƒ½å¸‚ã®åå®¹å¯èƒ½äººæ•°
 	
-	next_obj_serial_num = 0			; •¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚éƒIƒuƒWƒFƒNƒg‚Ì’Ê‚µ”Ô†
+	next_obj_serial_num = 0			; è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®é€šã—ç•ªå·
 	
-	Not_Played_NewMap_BGM = 1		; ƒ}ƒbƒvì¬’¼Œã‚ÌBGM‚ğ‚Ü‚¾–Â‚ç‚µ‚Ä‚¢‚È‚¢ê‡‚Í1
+	Not_Played_NewMap_BGM = 1		; ãƒãƒƒãƒ—ä½œæˆç›´å¾Œã®BGMã‚’ã¾ã é³´ã‚‰ã—ã¦ã„ãªã„å ´åˆã¯1
 	
-	//‹C‰·‚Ì‰Šú’l
-		//12Œ`2ŒF-10`15‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+	//æ°—æ¸©ã®åˆæœŸå€¤
+		//12æœˆï½2æœˆï¼š-10â„ƒï½15â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 		if time_Month = 12 or (1 <= time_Month and 2 >= time_Month) {
 			temperature = rnd(25)-10
 		}
 	
-		//3Œ`5ŒF10`25‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+		//3æœˆï½5æœˆï¼š10â„ƒï½25â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 		if 3 <= time_Month and 5 >= time_Month {
 			temperature = rnd(15) + 10
 		}
 	
-		//6Œ`8ŒF20`35‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+		//6æœˆï½8æœˆï¼š20â„ƒï½35â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 		if 6 <= time_Month and 8 >= time_Month {
 			temperature= rnd(15) + 20
 		}
 	
-		//9Œ`11ŒF10`25‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+		//9æœˆï½11æœˆï¼š10â„ƒï½25â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 		if 9 <= time_Month and 11 >= time_Month {
 			temperature = rnd(15) + 10
 		}
@@ -817,7 +821,7 @@
 	
 *load_map
 	if from_new_map = 0 {
-		dialog "cbx;*.cbd", 16, "Cities Box ŠÈˆÕˆÃ†‰»ƒ}ƒbƒvƒf[ƒ^iVer.0.4.4ˆÈ~j, Cities Box ”ñˆÃ†‰»ƒ}ƒbƒvƒf[ƒ^iVer.0.4.3.1ˆÈ‘Oj"
+		dialog "cbx;*.cbd", 16, "Cities Box ç°¡æ˜“æš—å·åŒ–ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿ï¼ˆVer.0.4.4ä»¥é™ï¼‰, Cities Box éæš—å·åŒ–ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿ï¼ˆVer.0.4.3.1ä»¥å‰ï¼‰"
 	}
 	
 	if stat = 1 or from_new_map = 1 {
@@ -842,16 +846,16 @@
 *map_preparating
 	clrobj
 	
-	title "ƒ}ƒbƒv“Ç‚İ‚İ’†..."
+	title "ãƒãƒƒãƒ—èª­ã¿è¾¼ã¿ä¸­..."
 	
-	//•Ï”‚ğ‰Šú‰»
-		camx=-300:camy=-150		//ƒJƒƒ‰‚ÌˆÊ’n
+	//å¤‰æ•°ã‚’åˆæœŸåŒ–
+		camx=-300:camy=-150		//ã‚«ãƒ¡ãƒ©ã®ä½åœ°
 		mapx=100:mapy=100
 		
-		menu_line_y = 400		//ƒƒjƒ…[‚Æ‚Ì‹«ŠEü
-		cursor_mode = "normal"	//ƒJ[ƒ\ƒ‹‚Ìƒ‚[ƒh
+		menu_line_y = 400		//ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã¨ã®å¢ƒç•Œç·š
+		cursor_mode = "normal"	//ã‚«ãƒ¼ã‚½ãƒ«ã®ãƒ¢ãƒ¼ãƒ‰
 		
-		pointer_icon = -1		//ƒ|ƒCƒ“ƒ^‚ÌƒAƒCƒRƒ“i-1‚ÅlŠpŒ`j
+		pointer_icon = -1		//ãƒã‚¤ãƒ³ã‚¿ã®ã‚¢ã‚¤ã‚³ãƒ³ï¼ˆ-1ã§å››è§’å½¢ï¼‰
 		
 		before_mousex = 0
 		before_mousey = 0
@@ -872,28 +876,28 @@
 		dim sizex, mapx, mapy
 		dim sizey, mapx, mapy
 	
-		dim map, mapx, mapy					//ŠeÀ•W‚ÌƒAƒhƒIƒ“”Ô†
-		sdim name, mapx, mapy				//ŠeÀ•W‚ÌƒAƒhƒIƒ“–¼
-		sdim category, mapx, mapy			//Šeƒ}ƒX‚É’u‚©‚ê‚Ä‚¢‚éƒAƒhƒIƒ“‚ÌƒJƒeƒSƒŠ[iroad, residential‚È‚Çj
-		dim obj_type, mapx, mapy			//À•Wã‚É‚ ‚éƒIƒuƒWƒFƒNƒg‚Ìƒ^ƒCƒv
-		dim obj_dire, mapx, mapy			//À•Wã‚É‚ ‚éƒIƒuƒWƒFƒNƒg‚ÌŒü‚«
-		dim obj_serial_num, mapx, mapy		//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌAƒIƒuƒWƒFƒNƒg‚Ì’Ê‚µ”Ô†i1ƒ}ƒX‚Ìê‡‚Í0j
-		dim obj_use_tiles_x, mapx, mapy		//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌA•K—v‚Èx•ûŒü‚Ìƒ^ƒCƒ‹”
-		dim obj_use_tiles_y, mapx, mapy		//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌA•K—v‚Èy•ûŒü‚Ìƒ^ƒCƒ‹”
-		dim obj_tiles_x, mapx, mapy			//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌAƒIƒuƒWƒFƒNƒg‚ğİ’u‚µ‚½êŠ‚©‚ç‚Ìx•ûŒü‚Ìƒ^ƒCƒ‹‚Ì”
-		dim obj_tiles_y, mapx, mapy			//‚Ğ‚Æ‚Â‚ÌƒIƒuƒWƒFƒNƒg‚Å•¡”‚Ìƒ^ƒCƒ‹‚ğ—v‚·‚é‚Æ‚«‚ÌAƒIƒuƒWƒFƒNƒg‚ğİ’u‚µ‚½êŠ‚©‚ç‚Ìy•ûŒü‚Ìƒ^ƒCƒ‹‚Ì”
+		dim map, mapx, mapy					//å„åº§æ¨™ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·
+		sdim name, mapx, mapy				//å„åº§æ¨™ã®ã‚¢ãƒ‰ã‚ªãƒ³å
+		sdim category, mapx, mapy			//å„ãƒã‚¹ã«ç½®ã‹ã‚Œã¦ã„ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚«ãƒ†ã‚´ãƒªãƒ¼ï¼ˆroad, residentialãªã©ï¼‰
+		dim obj_type, mapx, mapy			//åº§æ¨™ä¸Šã«ã‚ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¿ã‚¤ãƒ—
+		dim obj_dire, mapx, mapy			//åº§æ¨™ä¸Šã«ã‚ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‘ã
+		dim obj_serial_num, mapx, mapy		//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®é€šã—ç•ªå·ï¼ˆ1ãƒã‚¹ã®å ´åˆã¯0ï¼‰
+		dim obj_use_tiles_x, mapx, mapy		//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€å¿…è¦ãªxæ–¹å‘ã®ã‚¿ã‚¤ãƒ«æ•°
+		dim obj_use_tiles_y, mapx, mapy		//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€å¿…è¦ãªyæ–¹å‘ã®ã‚¿ã‚¤ãƒ«æ•°
+		dim obj_tiles_x, mapx, mapy			//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¨­ç½®ã—ãŸå ´æ‰€ã‹ã‚‰ã®xæ–¹å‘ã®ã‚¿ã‚¤ãƒ«ã®æ•°
+		dim obj_tiles_y, mapx, mapy			//ã²ã¨ã¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã§è¤‡æ•°ã®ã‚¿ã‚¤ãƒ«ã‚’è¦ã™ã‚‹ã¨ãã®ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¨­ç½®ã—ãŸå ´æ‰€ã‹ã‚‰ã®yæ–¹å‘ã®ã‚¿ã‚¤ãƒ«ã®æ•°
 		
-		dim residents, mapx, mapy			//ŠeŒš’z•¨‚ÌZ–¯‚Ì”iZ‘î’n‚Ì‚İj
-		dim workers_Commercial, mapx, mapy	//¤‹Æ’n‹æ‚Ì]‹Æˆõ”i¤‹Æ’n‹æ‚Ì‚İj
-		dim workers_Office, mapx, mapy		//ƒIƒtƒBƒX’n‹æ‚Ì]‹Æˆõ”iƒIƒtƒBƒX’n‹æ‚Ì‚İj
-		dim workers_Industrial, mapx, mapy	//H‹Æ’n‹æ‚Ì]‹Æˆõ”iH‹Æ’n‹æ‚Ì‚İj
-		dim workers_Public, mapx, mapy		//Œö‹¤{İ‚Ì]‹Æˆõ”iŒö‹¤{İ‚Ì‚İj
+		dim residents, mapx, mapy			//å„å»ºç¯‰ç‰©ã®ä½æ°‘ã®æ•°ï¼ˆä½å®…åœ°ã®ã¿ï¼‰
+		dim workers_Commercial, mapx, mapy	//å•†æ¥­åœ°åŒºã®å¾“æ¥­å“¡æ•°ï¼ˆå•†æ¥­åœ°åŒºã®ã¿ï¼‰
+		dim workers_Office, mapx, mapy		//ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®å¾“æ¥­å“¡æ•°ï¼ˆã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®ã¿ï¼‰
+		dim workers_Industrial, mapx, mapy	//å·¥æ¥­åœ°åŒºã®å¾“æ¥­å“¡æ•°ï¼ˆå·¥æ¥­åœ°åŒºã®ã¿ï¼‰
+		dim workers_Public, mapx, mapy		//å…¬å…±æ–½è¨­ã®å¾“æ¥­å“¡æ•°ï¼ˆå…¬å…±æ–½è¨­ã®ã¿ï¼‰
 	
-		dim land_price, mapx, mapy			//’n‰¿i–œ‰~/ƒ}ƒXj
-		dim crime_rate, mapx, mapy			//”Æß—¦
-		dim education_rate, mapx, mapy		//‹³ˆç—¦
+		dim land_price, mapx, mapy			//åœ°ä¾¡ï¼ˆä¸‡å††/ãƒã‚¹ï¼‰
+		dim crime_rate, mapx, mapy			//çŠ¯ç½ªç‡
+		dim education_rate, mapx, mapy		//æ•™è‚²ç‡
 		
-		sdim reservation, 100, 100			//’n‹æ‚Ì—\–ñi’nˆæİ’è‚³‚ê‚½‚ª‚Ü‚¾Œš•¨‚ª—§‚Á‚Ä‚¢‚È‚¢‹æˆæj
+		sdim reservation, 100, 100			//åœ°åŒºã®äºˆç´„ï¼ˆåœ°åŸŸè¨­å®šã•ã‚ŒãŸãŒã¾ã å»ºç‰©ãŒç«‹ã£ã¦ã„ãªã„åŒºåŸŸï¼‰
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -903,10 +907,10 @@
 	
 	addon_num_buf = addon_num("tile_greenfield")
 	
-	//ƒ}ƒbƒv“Ç‚İ‚İ
+	//ãƒãƒƒãƒ—èª­ã¿è¾¼ã¿
 		;if map_mode = "load_map" {
 	
-			//ˆÃ†‰»Ï‚İ‚Ìƒ}ƒbƒvƒf[ƒ^‚Ìê‡
+			//æš—å·åŒ–æ¸ˆã¿ã®ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿ã®å ´åˆ
 			if instr(load_mapdata_name, 0, "cbx") != -1 {
 				
 				notesel load_mapdata_Cipher
@@ -914,7 +918,7 @@
 		
 				l = notemax
 				
-				//•œ†
+				//å¾©å·
 					repeat l
 						notesel load_mapdata_Cipher
 						noteget load_mapdata_Cipher_buf, cnt
@@ -933,18 +937,18 @@
 	
 			}
 	
-			//“ss–¼(City_Name)‚ğ“Ç‚İ‚İ
+			//éƒ½å¸‚å(City_Name)ã‚’èª­ã¿è¾¼ã¿
 				City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
 	
-			//s’·–¼(Mayor_Name)‚ğ“Ç‚İ‚İ
+			//å¸‚é•·å(Mayor_Name)ã‚’èª­ã¿è¾¼ã¿
 				Mayor_Name = get_chapter(load_mapdata, "Mayor_Name", " = \"", "\"")
 	
-			//“ú
-				time_Year = int(get_chapter(load_mapdata, "time_Year", " = ", ";"))			; ƒQ[ƒ€“à‚ÌŠÔ‚Ì”N
-				time_Month = int(get_chapter(load_mapdata, "time_Month", " = ", ";"))		; ƒQ[ƒ€“à‚ÌŠÔ‚ÌŒ
-				time_Date = int(get_chapter(load_mapdata, "time_Date", " = ", ";"))			; ƒQ[ƒ€“à‚ÌŠÔ‚Ì“ú
-				time_Hour = int(get_chapter(load_mapdata, "time_Hour", " = ", ";"))			; ƒQ[ƒ€“à‚ÌŠÔ‚Ì
-				time_Minutes = int(get_chapter(load_mapdata, "time_Minutes", " = ", ";"))	; ƒQ[ƒ€“à‚ÌŠÔ‚Ì•ª
+			//æ—¥æ™‚
+				time_Year = int(get_chapter(load_mapdata, "time_Year", " = ", ";"))			; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®å¹´
+				time_Month = int(get_chapter(load_mapdata, "time_Month", " = ", ";"))		; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®æœˆ
+				time_Date = int(get_chapter(load_mapdata, "time_Date", " = ", ";"))			; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®æ—¥
+				time_Hour = int(get_chapter(load_mapdata, "time_Hour", " = ", ";"))			; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®æ™‚
+				time_Minutes = int(get_chapter(load_mapdata, "time_Minutes", " = ", ";"))	; ã‚²ãƒ¼ãƒ å†…ã®æ™‚é–“ã®åˆ†
 	
 				if time_Year = 0 {
 					time_Year = gettime(0)
@@ -956,7 +960,7 @@
 					time_Date = gettime(3)
 				}
 	
-			//ù—v“x(demand_››)‚ğ“Ç‚İ‚İ
+			//éœ€è¦åº¦(demand_â—‹â—‹)ã‚’èª­ã¿è¾¼ã¿
 				demand_Residential = int( get_chapter(load_mapdata, "demand_Residential", " = ", ";") )
 				demand_Commercial = int( get_chapter(load_mapdata, "demand_Commercial", " = ", ";") )
 				demand_Office = int( get_chapter(load_mapdata, "demand_Office", " = \"", ";") )
@@ -975,14 +979,14 @@
 					demand_Industrial = 0
 				}
 	
-			//İ’è“Ç‚İ‚İ
-				//“VŒó‚Ì•Ï‰»(Set_Change_Weather)
+			//è¨­å®šèª­ã¿è¾¼ã¿
+				//å¤©å€™ã®å¤‰åŒ–(Set_Change_Weather)
 					Set_Change_Weather = int( get_chapter(load_mapdata, "Set_Change_Weather", " = ", ";") )
 					
-				//‹C‰·(temperature)
+				//æ°—æ¸©(temperature)
 					temperature = int( get_chapter(load_mapdata, "Temperature", " = ", ";") )
 		
-			//name(x,y)‚Ì“Ç‚İ‚İ•name(x,y)‚ğ‚à‚Æ‚Émap(x,y)‚Æ“ss‚Ìû—e‰Â”\l”‚àæ“¾
+			//name(x,y)ã®èª­ã¿è¾¼ã¿ï¼†name(x,y)ã‚’ã‚‚ã¨ã«map(x,y)ã¨éƒ½å¸‚ã®åå®¹å¯èƒ½äººæ•°ã‚‚å–å¾—
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
 			
 				repeat mapy
@@ -999,7 +1003,7 @@
 						name(x,y) = name_buf_a_tile(x)
 						map(x,y) = addon_num(name_buf_a_tile(x))
 	
-						//Šeí‚Ì’n‹æ‚Ìû—e‰Â”\l”‚É‰ÁZ
+						//å„ç¨®ã®åœ°åŒºã®åå®¹å¯èƒ½äººæ•°ã«åŠ ç®—
 							if addon_type(map(x,y)) = "low_density_residential" or addon_type(map(x,y)) = "high_density_residential" {
 								total_Residential_maximum_capacity += addon_maximum_capacity(map(x,y))
 							}
@@ -1019,7 +1023,7 @@
 			
 				loop
 			
-			//category(x,y)‚Ì“Ç‚İ‚İ
+			//category(x,y)ã®èª­ã¿è¾¼ã¿
 				category_buf = get_chapter(load_mapdata, "category(x,y)", " {", "}")
 			
 				repeat mapy
@@ -1038,7 +1042,7 @@
 			
 				loop
 		
-			//obj_type(x,y)‚Ì“Ç‚İ‚İ
+			//obj_type(x,y)ã®èª­ã¿è¾¼ã¿
 				obj_type_buf = get_chapter(load_mapdata, "obj_type(x,y)", " {", "}")
 			
 				repeat mapy
@@ -1057,7 +1061,7 @@
 			
 				loop
 		
-			//obj_dire(x,y)‚Ì“Ç‚İ‚İ
+			//obj_dire(x,y)ã®èª­ã¿è¾¼ã¿
 				obj_dire_buf = get_chapter(load_mapdata, "obj_dire(x,y)", " {", "}")
 			
 				repeat mapy
@@ -1076,7 +1080,7 @@
 			
 				loop
 	
-			//obj_serial_num(x,y)‚Ì“Ç‚İ‚İ
+			//obj_serial_num(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "obj_serial_num(x,y)") != -1 {
 					obj_serial_num_buf = get_chapter(load_mapdata, "obj_serial_num(x,y)", " {", "}")
 					
@@ -1100,7 +1104,7 @@
 					loop
 				}
 	
-			//obj_use_tiles_x(x,y)‚Ì“Ç‚İ‚İ
+			//obj_use_tiles_x(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "obj_use_tiles_x(x,y)") != -1 {
 					obj_use_tiles_x_buf = get_chapter(load_mapdata, "obj_use_tiles_x(x,y)", " {", "}")
 					
@@ -1121,7 +1125,7 @@
 					loop
 				}
 	
-			//obj_use_tiles_y(x,y)‚Ì“Ç‚İ‚İ
+			//obj_use_tiles_y(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "obj_use_tiles_y(x,y)") != -1 {
 					obj_use_tiles_y_buf = get_chapter(load_mapdata, "obj_use_tiles_y(x,y)", " {", "}")
 				
@@ -1142,7 +1146,7 @@
 					loop
 				}
 	
-			//obj_tiles_x(x,y)‚Ì“Ç‚İ‚İ
+			//obj_tiles_x(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "obj_tiles_x(x,y)") != -1 {
 					obj_tiles_x_buf = get_chapter(load_mapdata, "obj_tiles_x(x,y)", " {", "}")
 					
@@ -1163,7 +1167,7 @@
 					loop
 				}
 	
-			//obj_tiles_y(x,y)‚Ì“Ç‚İ‚İ
+			//obj_tiles_y(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "obj_tiles_y(x,y)") != -1 {
 					obj_tiles_y_buf = get_chapter(load_mapdata, "obj_tiles_y(x,y)", " {", "}")
 	
@@ -1184,7 +1188,7 @@
 					loop
 				}
 	
-			//residents(x,y)‚Ì“Ç‚İ‚İ
+			//residents(x,y)ã®èª­ã¿è¾¼ã¿
 				residents_buf = get_chapter(load_mapdata, "residents(x,y)", " {", "}")
 			
 				repeat mapy
@@ -1204,7 +1208,7 @@
 			
 				loop
 	
-			//workers_Commercial(x,y)‚Ì“Ç‚İ‚İ
+			//workers_Commercial(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "workers_Commercial(x,y)") != -1 {
 					workers_Commercial_buf = get_chapter(load_mapdata, "workers_Commercial(x,y)", " {", "}")
 				
@@ -1226,7 +1230,7 @@
 					loop
 				}
 	
-			//workers_Office(x,y)‚Ì“Ç‚İ‚İ
+			//workers_Office(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "workers_Office(x,y)") != -1 {
 					workers_Office_buf = get_chapter(load_mapdata, "workers_Office(x,y)", " {", "}")
 				
@@ -1248,7 +1252,7 @@
 					loop
 				}
 	
-			//workers_Industrial(x,y)‚Ì“Ç‚İ‚İ
+			//workers_Industrial(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "workers_Industrial(x,y)") != -1 {
 					workers_Industrial_buf = get_chapter(load_mapdata, "workers_Industrial(x,y)", " {", "}")
 				
@@ -1270,7 +1274,7 @@
 					loop
 				}
 	
-			//workers_Public(x,y)‚Ì“Ç‚İ‚İ
+			//workers_Public(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "workers_Public(x,y)") != -1 {
 					workers_Public_buf = get_chapter(load_mapdata, "workers_Public(x,y)", " {", "}")
 				
@@ -1292,7 +1296,7 @@
 					loop
 				}
 	
-			//land_price(x,y)‚Ì“Ç‚İ‚İ
+			//land_price(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "land_price(x,y)") != -1 {
 					land_price_buf = get_chapter(load_mapdata, "land_price(x,y)", " {", "}")
 				
@@ -1313,7 +1317,7 @@
 					loop
 	
 				} else {
-					//ƒZ[ƒuƒf[ƒ^‚Éland_price‚Ìî•ñ‚ª‚È‚¢ê‡‚Í‘S‚Ä50–œ‰~/ƒ}ƒX‚Éİ’è
+					//ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ã«land_priceã®æƒ…å ±ãŒãªã„å ´åˆã¯å…¨ã¦50ä¸‡å††/ãƒã‚¹ã«è¨­å®š
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -1324,7 +1328,7 @@
 						loop
 				}
 	
-			//crime_rate(x,y)‚Ì“Ç‚İ‚İ
+			//crime_rate(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "crime_rate(x,y)") != -1 {
 					crime_rate_buf = get_chapter(load_mapdata, "crime_rate(x,y)", " {", "}")
 				
@@ -1345,7 +1349,7 @@
 					loop
 	
 				} else {
-					//ƒZ[ƒuƒf[ƒ^‚Écrime_rate‚Ìî•ñ‚ª‚È‚¢ê‡‚Í‘S‚Ä0‚Éİ’è
+					//ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ã«crime_rateã®æƒ…å ±ãŒãªã„å ´åˆã¯å…¨ã¦0ã«è¨­å®š
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -1356,7 +1360,7 @@
 						loop
 				}
 	
-			//education_rate(x,y)‚Ì“Ç‚İ‚İ
+			//education_rate(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "education_rate(x,y)") != -1 {
 					education_rate_buf = get_chapter(load_mapdata, "education_rate(x,y)", " {", "}")
 				
@@ -1377,7 +1381,7 @@
 					loop
 	
 				} else {
-					//ƒZ[ƒuƒf[ƒ^‚Éeducation_rate‚Ìî•ñ‚ª‚È‚¢ê‡‚Í‘S‚Ä0‚Éİ’è
+					//ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ã«education_rateã®æƒ…å ±ãŒãªã„å ´åˆã¯å…¨ã¦0ã«è¨­å®š
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -1388,7 +1392,7 @@
 						loop
 				}
 	
-			//reservation(x,y)‚Ì“Ç‚İ‚İ
+			//reservation(x,y)ã®èª­ã¿è¾¼ã¿
 				if instr(load_mapdata, 0, "reservation(x,y)") != -1 {
 					reservation_buf = get_chapter(load_mapdata, "reservation(x,y)", " {", "}")
 				
@@ -1409,7 +1413,7 @@
 					loop
 	
 				} else {
-					//ƒZ[ƒuƒf[ƒ^‚Éreservation‚Ìî•ñ‚ª‚È‚¢ê‡‚Í‘S‚Ä0‚Éİ’è
+					//ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ã«reservationã®æƒ…å ±ãŒãªã„å ´åˆã¯å…¨ã¦0ã«è¨­å®š
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -1421,7 +1425,7 @@
 				}
 		;}
 	
-	//‰J—±‚Ì‰ŠúˆÊ’u
+	//é›¨ç²’ã®åˆæœŸä½ç½®
 		randomize
 	
 		repeat 1000
@@ -1430,21 +1434,21 @@
 			rain_y(cnt) = -rnd(windowy)
 		loop
 	
-	//element2Aelement3ŠÖ”‚Í‰½“x‚àg‚¤‚Æ“®ì‚ªd‚­‚È‚é‚½‚ßA‚æ‚­g‚¤tile_greenfield‚Ì"null"‚Ìelement2‚¨‚æ‚Ñelement3ŠÖ”‚Ì“à—e‚ğ•Ê‚Ì•Ï”‚É•Û‘¶
-		//X’nitile_greenfieldj‚Ì"null"‚Ìobj_type”Ô†
+	//element2ã€element3é–¢æ•°ã¯ä½•åº¦ã‚‚ä½¿ã†ã¨å‹•ä½œãŒé‡ããªã‚‹ãŸã‚ã€ã‚ˆãä½¿ã†tile_greenfieldã®"null"ã®element2ãŠã‚ˆã³element3é–¢æ•°ã®å†…å®¹ã‚’åˆ¥ã®å¤‰æ•°ã«ä¿å­˜
+		//æ›´åœ°ï¼ˆtile_greenfieldï¼‰ã®"null"ã®obj_typeç•ªå·
 			tile_greenfield_null_type_buf = element2( "tile_greenfield", use_type, addon_total_use_types, "null")
 		
-		//X’nitile_greenfieldj‚Ì"null"‚Ìobj_dire”Ô†
+		//æ›´åœ°ï¼ˆtile_greenfieldï¼‰ã®"null"ã®obj_direç•ªå·
 			tile_greenfield_null_dire_buf = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
 	
-	//ù—v“x‚ğ‘Œ¸
-		//‘‹l”‚ğæ“¾
+	//éœ€è¦åº¦ã‚’å¢—æ¸›
+		//ç·æ±‚äººæ•°ã‚’å–å¾—
 			Vacancies = (total_Commercial_maximum_capacity-Total_workers_Commercial) + (total_Office_maximum_capacity-Total_workers_Office) + (total_Industrial_maximum_capacity-Total_workers_Industrial) + (total_Public_maximum_capacity-Total_workers_Public)
 		
-		//‘•‚˜QÒ”‚ğæ“¾
+		//ç·æµ®æµªè€…æ•°ã‚’å–å¾—
 			Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
 	
-	//“Ç‚İ‚İŒãÅ‰‚Ìƒ‹[ƒv‚Å‚ ‚é‚±‚Æ‚ğ¦‚·
+	//èª­ã¿è¾¼ã¿å¾Œæœ€åˆã®ãƒ«ãƒ¼ãƒ—ã§ã‚ã‚‹ã“ã¨ã‚’ç¤ºã™
 		first_loop = 1
 		
 *main
@@ -1456,16 +1460,16 @@
 	
 		main_cnt ++
 	
-		//1‰ñ‚Ìƒ‹[ƒv‚Å1•ª‚Æ‚·‚é
+		//1å›ã®ãƒ«ãƒ¼ãƒ—ã§1åˆ†ã¨ã™ã‚‹
 			time_Minutes ++
 		
-		//time_Minutes=60‚Å1ŠÔ‚Æ‚·‚é
+		//time_Minutes=60ã§1æ™‚é–“ã¨ã™ã‚‹
 			if time_Minutes = 60 {
 				time_Minutes = 0
 				time_Hour ++
 			}
 	
-		//time_Hour=24‚Å1“ú‚Æ‚·‚é
+		//time_Hour=24ã§1æ—¥ã¨ã™ã‚‹
 			if time_Hour= 24 {
 				time_Date ++
 				time_Hour = 0
@@ -1495,7 +1499,7 @@
 				}
 			}
 	
-		/*ƒJƒƒ‰‘€ì*/
+		/*ã‚«ãƒ¡ãƒ©æ“ä½œ*/
 			getkey key_left, 37
 			if key_left = 1 {
 				camx -= 10
@@ -1516,12 +1520,12 @@
 				camy += 5
 			}
 	
-		/*ƒ}ƒbƒv•`Ê*/
+		/*ãƒãƒƒãƒ—æå†™*/
 			redraw 0
 			color 0, 0, 0 : boxf
 	
 			if mousex != before_mousex or mousey != before_mousey or camx != before_camx or camy != before_camy {
-				mousex_=mousex+camx-(chip_size/2)	//mx,my‚Éƒ}ƒEƒXÀ•Wæ“¾
+				mousex_=mousex+camx-(chip_size/2)	//mx,myã«ãƒã‚¦ã‚¹åº§æ¨™å–å¾—
 				mousey_=mousey+camy+16
 				mx=(mousey_+mousex_/2)/(chip_size/2)
 				my=(-mousex_+mousey_*2)/chip_size
@@ -1530,24 +1534,24 @@
 				before_mousey = mousey
 			}
 	
-		; ------ FPSæ“¾ˆ— ------
-			  if gettime(7) < msecond { ; ƒ~ƒŠ•b‚ÌŒ…ã‚ª‚è‚ğŠm”F‚·‚é
-			    ; fps‚ÉƒJƒEƒ“ƒg‚µ‚½ƒtƒŒ[ƒ€”‚ğ‘ã“ü‚µAƒJƒEƒ“ƒg‚ğ1ƒtƒŒ[ƒ€–Ú‚É–ß‚·
+		; ------ FPSå–å¾—å‡¦ç† ------
+			  if gettime(7) < msecond { ; ãƒŸãƒªç§’ã®æ¡ä¸ŠãŒã‚Šã‚’ç¢ºèªã™ã‚‹
+			    ; fpsã«ã‚«ã‚¦ãƒ³ãƒˆã—ãŸãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã‚’ä»£å…¥ã—ã€ã‚«ã‚¦ãƒ³ãƒˆã‚’1ãƒ•ãƒ¬ãƒ¼ãƒ ç›®ã«æˆ»ã™
 			    fps = frame_count
 			    frame_count = 1
 			
 			  } else {
-			    ; ã‹LˆÈŠO‚Ìê‡ƒtƒŒ[ƒ€‚ğƒJƒEƒ“ƒg
+			    ; ä¸Šè¨˜ä»¥å¤–ã®å ´åˆãƒ•ãƒ¬ãƒ¼ãƒ ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
 			    frame_count = frame_count + 1
 			
 			  }
-			  ; msecond‚ÖŒ»İ‚Ìƒ~ƒŠ•b’l‚ğ‘ã“ü
+			  ; msecondã¸ç¾åœ¨ã®ãƒŸãƒªç§’å€¤ã‚’ä»£å…¥
 			  msecond = gettime(7)
 	
-		/*BGMÄ¶*/
+		/*BGMå†ç”Ÿ*/
 			gosub *play_BGM
 	
-		stick key,0 ; ƒL[æ“¾
+		stick key,0 ; ã‚­ãƒ¼å–å¾—
 	
 *main_2
 		onclick 0
@@ -1558,12 +1562,12 @@
 			repeat mapy
 				y = cnt
 	
-				//—\–ñ’n‹æ‚ÉŒš•¨‚ğŒšİ
+				//äºˆç´„åœ°åŒºã«å»ºç‰©ã‚’å»ºè¨­
 					if reservation(x,y) != "none" and rnd(500) = 0 {
 						gosub *Build_on_Reservation_area
 					}
 	
-				//ƒ}ƒEƒX‚Ì‚Ç‚Ìƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©æ“¾
+				//ãƒã‚¦ã‚¹ã®ã©ã®ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹ã‹å–å¾—
 					mouse_left = 0
 					mouse_right = 0
 					
@@ -1576,28 +1580,28 @@
 	
 				if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
 	
-					//‰æ–Ê’†‰›‚ÌÀ•W
-						x_=(windowx/2)+camx-chip_size/2	//mx,my‚Éƒ}ƒEƒXÀ•Wæ“¾
+					//ç”»é¢ä¸­å¤®ã®åº§æ¨™
+						x_=(windowx/2)+camx-chip_size/2	//mx,myã«ãƒã‚¦ã‚¹åº§æ¨™å–å¾—
 						y_=(windowy/2)+camy
 						middle_x=(y_+x_/2)/(chip_size/2)
 						middle_y=(-x_+y_*2)/chip_size
 	
-					//¶ã‚ÌxÀ•W
+					//å·¦ä¸Šã®xåº§æ¨™
 						left_top_x_ = 0+camx-chip_size/2
 						left_top_y_ = 0+camy
 						left_top_x = (left_top_y_+left_top_x_/2)/(chip_size/2)
 		
-					//¶‰º‚ÌyÀ•W
+					//å·¦ä¸‹ã®yåº§æ¨™
 						left_bottom_x_ = 0+camx-chip_size/2
 						left_bottom_y_ = windowy+camy
 						left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
 		
-					//‰Eã‚ÌyÀ•W
+					//å³ä¸Šã®yåº§æ¨™
 						right_top_x_ = windowx+camx-chip_size/2
 						right_top_y_ = 0+camy
 						right_top_y = (-right_top_x_+right_top_y_*2)/chip_size
 		
-					//‰E‰º‚ÌxÀ•W
+					//å³ä¸‹ã®xåº§æ¨™
 						right_bottom_x_ = windowx+camx-chip_size/2
 						right_bottom_y_ = windowy+camy
 						right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
@@ -1612,7 +1616,7 @@
 	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 		
-					//üˆÍ‚ÌƒIƒuƒWƒFƒNƒg‚Ì”Ô†‚ğæ“¾
+					//å‘¨å›²ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç•ªå·ã‚’å–å¾—
 						left_chip = ""
 						top_chip = ""
 						bottom_chip = ""
@@ -1631,14 +1635,14 @@
 							right_chip = category(x+1, y)
 						}
 		
-					//“¹˜H‚ÌŒü‚«‚ğ’²ß
+					//é“è·¯ã®å‘ãã‚’èª¿ç¯€
 						category_buf = category(x,y)
 						
 						if category_buf = "road" {
 							gosub *adjustment_road
 						}
 						
-					//ƒIƒuƒWƒFƒNƒgi“¹˜H‚âŒš•¨‚È‚Çj‚Ì•\¦‚ğ‚·‚é‚½‚ß‚Ì€”õ
+					//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼ˆé“è·¯ã‚„å»ºç‰©ãªã©ï¼‰ã®è¡¨ç¤ºã‚’ã™ã‚‹ãŸã‚ã®æº–å‚™
 						x_buf = x
 						y_buf = y
 	
@@ -1662,26 +1666,26 @@
 							}
 						}
 	
-					//name(x,y)‚ª"tile_greenfield"‚É‚àŠÖ‚í‚ç‚¸obj_type(x,y)‚ª0ˆÈŠO‚Ìê‡i•‚¢ƒ}ƒX–h~j
+					//name(x,y)ãŒ"tile_greenfield"ã«ã‚‚é–¢ã‚ã‚‰ãšobj_type(x,y)ãŒ0ä»¥å¤–ã®å ´åˆï¼ˆé»’ã„ãƒã‚¹é˜²æ­¢ï¼‰
 						if name(x,y) = "tile_greenfield" and obj_type(x,y) != tile_greenfield_null_type_buf {
 							obj_type(x,y) = tile_greenfield_null_type_buf
 						}
 	
-					//ƒNƒH[ƒ^[ƒrƒ…[‚ÌÀ•W‚ğ‰æ–Êã‚ÌÀ•W‚É•ÏŠ·
+					//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ¼ãƒ“ãƒ¥ãƒ¼ã®åº§æ¨™ã‚’ç”»é¢ä¸Šã®åº§æ¨™ã«å¤‰æ›
 						qv2 x, y
 	
-					//ƒIƒuƒWƒFƒNƒg‚Ìƒoƒbƒtƒ@”Ô†AƒIƒuƒWƒFƒNƒg‚Ì¶ã‚ÌÀ•WiatlxjA¶‰º‚ÌÀ•WiatlyjA‰Eã‚ÌÀ•WiabrxjA‰E‰º‚ÌÀ•WiabryjAƒTƒCƒYisizex, sizeyj‚ğæ“¾
-						if addon_total_use_types( map(x,y) ) > 1 {		; ‚Ğ‚Æ‚Â‚ÌƒAƒhƒIƒ“‚Å•¡”‚Ì‰æ‘œ‚ğ—Ì‚·‚éê‡
+					//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒãƒƒãƒ•ã‚¡ç•ªå·ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å·¦ä¸Šã®åº§æ¨™ï¼ˆatlxï¼‰ã€å·¦ä¸‹ã®åº§æ¨™ï¼ˆatlyï¼‰ã€å³ä¸Šã®åº§æ¨™ï¼ˆabrxï¼‰ã€å³ä¸‹ã®åº§æ¨™ï¼ˆabryï¼‰ã€ã‚µã‚¤ã‚ºï¼ˆsizex, sizeyï¼‰ã‚’å–å¾—
+						if addon_total_use_types( map(x,y) ) > 1 {		; ã²ã¨ã¤ã®ã‚¢ãƒ‰ã‚ªãƒ³ã§è¤‡æ•°ã®ç”»åƒã‚’é ˜ã™ã‚‹å ´åˆ
 							buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
 							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
 							
-						} else {										; ‚Ğ‚Æ‚Â‚ÌƒAƒhƒIƒ“‚Å‚Ğ‚Æ‚Â‚Ì‰æ‘œ‚ğ—Ì‚·‚éê‡
+						} else {										; ã²ã¨ã¤ã®ã‚¢ãƒ‰ã‚ªãƒ³ã§ã²ã¨ã¤ã®ç”»åƒã‚’é ˜ã™ã‚‹å ´åˆ
 							buffer_number(x,y) = map(x,y) + 1000
 							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
 								
 						}
 							
-					//ƒIƒuƒWƒFƒNƒg‚ğ•\¦
+					//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¡¨ç¤º
 						pos macro1, macro2 - sizey + 1 + (8*(obj_use_tiles_x(x,y)))
 						gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
 	
@@ -1690,16 +1694,16 @@
 	
 				}
 	
-				//lŒûEù—v“x•Ï“®
+				//äººå£ãƒ»éœ€è¦åº¦å¤‰å‹•
 					gosub *fluctuation
 					
 			loop
 					
 		loop
 	
-		//ŠÔ‘Ñ‚É‰‚¶‚Ä–¾‚é‚³‚ğ’²ß
+		//æ™‚é–“å¸¯ã«å¿œã˜ã¦æ˜ã‚‹ã•ã‚’èª¿ç¯€
 		/*
-			//ˆÃ‚­‚·‚é‘O‚ÉF‚ğæ“¾
+			//æš—ãã™ã‚‹å‰ã«è‰²ã‚’å–å¾—
 			repeat windowx
 				wx = cnt
 				repeat windowy
@@ -1712,22 +1716,22 @@
 				loop
 			loop
 		*/
-			//–éŠÔ
+			//å¤œé–“
 			if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
 				color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
 			}
 	
-			//—[•ûi‚¾‚ñ‚¾‚ñˆÃ‚­j
+			//å¤•æ–¹ï¼ˆã ã‚“ã ã‚“æš—ãï¼‰
 			if time_Hour = 17 {
 				color 0, 0, 0 : sboxf double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 			}
 	
-			//–¾‚¯•ûi‚¾‚ñ‚¾‚ñ–¾‚é‚­j
+			//æ˜ã‘æ–¹ï¼ˆã ã‚“ã ã‚“æ˜ã‚‹ãï¼‰
 			if time_Hour = 6 {
 				color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 			}
 	
-		//–éŠÔ‚Í‘‹‚ğŒõ‚ç‚¹‚é
+		//å¤œé–“ã¯çª“ã‚’å…‰ã‚‰ã›ã‚‹
 			/*repeat windowx
 				wx = cnt
 				
@@ -1767,7 +1771,7 @@
 	
 					gsel 0*/
 	
-		//ƒ}ƒEƒXƒ|ƒCƒ“ƒ^‚ÌˆÊ’u‚Ìƒ`ƒbƒv‚ğŒõ‚ç‚¹‚é
+		//ãƒã‚¦ã‚¹ãƒã‚¤ãƒ³ã‚¿ã®ä½ç½®ã®ãƒãƒƒãƒ—ã‚’å…‰ã‚‰ã›ã‚‹
 			if opening_addon_menu = 1 {
 				menu_line_y = windowy-70-titlebar_h-32-20
 			} else {
@@ -1799,19 +1803,19 @@
 					color : gmode 4,,,200
 	
 					if instr(put_addon_name, 0, "Area : ") != -1 or (pointer_icon >= 22 and pointer_icon <= 25) {
-						pos macro1,macro2-32 : gcopy pointer_icon, 0, 0, 64, 32					; ’n‹æİ’è‚Ìê‡
+						pos macro1,macro2-32 : gcopy pointer_icon, 0, 0, 64, 32					; åœ°åŒºè¨­å®šã®å ´åˆ
 	
 					} else {
-						pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32	; ŒÂ•Ê‚ÌŒš•¨‚Ìê‡
+						pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32	; å€‹åˆ¥ã®å»ºç‰©ã®å ´åˆ
 					}
 				}
 			}
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" ƒ}ƒEƒXÀ•W("+mx+","+my+") ƒJƒƒ‰À•W("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" ãƒã‚¦ã‚¹åº§æ¨™("+mx+","+my+") ã‚«ãƒ¡ãƒ©åº§æ¨™("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
-		//ƒƒjƒ…[‚ğŠJ‚¢‚Ä‚¢‚é‚Æ‚«‚Ístat_mode = "type"‚É‚·‚é
+		//ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’é–‹ã„ã¦ã„ã‚‹ã¨ãã¯stat_mode = "type"ã«ã™ã‚‹
 			if cursor_mode != "normal" and cursor_mode != "put_Road" {
 				stat_mode = "type"
 				stat_mode_changed = 1
@@ -1822,7 +1826,7 @@
 				stat_mode_changed = 0
 			}
 	
-		//stat_mode = "type"‚Ìê‡‚Í’n‹æ‚ğ¦‚·F‚ğ•\¦‚·‚é
+		//stat_mode = "type"ã®å ´åˆã¯åœ°åŒºã‚’ç¤ºã™è‰²ã‚’è¡¨ç¤ºã™ã‚‹
 			if stat_mode = "type" {
 		
 				repeat mapx
@@ -1859,7 +1863,7 @@
 		
 			}
 	
-		//stat_mode = "land_price"‚Ìê‡‚Í’n‰¿‚ğ¦‚·F‚ğ•\¦‚·‚é
+		//stat_mode = "land_price"ã®å ´åˆã¯åœ°ä¾¡ã‚’ç¤ºã™è‰²ã‚’è¡¨ç¤ºã™ã‚‹
 			if stat_mode = "land_price" {
 		
 				repeat mapx
@@ -1910,7 +1914,7 @@
 		
 			}
 	
-		//stat_mode = "crime_rate"‚Ìê‡‚Í”Æß—¦‚ğ¦‚·F‚ğ•\¦‚·‚é
+		//stat_mode = "crime_rate"ã®å ´åˆã¯çŠ¯ç½ªç‡ã‚’ç¤ºã™è‰²ã‚’è¡¨ç¤ºã™ã‚‹
 			if stat_mode = "crime_rate" {
 				repeat mapx
 					x = cnt
@@ -1960,7 +1964,7 @@
 		
 			}
 	
-		//stat_mode = "educaton_rate"‚Ìê‡‚Í”Æß—¦‚ğ¦‚·F‚ğ•\¦‚·‚é
+		//stat_mode = "educaton_rate"ã®å ´åˆã¯çŠ¯ç½ªç‡ã‚’ç¤ºã™è‰²ã‚’è¡¨ç¤ºã™ã‚‹
 			if stat_mode = "education_rate" {
 		
 				repeat mapx
@@ -2011,18 +2015,18 @@
 		
 			}
 	
-		//“VŒó‚Ì•Ï“®
+		//å¤©å€™ã®å¤‰å‹•
 			gosub *climate
 	
 *menu_buttons
-			//Œ»İ‚ÌƒEƒBƒ“ƒhƒEƒTƒCƒY‚Æƒ^ƒCƒgƒ‹ƒo[‚Ì‚‚³‚ğæ“¾
+			//ç¾åœ¨ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã¨ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã®é«˜ã•ã‚’å–å¾—
 				gosub *get_windowsize
 			
-			//ƒƒjƒ…[
+			//ãƒ¡ãƒ‹ãƒ¥ãƒ¼
 				color 0, 0, 0
 				gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h, windowx, windowy
 	
-				//•W€ƒJ[ƒ\ƒ‹ƒ{ƒ^ƒ“
+				//æ¨™æº–ã‚«ãƒ¼ã‚½ãƒ«ãƒœã‚¿ãƒ³
 					if cursor_mode = "normal" {
 						gmode 2
 						pos 20, windowy-70-titlebar_h : gcopy 3, 0, 32, 32, 32
@@ -2031,7 +2035,7 @@
 						pos 20, windowy-70-titlebar_h : gcopy 3, 0, 0, 32, 32
 					}
 	
-				//“¹˜Hƒ{ƒ^ƒ“
+				//é“è·¯ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Road" {
 						gmode 2
 						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 32, 32, 32
@@ -2040,7 +2044,7 @@
 						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 0, 32, 32
 					}
 	
-				//Œš•¨iZ‹’n‹æjƒ{ƒ^ƒ“
+				//å»ºç‰©ï¼ˆä½å±…åœ°åŒºï¼‰ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Residential" {
 						gmode 2
 						pos 92, windowy-70-titlebar_h : gcopy 5, 0, 32, 32, 32
@@ -2049,7 +2053,7 @@
 						pos 92, windowy-70-titlebar_h : gcopy 5, 0, 0, 32, 32
 					}
 	
-				//Œš•¨i¤‹Æ’n‹æjƒ{ƒ^ƒ“
+				//å»ºç‰©ï¼ˆå•†æ¥­åœ°åŒºï¼‰ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Commercial" {
 						gmode 2
 						pos 124, windowy-70-titlebar_h : gcopy 12, 0, 32, 32, 32
@@ -2058,7 +2062,7 @@
 						pos 124, windowy-70-titlebar_h : gcopy 12, 0, 0, 32, 32
 					}
 	
-				//Œš•¨iƒIƒtƒBƒXjƒ{ƒ^ƒ“
+				//å»ºç‰©ï¼ˆã‚ªãƒ•ã‚£ã‚¹ï¼‰ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Office" {
 						gmode 2
 						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 32, 32, 32
@@ -2067,7 +2071,7 @@
 						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
 					}
 	
-				//Œš•¨iH‹Æ’n‹æjƒ{ƒ^ƒ“
+				//å»ºç‰©ï¼ˆå·¥æ¥­åœ°åŒºï¼‰ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Industrial" {
 						gmode 2
 						pos 188, windowy-70-titlebar_h : gcopy 19, 0, 32, 32, 32
@@ -2076,7 +2080,7 @@
 						pos 188, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
 					}
 	
-				//Œš•¨iŒö‹¤{İjƒ{ƒ^ƒ“
+				//å»ºç‰©ï¼ˆå…¬å…±æ–½è¨­ï¼‰ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Public" {
 						gmode 2
 						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
@@ -2085,7 +2089,7 @@
 						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
-				//Œö‰€ƒ{ƒ^ƒ“
+				//å…¬åœ’ãƒœã‚¿ãƒ³
 					if cursor_mode = "put_Park" {
 						gmode 2
 						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
@@ -2094,7 +2098,7 @@
 						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
 					}
 	
-				//“P‹ƒ{ƒ^ƒ“
+				//æ’¤å»ãƒœã‚¿ãƒ³
 					if cursor_mode = "bulldozer" {
 						gmode 2
 						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 32, 32, 32
@@ -2103,19 +2107,19 @@
 						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 0, 32, 32
 					}
 	
-				//İ’èƒ{ƒ^ƒ“
+				//è¨­å®šãƒœã‚¿ãƒ³
 					gmode 2
 					pos windowx-54-32, windowy-40-titlebar_h : gcopy 13, 0, 0, 32, 32
 	
-				//•Û‘¶ƒ{ƒ^ƒ“
+				//ä¿å­˜ãƒœã‚¿ãƒ³
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
 	
-				//“Œvƒ{ƒ^ƒ“
+				//çµ±è¨ˆãƒœã‚¿ãƒ³
 					gmode 2
 					pos windowx-54-32, windowy-70-titlebar_h : gcopy 30, 0, 0, 32, 32
 	
-				//“Œvƒƒjƒ…[ioepn_stat_menu = 1‚Ì‚Æ‚«j
+				//çµ±è¨ˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ï¼ˆoepn_stat_menu = 1ã®ã¨ãï¼‰
 					if open_stat_menu = 1 {
 						sboxf 128, windowx-72-32-1, windowy-70-titlebar_h-20-1, windowx-72-32-1+(20*4)+1, windowy-70-titlebar_h
 	
@@ -2146,11 +2150,11 @@
 						}
 					}
 	
-				//lŒûA“ú•tE‹C‰·‚ğ•\¦
+				//äººå£ã€æ—¥ä»˜ãƒ»æ°—æ¸©ã‚’è¡¨ç¤º
 					color 255, 255, 255 : font "Yu Gothic UI", 12
-					pos 300, windowy-70-titlebar_h+5 : mes "lŒû "+Total_Population+"l\n"+time_Year+"”N"+time_Month+"Œ"+time_Date+"“ú "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  ‹C‰· "+temperature+""
+					pos 300, windowy-70-titlebar_h+5 : mes "äººå£ "+Total_Population+"äºº\n"+time_Year+"å¹´"+time_Month+"æœˆ"+time_Date+"æ—¥ "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  æ°—æ¸© "+temperature+"â„ƒ"
 	
-				//ƒjƒ…[ƒX‚Ì•\¦i00•ªA60•ªA120•ªA180•ª ‚ ‚é‚¢‚Í ƒ}ƒbƒv“Ç‚İ‚İ’¼Œã‚ÉV‚µ‚¢ƒjƒ…[ƒX‚ğæ“¾j	
+				//ãƒ‹ãƒ¥ãƒ¼ã‚¹ã®è¡¨ç¤ºï¼ˆ0æ™‚0åˆ†ã€6æ™‚0åˆ†ã€12æ™‚0åˆ†ã€18æ™‚0åˆ† ã‚ã‚‹ã„ã¯ ãƒãƒƒãƒ—èª­ã¿è¾¼ã¿ç›´å¾Œã«æ–°ã—ã„ãƒ‹ãƒ¥ãƒ¼ã‚¹ã‚’å–å¾—ï¼‰	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
 						gosub *get_news
 					}
@@ -2158,26 +2162,26 @@
 					color 255, 255, 255 : font "Yu Gothic UI", 10
 					pos 20, windowy-32-titlebar_h+5 : mes "News : "+news_content+""
 	
-				//ƒAƒhƒIƒ“‘I‘ğƒƒjƒ…[‚ªŠJ‚©‚ê‚Ä‚¢‚éê‡‚ÍƒAƒhƒIƒ“‘I‘ğƒƒjƒ…[‚Ì”wŒiF‚ğ•\¦
+				//ã‚¢ãƒ‰ã‚ªãƒ³é¸æŠãƒ¡ãƒ‹ãƒ¥ãƒ¼ãŒé–‹ã‹ã‚Œã¦ã„ã‚‹å ´åˆã¯ã‚¢ãƒ‰ã‚ªãƒ³é¸æŠãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®èƒŒæ™¯è‰²ã‚’è¡¨ç¤º
 					if opening_addon_menu = 1 {
 						gosub *open_menu_addon_menu
 					} else : if cursor_mode = "normal" {
 						put_addon_name = ""
 					}
 				
-				//RCOIù—vƒ[ƒ^
+				//RCOIéœ€è¦ãƒ¡ãƒ¼ã‚¿
 					font SystemFont, 10
 					
-					//R - Z‹‹æ‰æ
+					//R - ä½å±…åŒºç”»
 						color 34, 177, 76 : boxf windowx-150, windowy-titlebar_h-20-(demand_Residential/3), windowx-150+10, windowy-titlebar_h-20
 						cmes "R", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
-					//C - ¤‹Æ‹æ‰æ
+					//C - å•†æ¥­åŒºç”»
 						color 63, 72, 204 : boxf windowx-140, windowy-titlebar_h-20-(demand_Commercial/3), windowx-140+10, windowy-titlebar_h-20
 						cmes "C", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
-					//O - ƒIƒtƒBƒX‹æ‰æ
+					//O - ã‚ªãƒ•ã‚£ã‚¹åŒºç”»
 						color 0, 162, 232 : boxf windowx-130, windowy-titlebar_h-20-(demand_Office/3), windowx-130+10, windowy-titlebar_h-20
 						cmes "O", windowx-130, windowy-titlebar_h-20, windowx-130+10, windowy-titlebar_h-10
-					//I - H‹Æ‹æ‰æ
+					//I - å·¥æ¥­åŒºç”»
 						color 255, 242, 0 : boxf windowx-120, windowy-titlebar_h-20-(demand_Industrial/3), windowx-120+10, windowy-titlebar_h-20
 						cmes "I", windowx-120, windowy-titlebar_h-20, windowx-120+10, windowy-titlebar_h-10
 					
@@ -2187,7 +2191,7 @@
 	loop
 	
 *main_onclick
-	//ƒƒjƒ…[ƒo[‚Ìã•Óiwindowy-70-titlebar_hj‚æ‚èã‚ªƒNƒŠƒbƒN‚³‚ê‚½ê‡‚Íreturn
+	//ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒãƒ¼ã®ä¸Šè¾ºï¼ˆwindowy-70-titlebar_hï¼‰ã‚ˆã‚Šä¸ŠãŒã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸå ´åˆã¯return
 		if opening_addon_menu = 1 {
 			menu_line_y = windowy-70-titlebar_h-32-20
 		} else {
@@ -2199,8 +2203,8 @@
 			return
 		}
 	
-	/*------------------------------------------ƒƒjƒ…[‚Ìƒ{ƒ^ƒ“‚Ì“®ì------------------------------------------------*/
-		//•W€ƒJ[ƒ\ƒ‹ƒ{ƒ^ƒ“
+	/*------------------------------------------ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ãƒœã‚¿ãƒ³ã®å‹•ä½œ------------------------------------------------*/
+		//æ¨™æº–ã‚«ãƒ¼ã‚½ãƒ«ãƒœã‚¿ãƒ³
 			if click_range( 20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32 ) = 1 {
 				cursor_mode = "normal"
 		
@@ -2215,7 +2219,7 @@
 				open_stat_menu = 0
 			}
 				
-		//“¹˜Hƒ{ƒ^ƒ“
+		//é“è·¯ãƒœã‚¿ãƒ³
 			if click_range( 60, windowy-70-titlebar_h, 60+32, windowy-70-titlebar_h+32 ) = 1 {
 					
 				if opening_menu_put_Road = 0 {
@@ -2225,14 +2229,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Road = 1
 	
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 		
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_Two_lane_road
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_Two_lane_road
 							noteget addon_num_normal_road, clicked_addon_number
 							addon_num_normal_road = int(addon_num_normal_road)
@@ -2248,7 +2252,7 @@
 				open_stat_menu = 0
 			}
 		
-		//Œš•¨iZ‹’n‹æjƒ{ƒ^ƒ“
+		//å»ºç‰©ï¼ˆä½å±…åœ°åŒºï¼‰ãƒœã‚¿ãƒ³
 			if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
 					
 				if opening_menu_put_Reaidential = 0 {
@@ -2258,14 +2262,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Residential = 1
 	
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_low_density_residential
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_low_density_residential
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2281,7 +2285,7 @@
 				open_stat_menu = 0
 			}
 		
-		//Œš•¨i¤‹Æ’n‹æjƒ{ƒ^ƒ“
+		//å»ºç‰©ï¼ˆå•†æ¥­åœ°åŒºï¼‰ãƒœã‚¿ãƒ³
 			if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Commercial = 0 {
@@ -2291,14 +2295,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Commercial = 1
 		
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_low_density_commercial
 							noteget put_addon_name, clicked_addon_number
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_low_density_commercial
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2314,7 +2318,7 @@
 				open_stat_menu = 0
 			}
 		
-		//Œš•¨iƒIƒtƒBƒXjƒ{ƒ^ƒ“
+		//å»ºç‰©ï¼ˆã‚ªãƒ•ã‚£ã‚¹ï¼‰ãƒœã‚¿ãƒ³
 			if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Office = 0 {
@@ -2323,14 +2327,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Office = 1
 		
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_office
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_office
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2346,7 +2350,7 @@
 				open_stat_menu = 0
 			}
 		
-		//Œš•¨iH‹Æ’n‹æjƒ{ƒ^ƒ“
+		//å»ºç‰©ï¼ˆå·¥æ¥­åœ°åŒºï¼‰ãƒœã‚¿ãƒ³
 			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Office = 0 {
@@ -2355,14 +2359,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Industrial = 1
 	
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_industrial
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_industrial
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2378,7 +2382,7 @@
 				open_stat_menu = 0
 			}
 				
-		//Œš•¨iŒö‹¤{İjƒ{ƒ^ƒ“
+		//å»ºç‰©ï¼ˆå…¬å…±æ–½è¨­ï¼‰ãƒœã‚¿ãƒ³
 			if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Public = 0 {
@@ -2387,14 +2391,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Public = 1
 		
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_public
 							noteget put_addon_name, clicked_addon_number
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_public
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2410,7 +2414,7 @@
 				open_stat_menu = 0
 			}
 		
-		//Œš•¨iŒö‰€jƒ{ƒ^ƒ“
+		//å»ºç‰©ï¼ˆå…¬åœ’ï¼‰ãƒœã‚¿ãƒ³
 			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Park = 0 {
@@ -2419,14 +2423,14 @@
 					opening_addon_menu = 1
 					opening_menu_put_Park = 1
 		
-					//‚Æ‚è‚ ‚¦‚¸ˆê”Ô¶‚É‚ ‚éƒAƒhƒIƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšä¸€ç•ªå·¦ã«ã‚ã‚‹ã‚¢ãƒ‰ã‚ªãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_park
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_park
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2442,7 +2446,7 @@
 				open_stat_menu = 0
 			}
 		
-		//“P‹ƒ{ƒ^ƒ“
+		//æ’¤å»ãƒœã‚¿ãƒ³
 			if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
 				cursor_mode = "bulldozer"
 		
@@ -2454,21 +2458,21 @@
 				opening_menu_put_Public = 0
 			}
 		
-		//İ’èƒ{ƒ^ƒ“
+		//è¨­å®šãƒœã‚¿ãƒ³
 			if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
 				cursor_mode = "normal"
 				opening_addon_menu = 0
 				gosub *setting
 			}
 		
-		//•Û‘¶ƒ{ƒ^ƒ“
+		//ä¿å­˜ãƒœã‚¿ãƒ³
 			if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
 				cursor_mode = "normal"
 				opening_addon_menu = 0
 				gosub *save
 			}
 		
-		//“Œvƒ{ƒ^ƒ“
+		//çµ±è¨ˆãƒœã‚¿ãƒ³
 			if click_range( windowx-54-32, windowy-70-titlebar_h, windowx-54, windowy-70-titlebar_h+32 ) = 1 {
 				if open_stat_menu = 0 {
 					open_stat_menu = 1
@@ -2480,7 +2484,7 @@
 				}
 			}
 		
-		//“Œvƒƒjƒ…[
+		//çµ±è¨ˆãƒ¡ãƒ‹ãƒ¥ãƒ¼
 			if open_stat_menu = 1 and click_range( windowx-72-32, windowy-70-titlebar_h-20, windowx-72-32+20, windowy-70-titlebar_h ) = 1 {
 				if stat_mode != "type" {
 					stat_mode = "type"
@@ -2510,58 +2514,58 @@
 				}
 			}
 		
-		//ƒAƒhƒIƒ“‘I‘ğƒ{ƒ^ƒ“i…F‚Ìƒƒjƒ…[ƒo[j
+		//ã‚¢ãƒ‰ã‚ªãƒ³é¸æŠãƒœã‚¿ãƒ³ï¼ˆæ°´è‰²ã®ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒãƒ¼ï¼‰
 			
-			/*-------------------------------------------“¹˜H---------------------------------------------------*/
+			/*-------------------------------------------é“è·¯---------------------------------------------------*/
 				notesel type_Two_lane_road
 				if opening_menu_put_Road = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Road"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_Two_lane_road
 						noteget put_addon_name, clicked_addon_number
 						
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_Two_lane_road
 						noteget addon_num_normal_road, clicked_addon_number
 						addon_num_normal_road = int(addon_num_normal_road)
 				}
 	
-			/*-----------------------------------------Z‹’n‹æ-------------------------------------------------*/
+			/*-----------------------------------------ä½å±…åœ°åŒº-------------------------------------------------*/
 	
-			//Z‹’n‹æ‚Ì’á–§“xE‚–§“x‘I‘ğƒ{ƒ^ƒ“
-				//’á–§“x
+			//ä½å±…åœ°åŒºã®ä½å¯†åº¦ãƒ»é«˜å¯†åº¦é¸æŠãƒœã‚¿ãƒ³
+				//ä½å¯†åº¦
 					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
 						density = "low"
 		
-					//‚Æ‚è‚ ‚¦‚¸’n‹æİ’èƒAƒCƒRƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšåœ°åŒºè¨­å®šã‚¢ã‚¤ã‚³ãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_low_density_residential
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_low_density_residential
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
 								
 						gosub *open_menu_addon_menu
 					}
-				//‚–§“x
+				//é«˜å¯†åº¦
 					if cursor_mode = "put_Residential" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
 						density = "high"
 		
-						//‚Æ‚è‚ ‚¦‚¸’n‹æİ’èƒAƒCƒRƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+						//ã¨ã‚Šã‚ãˆãšåœ°åŒºè¨­å®šã‚¢ã‚¤ã‚³ãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 							clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_high_density_residential
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_high_density_residential
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2569,73 +2573,73 @@
 						gosub *open_menu_addon_menu
 					}
 			
-			//’á–§“xZ‹’n‹æ
+			//ä½å¯†åº¦ä½å±…åœ°åŒº
 				notesel type_low_density_residential
 				if opening_menu_put_Residential = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Residential"
 					
 					clicked_addon_number = mousex/35 - 1
 					
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_low_density_residential
 						noteget put_addon_name, clicked_addon_number - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_low_density_residential
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 				
-			//‚–§“xZ‹’n‹æ
+			//é«˜å¯†åº¦ä½å±…åœ°åŒº
 				notesel type_high_density_residential
 				if opening_menu_put_Residential = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Residential"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_high_density_residential
 						noteget put_addon_name, clicked_addon_number - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_high_density_residential
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
-			/*--------------------------------------------¤‹Æ’n‹æ---------------------------------------------*/
+			/*--------------------------------------------å•†æ¥­åœ°åŒº---------------------------------------------*/
 	
-			//¤‹Æ’n‹æ‚Ì’á–§“xE‚–§“x‘I‘ğƒ{ƒ^ƒ“
-				//’á–§“x
+			//å•†æ¥­åœ°åŒºã®ä½å¯†åº¦ãƒ»é«˜å¯†åº¦é¸æŠãƒœã‚¿ãƒ³
+				//ä½å¯†åº¦
 					if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
 						density = "low"
 		
-					//‚Æ‚è‚ ‚¦‚¸’n‹æİ’èƒAƒCƒRƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+					//ã¨ã‚Šã‚ãˆãšåœ°åŒºè¨­å®šã‚¢ã‚¤ã‚³ãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 						clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_low_density_commercial
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_low_density_commercial
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
 								
 						gosub *open_menu_addon_menu
 					}
-				//‚–§“x
+				//é«˜å¯†åº¦
 					if cursor_mode = "put_Commercial" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
 						density = "high"
 		
-						//‚Æ‚è‚ ‚¦‚¸’n‹æİ’èƒAƒCƒRƒ“‚ğ‘I‘ğ‚³‚¹‚Ä‚¨‚­
+						//ã¨ã‚Šã‚ãˆãšåœ°åŒºè¨­å®šã‚¢ã‚¤ã‚³ãƒ³ã‚’é¸æŠã•ã›ã¦ãŠã
 							clicked_addon_number = 0
 			
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 							notesel type_high_density_commercial
 							noteget put_addon_name, clicked_addon_number
 				
-						//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+						//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 							notesel type_number_high_density_commercial
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
@@ -2643,111 +2647,111 @@
 						gosub *open_menu_addon_menu
 					}
 			
-			//’á–§“x¤‹Æ’n‹æ
+			//ä½å¯†åº¦å•†æ¥­åœ°åŒº
 				notesel type_low_density_commercial
 				if opening_menu_put_commercial = 1 and density = "low" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Commercial"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_low_density_commercial
 						noteget put_addon_name, clicked_addon_number - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_low_density_commercial
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
-			//‚–§“x¤‹Æ’n‹æ
+			//é«˜å¯†åº¦å•†æ¥­åœ°åŒº
 				notesel type_high_density_commercial
 				if opening_menu_put_commercial = 1 and density = "high" and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Commercial"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_high_density_commercial
 						noteget put_addon_name, clicked_addon_number - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_high_density_commercial
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
-			/*--------------------------------------------ƒIƒtƒBƒX-----------------------------------------------*/
+			/*--------------------------------------------ã‚ªãƒ•ã‚£ã‚¹-----------------------------------------------*/
 			
-			//‚–§“xƒIƒtƒBƒX
+			//é«˜å¯†åº¦ã‚ªãƒ•ã‚£ã‚¹
 				notesel type_office
 				if opening_menu_put_Office = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Office"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_office
 						noteget put_addon_name, clicked_addon_number - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_office
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 	
-			/*--------------------------------------------H‹Æ’n‹æ-----------------------------------------------*/
+			/*--------------------------------------------å·¥æ¥­åœ°åŒº-----------------------------------------------*/
 			
-			//H‹Æ’n‹æ
+			//å·¥æ¥­åœ°åŒº
 				notesel type_industrial
 				if opening_menu_put_industrial = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Industrial"
 		
 					clicked_addon_number = mousex/35 - 1
 						
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_industrial
 						noteget put_addon_name, clicked_addon_number - 1
 						
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_industrial
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 				}
 				
-			/*---------------------------------------------Œö‹¤{İ-----------------------------------------------*/
+			/*---------------------------------------------å…¬å…±æ–½è¨­-----------------------------------------------*/
 			
-			//Œö‹¤{İ
+			//å…¬å…±æ–½è¨­
 				notesel type_public
 				if opening_menu_put_public = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Public"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_public
 						noteget put_addon_name, clicked_addon_number
 						
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_public
 						noteget addon_num_buf, clicked_addon_number
 						addon_num_buf = int(addon_num_buf)
 				}
 	
-			/*-----------------------------------------------Œö‰€-------------------------------------------------*/
+			/*-----------------------------------------------å…¬åœ’-------------------------------------------------*/
 			
-			//Œö‰€
+			//å…¬åœ’
 				notesel type_public
 				if opening_menu_put_Park = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Park"
 		
 					clicked_addon_number = mousex/35 - 1
 		
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“–¼‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³åã‚’å–å¾—
 						notesel type_park
 						noteget put_addon_name, clicked_addon_number
 						
-					//‘I‘ğ‚³‚ê‚½ƒAƒhƒIƒ“‚ÌƒAƒhƒIƒ“”Ô†‚ğæ“¾
+					//é¸æŠã•ã‚ŒãŸã‚¢ãƒ‰ã‚ªãƒ³ã®ã‚¢ãƒ‰ã‚ªãƒ³ç•ªå·ã‚’å–å¾—
 						notesel type_number_park
 						noteget addon_num_buf, clicked_addon_number
 						addon_num_buf = int(addon_num_buf)
@@ -2764,26 +2768,26 @@
 	dim direction_check, 4
 	
 *build_obj_2
-	/*-----------------“¹˜HEŒš•¨‚ÌŒšİE•~İi¶ƒNƒŠƒbƒNjA“P‹i‰EƒNƒŠƒbƒN or “P‹ƒ‚[ƒhj---------------------*/
+	/*-----------------é“è·¯ãƒ»å»ºç‰©ã®å»ºè¨­ãƒ»æ•·è¨­ï¼ˆå·¦ã‚¯ãƒªãƒƒã‚¯ï¼‰ã€æ’¤å»ï¼ˆå³ã‚¯ãƒªãƒƒã‚¯ or æ’¤å»ãƒ¢ãƒ¼ãƒ‰ï¼‰---------------------*/
 	
-		//•W€ƒJ[ƒ\ƒ‹ƒ‚[ƒh‚ ‚é‚¢‚ÍƒNƒŠƒbƒN‚³‚ê‚½ƒ}ƒEƒXyÀ•W‚ªmenu_line_yˆÈã‚Ìê‡‚Íreturn
+		//æ¨™æº–ã‚«ãƒ¼ã‚½ãƒ«ãƒ¢ãƒ¼ãƒ‰ã‚ã‚‹ã„ã¯ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸãƒã‚¦ã‚¹yåº§æ¨™ãŒmenu_line_yä»¥ä¸Šã®å ´åˆã¯return
 			if from_Build_on_Reservation_area = 0 and (cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0) {
 				pointer_icon = -1
 				return
 			}
 	
-		//“P‹ƒ‚[ƒh‚Ìê‡‚Í‘I‘ğ‚³‚ê‚½ƒ}ƒX‚ğX’n‚É‚·‚é
+		//æ’¤å»ãƒ¢ãƒ¼ãƒ‰ã®å ´åˆã¯é¸æŠã•ã‚ŒãŸãƒã‚¹ã‚’æ›´åœ°ã«ã™ã‚‹
 			if from_Build_on_Reservation_area = 0 and cursor_mode = "bulldozer" {
 				gosub *delete_obj
 				return
 			}
 	
-		//ƒJ[ƒ\ƒ‹‚ªƒ}ƒbƒvŠO‚É‚ ‚éê‡‚Íreturn
+		//ã‚«ãƒ¼ã‚½ãƒ«ãŒãƒãƒƒãƒ—å¤–ã«ã‚ã‚‹å ´åˆã¯return
 			if from_Build_on_Reservation_area = 0 and (mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1) {
 				return
 			}
 	
-		//üˆÍ‚ÌƒIƒuƒWƒFƒNƒg‚ÌƒJƒeƒSƒŠ‚ğæ“¾
+		//å‘¨å›²ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚«ãƒ†ã‚´ãƒªã‚’å–å¾—
 			left_chip = ""
 			top_chip = ""
 			bottom_chip = ""
@@ -2802,12 +2806,12 @@
 				right_chip = category(mx+1, my)
 			}
 	
-		//ŒšİE•~İ
+		//å»ºè¨­ãƒ»æ•·è¨­
 			if mouse_left = 1 {
 				
-				//“¹˜H•~İ
+				//é“è·¯æ•·è¨­
 					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
-						//“¹˜H‚ÌŒü‚«‚ğ‘µ‚¦‚é
+						//é“è·¯ã®å‘ãã‚’æƒãˆã‚‹
 							x_buf = x : y_buf = y
 							x = mx : y = my
 	
@@ -2818,7 +2822,7 @@
 							
 							x = x_buf : y = y_buf
 	
-						//•~İ‚µ‚½’n“_‚Ìî•ñ‚ğ‘‚«Š·‚¦
+						//æ•·è¨­ã—ãŸåœ°ç‚¹ã®æƒ…å ±ã‚’æ›¸ãæ›ãˆ
 							cetegory_buf = category(mx,my)
 							
 							map(mx, my) = addon_num_normal_road
@@ -2866,12 +2870,12 @@
 						return
 					}
 	
-				//“¹˜H•~İˆÈŠO‚Ìê‡A‘I‘ğ‚³‚ê‚½ƒ}ƒX‚ÌüˆÍiã‰º¶‰Ej‚É“¹˜H‚ª‚ ‚é‚©‚Ç‚¤‚©i“¹˜H‚ÉÚ‘±‚Å‚«‚é‚©j
+				//é“è·¯æ•·è¨­ä»¥å¤–ã®å ´åˆã€é¸æŠã•ã‚ŒãŸãƒã‚¹ã®å‘¨å›²ï¼ˆä¸Šä¸‹å·¦å³ï¼‰ã«é“è·¯ãŒã‚ã‚‹ã‹ã©ã†ã‹ï¼ˆé“è·¯ã«æ¥ç¶šã§ãã‚‹ã‹ï¼‰
 					if cursor_mode != "put_Road" {
 	
-						//‚»‚à‚»‚àŒšİ’n‚É“¹˜H‚ª‚ ‚éê‡
+						//ãã‚‚ãã‚‚å»ºè¨­åœ°ã«é“è·¯ãŒã‚ã‚‹å ´åˆ
 							if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
-								;dialog "‚±‚Ì‹æ‰æ‚ÍŠù‚Éè—L‚³‚ê‚Ä‚¢‚Ü‚·"
+								;dialog "ã“ã®åŒºç”»ã¯æ—¢ã«å æœ‰ã•ã‚Œã¦ã„ã¾ã™"
 								return
 							}
 	
@@ -2918,50 +2922,50 @@
 							}
 						}
 	
-						//“¹˜H‚ÉÚ‘±‚³‚ê‚Ä‚¢‚È‚¢êŠ‚ÉŒšİ‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚éê‡
+						//é“è·¯ã«æ¥ç¶šã•ã‚Œã¦ã„ãªã„å ´æ‰€ã«å»ºè¨­ã—ã‚ˆã†ã¨ã—ã¦ã„ã‚‹å ´åˆ
 							if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
-								dialog "“¹˜H‚ÉÚ‘±‚³‚ê‚Ä‚¢‚È‚¢êŠ‚É‚ÍŒšİ‚Å‚«‚Ü‚¹‚ñI"
+								dialog "é“è·¯ã«æ¥ç¶šã•ã‚Œã¦ã„ãªã„å ´æ‰€ã«ã¯å»ºè¨­ã§ãã¾ã›ã‚“ï¼"
 								return
 							}
 	
-						//’n‹æİ’è‚Ìê‡
+						//åœ°åŒºè¨­å®šã®å ´åˆ
 							if instr(put_addon_name, 0, "Area : ") != -1 {
 								gosub *set_area
 								return
 							}
 							
 						if around_road_exist >= 0 {
-							//Œš•¨iZ‹’n‹æjŒšİ
+							//å»ºç‰©ï¼ˆä½å±…åœ°åŒºï¼‰å»ºè¨­
 								if cursor_mode = "put_Residential" {
 									category_buf = "residential"
 								}
 	
-							//Œš•¨i¤‹Æ’n‹æjŒšİ
+							//å»ºç‰©ï¼ˆå•†æ¥­åœ°åŒºï¼‰å»ºè¨­
 								if cursor_mode = "put_Commercial" {
 									category_buf = "commercial"
 								}
 				
-							//Œš•¨i‚–§“xƒIƒtƒBƒXjŒšİ
+							//å»ºç‰©ï¼ˆé«˜å¯†åº¦ã‚ªãƒ•ã‚£ã‚¹ï¼‰å»ºè¨­
 								if cursor_mode = "put_Office" {
 									category_buf = "office"
 								}
 	
-							//Œš•¨iH‹Æ’n‹æjŒšİ
+							//å»ºç‰©ï¼ˆå·¥æ¥­åœ°åŒºï¼‰å»ºè¨­
 								if cursor_mode = "put_Industrial" {
 									category_buf = "industrial"
 								}
 				
-							//Œš•¨iŒö‹¤{İjŒšİ
+							//å»ºç‰©ï¼ˆå…¬å…±æ–½è¨­ï¼‰å»ºè¨­
 								if cursor_mode = "put_Public" {
 									category_buf = "public"
 								}
 	
-							//Œš•¨iŒö‰€jŒšİ
+							//å»ºç‰©ï¼ˆå…¬åœ’ï¼‰å»ºè¨­
 								if cursor_mode = "put_Park" {
 									category_buf = "park"
 								}
 	
-							//Œü‚«‚É‰‚¶‚Äobj_type_buf‚Æobj_dire_buf‚ğ‘ã“ü
+							//å‘ãã«å¿œã˜ã¦obj_type_bufã¨obj_dire_bufã‚’ä»£å…¥
 								if direction = "left" {
 									obj_type_buf = element2( put_addon_name, use_type, addon_total_use_types, "null")
 									obj_dire_buf = element3( put_addon_name, use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "left")
@@ -2983,7 +2987,7 @@
 									return
 								}
 								
-							//2ƒ}ƒXˆÈã‚ÌŒš’z•¨‚Ìê‡AŒšİ‚·‚é•ûŒü‚É‚Ù‚©‚ÌŒš’z•¨‚ª‚È‚¢‚©Šm”F
+							//2ãƒã‚¹ä»¥ä¸Šã®å»ºç¯‰ç‰©ã®å ´åˆã€å»ºè¨­ã™ã‚‹æ–¹å‘ã«ã»ã‹ã®å»ºç¯‰ç‰©ãŒãªã„ã‹ç¢ºèª
 								if addon_chip_x(addon_num_buf, obj_type_buf, obj_dire_buf) >= 2 or addon_chip_y(addon_num_buf, obj_type_buf, obj_dire_buf) >= 2 {
 									found_other_obj = 0
 									
@@ -3017,7 +3021,7 @@
 													cannot_build(3) = 1
 												}
 		
-												//‚Ù‚©‚ÉŒšİ‰Â”\‚ÈŒü‚«‚ğ’T‚·
+												//ã»ã‹ã«å»ºè¨­å¯èƒ½ãªå‘ãã‚’æ¢ã™
 													found_other_direction = 0
 														
 													repeat 4
@@ -3049,12 +3053,12 @@
 														}
 													loop
 		
-												//‚Ù‚©‚ÉŒšİ‰Â”\‚ÈŒü‚«‚ªŒ©‚Â‚©‚Á‚½ê‡
+												//ã»ã‹ã«å»ºè¨­å¯èƒ½ãªå‘ããŒè¦‹ã¤ã‹ã£ãŸå ´åˆ
 													if found_other_direction = 1 {
 														able_build_here = 1
 														break
 														
-												//‚Ù‚©‚ÉŒšİ‰Â”\‚ÈŒü‚«‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
+												//ã»ã‹ã«å»ºè¨­å¯èƒ½ãªå‘ããŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆ
 													} else {
 														cannot_build_here = 1
 														break
@@ -3074,7 +3078,7 @@
 									
 									if cannot_build_here = 1 and found_other_obj = 1 {
 										if from_Build_on_Reservation_area = 0 {
-											dialog "‚±‚Ì‹æ‰æ‚ÍŠù‚Éè—L‚³‚ê‚Ä‚¢‚Ü‚·"
+											dialog "ã“ã®åŒºç”»ã¯æ—¢ã«å æœ‰ã•ã‚Œã¦ã„ã¾ã™"
 										}
 										
 										cannot_build_here = 0
@@ -3085,35 +3089,35 @@
 										
 								}
 	
-							//Build_on_Reservation_area‚©‚ç‚«‚½ê‡‚Ífrom_Build_on_Reservation_area = 0‚É
+							//Build_on_Reservation_areaã‹ã‚‰ããŸå ´åˆã¯from_Build_on_Reservation_area = 0ã«
 								if from_Build_on_Reservation_area = 1 {
 									from_Build_on_Reservation_area = 0
 								}
 	
-							//obj_type_buf‚ğobj_type(mx,my)‚ÉAobj_dire_buf‚ğobj_dire(mx,my)‚É‘ã“ü
+							//obj_type_bufã‚’obj_type(mx,my)ã«ã€obj_dire_bufã‚’obj_dire(mx,my)ã«ä»£å…¥
 								obj_type(mx,my) = obj_type_buf
 								obj_dire(mx,my) = obj_dire_buf
 	
-							//x•ûŒü‚É1ƒ}ƒX‚µ‚©g‚í‚È‚¢Œš’z•¨‚Ìê‡Aobj_use_tiles_x‚Í0‚É
+							//xæ–¹å‘ã«1ãƒã‚¹ã—ã‹ä½¿ã‚ãªã„å»ºç¯‰ç‰©ã®å ´åˆã€obj_use_tiles_xã¯0ã«
 								if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
 									acx = 0
 								} else {
 									acx = 1
 								}
 	
-							//y•ûŒü‚É1ƒ}ƒX‚µ‚©g‚í‚È‚¢Œš’z•¨‚Ìê‡Aobj_use_tiles_y‚Í0‚É
+							//yæ–¹å‘ã«1ãƒã‚¹ã—ã‹ä½¿ã‚ãªã„å»ºç¯‰ç‰©ã®å ´åˆã€obj_use_tiles_yã¯0ã«
 								if addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
 									acy = 0
 								} else {
 									acy = 1
 								}
 	
-							//ƒIƒuƒWƒFƒNƒg‚Ì’Ê‚µ”Ô†
+							//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®é€šã—ç•ªå·
 								if obj_serial_num(mx, my) = 0 {
 									next_obj_serial_num += 1
 								}
 								
-							//Œšİˆ—
+							//å»ºè¨­å‡¦ç†
 								repeat addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
 									rx = cnt
 									
@@ -3187,7 +3191,7 @@
 									loop
 								loop
 	
-							//’n‰¿‚Ì•Ï“®
+							//åœ°ä¾¡ã®å¤‰å‹•
 								addon_land_price_influence__tmp = addon_land_price_influence(addon_num_buf)
 	
 								addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_buf)
@@ -3234,7 +3238,7 @@
 									loop
 								next
 	
-							//”Æß—¦‚Ì•Ï“®
+							//çŠ¯ç½ªç‡ã®å¤‰å‹•
 								addon_crime_rate_influence__tmp = addon_crime_rate_influence(addon_num_buf)
 								
 								if addon_crime_rate_influence__tmp != 0 {
@@ -3284,7 +3288,7 @@
 	
 								}
 	
-							//‹³ˆç—¦‚Ì•Ï“®
+							//æ•™è‚²ç‡ã®å¤‰å‹•
 								addon_education_rate_influence__tmp = addon_education_rate_influence(addon_num_buf)
 								
 								if addon_education_rate_influence__tmp != 0 {
@@ -3334,7 +3338,7 @@
 	
 								}
 	
-							//“ss‘S‘Ì‚Ìû—e‰Â”\l”ˆ½‚¢‚Í‹l”‚ğ‘‚â‚·
+							//éƒ½å¸‚å…¨ä½“ã®åå®¹å¯èƒ½äººæ•°æˆ–ã„ã¯æ±‚äººæ•°ã‚’å¢—ã‚„ã™
 								if category_buf = "residential" and done_build(4,mx,my) = 0 {
 									total_Residential_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
@@ -3368,14 +3372,14 @@
 			return
 	
 *delete_obj
-		//“P‹
-			//ƒJ[ƒ\ƒ‹‚ªƒ}ƒbƒvŠO‚É‚ ‚éê‡‚Íreturn
+		//æ’¤å»
+			//ã‚«ãƒ¼ã‚½ãƒ«ãŒãƒãƒƒãƒ—å¤–ã«ã‚ã‚‹å ´åˆã¯return
 				if mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1 {
 					return
 				}
 			
 			if mouse_right = 1 or (cursor_mode = "bulldozer" and mouse_left = 1) or from_build_obj = 1 {
-				//ƒIƒuƒWƒFƒNƒg‚ÌŒü‚«‚ğæ“¾
+				//ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‘ãã‚’å–å¾—
 					addon_num_buf = addon_num(name(mx,my))
 					tile_addon_num_buf = addon_num("tile_greenfield")
 					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
@@ -3474,9 +3478,9 @@
 		return
 	
 *set_area
-	//’n‹æİ’è
+	//åœ°åŒºè¨­å®š
 	
-	;Z‹’n‹æ‚Ìİ’è
+	;ä½å±…åœ°åŒºã®è¨­å®š
 	if put_addon_name = "Area : low_density_Residential" {
 		reservation(mx,my) = "low_density_residential"
 	}
@@ -3484,7 +3488,7 @@
 		reservation(mx,my) = "high_density_residential"
 	}
 	
-	;¤‹Æ’n‹æ‚Ìİ’è
+	;å•†æ¥­åœ°åŒºã®è¨­å®š
 	if put_addon_name = "Area : low_density_Commercial" {
 		reservation(mx,my) = "low_density_commercial"
 	}
@@ -3492,12 +3496,12 @@
 		reservation(mx,my) = "high_density_commercial"
 	}
 	
-	;ƒIƒtƒBƒX’n‹æ‚Ìİ’è
+	;ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®è¨­å®š
 	if put_addon_name = "Area : Office" {
 		reservation(mx,my) = "office"
 	}
 	
-	;H‹Æ’n‹æ‚Ìİ’è
+	;å·¥æ¥­åœ°åŒºã®è¨­å®š
 	if put_addon_name = "Area : Industrial" {
 		reservation(mx,my) = "industrial"
 	}
@@ -3505,14 +3509,14 @@
 	return
 	
 *Build_on_Reservation_area
-	//—\–ñ’n‹æ‚ÉŒš•¨‚ğŒšİ
+	//äºˆç´„åœ°åŒºã«å»ºç‰©ã‚’å»ºè¨­
 	
-		//‘¼‚ÌŒš•¨‚ğŒšİ‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚éê‡‚Íreturn
+		//ä»–ã®å»ºç‰©ã‚’å»ºè¨­ã—ã‚ˆã†ã¨ã—ã¦ã„ã‚‹å ´åˆã¯return
 			if put_addon_name != "" {
 				return
 			}
 	
-	;Z‹’n‹æ
+	;ä½å±…åœ°åŒº
 		if instr(reservation(x,y), 0, "residential") != -1 and demand_Residential > 0 {
 			demand_Residential -= 1
 	
@@ -3543,7 +3547,7 @@
 			mouse_left = 1
 		}
 	
-	;¤‹Æ’n‹æ
+	;å•†æ¥­åœ°åŒº
 		if instr(reservation(x,y), 0, "commercial") != -1 and demand_Commercial > 0 {
 			demand_Commercial -= 1
 	
@@ -3574,7 +3578,7 @@
 			mouse_left = 1
 		}
 	
-	;ƒIƒtƒBƒX’n‹æ
+	;ã‚ªãƒ•ã‚£ã‚¹åœ°åŒº
 		if instr(reservation(x,y), 0, "office") != -1 and demand_Office > 0 {
 			demand_Office -= 1
 	
@@ -3594,7 +3598,7 @@
 			mouse_left = 1
 		}
 	
-	;H‹Æ’n‹æ
+	;å·¥æ¥­åœ°åŒº
 		if instr(reservation(x,y), 0, "industrial") != -1 and demand_Industrial > 0 {
 			demand_Industrial -= 1
 	
@@ -3706,7 +3710,7 @@
 		}
 	loop
 	
-	// ’n‹æİ’è‚ÌƒAƒCƒRƒ“‚ğ•\¦
+	// åœ°åŒºè¨­å®šã®ã‚¢ã‚¤ã‚³ãƒ³ã‚’è¡¨ç¤º
 	if cursor_mode != "put_Road" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
 	
 		gmode 2
@@ -3715,10 +3719,10 @@
 			if clicked_addon_number = 0 {
 				if density = "low" {
 					color 255,255,255 : font "", 14
-					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "’á–§“x‚ÈZ‹’n‹æ"
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "ä½å¯†åº¦ãªä½å±…åœ°åŒº"
 					
 					color 255,255,255 : font "", 10
-					pos 23, (windowy-70-titlebar_h-32-20) : mes "s–¯‚ªZ‚ŞêŠ‚ğ’ñ‹Ÿ‚µ‚Ü‚·BZ‹’n‹æ‚ğİ’è‚·‚é‚ÆZ‹Œš’z•¨‚ªŒšİ‚³‚ê‚Ü‚·B"
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "å¸‚æ°‘ãŒä½ã‚€å ´æ‰€ã‚’æä¾›ã—ã¾ã™ã€‚ä½å±…åœ°åŒºã‚’è¨­å®šã™ã‚‹ã¨ä½å±…å»ºç¯‰ç‰©ãŒå»ºè¨­ã•ã‚Œã¾ã™ã€‚"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 32, 32, 32
 					
@@ -3726,10 +3730,10 @@
 					
 				} else : if density = "high" {
 					color 255,255,255 : font "", 14
-					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "‚–§“x‚ÈZ‹’n‹æ"
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "é«˜å¯†åº¦ãªä½å±…åœ°åŒº"
 					
 					color 255,255,255 : font "", 10
-					pos 23, (windowy-70-titlebar_h-32-20) : mes "s–¯‚ªZ‚ŞêŠ‚ğ’ñ‹Ÿ‚µ‚Ü‚·BZ‹’n‹æ‚ğİ’è‚·‚é‚ÆZ‹Œš’z•¨‚ªŒšİ‚³‚ê‚Ü‚·B"
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "å¸‚æ°‘ãŒä½ã‚€å ´æ‰€ã‚’æä¾›ã—ã¾ã™ã€‚ä½å±…åœ°åŒºã‚’è¨­å®šã™ã‚‹ã¨ä½å±…å»ºç¯‰ç‰©ãŒå»ºè¨­ã•ã‚Œã¾ã™ã€‚"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 32, 32, 32
 					
@@ -3746,10 +3750,10 @@
 			if clicked_addon_number = 0 {
 				if density = "low" {
 					color 255,255,255 : font "", 14
-					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "’á–§“x‚È¤‹Æ’n‹æ"
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "ä½å¯†åº¦ãªå•†æ¥­åœ°åŒº"
 					
 					color 255,255,255 : font "", 10
-					pos 23, (windowy-70-titlebar_h-32-20) : mes "s–¯‚ª¤‹Æ‚ğ‰c‚ŞêŠ‚ğ’ñ‹Ÿ‚µ‚Ü‚·B¤‹Æ’n‹æ‚ğİ’è‚·‚é‚Æ¤‹ÆŒš’z•¨‚ªŒšİ‚³‚ê‚Ü‚·B"
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "å¸‚æ°‘ãŒå•†æ¥­ã‚’å–¶ã‚€å ´æ‰€ã‚’æä¾›ã—ã¾ã™ã€‚å•†æ¥­åœ°åŒºã‚’è¨­å®šã™ã‚‹ã¨å•†æ¥­å»ºç¯‰ç‰©ãŒå»ºè¨­ã•ã‚Œã¾ã™ã€‚"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 32, 32, 32
 					
@@ -3757,10 +3761,10 @@
 					
 				} else : if density = "high" {
 					color 255,255,255 : font "", 14
-					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "‚–§“x‚È¤‹Æ’n‹æ"
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "é«˜å¯†åº¦ãªå•†æ¥­åœ°åŒº"
 					
 					color 255,255,255 : font "", 10
-					pos 23, (windowy-70-titlebar_h-32-20) : mes "s–¯‚ª¤‹Æ‚ğ‰c‚ŞêŠ‚ğ’ñ‹Ÿ‚µ‚Ü‚·B¤‹Æ’n‹æ‚ğİ’è‚·‚é‚Æ¤‹ÆŒš’z•¨‚ªŒšİ‚³‚ê‚Ü‚·B"
+					pos 23, (windowy-70-titlebar_h-32-20) : mes "å¸‚æ°‘ãŒå•†æ¥­ã‚’å–¶ã‚€å ´æ‰€ã‚’æä¾›ã—ã¾ã™ã€‚å•†æ¥­åœ°åŒºã‚’è¨­å®šã™ã‚‹ã¨å•†æ¥­å»ºç¯‰ç‰©ãŒå»ºè¨­ã•ã‚Œã¾ã™ã€‚"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 32, 32, 32
 					
@@ -3776,10 +3780,10 @@
 		if cursor_mode = "put_Office" {
 			if clicked_addon_number = 0 {
 				color 255,255,255 : font "", 14
-				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "ƒIƒtƒBƒX’n‹æ"
+				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "ã‚ªãƒ•ã‚£ã‚¹åœ°åŒº"
 				
 				color 255,255,255 : font "", 10
-				pos 23, (windowy-70-titlebar_h-32-20) : mes "s–¯‚ªd–‚·‚éê‚ğ’ñ‹Ÿ‚µ‚Ü‚·BƒIƒtƒBƒX’n‹æ‚ğİ’è‚·‚é‚ÆƒIƒtƒBƒXŒš’z•¨‚ªŒšİ‚³‚ê‚Ü‚·B"
+				pos 23, (windowy-70-titlebar_h-32-20) : mes "å¸‚æ°‘ãŒä»•äº‹ã™ã‚‹å ´ã‚’æä¾›ã—ã¾ã™ã€‚ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã‚’è¨­å®šã™ã‚‹ã¨ã‚ªãƒ•ã‚£ã‚¹å»ºç¯‰ç‰©ãŒå»ºè¨­ã•ã‚Œã¾ã™ã€‚"
 				
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 42, 0, 32, 32, 32
 				
@@ -3795,10 +3799,10 @@
 		if cursor_mode = "put_Industrial" {
 			if clicked_addon_number = 0 {
 				color 255,255,255 : font "", 14
-				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "H‹Æ’n‹æ"
+				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "å·¥æ¥­åœ°åŒº"
 				
 				color 255,255,255 : font "", 10
-				pos 23, (windowy-70-titlebar_h-32-20) : mes "s–¯‚ªƒ‚ƒm‚ğ¶Y‚·‚éê‚ğ’ñ‹Ÿ‚µ‚Ü‚·BH‹Æ’n‹æ‚ğİ’è‚·‚é‚ÆH‹ÆŒš’z•¨‚ªŒšİ‚³‚ê‚Ü‚·B"
+				pos 23, (windowy-70-titlebar_h-32-20) : mes "å¸‚æ°‘ãŒãƒ¢ãƒã‚’ç”Ÿç”£ã™ã‚‹å ´ã‚’æä¾›ã—ã¾ã™ã€‚å·¥æ¥­åœ°åŒºã‚’è¨­å®šã™ã‚‹ã¨å·¥æ¥­å»ºç¯‰ç‰©ãŒå»ºè¨­ã•ã‚Œã¾ã™ã€‚"
 				
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 43, 0, 32, 32, 32
 	
@@ -3828,19 +3832,19 @@
 		from_delete_obj = 0
 		from_build_obj = 0
 		
-		//cŒü‚«
+		//ç¸¦å‘ã
 			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 			}
 	
-		//‰¡Œü‚«
+		//æ¨ªå‘ã
 			if left_chip = "road" and top_chip != "road" and bottom_chip != "road" and right_chip = "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 			}
 	
-		//s‚«~‚Ü‚è
+		//è¡Œãæ­¢ã¾ã‚Š
 			if left_chip = "road" and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
@@ -3858,7 +3862,7 @@
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
 			}
 	
-		//‹È‚ª‚èŠp
+		//æ›²ãŒã‚Šè§’
 			if left_chip = "road" and top_chip = "road" and bottom_chip != "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-top")
@@ -3876,7 +3880,7 @@
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-bottom")
 			}
 	
-		//TšŒ^Œğ·“_
+		//Tå­—å‹äº¤å·®ç‚¹
 			if left_chip = "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
@@ -3894,13 +3898,13 @@
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
 			}
 	
-		//\šŒ^Œğ·“_
+		//åå­—å‹äº¤å·®ç‚¹
 			if left_chip = "road" and top_chip = "road" and bottom_chip = "road" and right_chip = "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
 			}
 	
-		//1ƒ}ƒX‚¾‚¯ŒÇ—§‚µ‚½iü‚è‚ÉÚ‘±‚·‚é“¹˜H‚ª‚È‚¢j“¹˜H‚Ìê‡‚ÍƒRƒ“ƒNƒŠ[ƒgƒ^ƒCƒ‹‚ğ•\¦
+		//1ãƒã‚¹ã ã‘å­¤ç«‹ã—ãŸï¼ˆå‘¨ã‚Šã«æ¥ç¶šã™ã‚‹é“è·¯ãŒãªã„ï¼‰é“è·¯ã®å ´åˆã¯ã‚³ãƒ³ã‚¯ãƒªãƒ¼ãƒˆã‚¿ã‚¤ãƒ«ã‚’è¡¨ç¤º
 			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
@@ -3915,7 +3919,7 @@
 			
 	use_types_buf = get_chapter(buf_adat, "use_types", " = \"", "\"")
 	
-	//adat_use_types‚ğX‚Éƒ^ƒCƒv‚²‚Æ‚É•ª‚¯‚é
+	//adat_use_typesã‚’æ›´ã«ã‚¿ã‚¤ãƒ—ã”ã¨ã«åˆ†ã‘ã‚‹
 		split use_types_buf, ", ", use_type_buf
 	
 		repeat stat
@@ -3923,19 +3927,19 @@
 			await 1
 		loop
 				
-	//ƒ^ƒCƒv‚Ì”‚ğæ“¾
+	//ã‚¿ã‚¤ãƒ—ã®æ•°ã‚’å–å¾—
 		addon_total_use_types(addon_number) = stat
 				
-	//Šeƒ^ƒCƒv‚²‚Æ‚ÌŠT—v‚ğæ“¾
+	//å„ã‚¿ã‚¤ãƒ—ã”ã¨ã®æ¦‚è¦ã‚’å–å¾—
 	
-		//æ“¾ŠJn
+		//å–å¾—é–‹å§‹
 		repeat addon_total_use_types(addon_number)
 			use_type_summary = get_chapter(buf_adat, ""+use_type(addon_number, cnt)+" {", " {", ";")
 	
-			//g—p‚·‚é‰æ‘œ‚Ìæ“¾iimagej
+			//ä½¿ç”¨ã™ã‚‹ç”»åƒã®å–å¾—ï¼ˆimageï¼‰
 				addon_image(addon_number, cnt) = get_chapter(use_type_summary, "image", " = \"", "\"")
 						
-			//ƒ^ƒCƒv‚ÌŒü‚«‚ğæ“¾idirectionj
+			//ã‚¿ã‚¤ãƒ—ã®å‘ãã‚’å–å¾—ï¼ˆdirectionï¼‰
 				addon_direction_buf = get_chapter(use_type_summary, "direction", " = \"", "\"")
 						
 				split addon_direction_buf, ", ", addon_direction_buf_2
@@ -3949,28 +3953,28 @@
 	
 					addon_direction_summary = get_chapter(use_type_summary, ""+addon_direction(addon_number, load_adat_cnt, cnt)+" {", " {", "}")
 	
-					//ƒTƒCƒY‚ğæ“¾isize_x, size_yj
+					//ã‚µã‚¤ã‚ºã‚’å–å¾—ï¼ˆsize_x, size_yï¼‰
 						addon_size_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_x", " = \"", "\"")
 						addon_size_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_y", " = \"", "\"")
 										
 						addon_size_x(addon_number, load_adat_cnt, cnt) = int(addon_size_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_size_y(addon_number, load_adat_cnt, cnt) = int(addon_size_y_buf(addon_number, load_adat_cnt, cnt))
 	
-					//ƒ`ƒbƒv‚ÌƒQ[ƒ€ã‚ÌÀ•WƒTƒCƒY‚ğæ“¾ichip_x, chip_yj
+					//ãƒãƒƒãƒ—ã®ã‚²ãƒ¼ãƒ ä¸Šã®åº§æ¨™ã‚µã‚¤ã‚ºã‚’å–å¾—ï¼ˆchip_x, chip_yï¼‰
 						addon_chip_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_x", " = \"", "\"")
 						addon_chip_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_y", " = \"", "\"")
 										
 						addon_chip_x(addon_number, load_adat_cnt, cnt) = int(addon_chip_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_chip_y(addon_number, load_adat_cnt, cnt) = int(addon_chip_y_buf(addon_number, load_adat_cnt, cnt))
 	
-					//ƒ`ƒbƒv‚Ì¶ã‚ÌÀ•W‚ğæ“¾itop_left_x, top_left_yj
+					//ãƒãƒƒãƒ—ã®å·¦ä¸Šã®åº§æ¨™ã‚’å–å¾—ï¼ˆtop_left_x, top_left_yï¼‰
 						addon_top_left_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_x", " = \"", "\"")
 						addon_top_left_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_y", " = \"", "\"")
 										
 						addon_top_left_x(addon_number, load_adat_cnt, cnt) = int(addon_top_left_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_top_left_y(addon_number, load_adat_cnt, cnt) = int(addon_top_left_y_buf(addon_number, load_adat_cnt, cnt))
 	
-					//ƒ`ƒbƒv‚Ì‰E‰º‚ÌÀ•W‚ğæ“¾ibottom_right_x, bottom_right_yj
+					//ãƒãƒƒãƒ—ã®å³ä¸‹ã®åº§æ¨™ã‚’å–å¾—ï¼ˆbottom_right_x, bottom_right_yï¼‰
 						addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_x", " = \"", "\"")
 						addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_y", " = \"", "\"")
 										
@@ -3986,21 +3990,21 @@
 	return
 	
 *play_BGM
-	//Œ»İÄ¶‚µ‚Ä‚¢‚éBGM‚ÌŒ»İ‚ÌÄ¶ˆÊ’u‚Æ‹È‚Ì’·‚³‚ğæ“¾
+	//ç¾åœ¨å†ç”Ÿã—ã¦ã„ã‚‹BGMã®ç¾åœ¨ã®å†ç”Ÿä½ç½®ã¨æ›²ã®é•·ã•ã‚’å–å¾—
 		mci"status Cities-Box position"
-		BGM_Position = stat		; Œ»İ‚ÌÄ¶ˆÊ’u
+		BGM_Position = stat		; ç¾åœ¨ã®å†ç”Ÿä½ç½®
 			
 		mci "status Cities-Box length"
-		BGM_Length = stat		; ‹È‚Ì’·‚³
+		BGM_Length = stat		; æ›²ã®é•·ã•
 	
-	//Ä¶ˆÊ’u‚ª‹È‚Ì’·‚³‚Æ“¯‚¶‚È‚çŸ‚ÌBGM‚ğƒ‰ƒ“ƒ_ƒ€‚É‘Io
+	//å†ç”Ÿä½ç½®ãŒæ›²ã®é•·ã•ã¨åŒã˜ãªã‚‰æ¬¡ã®BGMã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«é¸å‡º
 		if BGM_Position = BGM_Length {	
 			chdir directory
 			chdir "bgm"
 	
 			mci "close Cities-Box"
 					
-			//ƒpƒX–¼‚ğŠÜ‚ß‚½ƒtƒ@ƒCƒ‹ˆê——‚ğæ“¾
+			//ãƒ‘ã‚¹åã‚’å«ã‚ãŸãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§ã‚’å–å¾—
 				dirlist2h 1, ','
 				dirlist2 buf_BGMs, "*.mp3*", 1, '\\'
 					
@@ -4012,13 +4016,13 @@
 			
 			chdir directory
 			
-			//ƒ‰ƒ“ƒ_ƒ€‚É‘Io
+			//ãƒ©ãƒ³ãƒ€ãƒ ã«é¸å‡º
 				randomize
 	
 				repeat
 					BGM_rnd = rnd(total_BGMs)
 					
-					//Œ»İÄ¶‚µ‚Ä‚¢‚éBGM‚Æ“¯‚¶‹È‚Å‚È‚¢‚±‚Æ‚ÆA“Á’è‚ÌğŒ‰º‚Ì‚İ‚Å—¬‚ê‚éBGMiƒtƒ@ƒCƒ‹–¼‚É[Sp]‚ª‚ ‚éj‚Å‚È‚¢‚±‚Æ‚ğŠm”F
+					//ç¾åœ¨å†ç”Ÿã—ã¦ã„ã‚‹BGMã¨åŒã˜æ›²ã§ãªã„ã“ã¨ã¨ã€ç‰¹å®šã®æ¡ä»¶ä¸‹ã®ã¿ã§æµã‚Œã‚‹BGMï¼ˆãƒ•ã‚¡ã‚¤ãƒ«åã«[Sp]ãŒã‚ã‚‹ï¼‰ã§ãªã„ã“ã¨ã‚’ç¢ºèª
 						notesel BGM_filelist
 						noteget next_BGM_file, BGM_rnd
 						
@@ -4032,13 +4036,13 @@
 					await 1
 				loop
 	
-			//‚à‚µƒ}ƒbƒvì¬’¼Œã‚È‚çAƒ}ƒbƒvì¬‚ÌBGM‚ğ—¬‚·
+			//ã‚‚ã—ãƒãƒƒãƒ—ä½œæˆç›´å¾Œãªã‚‰ã€ãƒãƒƒãƒ—ä½œæˆæ™‚ã®BGMã‚’æµã™
 				if Not_Played_NewMap_BGM = 1 {
 					Not_Played_NewMap_BGM = 0
 					playing_BGM_file = "[Sp]PROKOFIEV-PeterAndTheWolf.mp3"
 				}
 	
-			//“V‹C‚ª‰J‚È‚çA1/3‚ÌŠm—¦‚Åƒ‰ƒ“ƒ_ƒ€‚Å‰J‚Á‚Û‚¢‹È‚ğ—¬‚·
+			//å¤©æ°—ãŒé›¨ãªã‚‰ã€1/3ã®ç¢ºç‡ã§ãƒ©ãƒ³ãƒ€ãƒ ã§é›¨ã£ã½ã„æ›²ã‚’æµã™
 				if add_rain > 0 {
 					if rnd(3) = 2 {
 						p = rnd(2)
@@ -4051,14 +4055,14 @@
 					}
 				}
 	
-			//Ä¶
-				mci"open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"	; ŠJ‚­
-				mci"play Cities-Box"													; Ä¶
+			//å†ç”Ÿ
+				mci"open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"	; é–‹ã
+				mci"play Cities-Box"													; å†ç”Ÿ
 	
 				changed_BGM = 1
 		}
 	
-		; ƒ{ƒŠƒ…[ƒ€
+		; ãƒœãƒªãƒ¥ãƒ¼ãƒ 
 		if Set_Play_BGM = 0 {
 			mci "setaudio Cities-Box volume to 0"
 		} else {
@@ -4068,11 +4072,11 @@
 		return
 	
 *get_windowsize
-	//Œ»İ‚ÌƒEƒBƒ“ƒhƒEƒTƒCƒY‚ğæ“¾
+	//ç¾åœ¨ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã‚’å–å¾—
 		windowx = ginfo_sizex
 		windowy = ginfo_sizey
 	
-	//ƒEƒBƒ“ƒhƒE¶˜g‚Ì‰¡•‚Æƒ^ƒCƒgƒ‹ƒo[‚Ì‚‚³‚ğæ“¾
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å·¦æ ã®æ¨ªå¹…ã¨ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã®é«˜ã•ã‚’å–å¾—
 		dim rc, 2
 		rc(0) = 0
 		rc(1) = 0
@@ -4084,32 +4088,32 @@
 	return
 	
 *fluctuation
-	//lŒûE˜J“­lŒûEù—v“x‚È‚Ç‚ğ‘Œ¸
+	//äººå£ãƒ»åŠ´åƒäººå£ãƒ»éœ€è¦åº¦ãªã©ã‚’å¢—æ¸›
 	
-		//–ˆ“úŒß‘O0‚É‘Œ¸
+		//æ¯æ—¥åˆå‰0æ™‚ã«å¢—æ¸›
 			if time_Hour != 0 or time_Minutes != 0 {
 				return
 			}
 	
-		//•Ï”‰Šú‰»
+		//å¤‰æ•°åˆæœŸåŒ–
 			before_residents = 0
 			before_workers_Commericial = 0
 			before_workers_Office = 0
 			before_workers_Industrial = 0
 			before_workers_Public = 0
 	
-		//lŒû‚Ì‘Œ¸
+		//äººå£ã®å¢—æ¸›
 			if category(x,y) = "residential" {
-				//Z–¯”‚ğ‘‚â‚·‚©EŒ¸‚ç‚·‚©‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŒˆ‚ß‚éiù—v“x‚É‚æ‚Á‚ÄŠm—¦‚ª•Ï“®‚·‚éj
+				//ä½æ°‘æ•°ã‚’å¢—ã‚„ã™ã‹ãƒ»æ¸›ã‚‰ã™ã‹ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«æ±ºã‚ã‚‹ï¼ˆéœ€è¦åº¦ã«ã‚ˆã£ã¦ç¢ºç‡ãŒå¤‰å‹•ã™ã‚‹ï¼‰
 					rndv = 10+(demand_Residential/10)
-					f = rnd(rndv)+1		; f‚Ì’l‚ÍZ‹’n‹æ‚Ìù—v“x‚ª100“‚È‚ç20`0
+					f = rnd(rndv)+1		; fã®å€¤ã¯ä½å±…åœ°åŒºã®éœ€è¦åº¦ãŒ100ï¼…ãªã‚‰20ï½0
 						
-				//•ÏX‘O‚ÌZ‹’n‹æ‚ÌZ–¯”
+				//å¤‰æ›´å‰ã®ä½å±…åœ°åŒºã®ä½æ°‘æ•°
 					before_residents = residents(x,y)
 		
-				//lŒû‚Ì‘Œ¸ˆ—
+				//äººå£ã®å¢—æ¸›å‡¦ç†
 					if f < 10+(demand_Residential/10) {
-						//ŠeZ‹’n‹æ‚É‰½l‘‚â‚·‚©
+						//å„ä½å±…åœ°åŒºã«ä½•äººå¢—ã‚„ã™ã‹
 							if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
 								add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
 								residents(x,y) = before_residents + add_residents
@@ -4117,7 +4121,7 @@
 					}
 				
 					if f > 10+(demand_Residential/10) {
-						//ŠeZ‹’n‹æ‚Å‰½lŒ¸‚ç‚·‚©
+						//å„ä½å±…åœ°åŒºã§ä½•äººæ¸›ã‚‰ã™ã‹
 							if before_residents > 0 {
 								cut_residents = rnd(before_residents)
 								residents(x,y) = before_residents - cut_residents
@@ -4128,26 +4132,26 @@
 						residents(x,y) = 0
 					}
 		
-				//‘lŒû”‚É‚à”½‰f
+				//ç·äººå£æ•°ã«ã‚‚åæ˜ 
 					Total_Population = Total_Population - before_residents + residents(x,y)
 			}
 	
-		//¤‹Æ‹æ‰æ‚Ì˜J“­lŒû‚Ì‘Œ¸
+		//å•†æ¥­åŒºç”»ã®åŠ´åƒäººå£ã®å¢—æ¸›
 			if category(x,y) = "commercial" {
-				//˜J“­lŒû‚ğ‘‚â‚·‚©EŒ¸‚ç‚·‚©‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŒˆ‚ß‚éiù—v“x‚É‚æ‚Á‚ÄŠm—¦‚ª•Ï“®‚·‚éj
+				//åŠ´åƒäººå£ã‚’å¢—ã‚„ã™ã‹ãƒ»æ¸›ã‚‰ã™ã‹ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«æ±ºã‚ã‚‹ï¼ˆéœ€è¦åº¦ã«ã‚ˆã£ã¦ç¢ºç‡ãŒå¤‰å‹•ã™ã‚‹ï¼‰
 					rndv = 10+(demand_Commercial/10)
-					f = rnd(rndv)+1		; f‚Ì’l‚Í¤‹Æ’n‹æ‚Ìù—v“x‚ª100“‚È‚ç20`0
+					f = rnd(rndv)+1		; fã®å€¤ã¯å•†æ¥­åœ°åŒºã®éœ€è¦åº¦ãŒ100ï¼…ãªã‚‰20ï½0
 					f2 = 0
 						
-				//•ÏX‘O‚Ì¤‹Æ‹æ‰æ‚Ì˜J“­Ò”
+				//å¤‰æ›´å‰ã®å•†æ¥­åŒºç”»ã®åŠ´åƒè€…æ•°
 					before_workers_Commercial = workers_Commercial(x,y)
 		
-				//‘Œ¸ˆ—
+				//å¢—æ¸›å‡¦ç†
 					if f < 10+(demand_Commercial/10) {
-						//Še¤‹Æ’n‹æ‚É‰½l‘‚â‚·‚©
+						//å„å•†æ¥­åœ°åŒºã«ä½•äººå¢—ã‚„ã™ã‹
 							if addon_maximum_capacity(map(x,y)) - before_workers_Commercial > 0 {
 								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Commercial)
-								//‘lŒû‚ğ‰z‚³‚È‚¢‚±‚Æ‚ğŠm”F
+								//ç·äººå£ã‚’è¶Šã•ãªã„ã“ã¨ã‚’ç¢ºèª
 									if Total_workers_Commercial + add_workers < Total_Population {
 										workers_Commercial(x,y) = before_workers_Commercial + add_workers
 									} else {
@@ -4157,7 +4161,7 @@
 					}
 				
 					if f > 10+(demand_Commercial/10) or f2 = 1 {
-						//Še¤‹Æ’n‹æ‚Å‰½lŒ¸‚ç‚·‚©
+						//å„å•†æ¥­åœ°åŒºã§ä½•äººæ¸›ã‚‰ã™ã‹
 							if before_workers_Commercial > 0 {
 								cut_workers = rnd(before_workers_Commercial)
 								workers_Commercial(x,y) = before_workers_Commercial - cut_workers
@@ -4168,26 +4172,26 @@
 						workers_Commercial(x,y) = 0
 					}
 		
-				//‘˜J“­lŒû”‚É‚à”½‰f
+				//ç·åŠ´åƒäººå£æ•°ã«ã‚‚åæ˜ 
 					Total_workers_Commercial = Total_workers_Commercial - before_workers_Commercial + workers_Commercial(x,y)
 			}
 	
-		//ƒIƒtƒBƒX‹æ‰æ‚Ì˜J“­lŒû‚Ì‘Œ¸
+		//ã‚ªãƒ•ã‚£ã‚¹åŒºç”»ã®åŠ´åƒäººå£ã®å¢—æ¸›
 			if category(x,y) = "office" {
-				//˜J“­lŒû‚ğ‘‚â‚·‚©EŒ¸‚ç‚·‚©‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŒˆ‚ß‚éiù—v“x‚É‚æ‚Á‚ÄŠm—¦‚ª•Ï“®‚·‚éj
+				//åŠ´åƒäººå£ã‚’å¢—ã‚„ã™ã‹ãƒ»æ¸›ã‚‰ã™ã‹ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«æ±ºã‚ã‚‹ï¼ˆéœ€è¦åº¦ã«ã‚ˆã£ã¦ç¢ºç‡ãŒå¤‰å‹•ã™ã‚‹ï¼‰
 					rndv = 10+(demand_Office/10)
-					f = rnd(rndv)+1		; f‚Ì’l‚ÍƒIƒtƒBƒX’n‹æ‚Ìù—v“x‚ª100“‚È‚ç20`0
+					f = rnd(rndv)+1		; fã®å€¤ã¯ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã®éœ€è¦åº¦ãŒ100ï¼…ãªã‚‰20ï½0
 					f2 = 0
 						
-				//•ÏX‘O‚ÌƒIƒtƒBƒX‹æ‰æ‚Ì˜J“­Ò”
+				//å¤‰æ›´å‰ã®ã‚ªãƒ•ã‚£ã‚¹åŒºç”»ã®åŠ´åƒè€…æ•°
 					before_workers_Office = workers_Office(x,y)
 		
-				//‘Œ¸ˆ—
+				//å¢—æ¸›å‡¦ç†
 					if f < 10+(demand_Office/10) {
-						//ŠeƒIƒtƒBƒX’n‹æ‚É‰½l‘‚â‚·‚©
+						//å„ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã«ä½•äººå¢—ã‚„ã™ã‹
 							if addon_maximum_capacity(map(x,y)) - before_workers_Office > 0 {
 								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Office)
-								//‘lŒû‚ğ‰z‚³‚È‚¢‚±‚Æ‚ğŠm”F
+								//ç·äººå£ã‚’è¶Šã•ãªã„ã“ã¨ã‚’ç¢ºèª
 									if Total_workers_Office + add_workers < Total_Population {
 										workers_Office(x,y) = before_workers_Office + add_workers
 									} else {
@@ -4197,7 +4201,7 @@
 					}
 				
 					if f > 10+(demand_Office/10) or f2 = 1 {
-						//ŠeƒIƒtƒBƒX’n‹æ‚Å‰½lŒ¸‚ç‚·‚©
+						//å„ã‚ªãƒ•ã‚£ã‚¹åœ°åŒºã§ä½•äººæ¸›ã‚‰ã™ã‹
 							if before_workers_Office > 0 {
 								cut_workers = rnd(before_workers_Office)
 								workers_Office(x,y) = before_workers_Office - cut_workers
@@ -4208,26 +4212,26 @@
 						workers_Office(x,y) = 0
 					}
 		
-				//‘˜J“­lŒû”‚É‚à”½‰f
+				//ç·åŠ´åƒäººå£æ•°ã«ã‚‚åæ˜ 
 					Total_workers_Office = Total_workers_Office - before_workers_Office + workers_Office(x,y)
 			}
 	
-		//H‹Æ‹æ‰æ‚Ì˜J“­lŒû‚Ì‘Œ¸
+		//å·¥æ¥­åŒºç”»ã®åŠ´åƒäººå£ã®å¢—æ¸›
 			if category(x,y) = "industrial" {
-				//˜J“­lŒû‚ğ‘‚â‚·‚©EŒ¸‚ç‚·‚©‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŒˆ‚ß‚éiù—v“x‚É‚æ‚Á‚ÄŠm—¦‚ª•Ï“®‚·‚éj
+				//åŠ´åƒäººå£ã‚’å¢—ã‚„ã™ã‹ãƒ»æ¸›ã‚‰ã™ã‹ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«æ±ºã‚ã‚‹ï¼ˆéœ€è¦åº¦ã«ã‚ˆã£ã¦ç¢ºç‡ãŒå¤‰å‹•ã™ã‚‹ï¼‰
 					rndv = 10+(demand_Industrial/10)
-					f = rnd(rndv)+1		; f‚Ì’l‚ÍH‹Æ’n‹æ‚Ìù—v“x‚ª100“‚È‚ç20`0
+					f = rnd(rndv)+1		; fã®å€¤ã¯å·¥æ¥­åœ°åŒºã®éœ€è¦åº¦ãŒ100ï¼…ãªã‚‰20ï½0
 					f2 = 0
 						
-				//•ÏX‘O‚ÌH‹Æ‹æ‰æ‚Ì˜J“­Ò”
+				//å¤‰æ›´å‰ã®å·¥æ¥­åŒºç”»ã®åŠ´åƒè€…æ•°
 					before_workers_Industrial = workers_Industrial(x,y)
 		
-				//‘Œ¸ˆ—
+				//å¢—æ¸›å‡¦ç†
 					if f < 10+(demand_Industrial/10) {
-						//ŠeH‹Æ’n‹æ‚É‰½l‘‚â‚·‚©
+						//å„å·¥æ¥­åœ°åŒºã«ä½•äººå¢—ã‚„ã™ã‹
 							if addon_maximum_capacity(map(x,y)) - before_workers_Industrial > 0 {
 								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Industrial)
-								//‘lŒû‚ğ‰z‚³‚È‚¢‚±‚Æ‚ğŠm”F
+								//ç·äººå£ã‚’è¶Šã•ãªã„ã“ã¨ã‚’ç¢ºèª
 									if Total_workers_Industrial + add_workers < Total_Population {
 										workers_Industrial(x,y) = before_workers_Industrial + add_workers
 									} else {
@@ -4237,7 +4241,7 @@
 					}
 				
 					if f > 10+(demand_Industrial/10) or f2 = 1 {
-						//ŠeH‹Æ’n‹æ‚Å‰½lŒ¸‚ç‚·‚©
+						//å„å·¥æ¥­åœ°åŒºã§ä½•äººæ¸›ã‚‰ã™ã‹
 							if before_workers_Industrial > 0 {
 								cut_workers = rnd(before_workers_Industrial)
 								workers_Industrial(x,y) = before_workers_Industrial - cut_workers
@@ -4248,25 +4252,25 @@
 						workers_Industrial(x,y) = 0
 					}
 		
-				//‘˜J“­lŒû”‚É‚à”½‰f
+				//ç·åŠ´åƒäººå£æ•°ã«ã‚‚åæ˜ 
 					Total_workers_Industrial = Total_workers_Industrial - before_workers_Industrial + workers_Industrial(x,y)
 			}
 	
-		//Œö‹¤{İ‚Ì˜J“­lŒû‚Ì‘Œ¸
+		//å…¬å…±æ–½è¨­ã®åŠ´åƒäººå£ã®å¢—æ¸›
 			if category(x,y) = "public" {
-				//˜J“­lŒû‚ğ‘‚â‚·‚©EŒ¸‚ç‚·‚©‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŒˆ‚ß‚éiù—v“x‚É‚æ‚Á‚ÄŠm—¦‚ª•Ï“®‚·‚éj
+				//åŠ´åƒäººå£ã‚’å¢—ã‚„ã™ã‹ãƒ»æ¸›ã‚‰ã™ã‹ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«æ±ºã‚ã‚‹ï¼ˆéœ€è¦åº¦ã«ã‚ˆã£ã¦ç¢ºç‡ãŒå¤‰å‹•ã™ã‚‹ï¼‰
 					f = rnd(2)
 					f2 = 0
 						
-				//•ÏX‘O‚ÌŒö‹¤{İ‚Ì˜J“­Ò”
+				//å¤‰æ›´å‰ã®å…¬å…±æ–½è¨­ã®åŠ´åƒè€…æ•°
 					before_workers_Public = workers_Public(x,y)
 		
-				//‘Œ¸ˆ—
+				//å¢—æ¸›å‡¦ç†
 					if f = 0 {
-						//ŠeŒö‹¤{İ‚É‰½l‘‚â‚·‚©
+						//å„å…¬å…±æ–½è¨­ã«ä½•äººå¢—ã‚„ã™ã‹
 							if addon_maximum_capacity(map(x,y)) - before_workers_Public > 0 {
 								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Public)
-								//‘lŒû‚ğ‰z‚³‚È‚¢‚±‚Æ‚ğŠm”F
+								//ç·äººå£ã‚’è¶Šã•ãªã„ã“ã¨ã‚’ç¢ºèª
 									if Total_workers_Public + add_workers < Total_Population {
 										workers_Public(x,y) = before_workers_Public + add_workers
 									} else {
@@ -4276,7 +4280,7 @@
 					}
 				
 					if f = 1 {
-						//ŠeŒö‹¤{İ‚Å‰½lŒ¸‚ç‚·‚©
+						//å„å…¬å…±æ–½è¨­ã§ä½•äººæ¸›ã‚‰ã™ã‹
 							if before_workers_Public > 0 or f2 = 1 {
 								cut_workers = rnd(before_workers_Public)
 								workers_Public(x,y) = before_workers_Public - cut_workers
@@ -4287,16 +4291,16 @@
 						workers_Public(x,y) = 0
 					}
 		
-				//‘˜J“­lŒû”‚É‚à”½‰f
+				//ç·åŠ´åƒäººå£æ•°ã«ã‚‚åæ˜ 
 					Total_workers_Public = Total_workers_Public - before_workers_Public + workers_Public(x,y)
 			}
 	
-		//ù—v“x‚ğ‘Œ¸
-			//‘‹l”‚ğæ“¾
+		//éœ€è¦åº¦ã‚’å¢—æ¸›
+			//ç·æ±‚äººæ•°ã‚’å–å¾—
 				before_Vacancies = Vacancies
 				Vacancies = (total_Commercial_maximum_capacity-Total_workers_Commercial) + (total_Office_maximum_capacity-Total_workers_Office) + (total_Industrial_maximum_capacity-Total_workers_Industrial) + (total_Public_maximum_capacity-Total_workers_Public)
 				
-			//‘•‚˜QÒ”‚ğæ“¾
+			//ç·æµ®æµªè€…æ•°ã‚’å–å¾—
 				before_Vagrants = Vagrants
 				Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
 	
@@ -4304,7 +4308,7 @@
 					Total_Vagrants = 0
 				}
 				
-			//RCOIù—vƒ[ƒ^[‚ğ•Ï“®
+			//RCOIéœ€è¦ãƒ¡ãƒ¼ã‚¿ãƒ¼ã‚’å¤‰å‹•
 				if Vacancies > 0 and Total_Vagrants >= 0 {
 					if Total_Population > 0 {
 						demand_Residential 	= 100 - ((Total_Population / Vacancies) * 100) + Special_demand_Residential
@@ -4346,18 +4350,18 @@
 	return
 	
 *climate
-	//“VŒó‚Ì•Ï“®
+	//å¤©å€™ã®å¤‰å‹•
 		randomize
 	
-		//‹C‰·‚Ì•Ï“®
+		//æ°—æ¸©ã®å¤‰å‹•
 			change_temperature = rnd(5)
 	
 			if change_temperature = 0 {
 				
-				//“ú’†‚Í‹C‰·‚ªã‚ª‚è‚â‚·‚­A–éŠÔ‚Í‰º‚ª‚è‚â‚·‚­‚·‚é
+				//æ—¥ä¸­ã¯æ°—æ¸©ãŒä¸ŠãŒã‚Šã‚„ã™ãã€å¤œé–“ã¯ä¸‹ãŒã‚Šã‚„ã™ãã™ã‚‹
 					temperature_increase_or_decrease = rnd(8)
 			
-					//“ú’†
+					//æ—¥ä¸­
 						if 8 <= time_Hour and 14 >= time_Hour {
 							if 0 <= temperature_increase_or_decrease and 5 >= temperature_increase_or_decrease {
 								temperature_increase = 1
@@ -4368,7 +4372,7 @@
 								temperature_decrease = 1
 							}
 			
-					//–éŠÔ
+					//å¤œé–“
 						} else {
 							if 0 <= temperature_increase_or_decrease and 1 >= temperature_increase_or_decrease {
 								temperature_increase = 1
@@ -4380,7 +4384,7 @@
 							}
 						}
 				
-				//12Œ`2ŒF-10`15‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+				//12æœˆï½2æœˆï¼š-10â„ƒï½15â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 					if time_Month = 12 or (1 <= time_Month and 2 >= time_Month) {
 						
 						if temperature_increase = 1 {
@@ -4396,7 +4400,7 @@
 						
 					}
 			
-				//3Œ`5ŒF10`25‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+				//3æœˆï½5æœˆï¼š10â„ƒï½25â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 					if 3 <= time_Month and 5 >= time_Month {
 						
 						if temperature_increase = 1 {
@@ -4412,7 +4416,7 @@
 						
 					}
 			
-				//6Œ`8ŒF20`35‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+				//6æœˆï½8æœˆï¼š20â„ƒï½35â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 					if 6 <= time_Month and 8 >= time_Month {
 						
 						if temperature_increase = 1 {
@@ -4428,7 +4432,7 @@
 						
 					}
 			
-				//9Œ`11ŒF10`25‚Ì”ÍˆÍ‚Å‹C‰·‚ğ•Ï“®
+				//9æœˆï½11æœˆï¼š10â„ƒï½25â„ƒã®ç¯„å›²ã§æ°—æ¸©ã‚’å¤‰å‹•
 					if 9 <= time_Month and 11 >= time_Month {
 						
 						if temperature_increase = 1 {
@@ -4445,8 +4449,8 @@
 					}
 			}
 	
-		//“V‹C‚Ì•Ï“®
-			//‰JEá‚Ì•\¦A‹C‰·‚Ì•Ï“®
+		//å¤©æ°—ã®å¤‰å‹•
+			//é›¨ãƒ»é›ªã®è¡¨ç¤ºã€æ°—æ¸©ã®å¤‰å‹•
 				if Set_Change_Weather = 1 {
 					randomize
 									
@@ -4478,11 +4482,11 @@
 						if rain(cnt) = 1 {
 							color 255, 255, 255
 			
-							if temperature >= 3 {	; ‹C‰·‚ª3ˆÈã‚È‚ç‰J
+							if temperature >= 3 {	; æ°—æ¸©ãŒ3â„ƒä»¥ä¸Šãªã‚‰é›¨
 								rain_y(cnt) += 5
 								line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+20
 									
-							} else {				; ‹C‰·‚ª2ˆÈ‰º‚È‚çá
+							} else {				; æ°—æ¸©ãŒ2â„ƒä»¥ä¸‹ãªã‚‰é›ª
 								rain_x(cnt) += (rnd(3)-1)*2
 								rain_y(cnt) += 1
 								circle rain_x(cnt), rain_y(cnt), rain_x(cnt)+snow_size(cnt), rain_y(cnt)+snow_size(cnt)
@@ -4496,38 +4500,38 @@
 		return
 	
 *get_news
-	//“ss‚Ìƒjƒ…[ƒX‚Ìæ“¾
+	//éƒ½å¸‚ã®ãƒ‹ãƒ¥ãƒ¼ã‚¹ã®å–å¾—
 	
 		first_loop = 0
 		news_content = ""
 	
-		//“Áêƒjƒ…[ƒX
+		//ç‰¹æ®Šãƒ‹ãƒ¥ãƒ¼ã‚¹
 			notesel news_file
 			noteload "data/news/special.news"
 			
-			; ƒ}ƒbƒvì¬’¼Œã
+			; ãƒãƒƒãƒ—ä½œæˆç›´å¾Œ
 				if not_displayed_news_new_map = 1 {
 					not_displayed_news_new_map = 0
 	
 					same_news = 0
 	
-					; “¯‚¶“à—e‚Ìƒjƒ…[ƒX‚ğ•¡”“Ç‚İ‚Ş
+					; åŒã˜å†…å®¹ã®ãƒ‹ãƒ¥ãƒ¼ã‚¹ã‚’è¤‡æ•°èª­ã¿è¾¼ã‚€
 					repeat notemax
 						noteget news_tmp, cnt
 	
 						if instr(news_tmp, 0, "case=\"new_map\"") != -1 {
 							split news_tmp, ", ", tmp, news_content_candidate_tmp
-							news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; •\¦‚·‚éƒjƒ…[ƒX‚ÌŒó•â
-							same_news ++	; “¯‚¶“à—e‚Ìƒjƒ…[ƒX‚Ì”
+							news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; è¡¨ç¤ºã™ã‚‹ãƒ‹ãƒ¥ãƒ¼ã‚¹ã®å€™è£œ
+							same_news ++	; åŒã˜å†…å®¹ã®ãƒ‹ãƒ¥ãƒ¼ã‚¹ã®æ•°
 						}
 					loop
 					
 					if same_news > 0 {
-						news_content = news_content_candidate(rnd(same_news))		; Œó•â‚Ì’†‚©‚ç‚Ğ‚Æ‚Âƒ‰ƒ“ƒ_ƒ€‚É‘I‚Ô
+						news_content = news_content_candidate(rnd(same_news))		; å€™è£œã®ä¸­ã‹ã‚‰ã²ã¨ã¤ãƒ©ãƒ³ãƒ€ãƒ ã«é¸ã¶
 					}
 				}
 	
-		//“Á‚É•ñ‚¶‚é‚±‚Æ‚ª‚È‚¢ê‡A‚Ç‚¤‚Å‚à‚¢‚¢ƒjƒ…[ƒX‚ğ•\¦
+		//ç‰¹ã«å ±ã˜ã‚‹ã“ã¨ãŒãªã„å ´åˆã€ã©ã†ã§ã‚‚ã„ã„ãƒ‹ãƒ¥ãƒ¼ã‚¹ã‚’è¡¨ç¤º
 			notesel news_file
 			noteload "data/news/others.news"
 			
@@ -4536,19 +4540,19 @@
 
 				same_news = 0
 	
-				; “¯‚¶“à—e‚Ìƒjƒ…[ƒX‚ğ•¡”“Ç‚İ‚Ş
+				; åŒã˜å†…å®¹ã®ãƒ‹ãƒ¥ãƒ¼ã‚¹ã‚’è¤‡æ•°èª­ã¿è¾¼ã‚€
 				repeat notemax
 					noteget news_tmp, cnt
 	
 					if instr(news_tmp, 0, "case=\"others\"") != -1 {
 						split news_tmp, ", ", tmp, news_content_candidate_tmp
-						news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; •\¦‚·‚éƒjƒ…[ƒX‚ÌŒó•â
-						same_news ++	; “¯‚¶“à—e‚Ìƒjƒ…[ƒX‚Ì”
+						news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; è¡¨ç¤ºã™ã‚‹ãƒ‹ãƒ¥ãƒ¼ã‚¹ã®å€™è£œ
+						same_news ++	; åŒã˜å†…å®¹ã®ãƒ‹ãƒ¥ãƒ¼ã‚¹ã®æ•°
 					}
 				loop
 				
 				if same_news > 0 {
-					news_content = news_content_candidate(rnd(same_news))		; Œó•â‚Ì’†‚©‚ç‚Ğ‚Æ‚Âƒ‰ƒ“ƒ_ƒ€‚É‘I‚Ô
+					news_content = news_content_candidate(rnd(same_news))		; å€™è£œã®ä¸­ã‹ã‚‰ã²ã¨ã¤ãƒ©ãƒ³ãƒ€ãƒ ã«é¸ã¶
 				}
 			}
 	
@@ -4559,7 +4563,7 @@
 	screen 1, 300, 400
 	gsel 1
 	
-	title "Cities Box İ’è"
+	title "Cities Box è¨­å®š"
 	
 	onclick *setting_onclick
 	
@@ -4572,8 +4576,8 @@
 	color 255, 255, 255
 	font setting_SystemFont, 16
 	
-	//“ss–¼(City_Name)
-		pos 10, 10 : mes "“ss–¼"
+	//éƒ½å¸‚å(City_Name)
+		pos 10, 10 : mes "éƒ½å¸‚å"
 	
 		if from_setting_onclick = 0 {
 			setting_City_Name = City_Name
@@ -4582,8 +4586,8 @@
 		objsize 210, 20
 		pos 80, 10 : input setting_City_Name
 	
-	//s’·–¼(Mayor_Name)
-		pos 10, 40 : mes "s’·–¼"
+	//å¸‚é•·å(Mayor_Name)
+		pos 10, 40 : mes "å¸‚é•·å"
 	
 		if from_setting_onclick = 0 {
 			setting_Mayor_Name = Mayor_Name
@@ -4592,7 +4596,7 @@
 		objsize 210, 20
 		pos 80, 40 : input setting_Mayor_Name
 	
-	//“VŒó‚Ì•Ï‰»(Set_Change_Weather)
+	//å¤©å€™ã®å¤‰åŒ–(Set_Change_Weather)
 		if from_setting_onclick = 0 {
 			setting_Set_Change_Weather = Set_Change_Weather
 		}
@@ -4603,9 +4607,9 @@
 			pos 10, 73 : gcopy 14, 0, 16, 16, 16
 		}
 		
-		pos 35, 70 : mes "“VŒó‚Ì•Ï‰»"
+		pos 35, 70 : mes "å¤©å€™ã®å¤‰åŒ–"
 	
-	//BGM‚ÌÄ¶‚Ì—L–³(Set_Play_BGM)
+	//BGMã®å†ç”Ÿã®æœ‰ç„¡(Set_Play_BGM)
 		if from_setting_onclick = 0 {
 			setting_Set_Play_BGM = Set_Play_BGM
 		}
@@ -4616,10 +4620,10 @@
 			pos 10, 103 : gcopy 14, 0, 16, 16, 16
 		}
 		
-		pos 35, 100 : mes "BGM‚ÌÄ¶"
+		pos 35, 100 : mes "BGMã®å†ç”Ÿ"
 	
-	//ƒtƒHƒ“ƒg(SystemFont)
-		pos 10, 130 : mes "ƒtƒHƒ“ƒg"
+	//ãƒ•ã‚©ãƒ³ãƒˆ(SystemFont)
+		pos 10, 130 : mes "ãƒ•ã‚©ãƒ³ãƒˆ"
 	
 		objsize 194, 20
 		pos 80, 130 : input setting_SystemFont
@@ -4627,7 +4631,7 @@
 		gmode 2
 		pos 274, 130 : gcopy 16, 0, 0, 16, 16
 	
-	//OKƒ{ƒ^ƒ“
+	//OKãƒœã‚¿ãƒ³
 		color 255, 255, 255 : boxf 100, 360, 200, 390
 		color 95, 95, 95 : boxf 101, 361, 199, 389
 	
@@ -4643,8 +4647,8 @@
 	
 	from_setting_onclick = 1
 	
-	//“VŒó‚Ì•Ï‰»(Set_Change_Weather)
-		//ƒ`ƒFƒbƒNƒ{ƒbƒNƒX
+	//å¤©å€™ã®å¤‰åŒ–(Set_Change_Weather)
+		//ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹
 			if click_range(10, 73, 10+16, 73+16) = 1 {
 				if setting_Set_Change_Weather = 0 {
 					setting_Set_Change_Weather = 1
@@ -4653,8 +4657,8 @@
 				}
 			}
 	
-	//BGM‚ÌÄ¶‚Ì—L–³(Set_Play_BGM)
-		//ƒ`ƒFƒbƒNƒ{ƒbƒNƒX
+	//BGMã®å†ç”Ÿã®æœ‰ç„¡(Set_Play_BGM)
+		//ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹
 			if click_range(10, 103, 10+16, 103+16) = 1 {
 				if setting_Set_Play_BGM = 0 {
 					setting_Set_Play_BGM = 1
@@ -4663,16 +4667,16 @@
 				}
 			}
 	
-	//ƒtƒHƒ“ƒg(SystemFont)
-		//QÆƒ{ƒ^ƒ“
+	//ãƒ•ã‚©ãƒ³ãƒˆ(SystemFont)
+		//å‚ç…§ãƒœã‚¿ãƒ³
 			if click_range(274, 130, 274+16, 130+16) = 1 {
 				gosub *refer_fonts
 			}
 	
-	//OKƒ{ƒ^ƒ“
+	//OKãƒœã‚¿ãƒ³
 		if click_range(100, 360, 200, 390) = 1 {
 	
-			// ƒ}ƒbƒvì¬‚Ìİ’è‚Ìê‡
+			// ãƒãƒƒãƒ—ä½œæˆæ™‚ã®è¨­å®šã®å ´åˆ
 				if from_new_map = 1 {
 					City_Name = setting_City_Name
 					Mayor_Name = setting_Mayor_Name
@@ -4711,7 +4715,7 @@
 	screen 1, 400, 300
 	
 	gsel 1
-	title "V‹Kƒ}ƒbƒvì¬"
+	title "æ–°è¦ãƒãƒƒãƒ—ä½œæˆ"
 	
 	onclick gosub *new_map_setting_onclick
 	
@@ -4720,8 +4724,8 @@
 	color 255, 255, 255
 	font SystemFont, 16
 	
-	//“ss–¼(City_Name)
-		pos 10, 10 : mes "“ss–¼"
+	//éƒ½å¸‚å(City_Name)
+		pos 10, 10 : mes "éƒ½å¸‚å"
 	
 		if from_setting_onclick = 0 {
 			setting_City_Name = City_Name
@@ -4730,8 +4734,8 @@
 		objsize 280, 20
 		pos 80, 10 : input setting_City_Name
 	
-	//s’·–¼(Mayor_Name)
-		pos 10, 40 : mes "s’·–¼"
+	//å¸‚é•·å(Mayor_Name)
+		pos 10, 40 : mes "å¸‚é•·å"
 	
 		if from_setting_onclick = 0 {
 			setting_Mayor_Name = Mayor_Name
@@ -4740,7 +4744,7 @@
 		objsize 280, 20
 		pos 80, 40 : input setting_Mayor_Name
 	
-	//“VŒó‚Ì•Ï‰»(Set_Change_Weather)
+	//å¤©å€™ã®å¤‰åŒ–(Set_Change_Weather)
 		if from_setting_onclick = 0 {
 			setting_Set_Change_Weather = Set_Change_Weather
 		}
@@ -4751,9 +4755,9 @@
 			pos 10, 73 : gcopy 14, 0, 16, 16, 16
 		}
 		
-		pos 35, 70 : mes "“VŒó‚Ì•Ï‰»"
+		pos 35, 70 : mes "å¤©å€™ã®å¤‰åŒ–"
 	
-	//OKƒ{ƒ^ƒ“
+	//OKãƒœã‚¿ãƒ³
 		color 255, 255, 255 : boxf 150, 260, 250, 290
 		color 95, 95, 95 : boxf 151, 261, 249, 289
 	
@@ -4767,8 +4771,8 @@
 	
 	from_setting_onclick = 1
 	
-	//“VŒó‚Ì•Ï‰»(Set_Change_Weather)
-		//ƒ`ƒFƒbƒNƒ{ƒbƒNƒX
+	//å¤©å€™ã®å¤‰åŒ–(Set_Change_Weather)
+		//ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹
 			if click_range(10, 73, 10+16, 73+16) = 1 {
 				if setting_Set_Change_Weather = 0 {
 					setting_Set_Change_Weather = 1
@@ -4777,10 +4781,10 @@
 				}
 			}
 	
-	//OKƒ{ƒ^ƒ“
+	//OKãƒœã‚¿ãƒ³
 		if click_range(150, 260, 250, 290) = 1 {
 	
-		// ƒ}ƒbƒvì¬‚Ì‰Šúİ’è
+		// ãƒãƒƒãƒ—ä½œæˆæ™‚ã®åˆæœŸè¨­å®š
 			City_Name = setting_City_Name
 			Mayor_Name = setting_Mayor_Name
 			Set_Change_Name = setting_Set_Change_Name
@@ -4808,7 +4812,7 @@
 *save_setting
 	chdir directory
 	
-	//‚Ü‚¸‚Í–{‘Ìİ’è(data/config.dat)‚ğ•Û‘¶
+	//ã¾ãšã¯æœ¬ä½“è¨­å®š(data/config.dat)ã‚’ä¿å­˜
 		noteadd_SystemFont = 0
 		noteadd_Set_Play_BGM = 0
 		
@@ -4841,7 +4845,7 @@
 	
 		notesave "data/config.dat"
 	
-	//Ÿ‚ÉŠeƒ}ƒbƒvƒf[ƒ^(*.cbd)‚Ìİ’è‚ğ•Û‘¶
+	//æ¬¡ã«å„ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿(*.cbd)ã®è¨­å®šã‚’ä¿å­˜
 		noteadd_City_Name = 0
 		noteadd_Mayor_Name = 0
 		noteadd_Set_Change_Weather = 0
@@ -4930,17 +4934,17 @@
 *save
 	save_mapdata = ""
 	
-	//Œë”½‰–h~
+	//èª¤åå¿œé˜²æ­¢
 		if from_new_map = 0 and click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 {
 			return
 		}
 	
-	//ƒ}ƒbƒv•Û‘¶
-		title "•Û‘¶’†..."
+	//ãƒãƒƒãƒ—ä¿å­˜
+		title "ä¿å­˜ä¸­..."
 		
 		notesel save_mapdata
 		
-		//Ÿ‚ÉŠeƒ}ƒbƒvƒf[ƒ^(*.cbd)‚Ìİ’è‚ğ•Û‘¶
+		//æ¬¡ã«å„ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿(*.cbd)ã®è¨­å®šã‚’ä¿å­˜
 			noteadd "City_Name = \""+City_Name+"\";", -1
 			noteadd "Mayor_Name = \""+Mayor_Name+"\";", -1
 	
@@ -4949,33 +4953,33 @@
 			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -1
 			noteadd "Temperature = "+temperature+";", -1
 	
-		//‹ó”’
+		//ç©ºç™½
 			noteadd " ", -1
 	
-		//ƒ}ƒbƒvƒTƒCƒY
+		//ãƒãƒƒãƒ—ã‚µã‚¤ã‚º
 			noteadd "mapx = "+mapx+";", -1
 			noteadd "mapy = "+mapy+";", -1
 	
-		//‹ó”’
+		//ç©ºç™½
 			noteadd " ", -1
 	
-		//“ú
+		//æ—¥æ™‚
 			noteadd "time_Year = "+time_Year+";", -1
 			noteadd "time_Month = "+time_Month+";", -1
 			noteadd "time_Date = "+time_Date+";", -1
 			noteadd "time_Hour = "+time_Hour+";", -1
 			noteadd "time_Minutes = "+time_Minutes+";", -1
 	
-		//‹ó”’
+		//ç©ºç™½
 			noteadd " ", -1
 	
-		//ù—v“x
+		//éœ€è¦åº¦
 			noteadd "demand_Residential = "+demand_Residential+";", -1
 			noteadd "demand_Commercial = "+demand_Commercial+";", -1
 			noteadd "demand_Office = "+demand_Office+";", -1
 			noteadd "demand_Industrial = "+demand_Industrial+";", -1
 	
-		//‹ó”’
+		//ç©ºç™½
 			noteadd " ", -1
 	
 		//name(x,y)
@@ -5036,7 +5040,7 @@
 					x = cnt
 			
 					if cnt = 0 {
-						map_data_buf = strf("%03d", obj_type(x,y))		; 3Œ…‚É‘µ‚¦‚Ä‚¢‚é‚Ì‚ÍŒ©‚â‚·‚­‚·‚é‚½‚ß‚È‚Ì‚Å“Á‚ÉˆÓ–¡‚Í–³‚¢‚Å‚·B4Œ…i1000ˆÈãj‚à“Ç‚İ‚İ‰Â
+						map_data_buf = strf("%03d", obj_type(x,y))		; 3æ¡ã«æƒãˆã¦ã„ã‚‹ã®ã¯è¦‹ã‚„ã™ãã™ã‚‹ãŸã‚ãªã®ã§ç‰¹ã«æ„å‘³ã¯ç„¡ã„ã§ã™ã€‚4æ¡ï¼ˆ1000ä»¥ä¸Šï¼‰ã‚‚èª­ã¿è¾¼ã¿å¯
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_type(x,y))+""
 					}
@@ -5392,8 +5396,8 @@
 			
 			noteadd "}", -1
 	
-		//•Û‘¶æƒtƒ@ƒCƒ‹‚Ì‘I‘ğ
-			dialog "cbx", 17, "Cities Box ƒ}ƒbƒvƒf[ƒ^"
+		//ä¿å­˜å…ˆãƒ•ã‚¡ã‚¤ãƒ«ã®é¸æŠ
+			dialog "cbx", 17, "Cities Box ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿"
 	
 			save_mapdata_name = refstr
 			if instr(save_mapdata_name, 0, ".cbx") = -1 and instr(save_mapdata_name, 0, ".cbd") = -1 {
@@ -5404,7 +5408,7 @@
 				return
 			}
 	
-		//ˆÃ†‰»icbx‚Å•Û‘¶‚µ‚½ê‡‚Ì‚İj
+		//æš—å·åŒ–ï¼ˆcbxã§ä¿å­˜ã—ãŸå ´åˆã®ã¿ï¼‰
 			if instr(save_mapdata_name, 0, ".cbd") = -1 and stat = 1 {
 				notesel save_mapdata
 				l = notemax
@@ -5428,7 +5432,7 @@
 				return
 			}
 	
-		//•Û‘¶
+		//ä¿å­˜
 			if stat = 1 {
 				notesel save_mapdata_Cipher
 				notesave save_mapdata_name
@@ -5458,7 +5462,7 @@
 			
 *exit
 	if ginfo_act = 0 {
-		//ˆêƒtƒ@ƒCƒ‹‚ğíœ
+		//ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‰Šé™¤
 			repeat total_addons
 				exist "data/temp/"+addon_name(cnt)+".temp"
 				
