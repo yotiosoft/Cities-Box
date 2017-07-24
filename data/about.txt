@@ -1,3 +1,3 @@
-Title : Cities Box（Alpha）
+Title : Cities Box Ver.0.6.2 r52（Alpha）
 Version : 0.6.2
 Release_number : 52
