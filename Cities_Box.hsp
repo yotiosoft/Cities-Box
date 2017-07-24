@@ -1,11 +1,14 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.6.1
+									   Cities Box Ver 0.6.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
 	
 --------------------------------------------------------------------------------------------------*/
+
+*include
+#include "hspinet.as"
 
 *define
 /*チップサイズ（64x64）*/
@@ -188,6 +191,25 @@
 	repeat size
 	    poke p1, cnt, peek(p1, cnt) - key
 	loop
+	
+	return
+	
+//ダウンロード（要hspinet.dll）
+#deffunc download str url, str request, str dlname
+	netinit@
+	neturl@ url
+	
+	netdlname@ dlname					;	ダウンロード後のファイル名
+	netrequest@ request					;	ファイル名の指定（ここで指定する）
+	
+	repeat
+		exist dlname
+		netexec@ res
+		if res : break
+		await 50
+	loop
+
+	netterm@
 	
 	return
 								
@@ -573,8 +595,54 @@
 	
 	chdir directory
 	
+*check_update
+	color 0, 0, 0 : boxf
+	
+	color 255, 255, 255 : font SystemFont, 14
+	pos 10, 10 : mes "しばらくお待ちください\nアップデートの確認中..."
+	
+	//既にアップデーターがあれば削除
+		exist "Cities_Box_UD.exe"
+		if strsize != -1 {
+			delete "Cities_Box_UD.exe"
+		}
+	
+	download "http://joogle.web.fc2.com/datacenter/cities_box/", "datacenter_url.txt", "data/datacenter_url.txt"
+	
+	notesel datacenter_url
+	noteload "data/datacenter_url.txt"
+	
+	if instr(datacenter_url, 0, "http://") = -1 {
+		datacenter_url = "http://yotiosoft.com/dc/cities_box/"
+	}
+	
+	download datacenter_url, "latest_version.txt", "data/latest_version.txt"
+	
+	notesel latest_version
+	noteload "data/latest_version.txt"
+	
+	if instr(latest_version, 0, "<!DOCTYPE html>") != -1 {
+		goto *menu
+	}
+	
+	latest_version__Release_number = int(get_chapter(latest_version, "Release Number", " : ", ";"))
+	latest_version__Title = get_chapter(latest_version, "Title", " : ", ";")
+	latest_version__Version = get_chapter(latest_version, "Version", " : ", ";")
+	
+	notesel about
+	noteload "data/about.txt"
+	noteget tmp_about, 2
+	split tmp_about, " : ", tmp, NOW_Release_number
+	NOW_Release_number = int(NOW_Release_number)
+	
 *menu
 	onclick gosub *menu_onclick
+	
+	if latest_version__Release_number > NOW_Release_number and update_button = 0 {
+		objsize 100, 20
+		pos windowx-100-20, windowy-titlebar_h-60+20 : button gosub "更新する", *update
+		update_button = 1
+	}
 	
 	repeat
 		//ウィンドウサイズとタイトルバーの高さを取得
@@ -608,6 +676,13 @@
 					
 		pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
 			cmes "読み込み", windowx/2+20, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+	
+		//アップデートがあった場合
+			if latest_version__Release_number > NOW_Release_number {
+				color 0, 162, 232 : sboxf 128, 0, windowy-titlebar_h-60, windowx, windowy
+				color 255, 255, 255
+				pos 10, windowy-titlebar_h-60+5 : mes "アップデートがあります！更新しますか？\n"+latest_version__Title+" Ver."+latest_version__Version+""
+			}
 		
 		wait 1
 		redraw 1
@@ -5360,6 +5435,26 @@
 			}
 	
 		return
+	
+*update
+	//アップデーター起動
+		latest_version__Updater = get_chapter(latest_version, "Updater", " : ", ";")
+		latest_version__Updater_Name = get_chapter(latest_version, "Updater_Name", " : ", ";")
+	
+		download latest_version__Updater, latest_version__Updater_Name, latest_version__Updater_Name
+	
+		exist latest_version__Updater_Name
+	
+		if strsize = -1 {
+			dialog "アップデートに失敗しました"
+			return
+			
+		} else {
+			exec latest_version__Updater_Name
+			end
+		}
+	
+	stop
 			
 *exit
 	if ginfo_act = 0 {
