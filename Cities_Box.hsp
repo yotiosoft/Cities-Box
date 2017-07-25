@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.6.2
+									  Cities Box Ver 0.6.2.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -413,6 +413,8 @@
 				dim addon_education_rate_influence, 128
 				dim addon_education_rate_influence_grid, 128
 	
+				dim addon_build_limit, 128
+	
 				sdim type_Two_lane_road, 128
 				sdim type_number_Two_lane_road, 128
 				sdim type_low_density_residential, 128
@@ -474,6 +476,9 @@
 				//教育率への影響率
 					addon_education_rate_influence(cnt) = int( get_chapter(buf_adat, "education_rate_influence", " = \"", "\"") )
 					addon_education_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "education_rate_influence_grid", " = \"", "\"") )
+	
+				//建築物の建設可能回数
+					addon_build_limit(cnt) = int( get_chapter(buf_adat, "build_limit", " = \"", "\"") )
 	
 				//窓の色（RGB値）
 					addon_window_color_tmp = get_chapter(buf_adat, "window_color", " = (", ")")
@@ -2783,6 +2788,29 @@
 				return
 			}
 	
+		//アドオンに建設可能回数が設定されていて、建物が建設可能回数を超えている場合はreturn
+			if addon_build_limit(addon_num_buf) >= 1 {
+				s = 0
+					
+				repeat mapx
+					sx = cnt
+					repeat mapy
+						sy = cnt
+	
+						if map(sx, sy) = addon_num_buf {
+							s ++
+						}
+					loop
+				loop
+	
+				wait 10		; ←waitを入れないと誤作動を起こすため
+				
+				if s + 1 > addon_build_limit(addon_num_buf) {
+					dialog "この建物は既に建設可能回数を超えています！"
+					return
+				}
+			}
+	
 		//周囲のオブジェクトのカテゴリを取得
 			left_chip = ""
 			top_chip = ""
@@ -2870,7 +2898,7 @@
 					if cursor_mode != "put_Road" {
 	
 						//そもそも建設地に道路がある場合
-							if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
+							if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h & ginfo_my<=ginfo_wy2) {
 								;dialog "この区画は既に占有されています"
 								return
 							}
@@ -3693,8 +3721,30 @@
 				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
 			}
 			if clicked_addon_number = cnt {
-				color 255,255,255 : font "", 14
-				pos 20, (windowy-70-titlebar_h-32-40+5) : mes addon_jp_name(int(get_addon_number))
+				//アドオンにアドオン建設可能回数が設定されている場合
+				if addon_build_limit(addon_num_buf) >= 1 {
+					s = 0
+							
+					repeat mapx
+						sx = cnt
+						repeat mapy
+							sy = cnt
+		
+							if map(sx, sy) = addon_num_buf {
+								s ++
+							}
+						loop
+					loop
+			
+					wait 1		; ←waitを入れないと誤作動を起こすため
+					
+					color 255,255,255 : font "", 14
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" （残り"+(addon_build_limit(addon_num_buf)-s)+"回）"
+					
+				} else {
+					color 255,255,255 : font "", 14
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes addon_jp_name(int(get_addon_number))
+				}
 				
 				color 255,255,255 : font "", 10
 				pos 23, (windowy-70-titlebar_h-32-20) : mes addon_summary(int(get_addon_number))
