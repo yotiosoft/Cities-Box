@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.6.2.1
+									  Cities Box Ver 0.6.2.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1453,6 +1453,8 @@
 		first_loop = 1
 		
 *main
+	title about_title
+	
 	randomize
 	
 	repeat
@@ -1813,7 +1815,7 @@
 			}
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			//title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -2947,7 +2949,7 @@
 						}
 	
 						//道路に接続されていない場所に建設しようとしている場合
-							if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) {
+							if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) and instr(put_addon_name, 0, "Area : ") = -1 {
 								dialog "道路に接続されていない場所には建設できません！"
 								return
 							}
@@ -3277,6 +3279,12 @@
 											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
 												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
 													crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+cnt-(round-1),my+round-1) > 100 {
+														crime_rate(mx+cnt-(round-1),my+round-1) = 100
+													}
+													if crime_rate(mx+cnt-(round-1),my+round-1) < -100 {
+														crime_rate(mx+cnt-(round-1),my+round-1) = -100
+													}
 													done_build(5, mx+cnt-(round-1), my+round-1) = 1
 												}
 											}
@@ -3286,6 +3294,12 @@
 											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
 												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
 													crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+cnt-(round-1),my-round+1) > 100 {
+														crime_rate(mx+cnt-(round-1),my-round+1) = 100
+													}
+													if crime_rate(mx+cnt-(round-1),my-round+1) < -100 {
+														crime_rate(mx+cnt-(round-1),my-round+1) = -100
+													}
 													done_build(5, mx+cnt-(round-1), my-round+1) = 1
 												}
 											}
@@ -3295,6 +3309,12 @@
 											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
 												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+round-1,my+cnt-(round-1)) > 100 {
+														crime_rate(mx+round-1,my+cnt-(round-1)) = 100
+													}
+													if crime_rate(mx+round-1,my+cnt-(round-1)) < -100 {
+														crime_rate(mx+round-1,my+cnt-(round-1)) = -100
+													}
 													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
 												}
 											}
@@ -3304,6 +3324,12 @@
 											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
 												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx-round+1,my+cnt-(round-1)) > 100 {
+														crime_rate(mx-round+1,my+cnt-(round-1)) = 100
+													}
+													if crime_rate(mx-round+1,my+cnt-(round-1)) < -100 {
+														crime_rate(mx-round+1,my+cnt-(round-1)) = -100
+													}
 													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
 												}
 											}
@@ -3407,9 +3433,9 @@
 					addon_num_buf = addon_num(name(mx,my))
 					tile_addon_num_buf = addon_num("tile_greenfield")
 					obj_direction_buf = addon_direction(addon_num_buf, obj_type(mx,my), obj_dire(mx,my))
-	
+					
 					category_buf = category(mx,my)
-	
+					
 					p = 0
 	
 					obj_tiles_x_buf = obj_tiles_x(mx,my)
@@ -3492,8 +3518,182 @@
 								workers_Public(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 							}
 	
-						loop
+							//地価の変動
+								if instr(category_buf, 0, "road") = -1 and instr(category_buf, 0, "tile") = -1 {
+									addon_land_price_influence__tmp = addon_land_price_influence(addon_num_buf)
+		
+									addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_buf)
+									
+									if addon_land_price_influence_grid__tmp = 0 {
+										addon_land_price_influence_grid__tmp = 1
+									}
+									add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp
+									round = 0
+									
+									for round, 1, addon_land_price_influence_grid__tmp+1, 1
+										
+										repeat (round*2-1)
+											if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my+round-1>0 and my+round-1<mapy {
+												if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
+													land_price(mx+cnt-(round-1),my+round-1) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+													done_build(2, mx+cnt-(round-1), my+round-1) = 1
+												}
+											}
+										loop
+										
+										repeat (round*2-1)
+											if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my-round+1>0 and my-round+1<mapy {
+												if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
+													land_price(mx+cnt-(round-1),my-round+1) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+													done_build(2, mx+cnt-(round-1), my-round+1) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if mx+round-1>0 and mx+round-1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+												if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
+													land_price(mx+round-1,my+cnt-(round-1)) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+													done_build(2, mx+round-1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if mx-round+1>0 and mx-round+1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+												if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
+													land_price(mx-round+1,my+cnt-(round-1)) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+													done_build(2, mx-round+1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+									next
+								}
 	
+							//犯罪率の変動
+								addon_crime_rate_influence__tmp = addon_crime_rate_influence(addon_num_buf)
+								
+								if addon_crime_rate_influence__tmp != 0 {
+	
+									addon_crime_rate_influence_grid__tmp = addon_crime_rate_influence_grid(addon_num_buf)
+									
+									add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp
+									round = 0
+									
+									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
+													crime_rate(mx+cnt-(round-1),my+round-1) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+cnt-(round-1),my+round-1) > 100 {
+														crime_rate(mx+cnt-(round-1),my+round-1) = 100
+													}
+													if crime_rate(mx+cnt-(round-1),my+round-1) < -100 {
+														crime_rate(mx+cnt-(round-1),my+round-1) = -100
+													}
+													done_build(5, mx+cnt-(round-1), my+round-1) = 1
+												}
+											}
+										loop
+										
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
+													crime_rate(mx+cnt-(round-1),my-round+1) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+cnt-(round-1),my-round+1) > 100 {
+														crime_rate(mx+cnt-(round-1),my-round+1) = 100
+													}
+													if crime_rate(mx+cnt-(round-1),my-round+1) < -100 {
+														crime_rate(mx+cnt-(round-1),my-round+1) = -100
+													}
+													done_build(5, mx+cnt-(round-1), my-round+1) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
+													crime_rate(mx+round-1,my+cnt-(round-1)) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+round-1,my+cnt-(round-1)) > 100 {
+														crime_rate(mx+round-1,my+cnt-(round-1)) = 100
+													}
+													if crime_rate(mx+round-1,my+cnt-(round-1)) < -100 {
+														crime_rate(mx+round-1,my+cnt-(round-1)) = -100
+													}
+													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
+													crime_rate(mx-round+1,my+cnt-(round-1)) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx-round+1,my+cnt-(round-1)) > 100 {
+														crime_rate(mx-round+1,my+cnt-(round-1)) = 100
+													}
+													if crime_rate(mx-round+1,my+cnt-(round-1)) < -100 {
+														crime_rate(mx-round+1,my+cnt-(round-1)) = -100
+													}
+													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+									next
+	
+								}
+	
+							//教育率の変動
+								addon_education_rate_influence__tmp = addon_education_rate_influence(addon_num_buf)
+								
+								if addon_education_rate_influence__tmp != 0 {
+	
+									addon_education_rate_influence_grid__tmp = addon_education_rate_influence_grid(addon_num_buf)
+									
+									add_value = addon_education_rate_influence__tmp / addon_education_rate_influence_grid__tmp
+									round = 0
+									
+									for round, 1, addon_education_rate_influence_grid__tmp+1, 1
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
+													education_rate(mx+cnt-(round-1),my+round-1) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+cnt-(round-1), my+round-1) = 1
+												}
+											}
+										loop
+										
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
+													education_rate(mx+cnt-(round-1),my-round+1) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+cnt-(round-1), my-round+1) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
+													education_rate(mx+round-1,my+cnt-(round-1)) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
+													education_rate(mx-round+1,my+cnt-(round-1)) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+									next
+	
+								}
+						loop
 					loop
 			}
 	
