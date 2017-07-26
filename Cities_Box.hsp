@@ -2789,7 +2789,7 @@
 			}
 	
 		//アドオンに建設可能回数が設定されていて、建物が建設可能回数を超えている場合はreturn
-			if addon_build_limit(addon_num_buf) >= 1 {
+			if addon_build_limit(addon_num_buf) >= 1 and cursor_mode != "put_Road" {
 				s = 0
 					
 				repeat mapx
