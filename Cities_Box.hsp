@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.6.2.2
+									  Cities Box Ver 0.6.2.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -689,7 +689,7 @@
 				pos 10, windowy-titlebar_h-60+5 : mes "アップデートがあります！更新しますか？\n"+latest_version__Title+" Ver."+latest_version__Version+""
 			}
 		
-		wait 1
+		wait 10
 		redraw 1
 	loop
 	
@@ -1781,7 +1781,7 @@
 				menu_line_y = windowy-70-titlebar_h
 			}
 					
-			if mousey < menu_line_y {
+			if mousey < menu_line_y and (ginfo(0)-ginfo(4)) >= 0 and (ginfo(0)-ginfo(4)) <= (ginfo(4)+windowx) and (ginfo(1)-ginfo(5)) >= titlebar_h {
 				if pointer_icon = -1 {
 					color 0, 0, 0
 					
@@ -1812,10 +1812,15 @@
 						pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32	; 個別の建物の場合
 					}
 				}
+				
+			} else {
+				mx = -1
+				my = -1
 			}
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
 			//title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			title "FPS : "+fps+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -2448,74 +2453,78 @@
 	
 				open_stat_menu = 0
 			}
-		
-		//撤去ボタン
-			if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
-				cursor_mode = "bulldozer"
-		
-				opening_addon_menu = 0
-				opening_menu_put_Road = 0
-				opening_menu_put_Residential = 0
-				opening_menu_put_Commercial = 0
-				opening_menu_put_Office = 0
-				opening_menu_put_Public = 0
-			}
-		
-		//設定ボタン
-			if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
-				cursor_mode = "normal"
-				opening_addon_menu = 0
-				gosub *setting
-			}
-		
-		//保存ボタン
-			if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
-				cursor_mode = "normal"
-				opening_addon_menu = 0
-				gosub *save
-			}
-		
-		//統計ボタン
-			if click_range( windowx-54-32, windowy-70-titlebar_h, windowx-54, windowy-70-titlebar_h+32 ) = 1 {
-				if open_stat_menu = 0 {
-					open_stat_menu = 1
-					stat_mode = ""
-		
-				} else {
-					open_stat_menu = 0
-					stat_mode = ""
+	
+		if (ginfo(0)-ginfo(4)) >= 0 and (ginfo(0)-ginfo(4)) <= (ginfo(4)+windowx) and (ginfo(1)-ginfo(5)) >= titlebar_h and (ginfo(1)-ginfo(5)) <= (ginfo(5)+windowy) {
+	
+			//統計ボタン
+				if click_range( windowx-54-32, windowy-70-titlebar_h, windowx-54, windowy-70-titlebar_h+32 ) = 1 {
+					if open_stat_menu = 0 {
+						open_stat_menu = 1
+						stat_mode = ""
+			
+					} else {
+						open_stat_menu = 0
+						stat_mode = ""
+					}
 				}
-			}
-		
-		//統計メニュー
-			if open_stat_menu = 1 and click_range( windowx-72-32, windowy-70-titlebar_h-20, windowx-72-32+20, windowy-70-titlebar_h ) = 1 {
-				if stat_mode != "type" {
-					stat_mode = "type"
-				} else {
-					stat_mode = ""
+			
+			//撤去ボタン
+				if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
+					cursor_mode = "bulldozer"
+			
+					opening_addon_menu = 0
+					opening_menu_put_Road = 0
+					opening_menu_put_Residential = 0
+					opening_menu_put_Commercial = 0
+					opening_menu_put_Office = 0
+					opening_menu_put_Public = 0
 				}
-			}
-			if open_stat_menu = 1 and click_range( windowx-72-32+20, windowy-70-titlebar_h-20, windowx-72-32+40, windowy-70-titlebar_h ) = 1 {
-				if stat_mode != "land_price" {
-					stat_mode = "land_price"
-				} else {
-					stat_mode = ""
+			
+			//設定ボタン
+				if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
+					cursor_mode = "normal"
+					opening_addon_menu = 0
+					gosub *setting
 				}
-			}
-			if open_stat_menu = 1 and click_range( windowx-72-32+40, windowy-70-titlebar_h-20, windowx-72-32+60, windowy-70-titlebar_h ) = 1 {
-				if stat_mode != "crime_rate" {
-					stat_mode = "crime_rate"
-				} else {
-					stat_mode = ""
+			
+			//保存ボタン
+				if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
+					cursor_mode = "normal"
+					opening_addon_menu = 0
+					gosub *save
 				}
-			}
-			if open_stat_menu = 1 and click_range( windowx-72-32+60, windowy-70-titlebar_h-20, windowx-72-32+80, windowy-70-titlebar_h ) = 1 {
-				if stat_mode != "education_rate" {
-					stat_mode = "education_rate"
-				} else {
-					stat_mode = ""
+			
+			//統計メニュー
+				if open_stat_menu = 1 and click_range( windowx-72-32, windowy-70-titlebar_h-20, windowx-72-32+20, windowy-70-titlebar_h ) = 1 {
+					if stat_mode != "type" {
+						stat_mode = "type"
+					} else {
+						stat_mode = ""
+					}
 				}
-			}
+				if open_stat_menu = 1 and click_range( windowx-72-32+20, windowy-70-titlebar_h-20, windowx-72-32+40, windowy-70-titlebar_h ) = 1 {
+					if stat_mode != "land_price" {
+						stat_mode = "land_price"
+					} else {
+						stat_mode = ""
+					}
+				}
+				if open_stat_menu = 1 and click_range( windowx-72-32+40, windowy-70-titlebar_h-20, windowx-72-32+60, windowy-70-titlebar_h ) = 1 {
+					if stat_mode != "crime_rate" {
+						stat_mode = "crime_rate"
+					} else {
+						stat_mode = ""
+					}
+				}
+				if open_stat_menu = 1 and click_range( windowx-72-32+60, windowy-70-titlebar_h-20, windowx-72-32+80, windowy-70-titlebar_h ) = 1 {
+					if stat_mode != "education_rate" {
+						stat_mode = "education_rate"
+					} else {
+						stat_mode = ""
+					}
+				}
+	
+		}
 		
 		//アドオン選択ボタン（水色のメニューバー）
 			
@@ -3936,7 +3945,7 @@
 						loop
 					loop
 			
-					wait 1		; ←waitを入れないと誤作動を起こすため
+					await 30		; ←awaitを入れないと誤作動を起こすため
 					
 					color 255,255,255 : font "", 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" （残り"+(addon_build_limit(addon_num_buf)-s)+"回）"
@@ -3954,12 +3963,12 @@
 				pointer_icon = int(get_addon_number)
 			}
 		}
+		
+		
 	loop
 	
 	// 地区設定のアイコンを表示
 	if cursor_mode != "put_Road" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
-	
-		gmode 2
 		
 		if cursor_mode = "put_Residential" {
 			if clicked_addon_number = 0 {
@@ -4597,8 +4606,6 @@
 	
 *climate
 	//天候の変動
-		randomize
-	
 		//気温の変動
 			change_temperature = rnd(5)
 	
