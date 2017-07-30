@@ -497,7 +497,7 @@
 					gosub *load_adat
 	
 				//ƒJƒeƒSƒŠ•ª‚¯
-					if addon_type(cnt) = "Two_lane_road" {
+					if addon_type(cnt) = "Two_lane_road" or addon_type(cnt) = "Two_lane_Road" {
 						notesel type_Two_lane_road
 						noteadd addon_name(cnt), -1
 	
@@ -505,14 +505,14 @@
 						noteadd str(cnt), -1
 					}
 							
-					if addon_type(cnt) = "low_density_residential" {
+					if addon_type(cnt) = "low_density_residential" or addon_type(cnt) = "low_density_Residential" or addon_type(cnt) = "Low_density_Residential" {
 						notesel type_low_density_residential
 						noteadd addon_name(cnt), -1
 	
 						notesel type_number_low_density_residential
 						noteadd str(cnt), -1
 					}
-					if addon_type(cnt) = "high_density_residential" {
+					if addon_type(cnt) = "high_density_residential" or addon_type(cnt) = "high_density_Residential" or addon_type(cnt) = "High_density_Residential" {
 						notesel type_high_density_residential
 						noteadd addon_name(cnt), -1
 	
@@ -520,14 +520,14 @@
 						noteadd str(cnt), -1
 					}
 	
-					if addon_type(cnt) = "low_density_commercial" {
+					if addon_type(cnt) = "low_density_commercial" or addon_type(cnt) = "low_density_Commercial" or addon_type(cnt) = "Low_density_Commercial" {
 						notesel type_low_density_commercial
 						noteadd addon_name(cnt), -1
 	
 						notesel type_number_low_density_commercial
 						noteadd str(cnt), -1
 					}
-					if addon_type(cnt) = "high_density_commercial" {
+					if addon_type(cnt) = "high_density_commercial" or addon_type(cnt) = "high_density_Commercial" or addon_type(cnt) = "High_density_Commercial" {
 						notesel type_high_density_commercial
 						noteadd addon_name(cnt), -1
 	
@@ -535,7 +535,7 @@
 						noteadd str(cnt), -1
 					}
 					
-					if addon_type(cnt) = "office" {
+					if addon_type(cnt) = "office" or addon_type(cnt) = "Office" {
 						notesel type_office
 						noteadd addon_name(cnt), -1
 	
@@ -543,7 +543,7 @@
 						noteadd str(cnt), -1
 					}
 	
-					if addon_type(cnt) = "industrial" {
+					if addon_type(cnt) = "industrial" or addon_type(cnt) = "Industrial" {
 						notesel type_industrial
 						noteadd addon_name(cnt), -1
 						
@@ -551,7 +551,7 @@
 						noteadd str(cnt), -1
 					}
 					
-					if addon_type(cnt) = "public" {
+					if addon_type(cnt) = "public" or addon_type(cnt) = "Public" {
 						notesel type_public
 						noteadd addon_name(cnt), -1
 
@@ -559,7 +559,7 @@
 						noteadd str(cnt), -1
 					}
 	
-					if addon_type(cnt) = "park" {
+					if addon_type(cnt) = "park" or addon_type(cnt) = "Park" {
 						notesel type_park
 						noteadd addon_name(cnt), -1
 
@@ -3827,7 +3827,7 @@
 			from_Build_on_Reservation_area = 1
 	
 			cursor_mode_tmp = cursor_mode
-			cursor_mode = "put_Industrial"
+			cursor_mode = "put_Office"
 			mouse_left = 1
 		}
 	
