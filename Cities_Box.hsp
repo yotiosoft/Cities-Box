@@ -3827,7 +3827,7 @@
 			from_Build_on_Reservation_area = 1
 	
 			cursor_mode_tmp = cursor_mode
-			cursor_mode = "put_Office"
+			cursor_mode = "put_Industrial"
 			mouse_left = 1
 		}
 	
@@ -4031,7 +4031,7 @@
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 0, 32, 32
 			}
 		}
-	
+		
 		if cursor_mode = "put_Office" {
 			if clicked_addon_number = 0 {
 				color 255,255,255 : font "", 14
@@ -4041,9 +4041,8 @@
 				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が仕事する場を提供します。オフィス地区を設定するとオフィス建築物が建設されます。"
 				
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 42, 0, 32, 32, 32
-				
-				put_addon_name = "Area : office"
-				
+	
+				put_addon_name = "Area : Office"
 				pointer_icon = 24
 				
 			} else {
@@ -4300,13 +4299,7 @@
 			//天気が雨なら、1/3の確率でランダムで雨っぽい曲を流す
 				if add_rain > 0 {
 					if rnd(3) = 2 {
-						p = rnd(2)
-	
-						if p = 0 {
-							playing_BGM_file = "[Sp]Satie-Jeteveux.mp3"
-						} else : p = 1 {
-							playing_BGM_file = "[Sp]Rainy_Day.mp3"
-						}
+						playing_BGM_file = "[Sp]Satie-Jeteveux.mp3"
 					}
 				}
 	

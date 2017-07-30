@@ -34,7 +34,24 @@
 　2.Cities BoxをフォルダごとWalls Luxor或いはDarwal OSのディレクトリにコピーする。
 　3.Walls Luxor或いはDarwal OSのエクスプローラーで、コピーしたCities_Box.axを開く。
 
-6.更新履歴
+6.素材について
+　製作にあたり、いくつかのフリー素材サイトで公開されているものを利用させていただきました。
+　
+　6.1 BGM
+　　　[Sp]PROKOFIEV-PeterAndTheWolf.mp3 : クラシック名曲サウンドライブラリー（http://classical-sound.seesaa.net/）
+　　　[Sp]Satie-Jeteveux.mp3 　　　　　 : クラシック名曲サウンドライブラリー（http://classical-sound.seesaa.net/）
+　　　[Sp]Tchikovsky-Serenade-1st.mp3 　: クラシック名曲サウンドライブラリー（http://classical-sound.seesaa.net/）
+　　　Bumper_Tag.mp3 　　　　　　　　　 : Youtube Audio Library（https://www.youtube.com/audiolibrary/music）
+　　　Dog_and_Pony_Show.mp3 　　　　　　: Youtube Audio Library（https://www.youtube.com/audiolibrary/music）
+　　　Dog_Park.mp3 　　　　　　　　　　 : Youtube Audio Library（https://www.youtube.com/audiolibrary/music）
+　　　Nevada_City.mp3 　　　　　　　　　: Youtube Audio Library（https://www.youtube.com/audiolibrary/music）
+　　　都会の夜明け.mp3 　　　　　　　　 : DOVA-SYNDROME - 高橋 志郎様（http://dova-s.jp/_contents/author/profile241.html）
+
+7.更新履歴
+　Ver.0.6.2.3 r57（2017/07/30）
+　　オフィス地区を地区設定しようとするとメニューの表示がおかしくなるバグを修正
+　　（ただしオフィス地区を地区設定しようとすると重くなるバグは健在）
+　　
 　Ver.0.6.2.3 r56（2017/07/29）
 　　ウィンドウを動かしたときに保存ダイアログが出現するバグを修正
 　　動作を改善
