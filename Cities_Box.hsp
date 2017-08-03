@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.6.2.3
+									   Cities Box Ver 0.7.0
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -274,6 +274,7 @@
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
 		celload "img/menu_icons/setting/setting.png", 13					; 設定ボタン
 		celload "img/menu_icons/stat/stat.png", 30							; 統計ボタン
+		celload "img/menu_icons/budget/budget.png", 49						; 予算ボタン
 	
 	//小サイズのアイコン
 		celload "img/menu_icons/mini/low_density_residential.png", 8		; 低密度住居地区
@@ -721,6 +722,7 @@
 		dim map, mapx, mapy					//各座標のアドオン番号
 		sdim name, mapx, mapy				//各座標のアドオン名
 		sdim category, mapx, mapy			//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		sdim category_2, mapx, mapy			//アドオンの更に詳細なカテゴリー（公共施設などで使う）
 		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
 		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
@@ -745,6 +747,7 @@
 			map(ix,iy) = addon_num_buf
 			name(ix,iy) = "tile_greenfield"
 			category(ix,iy) = "tile"
+			category_2(ix,iy) = ""
 	
 			obj_type(ix,iy) = 0
 			obj_dire(ix,iy) = 0
@@ -778,21 +781,26 @@
 	Mayor_Name = ""
 	Set_Change_Weather = 1
 	
-	demand_of_Resindential = 100	; 住宅地区の需要度
-	demand_of_Commercial = 100		; 商業地区の需要度
-	demand_of_Office = 100			; オフィス地区の需要度
-	demand_of_Industrial = 100		; 工業地区の需要度
+	demand_of_Resindential = 100		; 住宅地区の需要度
+	demand_of_Commercial = 100			; 商業地区の需要度
+	demand_of_Office = 100				; オフィス地区の需要度
+	demand_of_Industrial = 100			; 工業地区の需要度
 	
-	time_Year = gettime(0)			; ゲーム内の時間の年
-	time_Month = gettime(1)			; ゲーム内の時間の月
-	time_Date = gettime(3)			; ゲーム内の時間の日
-	time_Hour = 0					; ゲーム内の時間の時
-	time_Minutes = 0				; ゲーム内の時間の分
+	time_Year = gettime(0)				; ゲーム内の時間の年
+	time_Month = gettime(1)				; ゲーム内の時間の月
+	time_Date = gettime(3)				; ゲーム内の時間の日
+	time_Hour = 0						; ゲーム内の時間の時
+	time_Minutes = 0					; ゲーム内の時間の分
 	
-	Total_Population = 0			; 都市の総人口
-	total_maximum_capacity = 0		; 都市の収容可能人数
+	Total_Population = 0				; 都市の総人口
+	total_maximum_capacity = 0			; 都市の収容可能人数
 	
-	next_obj_serial_num = 0			; 複数のタイルを要するオブジェクトの通し番号
+	next_obj_serial_num = 0				; 複数のタイルを要するオブジェクトの通し番号
+	
+	budget_of_Police = 100				; 警察への予算（%）
+	budget_of_Fire_Depertment = 100		; 消防への予算（%）
+	budget_of_Post_Office = 100			; 郵便への予算（%）
+	budget_of_Education = 100			; 教育への予算（%）
 	
 	Not_Played_NewMap_BGM = 1		; マップ作成直後のBGMをまだ鳴らしていない場合は1
 	
@@ -880,6 +888,7 @@
 		dim map, mapx, mapy					//各座標のアドオン番号
 		sdim name, mapx, mapy				//各座標のアドオン名
 		sdim category, mapx, mapy			//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		sdim category_2, mapx, mapy			//アドオンの更に詳細なカテゴリー（公共施設などで使う）
 		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
 		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
@@ -980,12 +989,69 @@
 					demand_Industrial = 0
 				}
 	
+			//資金(Money)を読み込み
+				Money = int( get_chapter(load_mapdata, "Money", " = ", ";") )
+	
+				if instr(load_mapdata, 0, "Money") = -1 {
+					Money = 50000
+				}
+	
 			//設定読み込み
 				//天候の変化(Set_Change_Weather)
 					Set_Change_Weather = int( get_chapter(load_mapdata, "Set_Change_Weather", " = ", ";") )
 					
 				//気温(temperature)
 					temperature = int( get_chapter(load_mapdata, "Temperature", " = ", ";") )
+	
+			//予算の読み込み
+				if instr(load_mapdata, 0, "budget_of_Police") != -1 {
+					budget_of_Police = int( get_chapter(load_mapdata, "budget_of_Police", " = ", ";") )
+				} else {
+					budget_of_Police = 100
+				}
+				
+				if instr(load_mapdata, 0, "budget_of_Fire_Depertment") != -1 {
+					budget_of_Fire_Depertment = int( get_chapter(load_mapdata, "budget_of_Fire_Depertment", " = ", ";") )
+				} else {
+					budget_of_Fire_Depertment = 100
+				}
+				
+				if instr(load_mapdata, 0, "budget_of_Post_Office") != -1 {
+					budget_of_Post_Office = int( get_chapter(load_mapdata, "budget_of_Post_Office", " = ", ";") )
+				} else {
+					budget_of_Post_Office = 100
+				}
+				
+				if instr(load_mapdata, 0, "budget_of_Education") != -1 {
+					budget_of_Education = int( get_chapter(load_mapdata, "budget_of_Education", " = ", ";") )
+				} else {
+					budget_of_Education = 100
+				}
+				
+	
+				if instr(load_mapdata, 0, "tax_of_Residential") != -1 {
+					tax_of_Residential = int( get_chapter(load_mapdata, "tax_of_Residential", " = ", ";") )
+				} else {
+					tax_of_Residential = 100
+				}
+				
+				if instr(load_mapdata, 0, "tax_of_Commercial") != -1 {
+					tax_of_Commercial = int( get_chapter(load_mapdata, "tax_of_Commercial", " = ", ";") )
+				} else {
+					tax_of_Commercial = 100
+				}
+				
+				if instr(load_mapdata, 0, "tax_of_Office") != -1 {
+					tax_of_Office = int( get_chapter(load_mapdata, "tax_of_Office", " = ", ";") )
+				} else {
+					tax_of_Office = 100
+				}
+				
+				if instr(load_mapdata, 0, "tax_of_Industrial") != -1 {
+					tax_of_Industrial = int( get_chapter(load_mapdata, "tax_of_Industrial", " = ", ";") )
+				} else {
+					tax_of_Industrial = 100
+				}
 		
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
@@ -1042,6 +1108,38 @@
 					loop
 			
 				loop
+	
+			//category_2(x,y)の読み込み
+				if instr(load_mapdata, 0, "category_2(x,y)") != -1 {
+					category_2_buf = get_chapter(load_mapdata, "category_2(x,y)", " {", "}")
+				
+					repeat mapy
+					y = cnt
+		
+					notesel category_2_buf
+					noteget category_2_buf_a_line, (y+1)
+		
+					sdim category_2_buf_a_tile, mapx
+					split category_2_buf_a_line, ", ", category_2_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						category_2(x,y) = category_2_buf_a_tile(x)
+					loop
+			
+				loop
+	
+				} else {
+					//セーブデータにland_priceの情報がない場合は全て50万円/マスに設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								category_2(x,y) = ""
+							loop
+						loop
+				}
 		
 			//obj_type(x,y)の読み込み
 				obj_type_buf = get_chapter(load_mapdata, "obj_type(x,y)", " {", "}")
@@ -1502,6 +1600,10 @@
 				}
 			}
 	
+			if time_Hour = 0 and time_Minutes = 0 and time_Date = 1 {
+				gosub *pay_budget
+			}
+	
 		/*カメラ操作*/
 			getkey key_left, 37
 			if key_left = 1 {
@@ -1819,8 +1921,8 @@
 			}
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			//title "stat_mode = \""+stat_mode+"\" land_price = "+land_price(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
-			title "FPS : "+fps+""
+			title "category "+category(mx,my)+" category_2 "+category_2(mx,my)+" demand_R "+demand_Residential+" Vacancies "+Vacancies+" Total_Vagrants "+Total_Vagrants+" マウス座標("+mx+","+my+") カメラ座標("+camx+","+camy+") add_rain:"+add_rain+" FPS:"+fps+""
+			//title "FPS : "+fps+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -2106,6 +2208,10 @@
 						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
 					}
 	
+				//予算ボタン
+					gmode 2
+					pos windowx-54-64, windowy-40-titlebar_h : gcopy 49, 0, 0, 32, 32
+	
 				//撤去ボタン
 					if cursor_mode = "bulldozer" {
 						gmode 2
@@ -2160,7 +2266,7 @@
 	
 				//人口、日付・気温を表示
 					color 255, 255, 255 : font "Yu Gothic UI", 12
-					pos 300, windowy-70-titlebar_h+5 : mes "人口 "+Total_Population+"人\n"+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃"
+					pos 300, windowy-70-titlebar_h+5 : mes "人口 "+Total_Population+"人\n"+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃\n§ "+Money+""
 	
 				//ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
@@ -2168,7 +2274,7 @@
 					}
 	
 					color 255, 255, 255 : font "Yu Gothic UI", 10
-					pos 20, windowy-32-titlebar_h+5 : mes "News : "+news_content+""
+					pos 20, windowy-32-titlebar_h+10 : mes "News : "+news_content+""
 	
 				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
 					if opening_addon_menu = 1 {
@@ -2181,17 +2287,17 @@
 					font SystemFont, 10
 					
 					//R - 住居区画
-						color 34, 177, 76 : boxf windowx-150, windowy-titlebar_h-20-(demand_Residential/3), windowx-150+10, windowy-titlebar_h-20
-						cmes "R", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
+						color 34, 177, 76 : boxf windowx-170, windowy-titlebar_h-20-(demand_Residential/3), windowx-170+10, windowy-titlebar_h-20
+						cmes "R", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
 					//C - 商業区画
-						color 63, 72, 204 : boxf windowx-140, windowy-titlebar_h-20-(demand_Commercial/3), windowx-140+10, windowy-titlebar_h-20
-						cmes "C", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
+						color 63, 72, 204 : boxf windowx-160, windowy-titlebar_h-20-(demand_Commercial/3), windowx-160+10, windowy-titlebar_h-20
+						cmes "C", windowx-160, windowy-titlebar_h-20, windowx-160+10, windowy-titlebar_h-10
 					//O - オフィス区画
-						color 0, 162, 232 : boxf windowx-130, windowy-titlebar_h-20-(demand_Office/3), windowx-130+10, windowy-titlebar_h-20
-						cmes "O", windowx-130, windowy-titlebar_h-20, windowx-130+10, windowy-titlebar_h-10
+						color 0, 162, 232 : boxf windowx-150, windowy-titlebar_h-20-(demand_Office/3), windowx-150+10, windowy-titlebar_h-20
+						cmes "O", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
 					//I - 工業区画
-						color 255, 242, 0 : boxf windowx-120, windowy-titlebar_h-20-(demand_Industrial/3), windowx-120+10, windowy-titlebar_h-20
-						cmes "I", windowx-120, windowy-titlebar_h-20, windowx-120+10, windowy-titlebar_h-10
+						color 255, 242, 0 : boxf windowx-140, windowy-titlebar_h-20-(demand_Industrial/3), windowx-140+10, windowy-titlebar_h-20
+						cmes "I", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
 					
 			redraw 1
 			await 30
@@ -2456,6 +2562,12 @@
 	
 		if (ginfo(0)-ginfo(4)) >= 0 and (ginfo(0)-ginfo(4)) <= (ginfo(4)+windowx) and (ginfo(1)-ginfo(5)) >= titlebar_h and (ginfo(1)-ginfo(5)) <= (ginfo(5)+windowy) {
 	
+			//統計ボタン
+				if click_range( windowx-54-64, windowy-40-titlebar_h, windowx-64, windowy-40-titlebar_h+32 ) = 1 {
+					gosub *budget_panel
+					return
+				}
+				
 			//統計ボタン
 				if click_range( windowx-54-32, windowy-70-titlebar_h, windowx-54, windowy-70-titlebar_h+32 ) = 1 {
 					if open_stat_menu = 0 {
@@ -2828,17 +2940,29 @@
 			bottom_chip = ""
 			right_chip = ""
 			
-			if mx > 0 {
+			if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
 				left_chip = category(mx-1, my)
-			}
-			if my > 0 {
 				top_chip = category(mx, my-1)
+				bottom_chip = category(mx+1, my)
+				right_chip = category(mx, my+1)
+	
+			} else {
+				if mx-1 < 0 {
+					left_chip = ""
+				}
+				if my-1 < 0 {
+					top_chip = ""
+				}
+				if mx+1 > mapx {
+					bottom_chip = ""
+				}
+				if my+1 > mapy {
+					right_chip = ""
+				}
 			}
-			if mapy-1 > my {
-				bottom_chip = category(mx, my+1)
-			}
-			if mapx-1 > mx {
-				right_chip = category(mx+1, my)
+	
+			if mx = -1 or my = -1 {
+				return
 			}
 	
 		//建設・敷設
@@ -2857,12 +2981,16 @@
 							
 							x = x_buf : y = y_buf
 	
+						//資金を減らす（§5/1マス）
+							Money -= 5
+	
 						//敷設した地点の情報を書き換え
 							cetegory_buf = category(mx,my)
 							
 							map(mx, my) = addon_num_normal_road
 							name(mx, my) = put_addon_name
 							category(mx, my) = "road"
+							category_2(mx, my) = addon_type_2(addon_num_buf)
 							
 							obj_serial_num(mx, my) = 0
 							obj_use_tiles_x(mx,my) = 0
@@ -2958,7 +3086,7 @@
 						}
 	
 						//道路に接続されていない場所に建設しようとしている場合
-							if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) and instr(put_addon_name, 0, "Area : ") = -1 {
+							if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) and instr(put_addon_name, 0, "Area : ") = -1 and from_Build_on_Reservation_area = 0 {
 								dialog "道路に接続されていない場所には建設できません！"
 								return
 							}
@@ -3115,8 +3243,11 @@
 										if from_Build_on_Reservation_area = 0 {
 											dialog "この区画は既に占有されています"
 										}
+	
+										if from_Build_on_Reservation_area = 0 {
+											cannot_build_here = 0
+										}
 										
-										cannot_build_here = 0
 										found_other_obj = 0
 										
 										return
@@ -3172,6 +3303,7 @@
 										map(mx+rx,my+ry) = addon_num_buf
 										name(mx+rx,my+ry) = put_addon_name
 										category(mx+rx,my+ry) = category_buf
+										category_2(mx+rx,my+ry) = addon_type_2(addon_num_buf)
 	
 										obj_type(mx+rx,my+ry) = obj_type(mx, my)
 										obj_dire(mx+rx,my+ry) = obj_dire(mx, my)
@@ -3181,8 +3313,13 @@
 										obj_use_tiles_y(mx+rx,my+ry) = addon_chip_y(addon_num_buf, 0, obj_dire(mx+rx,my+ry)) * acy
 										obj_tiles_x(mx+rx,my+ry) = rx
 										obj_tiles_y(mx+rx,my+ry) = ry
-	
+										
 										reservation(mx+rx,my+ry) = "none"
+	
+										if done_build(1,mx+rx,my+ry) = 0 {
+											//資金を減らす（§5/1マス）
+												Money -= 5
+										}
 										
 										if before_category = "residential" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_Population -= residents(mx+rx,my+ry)
@@ -3484,6 +3621,7 @@
 							map(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_addon_num_buf
 							name(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "tile_greenfield"
 							category(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "tile"
+							category_2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							obj_type(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_type_buf
 							obj_dire(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_dire_buf
 								
@@ -3859,7 +3997,12 @@
 	x = x_tmp : y = y_tmp
 	mx = mx_tmp : my = my_tmp
 	
-	reservation(x,y) = "none"
+	if cannot_build_here = 0 {
+		reservation(x,y) = "none"
+	} else {
+		cannot_build_here = 0
+	}
+	
 	cursor_mode = cursor_mode_tmp
 	
 	put_addon_name = ""
@@ -3948,11 +4091,11 @@
 					await 30		; ←awaitを入れないと誤作動を起こすため
 					
 					color 255,255,255 : font "", 14
-					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" （残り"+(addon_build_limit(addon_num_buf)-s)+"回）"
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" (§5 残り"+(addon_build_limit(addon_num_buf)-s)+"回)"
 					
 				} else {
 					color 255,255,255 : font "", 14
-					pos 20, (windowy-70-titlebar_h-32-40+5) : mes addon_jp_name(int(get_addon_number))
+					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" (§5)"
 				}
 				
 				color 255,255,255 : font "", 10
@@ -4353,8 +4496,12 @@
 		//人口の増減
 			if category(x,y) = "residential" {
 				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					rndv = 10+(demand_Residential/10)
-					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
+					if demand_Residential > 0 {
+						rndv = 10+(demand_Residential/10)
+						f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
+					} else {
+						f = 0
+					}
 						
 				//変更前の住居地区の住民数
 					before_residents = residents(x,y)
@@ -4595,6 +4742,333 @@
 					}
 				}
 	
+	return
+	
+*budget_panel
+	screen 1, 300, 350
+	
+	gsel 1, 2
+	
+	color 128, 128, 128 : boxf
+	
+	title "予算パネル"
+	
+	mci "stop Cities-Box"
+	
+	mci "set Cities-Box_2 time format milliseconds"
+	
+	if Money > 0 {
+		mci"open \""+directory+"\\bgm\\[Sp]Satie-Jeteveux.mp3\" alias Cities-Box_2"
+	} else {
+		mci"open \""+directory+"\\bgm\\[Sp]Tchikovsky-Serenade-1st.mp3\" alias Cities-Box_2"
+	}
+	
+	if Set_Play_BGM = 1 {
+		mci "play Cities-Box_2"
+	}
+	
+	repeat mapx
+		rx = cnt
+		repeat mapy
+			ry = cnt
+	
+			if category_2(rx,ry) = "police_station" {
+				total_Police += 1
+			}
+			if category_2(rx,ry) = "fire_depertment" {
+				total_Fire_Depertment += 1
+			}
+			if category_2(rx,ry) = "post_office" {
+				total_Post_Office += 1
+			}
+			if category_2(rx,ry) = "education" {
+				total_Education += 1
+			}
+	
+			if workers_Commercial(rx,ry) > 0 {
+				total_workers_Commercial += workers_Commercial(rx,ry)
+			}
+			if workers_Office(rx,ry) > 0 {
+				total_workers_Office += workers_Office(rx,ry)
+			}
+			if workers_Industrial(rx,ry) > 0 {
+				total_workers_Industrial += workers_Industrial(rx,ry)
+			}
+				
+		loop
+	loop
+	
+	objsize 50, 20
+	
+	//支出率
+		pos 200, 50 : input budget_of_Police : input_stat__budget_of_Police = stat
+		pos 250, 50 : mes "%"
+		
+		pos 200, 70 : input budget_of_Fire_Depertment : input_stat__budget_of_Fire_Depertment = stat
+		pos 250, 70 : mes "%"
+		
+		pos 200, 90 : input budget_of_Post_Office : input_stat__budget_of_Post_Office = stat
+		pos 250, 90 : mes "%"
+		
+		pos 200, 110 : input budget_of_Education : input_stat__budget_of_Education = stat
+		pos 250, 110 : mes "%"
+	
+	//税率
+		pos 200, 150 : input tax_of_Residential : input_stat__tax_of_Residential = stat
+		pos 250, 150 : mes "%"
+		
+		pos 200, 170 : input tax_of_Commercial : input_stat__tax_of_Commercial = stat
+		pos 250, 170 : mes "%"
+		
+		pos 200, 190 : input tax_of_Office : input_stat__tax_of_Office = stat
+		pos 250, 190 : mes "%"
+		
+		pos 200, 210 : input tax_of_Industrial : input_stat__tax_of_Industrial = stat
+		pos 250, 210 : mes "%"
+	
+	objsize 50, 20
+	pos 240, 320 : button "OK", *fix_budget
+	
+	repeat
+		redraw 0
+	
+		color 128, 128, 128 : boxf
+	
+		font SystemFont, 16 : color 255, 255, 255
+		pos 10, 10 : mes "今月の予算"
+	
+		//支出率のパーセンテージを上限・下限に合わせる
+			if budget_of_Police < 0 {
+				budget_of_Police = 0
+				objprm input_stat__budget_of_Police, budget_of_Police
+			}
+			if budget_of_Fire_Depertment < 0 {
+				budget_of_Fire_Depertment = 0
+				objprm input_stat__budget_of_Fire_Depertment, budget_of_Fire_Depertment
+			}
+			if budget_of_Post_Office < 0 {
+				budget_of_Post_Office = 0
+				objprm input_stat__budget_of_Post_Office, budget_of_Post_Office
+			}
+			if budget_of_Education < 0 {
+				budget_of_Education = 0
+				objprm input_stat__budget_of_Education, budget_of_Education
+			}
+			
+			if budget_of_Police > 100 {
+				budget_of_Police = 100
+				objprm input_stat__budget_of_Police, budget_of_Police
+			}
+			if budget_of_Fire_Depertment > 100 {
+				budget_of_Fire_Depertment = 100
+				objprm input_stat__budget_of_Fire_Depertment, budget_of_Fire_Depertment
+			}
+			if budget_of_Post_Office > 100 {
+				budget_of_Post_Office = 100
+				objprm input_stat__budget_of_Post_Office, budget_of_Post_Office
+			}
+			if budget_of_Education > 100 {
+				budget_of_Education = 100
+				objprm input_stat__budget_of_Education, budget_of_Education
+			}
+	
+		//税率のパーセンテージを上限・下限に合わせる
+			if tax_of_Residential < 0 {
+				tax_of_Residential = 0
+				objprm input_stat__tax_of_Residential, tax_of_Residential
+			}
+			if tax_of_Commercial < 0 {
+				tax_of_Commercial = 0
+				objprm input_stat__tax_of_Commercial, tax_of_Commercial
+			}
+			if tax_of_Office < 0 {
+				tax_of_Office = 0
+				objprm input_stat__tax_of_Office, tax_of_Office
+			}
+			if tax_of_Industrial < 0 {
+				tax_of_Industrial = 0
+				objprm input_stat__tax_of_Industrial, tax_of_Industrial
+			}
+			
+			if tax_of_Residential > 100 {
+				tax_of_Residential = 100
+				objprm input_stat__tax_of_Residential, tax_of_Residential
+			}
+			if tax_of_Commercial > 100 {
+				tax_of_Commercial = 100
+				objprm input_stat__tax_of_Commercial, tax_of_Commercial
+			}
+			if tax_of_Office > 100 {
+				tax_of_Office = 100
+				objprm input_stat__tax_of_Office, tax_of_Office
+			}
+			if tax_of_Industrial > 100 {
+				tax_of_Industrial = 100
+				objprm input_stat__tax_of_Industrial, tax_of_Industrial
+			}
+	
+		//支出の具体的な金額を算出
+			if total_Police = 0 {
+				take_budget_of_Police = 0
+			} else {
+				take_budget_of_Police = total_Police * (1000 / (1001-(budget_of_Police*10)))
+			}
+			if total_Fire_Depertment = 0 {
+				take_budget_of_Fire_Depertment = 0
+			} else {
+				take_budget_of_Fire_Depertment = total_Fire_Depertment * (1000 / (1001-(budget_of_Fire_Depertment*10)))
+			}
+			if total_Post_Office = 0 {
+				take_budget_of_Post_Office = 0
+			} else {
+				take_budget_of_Post_Office = total_Post_Office * (1000 / (1001-(budget_of_Post_Office*10)))
+			}
+			if total_Education = 0 {
+				take_budget_of_Education = 0
+			} else {
+				take_budget_of_Education = total_Education * (1000 / (1001-(budget_of_Education*10)))
+			}
+	
+		//収入の具体的な金額を算出
+			if Total_Population = 0 {
+				take_tax_of_Residential = 0
+			} else {
+				take_tax_of_Residential = Total_Population * (10 / (11-(tax_of_Residential/10)))
+			}
+			if total_workers_Commercial = 0 {
+				take_tax_of_Commercial = 0
+			} else {
+				take_tax_of_Commercial = total_workers_Commercial * (10 / (11-(tax_of_Commercial/10)))
+			}
+			if total_workers_Office = 0 {
+				take_tax_of_Office = 0
+			} else {
+				take_tax_of_Office = total_workers_Office * (10 / (11-(tax_of_Office/10)))
+			}
+			if total_workers_Industrial = 0 {
+				take_tax_of_Industrial = 0
+			} else {
+				take_tax_of_Industrial = total_workers_Industrial * (10 / (11-(tax_of_Industrial/10)))
+			}
+	
+		font SystemFont, 14
+		
+		color 255, 127, 39
+		pos 10, 30 : mes "繰越金 §"+Money+""
+	
+		color 255, 255, 255
+		
+		pos 10, 50  : mes "警察署　 　　§-"+take_budget_of_Police+""
+		pos 10, 70  : mes "消防署　　　 §-"+take_budget_of_Fire_Depertment+""
+		pos 10, 90  : mes "郵便事業 　　§-"+take_budget_of_Post_Office+""
+		pos 10, 110 : mes "教育事業　　 §-"+take_budget_of_Education+""
+	
+		pos 10, 150 : mes "住居地区　　 §+"+take_tax_of_Residential+""
+		pos 10, 170 : mes "商業地区　　 §+"+take_tax_of_Commercial+""
+		pos 10, 190 : mes "オフィス地区 　§+"+take_tax_of_Office+""
+		pos 10, 210 : mes "工業地区 　　§+"+take_tax_of_Industrial+""
+	
+		expenses = take_budget_of_Police + take_budget_of_Fire_Depertment + take_budget_of_Post_Office + take_budget_of_Education
+		color 255, 0, 0
+		pos 10, 250 : mes "今月の支出　 §-"+expenses+""
+	
+		income = take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial
+		color 0, 255, 0
+		pos 10, 270 : mes "今月の収入　 §+"+income+""
+	
+		color 0, 162, 232
+		pos 10, 290 : mes "月末の資金　 §"+(Money - expenses + income)+""
+	
+		redraw 1
+		wait 10
+	loop
+	
+	stop
+	
+*fix_budget
+	gsel ginfo_act, -1
+	return
+	
+*pay_budget
+	//毎月1日になったら資金から予算分を引いて税金分を増やす
+		repeat mapx
+			rx = cnt
+			repeat mapy
+				ry = cnt
+		
+				if category_2(rx,ry) = "police_station" {
+					total_Police += 1
+				}
+				if category_2(rx,ry) = "fire_depertment" {
+					total_Fire_Depertment += 1
+				}
+				if category_2(rx,ry) = "post_office" {
+					total_Post_Office += 1
+				}
+				if category_2(rx,ry) = "education" {
+					total_Education += 1
+				}
+		
+				if workers_Commercial(rx,ry) > 0 {
+					total_workers_Commercial += workers_Commercial(rx,ry)
+				}
+				if workers_Office(rx,ry) > 0 {
+					total_workers_Office += workers_Office(rx,ry)
+				}
+				if workers_Industrial(rx,ry) > 0 {
+					total_workers_Industrial += workers_Industrial(rx,ry)
+				}
+					
+			loop
+		loop
+		
+		//支出の具体的な金額を算出
+			if total_Police = 0 {
+				take_budget_of_Police = 0
+			} else {
+				take_budget_of_Police = total_Police * (1000 / (1001-(budget_of_Police*10)))
+			}
+			if total_Fire_Depertment = 0 {
+				take_budget_of_Fire_Depertment = 0
+			} else {
+				take_budget_of_Fire_Depertment = total_Fire_Depertment * (1000 / (1001-(budget_of_Fire_Depertment*10)))
+			}
+			if total_Post_Office = 0 {
+				take_budget_of_Post_Office = 0
+			} else {
+				take_budget_of_Post_Office = total_Post_Office * (1000 / (1001-(budget_of_Post_Office*10)))
+			}
+			if total_Education = 0 {
+				take_budget_of_Education = 0
+			} else {
+				take_budget_of_Education = total_Education * (1000 / (1001-(budget_of_Education*10)))
+			}
+	
+		//収入の具体的な金額を算出
+			if Total_Population = 0 {
+				take_tax_of_Residential = 0
+			} else {
+				take_tax_of_Residential = Total_Population * (10 / (11-(tax_of_Residential/10)))
+			}
+			if total_workers_Commercial = 0 {
+				take_tax_of_Commercial = 0
+			} else {
+				take_tax_of_Commercial = total_workers_Commercial * (10 / (11-(tax_of_Commercial/10)))
+			}
+			if total_workers_Office = 0 {
+				take_tax_of_Office = 0
+			} else {
+				take_tax_of_Office = total_workers_Office * (10 / (11-(tax_of_Office/10)))
+			}
+			if total_workers_Industrial = 0 {
+				take_tax_of_Industrial = 0
+			} else {
+				take_tax_of_Industrial = total_workers_Industrial * (10 / (11-(tax_of_Industrial/10)))
+			}
+		
+		Money -= take_budget_of_Police + take_budget_of_Fire_Depertment + take_budget_of_Post_Office + take_budget_of_Education
+		Money += take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial
+		
 	return
 	
 *climate
@@ -5225,6 +5699,23 @@
 			noteadd "demand_Office = "+demand_Office+";", -1
 			noteadd "demand_Industrial = "+demand_Industrial+";", -1
 	
+		//資金
+			noteadd "Money = "+Money+";", -1
+	
+		//空白
+			noteadd " ", -1
+	
+		//予算
+			noteadd "budget_of_Police = "+budget_of_Police+";", -1
+			noteadd "budget_of_Fire_Depertment = "+budget_of_Fire_Depertment+";", -1
+			noteadd "budget_of_Post_Office = "+budget_of_Post_Office+";", -1
+			noteadd "budget_of_Education = "+budget_of_Education+";", -1
+	
+			noteadd "tax_of_Residential = "+tax_of_Residential+";", -1
+			noteadd "tax_of_Commercial = "+tax_of_Commercial+";", -1
+			noteadd "tax_of_Office = "+tax_of_Office+";", -1
+			noteadd "tax_of_Industrial = "+tax_of_Industrial+";", -1
+	
 		//空白
 			noteadd " ", -1
 	
@@ -5266,6 +5757,29 @@
 						map_data_buf = category(x,y)
 					} else {
 						map_data_buf = ""+map_data_buf+", "+category(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+			loop
+			
+			noteadd "}", -1
+	
+		//category_2(x,y)
+			noteadd "category_2(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+					
+					if cnt = 0 {
+						map_data_buf = category_2(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+category_2(x,y)+""
 					}
 				loop
 			
@@ -5737,6 +6251,9 @@
 		}
 	
 		cursor_mode = "normal"
+	
+		mci "close Cities-Box_2"
+		mci "play Cities-Box"
 		
 		goto *main
 	}
