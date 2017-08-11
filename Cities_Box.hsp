@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.7.0
+									   Cities Box Ver 0.7.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -263,6 +263,7 @@
 	//メニューのアイコン
 		celload "img/menu_icons/menu/cursor.png", 3							; 標準カーソル
 		celload "img/menu_icons/menu/road.png", 4							; メニューアイコン（道路敷設）
+		celload "img/menu_icons/menu/railroad.png", 50						; メニューアイコン（線路建設）
 		celload "img/menu_icons/menu/low_density_residential.png", 5		; メニューアイコン（住居地区建設）
 		celload "img/menu_icons/menu/commercial.png", 12					; メニューアイコン（商業地区建設）
 		celload "img/menu_icons/menu/office.png", 6							; メニューアイコン（オフィス建設）
@@ -503,6 +504,14 @@
 						noteadd addon_name(cnt), -1
 	
 						notesel type_number_Two_lane_road
+						noteadd str(cnt), -1
+					}
+	
+					if addon_type(cnt) = "Two_lane_railroad" or addon_type(cnt) = "Two_lane_Railroad" {
+						notesel type_Two_lane_railroad
+						noteadd addon_name(cnt), -1
+	
+						notesel type_number_Two_lane_railroad
 						noteadd str(cnt), -1
 					}
 							
@@ -939,6 +948,8 @@
 						notesel load_mapdata
 						noteadd load_mapdata_Cipher_buf, cnt
 					loop
+	
+				loaded_cbx = 1
 	
 			} else {
 	
@@ -1746,6 +1757,13 @@
 						if category_buf = "road" {
 							gosub *adjustment_road
 						}
+	
+					//線路の向きを調節
+						category_buf = category(x,y)
+						
+						if category_buf = "railroad" {
+							gosub *adjustment_railroad
+						}
 						
 					//オブジェクト（道路や建物など）の表示をするための準備
 						x_buf = x
@@ -2154,58 +2172,67 @@
 						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 0, 32, 32
 					}
 	
+				//線路ボタン
+					if cursor_mode = "put_Railroad" {
+						gmode 2
+						pos 92, windowy-70-titlebar_h : gcopy 50, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 92, windowy-70-titlebar_h : gcopy 50, 0, 0, 32, 32
+					}
+	
 				//建物（住居地区）ボタン
 					if cursor_mode = "put_Residential" {
 						gmode 2
-						pos 92, windowy-70-titlebar_h : gcopy 5, 0, 32, 32, 32
+						pos 124, windowy-70-titlebar_h : gcopy 5, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 92, windowy-70-titlebar_h : gcopy 5, 0, 0, 32, 32
+						pos 124, windowy-70-titlebar_h : gcopy 5, 0, 0, 32, 32
 					}
 	
 				//建物（商業地区）ボタン
 					if cursor_mode = "put_Commercial" {
 						gmode 2
-						pos 124, windowy-70-titlebar_h : gcopy 12, 0, 32, 32, 32
+						pos 156, windowy-70-titlebar_h : gcopy 12, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 124, windowy-70-titlebar_h : gcopy 12, 0, 0, 32, 32
+						pos 156, windowy-70-titlebar_h : gcopy 12, 0, 0, 32, 32
 					}
 	
 				//建物（オフィス）ボタン
 					if cursor_mode = "put_Office" {
 						gmode 2
-						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 32, 32, 32
+						pos 188, windowy-70-titlebar_h : gcopy 6, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 156, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
+						pos 188, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
 					}
 	
 				//建物（工業地区）ボタン
 					if cursor_mode = "put_Industrial" {
 						gmode 2
-						pos 188, windowy-70-titlebar_h : gcopy 19, 0, 32, 32, 32
+						pos 220, windowy-70-titlebar_h : gcopy 19, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 188, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
+						pos 220, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
 					}
 	
 				//建物（公共施設）ボタン
 					if cursor_mode = "put_Public" {
 						gmode 2
-						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
+						pos 252, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 220, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
+						pos 252, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
 				//公園ボタン
 					if cursor_mode = "put_Park" {
 						gmode 2
-						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
+						pos 284, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 252, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
+						pos 284, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
 					}
 	
 				//予算ボタン
@@ -2355,7 +2382,42 @@
 							noteget addon_num_normal_road, clicked_addon_number
 							addon_num_normal_road = int(addon_num_normal_road)
 				} 
+	
+				opening_menu_put_Railroad = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
+				opening_menu_put_Office = 0
+				opening_menu_put_Industrial = 0
+				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
+	
+				open_stat_menu = 0
+			}
+	
+		//線路ボタン
+			if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
+					
+				if opening_menu_put_Road = 0 {
+					cursor_mode = "put_Railroad"
+					density = ""
 		
+					opening_addon_menu = 1
+					opening_menu_put_Railroad = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_Two_lane_railroad
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_Two_lane_railroad
+							noteget addon_num_normal_railroad, clicked_addon_number
+							addon_num_normal_railroad = int(addon_num_normal_railroad)
+				} 
+	
+				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
@@ -2367,7 +2429,7 @@
 			}
 		
 		//建物（住居地区）ボタン
-			if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
 					
 				if opening_menu_put_Reaidential = 0 {
 					cursor_mode = "put_Residential"
@@ -2390,6 +2452,7 @@
 				} 
 					
 				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
@@ -2400,7 +2463,7 @@
 			}
 		
 		//建物（商業地区）ボタン
-			if click_range( 124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Commercial = 0 {
 					cursor_mode = "put_Commercial"
@@ -2423,6 +2486,7 @@
 				} 
 		
 				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
@@ -2433,7 +2497,7 @@
 			}
 		
 		//建物（オフィス）ボタン
-			if click_range( 156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Office = 0 {
 					cursor_mode = "put_Office"
@@ -2455,6 +2519,7 @@
 				} 
 		
 				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Industrial = 0
@@ -2465,7 +2530,7 @@
 			}
 		
 		//建物（工業地区）ボタン
-			if click_range( 188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Office = 0 {
 					cursor_mode = "put_Industrial"
@@ -2487,6 +2552,7 @@
 				} 
 		
 				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
@@ -2497,7 +2563,7 @@
 			}
 				
 		//建物（公共施設）ボタン
-			if click_range( 220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Public = 0 {
 					cursor_mode = "put_Public"
@@ -2519,6 +2585,7 @@
 				} 
 		
 				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
@@ -2529,7 +2596,7 @@
 			}
 		
 		//建物（公園）ボタン
-			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 284, windowy-70-titlebar_h, 284+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Park = 0 {
 					cursor_mode = "put_Park"
@@ -2551,6 +2618,7 @@
 				} 
 		
 				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
@@ -2562,8 +2630,8 @@
 	
 		if (ginfo(0)-ginfo(4)) >= 0 and (ginfo(0)-ginfo(4)) <= (ginfo(4)+windowx) and (ginfo(1)-ginfo(5)) >= titlebar_h and (ginfo(1)-ginfo(5)) <= (ginfo(5)+windowy) {
 	
-			//統計ボタン
-				if click_range( windowx-54-64, windowy-40-titlebar_h, windowx-64, windowy-40-titlebar_h+32 ) = 1 {
+			//予算パネルボタン
+				if click_range( windowx-54-64, windowy-40-titlebar_h, windowx-54-32, windowy-40-titlebar_h+32 ) = 1 {
 					gosub *budget_panel
 					return
 				}
@@ -2586,6 +2654,7 @@
 			
 					opening_addon_menu = 0
 					opening_menu_put_Road = 0
+					opening_menu_put_Railroad = 0
 					opening_menu_put_Residential = 0
 					opening_menu_put_Commercial = 0
 					opening_menu_put_Office = 0
@@ -2655,6 +2724,23 @@
 						notesel type_number_Two_lane_road
 						noteget addon_num_normal_road, clicked_addon_number
 						addon_num_normal_road = int(addon_num_normal_road)
+				}
+	
+			/*-------------------------------------------線路----------------------------------------------------*/
+				notesel type_Two_lane_railroad
+				if opening_menu_put_Railroad = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Railroad"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_Two_lane_railroad
+						noteget put_addon_name, clicked_addon_number
+						
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_Two_lane_railroad
+						noteget addon_num_normal_railroad, clicked_addon_number
+						addon_num_normal_railroad = int(addon_num_normal_railroad)
 				}
 	
 			/*-----------------------------------------住居地区-------------------------------------------------*/
@@ -2892,7 +2978,7 @@
 	dim direction_check, 4
 	
 *build_obj_2
-	/*-----------------道路・建物の建設・敷設（左クリック）、撤去（右クリック or 撤去モード）---------------------*/
+	/*-----------------道路・線路・建物の建設・敷設（左クリック）、撤去（右クリック or 撤去モード）---------------------*/
 	
 		//標準カーソルモードあるいはクリックされたマウスy座標がmenu_line_y以上の場合はreturn
 			if from_Build_on_Reservation_area = 0 and (cursor_mode = "normal" or mousey >= menu_line_y or mx < 0 or my < 0) {
@@ -2961,6 +3047,32 @@
 				}
 			}
 	
+			left_chip_2 = ""
+			top_chip_2 = ""
+			bottom_chip_2 = ""
+			right_chip_2 = ""
+			
+			if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
+				left_chip_2 = category_2(mx-1, my)
+				top_chip_2 = category_2(mx, my-1)
+				bottom_chip_2 = category_2(mx+1, my)
+				right_chip_2 = category_2(mx, my+1)
+	
+			} else {
+				if mx-1 < 0 {
+					left_chip_2 = ""
+				}
+				if my-1 < 0 {
+					top_chip_2 = ""
+				}
+				if mx+1 > mapx {
+					bottom_chip_2 = ""
+				}
+				if my+1 > mapy {
+					right_chip_2 = ""
+				}
+			}
+	
 			if mx = -1 or my = -1 {
 				return
 			}
@@ -2985,6 +3097,8 @@
 							Money -= 5
 	
 						//敷設した地点の情報を書き換え
+							gosub *delete_obj
+							
 							cetegory_buf = category(mx,my)
 							
 							map(mx, my) = addon_num_normal_road
@@ -2997,47 +3111,50 @@
 							obj_use_tiles_y(mx,my) = 0
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
-							
-							if addon_chip_x(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 and addon_chip_y(addon_num_buf, obj_type(mx,my), obj_dire(mx,my)) = 1 {
-								if category_buf = "residential" {
-									Total_Population -= residents(mx,my)
-									total_Residential_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									residents(mx,my) = 0
-								}
-			
-								if category_buf = "commercial" {
-									Total_workers_Commercial -= workers_Commercial(mx, my)
-									total_Commercial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									workers_Commercial(mx, my) = 0
-								}
-			
-								if category_buf = "office" {
-									Total_workers_Office -= workers_Office(mx, my)
-									total_Office_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									workers_Office(mx, my) = 0
-								}
-			
-								if category_buf = "industrial" {
-									Total_workers_Industrial -= workers_Industrial(mx, my)
-									total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									workers_Industrial(mx, my) = 0
-								}
-			
-								if category_buf = "public" {
-									Total_workers_Public -= workers_Public(mx, my)
-									total_Public_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
-									workers_Public(mx, my) = 0
-								}
-							}
 	
 						return
 					}
 	
-				//道路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
-					if cursor_mode != "put_Road" {
+				//線路敷設
+					if cursor_mode = "put_Railroad" and map(mx, my) != addon_num_normal_railroad {
+						//道路の向きを揃える
+							x_buf = x : y_buf = y
+							x = mx : y = my
+	
+							category_buf = category(mx,my)
+							
+							from_build_obj = 1
+							gosub *adjustment_railroad
+							
+							x = x_buf : y = y_buf
+	
+						//資金を減らす（§5/1マス）
+							Money -= 5
+	
+						//敷設した地点の情報を書き換え
+							gosub *delete_obj
+							
+							cetegory_buf = category(mx,my)
+							
+							map(mx, my) = addon_num_normal_railroad
+							name(mx, my) = put_addon_name
+							category(mx, my) = "railroad"
+							category_2(mx, my) = addon_type_2(addon_num_buf)
+							
+							obj_serial_num(mx, my) = 0
+							obj_use_tiles_x(mx,my) = 0
+							obj_use_tiles_y(mx,my) = 0
+							obj_tiles_x(mx, my) = 0
+							obj_tiles_y(mx, my) = 0
+	
+						return
+					}
+	
+				//道路・線路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
+					if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" {
 	
 						//そもそも建設地に道路がある場合
-							if category(mx,my) = "road" and cursor_mode != "put_Road" and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h & ginfo_my<=ginfo_wy2) {
+							if (category(mx,my) = "road" or category(mx,my) = "railroad") and (cursor_mode != "put_Road" and cursor_mode != "put_Railroad") and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h & ginfo_my<=ginfo_wy2) {
 								;dialog "この区画は既に占有されています"
 								return
 							}
@@ -3168,7 +3285,7 @@
 												ry -= 1
 											}
 	
-											if done_build(0,rx,ry) = 0 and category(rx,ry) != "tile" and (category(rx,ry) = "road" or obj_use_tiles_x(rx,ry) != 0 or obj_use_tiles_y(rx,ry) != 0) {
+											if done_build(0,rx,ry) = 0 and category(rx,ry) != "tile" and (category(rx,ry) = "road" or category(rx,ry) = "railroad" or obj_use_tiles_x(rx,ry) != 0 or obj_use_tiles_y(rx,ry) != 0) {
 												found_other_obj = 1
 												
 												if direction = "left" {
@@ -3666,7 +3783,7 @@
 							}
 	
 							//地価の変動
-								if instr(category_buf, 0, "road") = -1 and instr(category_buf, 0, "tile") = -1 {
+								if instr(category_buf, 0, "road") = -1 and instr(category_buf, 0, "railroad") = -1 and instr(category_buf, 0, "tile") = -1 {
 									addon_land_price_influence__tmp = addon_land_price_influence(addon_num_buf)
 		
 									addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_buf)
@@ -4016,6 +4133,9 @@
 	if cursor_mode = "put_Road" {
 		notesel type_number_Two_lane_road
 	}
+	if cursor_mode = "put_Railroad" {
+		notesel type_number_Two_lane_railroad
+	}
 	if cursor_mode = "put_Residential" and density = "low" {
 		notesel type_number_low_density_residential
 	
@@ -4057,7 +4177,7 @@
 		notesel type_number_park
 	}
 	
-	if cursor_mode != "put_Road" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
+	if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
 		p = 1
 	} else {
 		p = 0
@@ -4111,7 +4231,7 @@
 	loop
 	
 	// 地区設定のアイコンを表示
-	if cursor_mode != "put_Road" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
+	if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
 		
 		if cursor_mode = "put_Residential" {
 			if clicked_addon_number = 0 {
@@ -4216,7 +4336,11 @@
 	return
 		
 *adjustment_road
-	if instr(put_addon_name, 0, "road") = -1 {
+	if instr(put_addon_name, 0, "road") = -1 and instr(put_addon_name, 0, "Road") = -1 {
+		return
+	}
+	
+	if category_2(x, y) = "train_crossing" {
 		return
 	}
 	
@@ -4230,33 +4354,111 @@
 		from_build_obj = 0
 		
 		//縦向き
-			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
+			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+	
+				if category_buf = "railroad" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "train_crossing"
+	
+					from_adjustment_road = 1
+					gosub *adjustment_railroad
+				}
 			}
 	
 		//横向き
-			if left_chip = "road" and top_chip != "road" and bottom_chip != "road" and right_chip = "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and top_chip != "road" and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+	
+				if category_buf = "railroad" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "train_crossing"
+	
+					from_adjustment_road = 1
+					gosub *adjustment_railroad
+				}
 			}
 	
 		//行き止まり
-			if left_chip = "road" and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
+	
+				if category_buf = "railroad" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "train_crossing"
+	
+					from_adjustment_road = 1
+					gosub *adjustment_railroad
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if x = 0 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+					}*/
 			}
-			if left_chip != "road" and top_chip = "road" and bottom_chip != "road" and right_chip != "road" {
+			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and bottom_chip != "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
+	
+				if category_buf = "railroad" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "train_crossing"
+	
+					from_adjustment_road = 1
+					gosub *adjustment_railroad
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if y = 0 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+					}*/
 			}
-			if left_chip != "road" and top_chip != "road" and bottom_chip = "road" and right_chip != "road" {
+			if left_chip != "road" and top_chip != "road" and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
+	
+				if category_buf = "railroad" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "train_crossing"
+	
+					from_adjustment_road = 1
+					gosub *adjustment_railroad
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if x = mapx {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+					}*/
 			}
-			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and right_chip = "road" {
+			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
+	
+				if category_buf = "railroad" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "train_crossing"
+	
+					from_adjustment_road = 1
+					gosub *adjustment_railroad
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if y = mapy {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+					}*/
 			}
 	
 		//曲がり角
@@ -4303,6 +4505,168 @@
 	
 		//1マスだけ孤立した（周りに接続する道路がない）道路の場合はコンクリートタイルを表示
 			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+			}
+	
+	}
+	
+	return
+	
+*adjustment_railroad
+	if instr(put_addon_name, 0, "railroad") = -1 and instr(put_addon_name, 0, "Railroad") = -1 and from_adjustment_road = 0 {
+		return
+	}
+	
+	from_adjustment_road = 0
+	
+	if category_2(x, y) = "train_crossing" {
+		return
+	}
+	
+	if (category_buf = "railroad" and (cursor_mode = "put_Railroad" or cursor_mode = "bulldozer")) or from_build_obj = 1 {
+	
+		if from_delete_obj = 0 {
+			gosub *delete_obj
+		}
+		
+		from_delete_obj = 0
+		from_build_obj = 0
+		
+		//縦向き
+			if left_chip != "railroad" and (top_chip = "railroad" or top_chip_2 = "train_crossing") and (bottom_chip = "railroad" or bottom_chip_2 = "train_crossing") and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+				
+				if category_buf = "road" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "train_crossing"
+				}
+			}
+	
+		//横向き
+			if (left_chip = "railroad" or left_chip_2 = "train_crossing") and top_chip != "railroad" and bottom_chip != "railroad" and (right_chip = "railroad" or right_chip_2 = "train_crossing") {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+	
+				if category_buf = "road" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "train_crossing"
+				}
+			}
+	
+		//行き止まり
+			if (left_chip = "railroad" or left_chip_2 = "train_crossing") and top_chip != "railroad" and bottom_chip != "railroad" and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
+	
+				if category_buf = "road" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "train_crossing"
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if x = 0 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+					}*/
+			}
+			if left_chip != "railroad" and (top_chip = "railroad" or top_chip_2 = "train_crossing") and bottom_chip != "railroad" and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
+	
+				if category_buf = "road" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "train_crossing"
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if y = 0 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+					}*/
+			}
+			if left_chip != "railroad" and top_chip != "railroad" and (bottom_chip = "railroad" or bottom_chip_2 = "train_crossing") and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
+	
+				if category_buf = "road" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "train_crossing"
+				}
+				
+				//マップの端なら直線道路に変更
+					/*if x = mapx {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+					}*/
+			}
+			if left_chip != "railroad" and top_chip != "railroad" and bottom_chip != "railroad" and (right_chip = "railroad" or right_chip_2 = "train_crossing") {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
+	
+				if category_buf = "road" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "train_crossing"
+				}
+	
+				//マップの端なら直線道路に変更
+					/*if y = mapy {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+					}*/
+			}
+	
+		//曲がり角
+			if left_chip = "railroad" and top_chip = "railroad" and bottom_chip != "railroad" and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-top")
+			}
+			if left_chip != "railroad" and top_chip = "railroad" and bottom_chip != "railroad" and right_chip = "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-top")
+			}
+			if left_chip = "railroad" and top_chip != "railroad" and bottom_chip = "railroad" and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-bottom")
+			}
+			if left_chip != "railroad" and top_chip != "railroad" and bottom_chip = "railroad" and right_chip = "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-bottom")
+			}
+	
+		//T字型交差点
+			if left_chip = "railroad" and top_chip = "railroad" and bottom_chip = "railroad" and right_chip != "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
+			}
+			if left_chip = "railroad" and top_chip = "railroad" and bottom_chip != "railroad" and right_chip = "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
+			}
+			if left_chip = "railroad" and top_chip != "railroad" and bottom_chip = "railroad" and right_chip = "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
+			}
+			if left_chip != "railroad" and top_chip = "railroad" and bottom_chip = "railroad" and right_chip = "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
+			}
+	
+		//十字型交差点
+			if left_chip = "railroad" and top_chip = "railroad" and bottom_chip = "railroad" and right_chip = "railroad" {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+			}
+	
+		//1マスだけ孤立した（周りに接続する道路がない）道路の場合はコンクリートタイルを表示
+			if left_chip != "railroad" and top_chip != "railroad" and bottom_chip != "railroad" and right_chip != "railroad" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
 			}
@@ -4745,7 +5109,7 @@
 	return
 	
 *budget_panel
-	screen 1, 300, 350
+	screen 1, 300, 360
 	
 	gsel 1, 2
 	
@@ -4799,35 +5163,36 @@
 	loop
 	
 	objsize 50, 20
+	font SystemFont, 14 : color 255, 255, 255
 	
 	//支出率
-		pos 200, 50 : input budget_of_Police : input_stat__budget_of_Police = stat
-		pos 250, 50 : mes "%"
+		pos 200, 70  : input budget_of_Police : input_stat__budget_of_Police = stat
+		pos 280, 70  : mes "%"
 		
-		pos 200, 70 : input budget_of_Fire_Depertment : input_stat__budget_of_Fire_Depertment = stat
-		pos 250, 70 : mes "%"
+		pos 200, 90  : input budget_of_Fire_Depertment : input_stat__budget_of_Fire_Depertment = stat
+		pos 280, 90  : mes "%"
 		
-		pos 200, 90 : input budget_of_Post_Office : input_stat__budget_of_Post_Office = stat
-		pos 250, 90 : mes "%"
+		pos 200, 110 : input budget_of_Post_Office : input_stat__budget_of_Post_Office = stat
+		pos 280, 110 : mes "%"
 		
-		pos 200, 110 : input budget_of_Education : input_stat__budget_of_Education = stat
-		pos 250, 110 : mes "%"
+		pos 200, 130 : input budget_of_Education : input_stat__budget_of_Education = stat
+		pos 280, 130 : mes "%"
 	
 	//税率
-		pos 200, 150 : input tax_of_Residential : input_stat__tax_of_Residential = stat
-		pos 250, 150 : mes "%"
+		pos 200, 190 : input tax_of_Residential : input_stat__tax_of_Residential = stat
+		pos 290, 190 : mes "%"
 		
-		pos 200, 170 : input tax_of_Commercial : input_stat__tax_of_Commercial = stat
-		pos 250, 170 : mes "%"
+		pos 200, 210 : input tax_of_Commercial : input_stat__tax_of_Commercial = stat
+		pos 290, 210 : mes "%"
 		
-		pos 200, 190 : input tax_of_Office : input_stat__tax_of_Office = stat
-		pos 250, 190 : mes "%"
+		pos 200, 230 : input tax_of_Office : input_stat__tax_of_Office = stat
+		pos 290, 230 : mes "%"
 		
-		pos 200, 210 : input tax_of_Industrial : input_stat__tax_of_Industrial = stat
-		pos 250, 210 : mes "%"
+		pos 200, 250 : input tax_of_Industrial : input_stat__tax_of_Industrial = stat
+		pos 290, 250 : mes "%"
 	
 	objsize 50, 20
-	pos 240, 320 : button "OK", *fix_budget
+	pos 240, 330 : button "OK", *fix_budget
 	
 	repeat
 		redraw 0
@@ -4957,27 +5322,37 @@
 		pos 10, 30 : mes "繰越金 §"+Money+""
 	
 		color 255, 255, 255
-		
-		pos 10, 50  : mes "警察署　 　　§-"+take_budget_of_Police+""
-		pos 10, 70  : mes "消防署　　　 §-"+take_budget_of_Fire_Depertment+""
-		pos 10, 90  : mes "郵便事業 　　§-"+take_budget_of_Post_Office+""
-		pos 10, 110 : mes "教育事業　　 §-"+take_budget_of_Education+""
 	
-		pos 10, 150 : mes "住居地区　　 §+"+take_tax_of_Residential+""
-		pos 10, 170 : mes "商業地区　　 §+"+take_tax_of_Commercial+""
-		pos 10, 190 : mes "オフィス地区 　§+"+take_tax_of_Office+""
-		pos 10, 210 : mes "工業地区 　　§+"+take_tax_of_Industrial+""
+		pos 8, 50  : mes "支出"
+		pos 10, 70  : mes "警察署　 　　§-"+take_budget_of_Police+""
+		pos 10, 90  : mes "消防署　　　 §-"+take_budget_of_Fire_Depertment+""
+		pos 10, 110  : mes "郵便事業 　　§-"+take_budget_of_Post_Office+""
+		pos 10, 130 : mes "教育事業　　 §-"+take_budget_of_Education+""
+	
+		pos 8, 170  : mes "収入"
+		pos 10, 190 : mes "住居地区　　 §+"+take_tax_of_Residential+""
+		pos 10, 210 : mes "商業地区　　 §+"+take_tax_of_Commercial+""
+		pos 10, 230 : mes "オフィス地区 　§+"+take_tax_of_Office+""
+		pos 10, 250 : mes "工業地区 　　§+"+take_tax_of_Industrial+""
+	
+		repeat 4
+			pos 250, 70+(cnt*20)  : mes "%"
+		loop
+	
+		repeat 4
+			pos 250, 190+(cnt*20) : mes "%"
+		loop
 	
 		expenses = take_budget_of_Police + take_budget_of_Fire_Depertment + take_budget_of_Post_Office + take_budget_of_Education
 		color 255, 0, 0
-		pos 10, 250 : mes "今月の支出　 §-"+expenses+""
+		pos 10, 290 : mes "今月の支出　 §-"+expenses+""
 	
 		income = take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial
 		color 0, 255, 0
-		pos 10, 270 : mes "今月の収入　 §+"+income+""
+		pos 10, 310 : mes "今月の収入　 §+"+income+""
 	
 		color 0, 162, 232
-		pos 10, 290 : mes "月末の資金　 §"+(Money - expenses + income)+""
+		pos 10, 330 : mes "月末の資金　 §"+(Money - expenses + income)+""
 	
 		redraw 1
 		wait 10
@@ -5552,6 +5927,8 @@
 				noteadd "Set_Play_BGM = "+Set_Play_BGM+";", cnt, 1
 				noteadd_Set_Play_BGM = 1
 			}
+	
+			wait 1
 		loop
 	
 		if noteadd_SystemFont = 0 {
@@ -5565,58 +5942,10 @@
 	
 		notesave "data/config.dat"
 	
-	//次に各マップデータ(*.cbd)の設定を保存
-		noteadd_City_Name = 0
-		noteadd_Mayor_Name = 0
-		noteadd_Set_Change_Weather = 0
-		
-		notesel load_mapdata
-	
-		repeat notemax
-			noteget load_mapdata_buf, cnt
-	
-			if instr(load_mapdata_buf, 0, "City_Name") != -1 {
-				City_Name = setting_City_Name
-				noteadd "City_Name = \""+City_Name+"\";", cnt, 1
-				noteadd_City_Name = 1
-			}
-	
-			if instr(load_mapdata_buf, 0, "Mayor_Name") != -1 {
-				Mayor_Name = setting_Mayor_Name
-				noteadd "Mayor_Name = \""+Mayor_Name+"\";", cnt, 1
-				noteadd_Mayor_Name = 1
-			}
-	
-			if instr(load_mapdata_buf, 0, "Set_Change_Weather") != -1 {
-				Set_Change_Weather = setting_Set_Change_Weather
-				noteadd "Set_Change_Weather = "+Set_Change_Weather+";", cnt, 1
-				noteadd_Set_Change_Weather = 1
-			}
-		loop
-	
-		if noteadd_City_Name = 0 {
-			City_Name = setting_City_Name
-			noteadd "City_Name = \""+City_Name+"\";", -1
-		}
-		if noteadd_Mayor_Name = 0 {
-			Mayor_Name = setting_Mayor_Name
-			noteadd "City_Name = \""+Mayor_Name+"\";", -1
-		}
-		if noteadd_Set_Change_Weather = 0 {
-			Set_Change_Weather = setting_Set_Change_Weather
-			noteadd "City_Name = \""+Set_Change_Weather+"\";", -1
-		}
-	
-		if load_mapdata_name = "" {
-			gosub *save
-			load_mapdata_name = save_mapdata_name
-	
-			if from_new_map = 0 {
-				return
-			}
-		}
-	
-		notesave load_mapdata_name
+	//次に各マップデータ(*.cbx)の設定を保存
+		City_Name = setting_City_Name
+		Mayor_Name = setting_Mayor_Name
+		Set_Change_Weather = setting_Set_Change_Weather
 	
 	return
 	
@@ -5655,26 +5984,46 @@
 	save_mapdata = ""
 	
 	//誤反応防止
-		if from_new_map = 0 and click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 {
+		if from_setting = 0 and from_new_map = 0 and click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 {
 			return
 		}
+	
+	//保存先ファイルの選択
+			dialog "cbx", 17, "Cities Box マップデータ"
+			
+			save_mapdata_name = refstr
+			if instr(save_mapdata_name, 0, ".cbx") = -1 and instr(save_mapdata_name, 0, ".cbd") = -1 {
+				save_mapdata_name = ""+save_mapdata_name+".cbx"
+			}
+			
+			if stat = 0 {
+				return
+			}
 	
 	//マップ保存
 		title "保存中..."
 		
 		notesel save_mapdata
+	
+		//保存したCities Boxのバージョン（リリースナンバー）
+			noteadd "Version = "+NOW_Release_number+";", -1
+	
+		//空白
+			noteadd " ", -1
+			wait 10
 		
-		//次に各マップデータ(*.cbd)の設定を保存
+		//次に各マップデータ(*.cbx)の設定を保存
 			noteadd "City_Name = \""+City_Name+"\";", -1
 			noteadd "Mayor_Name = \""+Mayor_Name+"\";", -1
 	
 			noteadd "Total_Population = "+Total_Population+";", -1
-	
+			
 			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -1
 			noteadd "Temperature = "+temperature+";", -1
 	
 		//空白
 			noteadd " ", -1
+			wait 10
 	
 		//マップサイズ
 			noteadd "mapx = "+mapx+";", -1
@@ -5682,6 +6031,7 @@
 	
 		//空白
 			noteadd " ", -1
+			wait 10
 	
 		//日時
 			noteadd "time_Year = "+time_Year+";", -1
@@ -5692,6 +6042,7 @@
 	
 		//空白
 			noteadd " ", -1
+			wait 10
 	
 		//需要度
 			noteadd "demand_Residential = "+demand_Residential+";", -1
@@ -5704,6 +6055,7 @@
 	
 		//空白
 			noteadd " ", -1
+			wait 10
 	
 		//予算
 			noteadd "budget_of_Police = "+budget_of_Police+";", -1
@@ -5718,6 +6070,7 @@
 	
 		//空白
 			noteadd " ", -1
+			wait 10
 	
 		//name(x,y)
 			noteadd "name(x,y) {", -1
@@ -5738,6 +6091,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5761,6 +6115,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5784,6 +6139,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5807,6 +6163,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5830,6 +6187,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5853,6 +6211,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5876,6 +6235,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5899,6 +6259,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5922,6 +6283,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5945,6 +6307,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5968,6 +6331,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -5991,6 +6355,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6014,6 +6379,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6037,6 +6403,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6060,6 +6427,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6083,6 +6451,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6106,6 +6475,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6129,6 +6499,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
@@ -6152,24 +6523,15 @@
 				loop
 			
 				noteadd map_data_buf, -1
+				await 10
 			loop
 			
 			noteadd "}", -1
 	
-		//保存先ファイルの選択
-			dialog "cbx", 17, "Cities Box マップデータ"
-	
-			save_mapdata_name = refstr
-			if instr(save_mapdata_name, 0, ".cbx") = -1 and instr(save_mapdata_name, 0, ".cbd") = -1 {
-				save_mapdata_name = ""+save_mapdata_name+".cbx"
-			}
-	
-			if stat = 0 {
-				return
-			}
-	
 		//暗号化（cbxで保存した場合のみ）
-			if instr(save_mapdata_name, 0, ".cbd") = -1 and stat = 1 {
+			if (instr(save_mapdata_name, 0, ".cbd") = -1 and stat = 1) {
+				from_setting = 0
+				
 				notesel save_mapdata
 				l = notemax
 				
@@ -6184,10 +6546,15 @@
 		
 					notesel save_mapdata_Cipher
 					noteadd save_mapdata_buf, cnt
+	
+					await 10
 				loop
+				
 			} else : if instr(save_mapdata_name, 0, ".cbd") != -1 {
 				notesel save_mapdata
 				notesave save_mapdata_name
+	
+				title about_title
 	
 				return
 			}
@@ -6197,6 +6564,8 @@
 				notesel save_mapdata_Cipher
 				notesave save_mapdata_name
 			}
+			
+		title about_title
 	
 		return
 	

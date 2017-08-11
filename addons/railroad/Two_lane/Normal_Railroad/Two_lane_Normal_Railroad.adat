@@ -1,14 +1,14 @@
-addon_name = "Two_lane_normal_road(white_broken_line)"
-addon_jp_name = "2Ôü“¹˜Hi”’”jüj"
-addon_summary = "•’Ê‚Ì2Ôü“¹˜H‚Å‚·B”’‚Ì”jü‚Íu“Á‚É‹Ö~–€‚Í‚È‚¢v‚Æ‚¢‚¤ˆÓ–¡B"
-addon_icon = "icon_Two_lane_normal_road(white_broken_line).png"
+addon_name = "Two_lane_normal_Railroad"
+addon_jp_name = "•¡üü˜H"
+addon_summary = "•’Ê‚Ì•¡üü˜H‚Å‚·B"
+addon_icon = "icon_Two_lane_Normal_Railroad.png"
 
-addon_type = "Two_lane_road"
+addon_type = "Two_lane_railroad"
 
-use_types = "default, dead_end, turn, intersection_T, intersection_cross"
+use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_crossing"
 
 default {
-	image = "Two_lane_normal_road(white_broken_line).png"
+	image = "Two_lane_Normal_Railroad.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	
@@ -37,7 +37,7 @@ default {
 };
 
 dead_end {
-	image = "Two_lane_normal_road(white_broken_line)_dead_end.png"
+	image = "Two_lane_Normal_Railroad_dead_end.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
@@ -88,7 +88,7 @@ dead_end {
 };
 
 turn {
-	image = "Two_lane_normal_road(white_broken_line)_turn.png"
+	image = "Two_lane_Normal_Railroad_turn.png"
 	direction = "left-top, right-top, left-bottom, right-bottom"
 	transparent_color = "0, 0, 0"
 	
@@ -139,7 +139,7 @@ turn {
 };
 
 intersection_T {
-	image = "Two_lane_normal_road_intersection_T.png"
+	image = "Two_lane_Normal_Railroad_intersection_T.png"
 	direction = "left-top-bottom, left-right-top, left-right-bottom, right-top-bottom"
 	transparent_color = "0, 0, 0"
 	
@@ -190,7 +190,7 @@ intersection_T {
 };
 
 intersection_cross {
-	image = "Two_lane_normal_road_intersection_cross.png"
+	image = "Two_lane_Normal_Railroad_intersection_cross.png"
 	direction = "null"
 	transparent_color = "0, 0, 0"
 	
@@ -208,7 +208,7 @@ intersection_cross {
 };
 
 train_crossing {
-	image = "Two_lane_normal_road_train_crossing.png"
+	image = "Two_lane_Normal_Railroad_train_crossing.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	
