@@ -1,6 +1,6 @@
-Release Number : 59;
-Title : Cities Box r59 (Alpha);
-Version : 0.7.0;
+Release Number : 60;
+Title : Cities Box r60 (Alpha);
+Version : 0.7.1;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
