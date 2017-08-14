@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.7.2
+									  Cities Box Ver 0.7.2.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1879,20 +1879,6 @@
 		loop
 	
 		//時間帯に応じて明るさを調節
-		/*
-			//暗くする前に色を取得
-			repeat windowx
-				wx = cnt
-				repeat windowy
-					wy = cnt
-					pget wx, wy
-	
-					ginfo_tmp(wx,wy,0) = ginfo_r
-					ginfo_tmp(wx,wy,1) = ginfo_g
-					ginfo_tmp(wx,wy,2) = ginfo_b
-				loop
-			loop
-		*/
 			//夜間
 			if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
 				color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
@@ -1907,46 +1893,6 @@
 			if time_Hour = 6 {
 				color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 			}
-	
-		//夜間は窓を光らせる
-			/*repeat windowx
-				wx = cnt
-				
-				repeat windowy
-					wy = cnt
-					
-					if ginfo_r = 195 and ginfo_g = 195 and ginfo_b = 195 {
-						color 255, 242, 0
-						pset wx, wy
-					}
-				loop
-			loop
-	
-					/*
-					
-					if addon_window_color_R(addon_number) != -1 {
-						buffer (1000 + addon_number)
-							pos 0, 0 : gcopy (1000 + addon_number), 0, 0, addon_img_size_X(addon_number), addon_img_size_Y(addon_number)
-							
-							repeat addon_img_size_X(addon_number)
-								rx = cnt
-								repeat addon_img_size_Y(addon_number)
-									ry = cnt
-	
-									pget rx, ry
-									
-									if ginfo_r = addon_window_color_R(addon_number) and ginfo_g = addon_window_color_G(addon_number) and ginfo_b = addon_window_color_B(addon_number) {
-										color 234, 222, 0
-										pset rx, ry
-									}
-	
-								loop
-							loop
-	
-						gsel 0
-					}
-	
-					gsel 0*/
 	
 		//マウスポインタの位置のチップを光らせる
 			if opening_addon_menu = 1 {
@@ -1993,8 +1939,7 @@
 			}
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			title "nx = "+nx+" ny = "+ny+"  left_top_x = "+left_top_x+" left_bottom_y = "+left_bottom_y+" right_bottom_x = "+right_bottom_x+" right_top_y = "+right_top_y+"  FPS:"+fps+""
-			//title "FPS : "+fps+""
+			;title "FPS:"+fps+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -3154,12 +3099,27 @@
 							obj_use_tiles_y(mx,my) = 0
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
-	
-						//建設中のタイプを指定する
-							obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
-							obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
-	
-							category_2(mx, my) = "under_construction"
+							
+							if category_buf = "railroad" {
+								//線路と交差している場合は予め踏切を設置しておく
+									if category(mx-1, my) = "road" or category(mx+1, my) = "road" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+									}
+									if category(mx, my-1) = "road" or category(mx, my+1) = "road" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+									}
+									
+									category_2(mx, my) = "train_crossing"
+								
+							} else {
+								//建設中のタイプを指定する
+									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
+									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
+			
+									category_2(mx, my) = "under_construction"
+							}
 	
 						return
 					}
@@ -3184,12 +3144,27 @@
 							obj_use_tiles_y(mx,my) = 0
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
+							
+							if cetegory_buf = "road" {
+								//線路と交差している場合は予め踏切を設置しておく
+									if category(mx-1, my) = "railroad" or category(mx+1, my) = "railroad" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+									}
+									if category(mx, my-1) = "railroad" or category(mx, my+1) = "railroad" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+									}
+									
+									category_2(mx, my) = "train_crossing"
 	
-						//建設中のタイプを指定する
-							obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
-							obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
-	
-							category_2(mx, my) = "under_construction"
+							} else {
+								//建設中のタイプを指定する
+									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
+									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
+			
+									category_2(mx, my) = "under_construction"
+							}
 	
 						return
 					}
@@ -4014,13 +3989,13 @@
 		put_addon_name = name(x, y)
 	}
 	
-	if category_2(x, y) = "train_crossing" {
-		return
-	}
-	
 	if category_buf = "road" {
 		if from_delete_obj = 0 {
 			gosub *delete_obj
+		}
+	
+		if category_2(x, y) != "train_crossing" {
+			category_2(x, y) = ""
 		}
 		
 		from_delete_obj = 0
@@ -4031,7 +4006,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
 	
-				if category_buf = "railroad" {
+				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
@@ -4047,7 +4022,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
 	
-				if category_buf = "railroad" {
+				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
@@ -4063,7 +4038,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
 	
-				if category_buf = "railroad" {
+				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
@@ -4079,7 +4054,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
 	
-				if category_buf = "railroad" {
+				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
@@ -4145,7 +4120,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 	
-				if category_buf = "railroad" {
+				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
@@ -4157,7 +4132,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 	
-				if category_buf = "railroad" {
+				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
@@ -4178,6 +4153,10 @@
 		if from_delete_obj = 0 {
 			gosub *delete_obj
 		}
+	
+		if category_2(x, y) != "train_crossing" {
+			category_2(x, y) = ""
+		}
 		
 		from_delete_obj = 0
 		from_build_obj = 0
@@ -4187,7 +4166,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
 	
-				if category_buf = "road" {
+				if category_buf = "road" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
@@ -4203,7 +4182,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
 	
-				if category_buf = "road" {
+				if category_buf = "road" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
@@ -4219,7 +4198,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
 	
-				if category_buf = "road" {
+				if category_buf = "road" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
@@ -4235,7 +4214,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
 	
-				if category_buf = "road" {
+				if category_buf = "road" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
@@ -4301,7 +4280,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 				
-				if category_buf = "road" {
+				if category_buf = "road" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
@@ -4313,7 +4292,7 @@
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 	
-				if category_buf = "road" {
+				if category_buf = "road" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
