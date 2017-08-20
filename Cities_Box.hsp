@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.7.3
+									  Cities Box Ver 0.7.3.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -2295,8 +2295,8 @@
 					}
 	
 				//人口、日付・気温を表示
-					color 255, 255, 255 : font "Yu Gothic UI", 12
-					pos 300, windowy-70-titlebar_h+5 : mes "人口 "+Total_Population+"人\n"+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃\n§ "+Money+""
+					color 255, 255, 255 : font "Yu Gothic UI", 11
+					pos 315, windowy-70-titlebar_h+5 : mes "人口 "+Total_Population+"人\n"+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃\n§ "+Money+""
 	
 				//ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
@@ -4093,43 +4093,43 @@
 			}
 	
 		//曲がり角
-			if left_chip = "road" and top_chip = "road" and bottom_chip != "road" and right_chip != "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and (top_chip = "road" or top_chip_2 = "train_crossing") and bottom_chip != "road" and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-top")
 			}
-			if left_chip != "road" and top_chip = "road" and bottom_chip != "road" and right_chip = "road" {
+			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-top")
 			}
-			if left_chip = "road" and top_chip != "road" and bottom_chip = "road" and right_chip != "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and top_chip != "road" and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-bottom")
 			}
-			if left_chip != "road" and top_chip != "road" and bottom_chip = "road" and right_chip = "road" {
+			if left_chip != "road" and top_chip != "road" and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-bottom")
 			}
 	
 		//T字型交差点
-			if left_chip = "road" and top_chip = "road" and bottom_chip = "road" and right_chip != "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and (top_chip = "road" or top_chip_2 = "train_crossing") and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and right_chip != "road" {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
 			}
-			if left_chip = "road" and top_chip = "road" and bottom_chip != "road" and right_chip = "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and (top_chip = "road" or top_chip_2 = "train_crossing") and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
 			}
-			if left_chip = "road" and top_chip != "road" and bottom_chip = "road" and right_chip = "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and top_chip != "road" and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
 			}
-			if left_chip != "road" and top_chip = "road" and bottom_chip = "road" and right_chip = "road" {
+			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
 			}
 	
 		//十字型交差点
-			if left_chip = "road" and top_chip = "road" and bottom_chip = "road" and right_chip = "road" {
+			if (left_chip = "road" or left_chip_2 = "train_crossing") and (top_chip = "road" or top_chip_2 = "train_crossing") and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and (right_chip = "road" or right_chip_2 = "train_crossing") {
 				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
 				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
 			}
@@ -4406,7 +4406,11 @@
 			}
 	
 	;住居地区
-		if instr(reservation(x,y), 0, "residential") != -1 and demand_Residential > 0 {
+		if instr(reservation(x,y), 0, "residential") != -1 {
+			if demand_Residential <= 0 {
+				return
+			}
+			
 			demand_Residential -= 1
 	
 			if reservation(x,y) = "low_density_residential" {
@@ -4437,7 +4441,11 @@
 		}
 	
 	;商業地区
-		if instr(reservation(x,y), 0, "commercial") != -1 and demand_Commercial > 0 {
+		if instr(reservation(x,y), 0, "commercial") != -1 {
+			if demand_Commercial <= 0 {
+				return
+			}
+			
 			demand_Commercial -= 1
 	
 			if reservation(x,y) = "low_density_commercial" {
@@ -4468,7 +4476,11 @@
 		}
 	
 	;オフィス地区
-		if instr(reservation(x,y), 0, "office") != -1 and demand_Office > 0 {
+		if instr(reservation(x,y), 0, "office") != -1 {
+			if demand_Office <= 0 {
+				return
+			}
+			
 			demand_Office -= 1
 	
 			notesel type_office
@@ -4488,7 +4500,11 @@
 		}
 	
 	;工業地区
-		if instr(reservation(x,y), 0, "industrial") != -1 and demand_Industrial > 0 {
+		if instr(reservation(x,y), 0, "industrial") != -1 {
+			if demand_Industrial <= 0 {
+				return
+			}
+			
 			demand_Industrial -= 1
 	
 			notesel type_industrial
@@ -4525,7 +4541,7 @@
 	
 	put_addon_name = ""
 	addon_num_buf = 0
-		
+	
 	return
 	
 *open_menu_addon_menu
@@ -4922,12 +4938,13 @@
 		//人口の増減
 			if category(x,y) = "residential" {
 				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					if demand_Residential > 0 {
-						rndv = 10+(demand_Residential/10)
-						f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
+					if demand_Residential = 0 {
+						rndv = 11
 					} else {
-						f = 0
+						rndv = 10+(demand_Residential/10)
 					}
+					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
+					f2 = 0
 						
 				//変更前の住居地区の住民数
 					before_residents = residents(x,y)
@@ -4960,7 +4977,11 @@
 		//商業区画の労働人口の増減
 			if category(x,y) = "commercial" {
 				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					rndv = 10+(demand_Commercial/10)
+					if demand_Commercial = 0 {
+						rndv = 11
+					} else {
+						rndv = 10+(demand_Commercial/10)
+					}
 					f = rnd(rndv)+1		; fの値は商業地区の需要度が100％なら20～0
 					f2 = 0
 						
@@ -5000,7 +5021,11 @@
 		//オフィス区画の労働人口の増減
 			if category(x,y) = "office" {
 				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					rndv = 10+(demand_Office/10)
+					if demand_Office = 0 {
+						rndv = 11
+					} else {
+						rndv = 10+(demand_Office/10)
+					}
 					f = rnd(rndv)+1		; fの値はオフィス地区の需要度が100％なら20～0
 					f2 = 0
 						
@@ -5040,7 +5065,11 @@
 		//工業区画の労働人口の増減
 			if category(x,y) = "industrial" {
 				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					rndv = 10+(demand_Industrial/10)
+					if demand_Industrial = 0 {
+						rndv = 11
+					} else {
+						rndv = 10+(demand_Industrial/10)
+					}
 					f = rnd(rndv)+1		; fの値は工業地区の需要度が100％なら20～0
 					f2 = 0
 						
