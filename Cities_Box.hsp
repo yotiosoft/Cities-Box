@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.7.3.1
+									   Cities Box Ver 0.7.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -291,16 +291,17 @@
 		celload "img/menu_icons/stat/type.png", 31							; 建築物の種類
 		celload "img/menu_icons/stat/land_price.png", 32					; 地価
 		celload "img/menu_icons/stat/crime_rate.png", 33					; 犯罪率
-		celload "img/menu_icons/stat/education_rate.png", 47				; 教育率
+		celload "img/menu_icons/stat/education_rate.png", 47				; 教育度
+		celload "img/menu_icons/stat/happiness.png", 51						; 幸福度
 	
 	//犯罪率、地価の統計で使うタイル
-		celload "img/quarter/+3.png", 34									; 地価/犯罪率/教育率 : 最良
-		celload "img/quarter/+2.png", 35									; 地価/犯罪率/教育率 : 良
-		celload "img/quarter/+1.png", 36									; 地価/犯罪率/教育率 : 概ね良
-		celload "img/quarter/0.png" , 48									; 地価/犯罪率/教育率 : 0
-		celload "img/quarter/-1.png", 37									; 地価/犯罪率/教育率 : 少し低い/悪い
-		celload "img/quarter/-2.png", 38									; 地価/犯罪率/教育率 : 低い/悪い
-		celload "img/quarter/-3.png", 39									; 地価/犯罪率/教育率 : 最低/最悪
+		celload "img/quarter/+3.png", 34									; 地価/犯罪率/教育度 : 最良
+		celload "img/quarter/+2.png", 35									; 地価/犯罪率/教育度 : 良
+		celload "img/quarter/+1.png", 36									; 地価/犯罪率/教育度 : 概ね良
+		celload "img/quarter/0.png" , 48									; 地価/犯罪率/教育度 : 0
+		celload "img/quarter/-1.png", 37									; 地価/犯罪率/教育度 : 少し低い/悪い
+		celload "img/quarter/-2.png", 38									; 地価/犯罪率/教育度 : 低い/悪い
+		celload "img/quarter/-3.png", 39									; 地価/犯罪率/教育度 : 最低/最悪
 	
 	//エリア設定で使うアイコン
 		celload "img/area/residential.png", 40								; エリア : 住居地区
@@ -475,7 +476,7 @@
 					addon_crime_rate_influence(cnt) = int( get_chapter(buf_adat, "crime_rate_influence", " = \"", "\"") )
 					addon_crime_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "crime_rate_influence_grid", " = \"", "\"") )
 	
-				//教育率への影響率
+				//教育度への影響率
 					addon_education_rate_influence(cnt) = int( get_chapter(buf_adat, "education_rate_influence", " = \"", "\"") )
 					addon_education_rate_influence_grid(cnt) = int( get_chapter(buf_adat, "education_rate_influence_grid", " = \"", "\"") )
 	
@@ -748,7 +749,8 @@
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
-		dim education_rate, mapx, mapy		//教育率
+		dim education_rate, mapx, mapy		//教育度
+		dim happiness, mapx, mapy			//幸福度
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
 		
@@ -776,6 +778,7 @@
 			land_price(ix,iy) = 20
 			crime_rate(ix,iy) = 0
 			education_rate(ix,iy) = 0
+			happiness(ix,iy) = 0
 	
 			reservation(ix,iy) = "none"
 			
@@ -790,10 +793,10 @@
 	Mayor_Name = ""
 	Set_Change_Weather = 1
 	
-	demand_of_Resindential = 100		; 住宅地区の需要度
-	demand_of_Commercial = 100			; 商業地区の需要度
-	demand_of_Office = 100				; オフィス地区の需要度
-	demand_of_Industrial = 100			; 工業地区の需要度
+	demand_Residential = 100			; 住宅地区の需要度
+	demand_Commercial = 0				; 商業地区の需要度
+	demand_Office = 0					; オフィス地区の需要度
+	demand_Industrial = 0				; 工業地区の需要度
 	
 	time_Year = gettime(0)				; ゲーム内の時間の年
 	time_Month = gettime(1)				; ゲーム内の時間の月
@@ -917,7 +920,8 @@
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
-		dim education_rate, mapx, mapy		//教育率
+		dim education_rate, mapx, mapy		//教育度
+		dim happiness, mapx, mapy			//幸福度
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
 	}
@@ -1505,6 +1509,38 @@
 						loop
 				}
 	
+			//happiness(x,y)の読み込み
+				if instr(load_mapdata, 0, "happiness(x,y)") != -1 {
+					happiness_buf = get_chapter(load_mapdata, "happiness(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel happiness_buf
+						noteget happiness_buf_a_line, (y+1)
+			
+						sdim happiness_buf_a_tile, mapx
+						split happiness_buf_a_line, ", ", happiness_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							happiness(x,y) = int(happiness_buf_a_tile(x))
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにhappinessの情報がない場合は全て0に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								happiness(x,y) = 0
+							loop
+						loop
+				}
+	
 			//reservation(x,y)の読み込み
 				if instr(load_mapdata, 0, "reservation(x,y)") != -1 {
 					reservation_buf = get_chapter(load_mapdata, "reservation(x,y)", " {", "}")
@@ -1536,6 +1572,7 @@
 							loop
 						loop
 				}
+				
 		;}
 	
 	//雨粒の初期位置
@@ -1681,6 +1718,17 @@
 			repeat mapy
 				y = cnt
 	
+				//幸福度の平均値を取得するための加算
+					if x = 0 and y = 0 {
+						happiness_ave_tmp = 0
+					}
+	
+					happiness_ave_tmp += happiness(x,y)
+	
+					if x = mapx-1 and y = mapy-1 {
+						happiness_ave = happiness_ave_tmp / (mapx*mapy)
+					}
+		
 				//予約地区に建物を建設
 					if reservation(x,y) != "none" and rnd(500) = 0 {
 						gosub *Build_on_Reservation_area
@@ -1750,7 +1798,7 @@
 	
 				}
 	
-				//道路・線路の向きを調節
+				//各マスの値を調節
 					if cnt \ 1000 = 0 {
 						//周囲のオブジェクトの番号を取得
 							left_chip = ""
@@ -1805,8 +1853,14 @@
 								gosub *adjustment_railroad
 							}
 	
-							x = x_tmp : y = y_tmp
+						//幸福度の更新
+							gosub *get_happiness_level
 	
+						//値を元に戻す
+							x = x_tmp : y = y_tmp
+							put_addon_name = put_addon_name_tmp
+	
+						//nx, nyを増加
 							ny ++
 	
 							if ny >= left_bottom_y {
@@ -1817,9 +1871,7 @@
 								nx = left_top_x
 								ny = right_top_y
 							}
-	
-							put_addon_name = put_addon_name_tmp
-						}
+					}
 	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 						
@@ -1944,6 +1996,7 @@
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
 			;title "FPS:"+fps+""
+			;title ""+happiness_ave+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -2004,7 +2057,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
 						
 							qv2 x,y
 							land_price_buf = land_price(x,y)
@@ -2054,7 +2107,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
 						
 							qv2 x,y
 							crime_rate_buf = crime_rate(x,y)
@@ -2095,7 +2148,7 @@
 		
 			}
 	
-		//stat_mode = "educaton_rate"の場合は犯罪率を示す色を表示する
+		//stat_mode = "education_rate"の場合は教育度を示す色を表示する
 			if stat_mode = "education_rate" {
 		
 				repeat mapx
@@ -2105,7 +2158,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
 						
 							qv2 x,y
 							education_rate_buf = education_rate(x,y)
@@ -2131,6 +2184,57 @@
 								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
 		
 							} else : if education_rate_buf <= 100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
+		
+							} else {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 34, 0, 0, 64, 32
+							}
+	
+						}
+		
+					loop
+				loop
+		
+			}
+	
+		//stat_mode = "hsppiness"の場合は幸福度を示す色を表示する
+			if stat_mode = "happiness" {
+		
+				repeat mapx
+					x = cnt
+					repeat mapy
+						y = cnt
+	
+						category_buf = category(x,y)
+	
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
+						
+							qv2 x,y
+							happiness_buf = happiness(x,y)
+							
+							if happiness_buf <= -100 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
+								
+							} else : if happiness_buf <= -30 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
+	
+							} else : if happiness_buf = 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
+		
+							} else : if happiness_buf < 0 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
+		
+							} else : if happiness_buf <= 30 {
+								color : gmode 4,,,128
+								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
+		
+							} else : if happiness_buf <= 100 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
 		
@@ -2265,32 +2369,38 @@
 	
 				//統計メニュー（oepn_stat_menu = 1のとき）
 					if open_stat_menu = 1 {
-						sboxf 128, windowx-72-32-1, windowy-70-titlebar_h-20-1, windowx-72-32-1+(20*4)+1, windowy-70-titlebar_h
+						sboxf 128, windowx-92-32-1, windowy-70-titlebar_h-20-1, windowx-92-32-1+(20*5)+1, windowy-70-titlebar_h
 	
 						gmode 2
 	
 						if stat_mode = "type" {
-							pos windowx-72-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 20, 20, 20
+							pos windowx-92-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 20, 20, 20
 						} else {
-							pos windowx-72-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 0, 20, 20
+							pos windowx-92-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 0, 20, 20
 						}
 	
 						if stat_mode = "land_price" {
-							pos windowx-72-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 20, 20, 20
+							pos windowx-92-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 20, 20, 20
 						} else {
-							pos windowx-72-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 0, 20, 20
+							pos windowx-92-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 0, 20, 20
 						}
 	
 						if stat_mode = "crime_rate" {
-							pos windowx-72-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 20, 20, 20
+							pos windowx-92-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 20, 20, 20
 						} else {
-							pos windowx-72-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 0, 20, 20
+							pos windowx-92-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 0, 20, 20
 						}
 	
 						if stat_mode = "education_rate" {
-							pos windowx-72-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 20, 20, 20
+							pos windowx-92-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 20, 20, 20
 						} else {
-							pos windowx-72-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 0, 20, 20
+							pos windowx-92-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 0, 20, 20
+						}
+	
+						if stat_mode = "happiness" {
+							pos windowx-92-32+80, windowy-70-titlebar_h-20 : gcopy 51, 0, 20, 20, 20
+						} else {
+							pos windowx-92-32+80, windowy-70-titlebar_h-20 : gcopy 51, 0, 0, 20, 20
 						}
 					}
 	
@@ -2679,30 +2789,37 @@
 				}
 			
 			//統計メニュー
-				if open_stat_menu = 1 and click_range( windowx-72-32, windowy-70-titlebar_h-20, windowx-72-32+20, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32, windowy-70-titlebar_h-20, windowx-92-32+20, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "type" {
 						stat_mode = "type"
 					} else {
 						stat_mode = ""
 					}
 				}
-				if open_stat_menu = 1 and click_range( windowx-72-32+20, windowy-70-titlebar_h-20, windowx-72-32+40, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32+20, windowy-70-titlebar_h-20, windowx-92-32+40, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "land_price" {
 						stat_mode = "land_price"
 					} else {
 						stat_mode = ""
 					}
 				}
-				if open_stat_menu = 1 and click_range( windowx-72-32+40, windowy-70-titlebar_h-20, windowx-72-32+60, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32+40, windowy-70-titlebar_h-20, windowx-92-32+60, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "crime_rate" {
 						stat_mode = "crime_rate"
 					} else {
 						stat_mode = ""
 					}
 				}
-				if open_stat_menu = 1 and click_range( windowx-72-32+60, windowy-70-titlebar_h-20, windowx-72-32+80, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32+60, windowy-70-titlebar_h-20, windowx-92-32+80, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "education_rate" {
 						stat_mode = "education_rate"
+					} else {
+						stat_mode = ""
+					}
+				}
+				if open_stat_menu = 1 and click_range( windowx-92-32+80, windowy-70-titlebar_h-20, windowx-92-32+100, windowy-70-titlebar_h ) = 1 {
+					if stat_mode != "happiness" {
+						stat_mode = "happiness"
 					} else {
 						stat_mode = ""
 					}
@@ -3647,7 +3764,7 @@
 	
 								}
 	
-							//教育率の変動
+							//教育度の変動
 								addon_education_rate_influence__tmp = addon_education_rate_influence(addon_num_buf)
 								
 								if addon_education_rate_influence__tmp != 0 {
@@ -3954,7 +4071,7 @@
 	
 								}
 	
-							//教育率の変動
+							//教育度の変動
 								addon_education_rate_influence__tmp = addon_education_rate_influence(addon_num_buf)
 								
 								if addon_education_rate_influence__tmp != 0 {
@@ -5161,10 +5278,11 @@
 			//RCOI需要メーターを変動
 				if Vacancies > 0 and Total_Vagrants >= 0 {
 					if Total_Population > 0 {
-						demand_Residential 	= 100 - ((Total_Population / Vacancies) * 100) + Special_demand_Residential
+						demand_Residential 	= happiness_ave + Special_demand_Residential
 					} else {
 						demand_Residential 	= 100
 					}
+					
 					if Total_Commercial_maximum_capacity > 0 {
 						demand_Commercial 	-= rnd(20) - 10  + Special_demand_Commercial
 						if demand_Commercial > 100 {
@@ -5175,6 +5293,7 @@
 					} else {
 						demand_Commercial 	= 100
 					}
+					
 					if Total_Office_maximum_capacity > 0 {
 						demand_Office 		-= rnd(20) - 10  + Special_demand_Office
 						if demand_Office > 100 {
@@ -5185,6 +5304,7 @@
 					} else {
 						demand_Office 		= 100
 					}
+					
 					if Total_Industrial_maximum_capacity > 0 {
 						demand_Industrial 	-= rnd(20) - 10  + Special_demand_Industrial
 						if demand_Industrial > 100 {
@@ -5197,6 +5317,10 @@
 					}
 				}
 	
+	return
+	
+*get_happiness_level
+	happiness(x,y) = (land_price(x,y)-20) - crime_rate(x,y) + education_rate(x,y)
 	return
 	
 *budget_panel
@@ -6586,6 +6710,30 @@
 						map_data_buf = strf("%03d", education_rate(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", education_rate(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 10
+			loop
+			
+			noteadd "}", -1
+	
+		//happiness(x,y)
+			noteadd "happiness(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", happiness(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", happiness(x,y))+""
 					}
 				loop
 			
