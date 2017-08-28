@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.7.4
+									   Cities Box Ver 0.7.5
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -276,6 +276,7 @@
 		celload "img/menu_icons/setting/setting.png", 13					; 設定ボタン
 		celload "img/menu_icons/stat/stat.png", 30							; 統計ボタン
 		celload "img/menu_icons/budget/budget.png", 49						; 予算ボタン
+		celload "img/menu_icons/information/information.png", 52			; 情報ボタン
 	
 	//小サイズのアイコン
 		celload "img/menu_icons/mini/low_density_residential.png", 8		; 低密度住居地区
@@ -2342,6 +2343,10 @@
 						pos 284, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
 					}
 	
+				//情報ボタン
+					gmode 2
+					pos windowx-54-64, windowy-70-titlebar_h : gcopy 52, 0, 0, 32, 32
+	
 				//予算ボタン
 					gmode 2
 					pos windowx-54-64, windowy-40-titlebar_h : gcopy 49, 0, 0, 32, 32
@@ -2742,6 +2747,12 @@
 			}
 	
 		if (ginfo(0)-ginfo(4)) >= 0 and (ginfo(0)-ginfo(4)) <= (ginfo(4)+windowx) and (ginfo(1)-ginfo(5)) >= titlebar_h and (ginfo(1)-ginfo(5)) <= (ginfo(5)+windowy) {
+	
+			//情報パネルボタン
+				if click_range( windowx-54-64, windowy-70-titlebar_h, windowx-54-32, windowy-70-titlebar_h+32 ) = 1 {
+					gosub *information_panel
+					return
+				}
 	
 			//予算パネルボタン
 				if click_range( windowx-54-64, windowy-40-titlebar_h, windowx-54-32, windowy-40-titlebar_h+32 ) = 1 {
@@ -4530,6 +4541,7 @@
 			
 			demand_Residential -= 1
 	
+		;低密度
 			if reservation(x,y) = "low_density_residential" {
 				notesel type_low_density_residential
 				rnd_num = rnd(notemax)
@@ -4537,7 +4549,8 @@
 				
 				notesel type_number_low_density_residential
 				noteget addon_num_buf, rnd_num
-				
+	
+		;高密度
 			} else : if reservation(x,y) = "high_density_residential" {
 				notesel type_high_density_residential
 				rnd_num = rnd(notemax)
@@ -4565,6 +4578,7 @@
 			
 			demand_Commercial -= 1
 	
+		;低密度
 			if reservation(x,y) = "low_density_commercial" {
 				notesel type_low_density_commercial
 				rnd_num = rnd(notemax)
@@ -4572,7 +4586,8 @@
 				
 				notesel type_number_low_density_commercial
 				noteget addon_num_buf, rnd_num
-				
+	
+		;高密度
 			} else : if reservation(x,y) = "high_density_commercial" {
 				notesel type_high_density_commercial
 				rnd_num = rnd(notemax)
@@ -5320,8 +5335,78 @@
 	return
 	
 *get_happiness_level
-	happiness(x,y) = (land_price(x,y)-20) - crime_rate(x,y) + education_rate(x,y)
+	; 幸福度を算出する前に、地価と犯罪率、教育度を調節
+		if land_price(x,y) > 500 {
+			land_price(x,y) = 500
+		}
+		if land_price(x,y) < 0 {
+			land_price(x,y) = 0
+		}
+	
+		if crime_rate(x,y) > 50 {
+			crime_rate(x,y) = 50
+		}
+		if crime_rate(x,y) < -50 {
+			crime_rate(x,y) = -50
+		}
+	
+		if education_rate(x,y) > 500 {
+			education_rate(x,y) = 500
+		}
+		if education_rate(x,y) < 0 {
+			education_rate(x,y) = 0
+		}
+		
+	happiness(x,y) = (int(((double(land_price(x,y))/500)*100)*0.40) + int(((double(crime_rate(x,y)+50)*1.5)*0.30)) + int(((double(education_rate(x,y))/500)*100)*0.30))
+	
+	if happiness(x,y) < 0 {
+		happiness(x,y) = 0
+	}
+	if happiness(x,y) > 100 {
+		happiness(x,y) = 100
+	}
+	
 	return
+	
+*get_approval_rate
+	approval_rate = happiness_ave 
+	
+*information_panel
+	screen 1, 400, 300
+	
+	gsel 1, 2
+	
+	color 128, 128, 128 : boxf
+	
+	title "情報パネル"
+	
+	mci "stop Cities-Box"
+	
+	mci "set Cities-Box_2 time format milliseconds"
+	
+	if approval_rate > 50 {
+		mci"open \""+directory+"\\bgm\\[Sp]Satie-Jeteveux.mp3\" alias Cities-Box_2"
+	} else {
+		mci"open \""+directory+"\\bgm\\[Sp]Tchikovsky-Serenade-1st.mp3\" alias Cities-Box_2"
+	}
+	
+	if Set_Play_BGM = 1 {
+		mci "play Cities-Box_2"
+	}
+	
+	pos 10, 10 : gmode 2 : gcopy 52, 0, 0, 32, 32
+	
+	font SystemFont, 16 : color 255, 255, 255
+	pos 50, 15 : mes "都市の情報"
+	
+	color 255, 255, 255 : boxf 10, 45, 390, 115
+	color 128, 128, 128 : boxf 11, 46, 389, 114
+	
+	color 255, 255, 255 : font SystemFont, 14
+	pos 15, 50  : mes "都市名 "+city_name+"\n市長　 "+mayor_name+"\n人口　 "+Total_Population+"人"
+	pos 200, 50 : mes "資金　 § "+Money+"\n支持率 "+approval_rate+"%"
+	
+	stop
 	
 *budget_panel
 	screen 1, 300, 360
