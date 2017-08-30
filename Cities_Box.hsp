@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.7.5
+									  Cities Box Ver 0.7.5.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1722,12 +1722,17 @@
 				//幸福度の平均値を取得するための加算
 					if x = 0 and y = 0 {
 						happiness_ave_tmp = 0
+						happiness_ave_cnt = 0
 					}
 	
-					happiness_ave_tmp += happiness(x,y)
+					if category(x,y) != "tile" and category(x,y) != "road" and category(x,y) != "railroad" {	; タイル（更地）や道路、線路などは含めない
+						happiness_ave_tmp += happiness(x,y)
+						happiness_ave_cnt ++
+					}
 	
-					if x = mapx-1 and y = mapy-1 {
-						happiness_ave = happiness_ave_tmp / (mapx*mapy)
+					if x = mapx - 1 and y = mapy - 1 {
+						happiness_ave = happiness_ave_tmp / happiness_ave_cnt
+						gosub *get_approval_rate	; 支持率を取得
 					}
 		
 				//予約地区に建物を建設
@@ -2215,27 +2220,27 @@
 							qv2 x,y
 							happiness_buf = happiness(x,y)
 							
-							if happiness_buf <= -100 {
+							if happiness_buf <= 15 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
 								
-							} else : if happiness_buf <= -30 {
+							} else : if happiness_buf <= 30 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
 	
-							} else : if happiness_buf = 0 {
+							} else : if happiness_buf <= 45 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
 		
-							} else : if happiness_buf < 0 {
+							} else : if happiness_buf <= 60 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
 		
-							} else : if happiness_buf <= 30 {
+							} else : if happiness_buf <= 75 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
 		
-							} else : if happiness_buf <= 100 {
+							} else : if happiness_buf <= 90 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
 		
@@ -5336,8 +5341,8 @@
 	
 *get_happiness_level
 	; 幸福度を算出する前に、地価と犯罪率、教育度を調節
-		if land_price(x,y) > 500 {
-			land_price(x,y) = 500
+		if land_price(x,y) > 300 {
+			land_price(x,y) = 300
 		}
 		if land_price(x,y) < 0 {
 			land_price(x,y) = 0
@@ -5350,14 +5355,14 @@
 			crime_rate(x,y) = -50
 		}
 	
-		if education_rate(x,y) > 500 {
-			education_rate(x,y) = 500
+		if education_rate(x,y) > 80 {
+			education_rate(x,y) = 80
 		}
 		if education_rate(x,y) < 0 {
 			education_rate(x,y) = 0
 		}
 		
-	happiness(x,y) = (int(((double(land_price(x,y))/500)*100)*0.40) + int(((double(crime_rate(x,y)+50)*1.5)*0.30)) + int(((double(education_rate(x,y))/500)*100)*0.30))
+	happiness(x,y) = (int(((double(land_price(x,y))/300)*100)*0.50) - int((double(crime_rate(x,y)*1.5)*0.30)) + int(((double(education_rate(x,y))/80)*100)*0.20))
 	
 	if happiness(x,y) < 0 {
 		happiness(x,y) = 0
@@ -5369,7 +5374,8 @@
 	return
 	
 *get_approval_rate
-	approval_rate = happiness_ave 
+	approval_rate = happiness_ave
+	return
 	
 *information_panel
 	screen 1, 400, 300
@@ -6310,7 +6316,7 @@
 	
 		//空白
 			noteadd " ", -1
-			wait 10
+			wait 2
 		
 		//次に各マップデータ(*.cbx)の設定を保存
 			noteadd "City_Name = \""+City_Name+"\";", -1
@@ -6323,7 +6329,7 @@
 	
 		//空白
 			noteadd " ", -1
-			wait 10
+			await 2
 	
 		//マップサイズ
 			noteadd "mapx = "+mapx+";", -1
@@ -6331,7 +6337,7 @@
 	
 		//空白
 			noteadd " ", -1
-			wait 10
+			await 2
 	
 		//日時
 			noteadd "time_Year = "+time_Year+";", -1
@@ -6342,7 +6348,7 @@
 	
 		//空白
 			noteadd " ", -1
-			wait 10
+			await 2
 	
 		//需要度
 			noteadd "demand_Residential = "+demand_Residential+";", -1
@@ -6355,7 +6361,7 @@
 	
 		//空白
 			noteadd " ", -1
-			wait 10
+			await 2
 	
 		//予算
 			noteadd "budget_of_Police = "+budget_of_Police+";", -1
@@ -6370,7 +6376,7 @@
 	
 		//空白
 			noteadd " ", -1
-			wait 10
+			await 2
 	
 		//name(x,y)
 			noteadd "name(x,y) {", -1
@@ -6391,7 +6397,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6415,7 +6421,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6439,7 +6445,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6463,7 +6469,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6487,7 +6493,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6511,7 +6517,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6535,7 +6541,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6559,7 +6565,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6583,7 +6589,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6607,7 +6613,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6631,7 +6637,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6655,7 +6661,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6679,7 +6685,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6703,7 +6709,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6727,7 +6733,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6751,7 +6757,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6775,7 +6781,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6799,7 +6805,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6823,7 +6829,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6847,7 +6853,7 @@
 				loop
 			
 				noteadd map_data_buf, -1
-				await 10
+				await 2
 			loop
 			
 			noteadd "}", -1
@@ -6871,7 +6877,7 @@
 					notesel save_mapdata_Cipher
 					noteadd save_mapdata_buf, cnt
 	
-					await 10
+					await 5
 				loop
 				
 			} else : if instr(save_mapdata_name, 0, ".cbd") != -1 {
