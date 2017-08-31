@@ -9,7 +9,7 @@ addon_type = "station"
 use_types = "default, dead_end, under_construction"
 
 maximum_capacity = "30"
-land_price_influence  = "20"
+land_price_influence = "80"
 land_price_influence_grid = "8"
 
 default {

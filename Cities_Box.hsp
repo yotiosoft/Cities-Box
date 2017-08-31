@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.7.5.1
+									  Cities Box Ver 0.7.5.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -955,6 +955,8 @@
 		
 						notesel load_mapdata
 						noteadd load_mapdata_Cipher_buf, cnt
+	
+						await 1
 					loop
 	
 				loaded_cbx = 1
@@ -1730,7 +1732,7 @@
 						happiness_ave_cnt ++
 					}
 	
-					if x = mapx - 1 and y = mapy - 1 {
+					if x = mapx - 1 and y = mapy - 1 and happiness_ave_cnt != 0 {
 						happiness_ave = happiness_ave_tmp / happiness_ave_cnt
 						gosub *get_approval_rate	; 支持率を取得
 					}
@@ -2068,27 +2070,27 @@
 							qv2 x,y
 							land_price_buf = land_price(x,y)
 							
-							if land_price_buf > 100 {
+							if land_price_buf > 200 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 34, 0, 0, 64, 32
 								
-							} else : if land_price_buf > 50 {
+							} else : if land_price_buf > 150 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
 		
-							} else : if land_price_buf > 0 {
+							} else : if land_price_buf > 80 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
 	
-							} else : if land_price_buf = 0 {
+							} else : if land_price_buf = 50 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
 		
-							} else : if land_price_buf > -50 {
+							} else : if land_price_buf > 30 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
 		
-							} else : if land_price_buf > -100 {
+							} else : if land_price_buf > 15 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
 		
@@ -2122,7 +2124,7 @@
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 34, 0, 0, 64, 32
 								
-							} else : if crime_rate_buf <= -30 {
+							} else : if crime_rate_buf <= -50 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
 	
@@ -2138,7 +2140,7 @@
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
 		
-							} else : if crime_rate_buf <= 100 {
+							} else : if crime_rate_buf <= 60 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
 		
@@ -2169,27 +2171,27 @@
 							qv2 x,y
 							education_rate_buf = education_rate(x,y)
 							
-							if education_rate_buf <= -100 {
+							if education_rate_buf <= 0 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 39, 0, 0, 64, 32
 								
-							} else : if education_rate_buf <= -30 {
+							} else : if education_rate_buf <= 15 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 38, 0, 0, 64, 32
 	
-							} else : if education_rate_buf = 0 {
+							} else : if education_rate_buf <= 30 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 48, 0, 0, 64, 32
 		
-							} else : if education_rate_buf < 0 {
+							} else : if education_rate_buf <= 45 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 37, 0, 0, 64, 32
 		
-							} else : if education_rate_buf <= 30 {
+							} else : if education_rate_buf <= 60 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 36, 0, 0, 64, 32
 		
-							} else : if education_rate_buf <= 100 {
+							} else : if education_rate_buf <= 75 {
 								color : gmode 4,,,128
 								pos macro1, macro2-32 : gcopy 35, 0, 0, 64, 32
 		
@@ -3297,6 +3299,126 @@
 							}
 							if instr(addon_type(addon_num_normal_railroad), 0, "station") != -1 or instr(addon_type(addon_num_normal_railroad), 0, "Station") != -1 {
 								category(mx, my) = "station"
+	
+								//地価の変動（駅の場合のみ）
+								addon_land_price_influence__tmp = addon_land_price_influence(addon_num_normal_railroad)
+								addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_normal_railroad)
+								
+								add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp
+								round = 0
+								
+								for round, 1, addon_land_price_influence_grid__tmp+1, 1
+									
+									repeat (round*2-1)
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my+round-1>0 and my+round-1<mapy {
+											if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
+												land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx+cnt-(round-1), my+round-1) = 1
+											}
+										}
+									loop
+									
+									repeat (round*2-1)
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my-round+1>0 and my-round+1<mapy {
+											if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
+												land_price(mx+cnt-(round-1),my-round+1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx+cnt-(round-1), my-round+1) = 1
+											}
+										}
+									loop
+	
+									repeat (round*2-1)
+										if mx+round-1>0 and mx+round-1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+											if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
+												land_price(mx+round-1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx+round-1, my+cnt-(round-1)) = 1
+											}
+										}
+									loop
+	
+									repeat (round*2-1)
+										if mx-round+1>0 and mx-round+1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+											if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
+												land_price(mx-round+1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+												done_build(2, mx-round+1, my+cnt-(round-1)) = 1
+											}
+										}
+									loop
+								next
+	
+							//犯罪率の変動（駅の場合のみ）
+								addon_crime_rate_influence__tmp = addon_crime_rate_influence(addon_num_normal_railroad)
+								
+								if addon_crime_rate_influence__tmp != 0 {
+	
+									addon_crime_rate_influence_grid__tmp = addon_crime_rate_influence_grid(addon_num_normal_railroad)
+									
+									add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp
+									round = 0
+									
+									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
+													crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+cnt-(round-1),my+round-1) > 100 {
+														crime_rate(mx+cnt-(round-1),my+round-1) = 100
+													}
+													if crime_rate(mx+cnt-(round-1),my+round-1) < -100 {
+														crime_rate(mx+cnt-(round-1),my+round-1) = -100
+													}
+													done_build(5, mx+cnt-(round-1), my+round-1) = 1
+												}
+											}
+										loop
+										
+										repeat (round*2-1)
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
+													crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+cnt-(round-1),my-round+1) > 100 {
+														crime_rate(mx+cnt-(round-1),my-round+1) = 100
+													}
+													if crime_rate(mx+cnt-(round-1),my-round+1) < -100 {
+														crime_rate(mx+cnt-(round-1),my-round+1) = -100
+													}
+													done_build(5, mx+cnt-(round-1), my-round+1) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
+													crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx+round-1,my+cnt-(round-1)) > 100 {
+														crime_rate(mx+round-1,my+cnt-(round-1)) = 100
+													}
+													if crime_rate(mx+round-1,my+cnt-(round-1)) < -100 {
+														crime_rate(mx+round-1,my+cnt-(round-1)) = -100
+													}
+													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+		
+										repeat (round*2-1)
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
+													crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+													if crime_rate(mx-round+1,my+cnt-(round-1)) > 100 {
+														crime_rate(mx-round+1,my+cnt-(round-1)) = 100
+													}
+													if crime_rate(mx-round+1,my+cnt-(round-1)) < -100 {
+														crime_rate(mx-round+1,my+cnt-(round-1)) = -100
+													}
+													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
+												}
+											}
+										loop
+									next
+	
+								}
 							}
 							
 							obj_serial_num(mx, my) = 0
@@ -5341,28 +5463,28 @@
 	
 *get_happiness_level
 	; 幸福度を算出する前に、地価と犯罪率、教育度を調節
-		if land_price(x,y) > 300 {
-			land_price(x,y) = 300
+		if land_price(x,y) > 1000 {
+			land_price(x,y) = 1000
 		}
 		if land_price(x,y) < 0 {
 			land_price(x,y) = 0
 		}
 	
-		if crime_rate(x,y) > 50 {
-			crime_rate(x,y) = 50
+		if crime_rate(x,y) > 100 {
+			crime_rate(x,y) = 100
 		}
-		if crime_rate(x,y) < -50 {
-			crime_rate(x,y) = -50
+		if crime_rate(x,y) < -100 {
+			crime_rate(x,y) = -100
 		}
 	
-		if education_rate(x,y) > 80 {
-			education_rate(x,y) = 80
+		if education_rate(x,y) > 100 {
+			education_rate(x,y) = 100
 		}
 		if education_rate(x,y) < 0 {
 			education_rate(x,y) = 0
 		}
 		
-	happiness(x,y) = (int(((double(land_price(x,y))/300)*100)*0.50) - int((double(crime_rate(x,y)*1.5)*0.30)) + int(((double(education_rate(x,y))/80)*100)*0.20))
+	happiness(x,y) = (int(((double(land_price(x,y))/200)*100)*0.50) - int((double(crime_rate(x,y)/50)*0.30)) + int(((double(education_rate(x,y))/60)*100)*0.20))
 	
 	if happiness(x,y) < 0 {
 		happiness(x,y) = 0
