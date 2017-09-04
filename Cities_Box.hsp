@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.7.5.2
+									  Cities Box Ver 0.7.5.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -41,6 +41,11 @@
 		#define WM_SIZE	0x00005	//ウィンドウサイズ変更
 		#define WS_MAXIMIZEBOX	0x10000	//最大化ボタン
 		#define WS_THICKFRAME	0x40000	//サイズ変更可能
+	
+		#func SetTimer  "SetTimer"  int,int,int,int
+		#func KillTimer "KillTimer" int,int
+		#define WM_TIMER    0x0113
+		#define TIMER_ID    1    ; タイマーID
 	
 *module
 #module
@@ -327,6 +332,12 @@
 	//最初のメニュー画面のボタン
 		celload "img/start_menu/hoe.png", 27								; 鍬
 		celload "img/start_menu/city.png", 28								; 都市
+	
+	//読み込み中アイコン
+		celload "img/loading/124856y.png", 53								; 読み込み中アイコン1
+		celload "img/loading/124856y-2.png", 54								; 読み込み中アイコン2
+		celload "img/loading/124856y-3.png", 55								; 読み込み中アイコン3
+		celload "img/loading/124856y-4.png", 56								; 読み込み中アイコン4
 	
 *preparation
 	//読み込み中画面
@@ -668,11 +679,14 @@
 		redraw 0
 				
 		pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 948, 635 : gblur 2
+	
+		color 0, 0, 0
+		sboxf 128, 0, 0, windowx, windowy
 				
 		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
 			
 		color 255, 255, 255 : font SystemFont, 18
-		cmes "Ver."+about_version+"", 0, double(200./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
+		cmes "Ver."+about_version+" r"+NOW_Release_number+"", 0, double(200./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
 			
 		font SystemFont, 14
 			
@@ -870,6 +884,9 @@
 	
 	title "マップ読み込み中..."
 	
+	oncmd gosub *OnTimer__map_preparating, WM_TIMER
+	SetTimer hwnd, TIMER_ID, 1000, 0
+	
 	//変数を初期化
 		camx=-300:camy=-150		//カメラの位地
 		mapx=100:mapy=100
@@ -1023,6 +1040,9 @@
 					
 				//気温(temperature)
 					temperature = int( get_chapter(load_mapdata, "Temperature", " = ", ";") )
+	
+				//夜間は暗くする(Set_Dark_on_Night)
+					Set_Dark_on_Night = int( get_chapter(load_mapdata, "Set_Dark_on_Night", " = ", ";") )
 	
 			//予算の読み込み
 				if instr(load_mapdata, 0, "budget_of_Police") != -1 {
@@ -1603,6 +1623,9 @@
 	
 	//読み込み後最初のループであることを示す
 		first_loop = 1
+	
+	//読み込み中アイコンを閉じる
+		oncmd 0
 		
 *main
 	title about_title
@@ -1943,19 +1966,21 @@
 		loop
 	
 		//時間帯に応じて明るさを調節
-			//夜間
-			if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
-				color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
-			}
-	
-			//夕方（だんだん暗く）
-			if time_Hour = 17 {
-				color 0, 0, 0 : sboxf double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
-			}
-	
-			//明け方（だんだん明るく）
-			if time_Hour = 6 {
-				color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
+			if Set_Dark_on_Night = 1 {
+				//夜間
+				if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
+					color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
+				}
+		
+				//夕方（だんだん暗く）
+				if time_Hour = 17 {
+					color 0, 0, 0 : sboxf double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
+				}
+		
+				//明け方（だんだん明るく）
+				if time_Hour = 6 {
+					color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
+				}
 			}
 	
 		//マウスポインタの位置のチップを光らせる
@@ -5087,6 +5112,35 @@
 	
 	return
 	
+*OnTimer__map_preparating
+	redraw 0
+	
+	pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 948, 635 : gblur 2
+	color 0, 0, 0 : sboxf 128, 0, 0, windowx, windowy
+	
+	color 255, 255, 255 : font SystemFont, 14
+	cmes "読み込み中...", 0, windowy-100, windowx, windowy-80
+	
+	//読み込み中アイコンを表示
+		loading_icon_cnt ++
+		
+		if loading_icon_cnt = 1 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 53, 0, 0, 200, 200
+		}
+		if loading_icon_cnt = 2 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 54, 0, 0, 200, 200
+		}
+		if loading_icon_cnt = 3 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 55, 0, 0, 200, 200
+		}
+		if loading_icon_cnt = 4 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 56, 0, 0, 200, 200
+			loading_icon_cnt = 0
+		}
+	
+	redraw 1
+	return
+	
 *play_BGM
 	//現在再生しているBGMの現在の再生位置と曲の長さを取得
 		mci"status Cities-Box position"
@@ -6132,27 +6186,40 @@
 		
 		pos 35, 70 : mes "天候の変化"
 	
+	//夜間は暗くする(Set_Dark_on_Night)
+		if from_setting_onclick = 0 {
+			setting_Set_Dark_on_Night = Set_Dark_on_Night
+		}
+		
+		if setting_Set_Dark_on_Night = 0 {
+			pos 10, 103 : gcopy 14, 0, 0, 16, 16
+		} else {
+			pos 10, 103 : gcopy 14, 0, 16, 16, 16
+		}
+		
+		pos 35, 100 : mes "夜間は暗くする"
+	
 	//BGMの再生の有無(Set_Play_BGM)
 		if from_setting_onclick = 0 {
 			setting_Set_Play_BGM = Set_Play_BGM
 		}
 		
 		if setting_Set_Play_BGM = 0 {
-			pos 10, 103 : gcopy 14, 0, 0, 16, 16
+			pos 10, 133 : gcopy 14, 0, 0, 16, 16
 		} else {
-			pos 10, 103 : gcopy 14, 0, 16, 16, 16
+			pos 10, 133 : gcopy 14, 0, 16, 16, 16
 		}
 		
-		pos 35, 100 : mes "BGMの再生"
+		pos 35, 130 : mes "BGMの再生"
 	
 	//フォント(SystemFont)
-		pos 10, 130 : mes "フォント"
+		pos 10, 160 : mes "フォント"
 	
 		objsize 194, 20
-		pos 80, 130 : input setting_SystemFont
+		pos 80, 160 : input setting_SystemFont
 	
 		gmode 2
-		pos 274, 130 : gcopy 16, 0, 0, 16, 16
+		pos 274, 160 : gcopy 16, 0, 0, 16, 16
 	
 	//OKボタン
 		color 255, 255, 255 : boxf 100, 360, 200, 390
@@ -6180,9 +6247,19 @@
 				}
 			}
 	
-	//BGMの再生の有無(Set_Play_BGM)
+	//夜間は暗くする(Set_Dark_on_Night)
 		//チェックボックス
 			if click_range(10, 103, 10+16, 103+16) = 1 {
+				if setting_Set_Dark_on_Night = 0 {
+					setting_Set_Dark_on_Night = 1
+				} else {
+					setting_Set_Dark_on_Night = 0
+				}
+			}
+	
+	//BGMの再生の有無(Set_Play_BGM)
+		//チェックボックス
+			if click_range(10, 133, 10+16, 133+16) = 1 {
 				if setting_Set_Play_BGM = 0 {
 					setting_Set_Play_BGM = 1
 				} else {
@@ -6192,7 +6269,7 @@
 	
 	//フォント(SystemFont)
 		//参照ボタン
-			if click_range(274, 130, 274+16, 130+16) = 1 {
+			if click_range(274, 160, 274+16, 160+16) = 1 {
 				gosub *refer_fonts
 			}
 	
@@ -6374,6 +6451,7 @@
 		City_Name = setting_City_Name
 		Mayor_Name = setting_Mayor_Name
 		Set_Change_Weather = setting_Set_Change_Weather
+		Set_Dark_on_Night = setting_Set_Dark_on_Night
 	
 	return
 	
@@ -6448,6 +6526,8 @@
 			
 			noteadd "Set_Change_Weather = "+Set_Change_Weather+";", -1
 			noteadd "Temperature = "+temperature+";", -1
+			
+			noteadd "Set_Dark_on_Nightr = "+Set_Dark_on_Night+";", -1
 	
 		//空白
 			noteadd " ", -1
