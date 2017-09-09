@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.7.5.3
+									   Cities Box Ver 0.7.6
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -170,7 +170,7 @@
 	return
 	
 /*アドオンの情報を取得*/
-#deffunc get_about_addon int search_addon_number@, int search_type_number@, int search_direction_number@, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y
+#deffunc get_about_addon int search_addon_number@, int search_type_number@, int search_direction_number@, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y, var input_chip_x, var input_chip_y
 	//オブジェクトの画像上の座標を取得
 		input_top_left_x = addon_top_left_x@( search_addon_number@, search_type_number@, search_direction_number@ )
 		input_top_left_y = addon_top_left_y@( search_addon_number@, search_type_number@, search_direction_number@ )
@@ -179,6 +179,9 @@
 		
 		input_size_x = addon_size_x@( search_addon_number@, search_type_number@, search_direction_number@ )
 		input_size_y = addon_size_y@( search_addon_number@, search_type_number@, search_direction_number@ )
+	
+		input_chip_x = addon_chip_x@( search_addon_number@, search_type_number@, search_direction_number@ )
+		input_chip_y = addon_chip_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 	
 	return
 	
@@ -393,6 +396,10 @@
 				sdim use_type, total_addons, 100
 				dim addon_total_use_types, total_addons
 	
+				dim addon_transparent_color_r, total_addons
+				dim addon_transparent_color_g, total_addons
+				dim addon_transparent_color_b, total_addons
+	
 				dim addon_total_addon_direction, total_addons, 100
 				sdim addon_direction, total_addons, 100, 100
 				sdim addon_image, total_addons, 100
@@ -495,6 +502,15 @@
 				//建築物の建設可能回数
 					addon_build_limit(cnt) = int( get_chapter(buf_adat, "build_limit", " = \"", "\"") )
 	
+				//透過色
+					addon_transparent_color_tmp = get_chapter(buf_adat, "transparent_color", " = \"", "\"")
+					split addon_transparent_color_tmp, ", ", addon_transparent_color_r_tmp, addon_transparent_color_g_tmp, addon_transparent_color_b_tmp
+	
+					addon_transparent_color_r(cnt) = int(addon_transparent_color_r_tmp)
+					addon_transparent_color_g(cnt) = int(addon_transparent_color_g_tmp)
+					addon_transparent_color_b(cnt) = int(addon_transparent_color_b_tmp)
+	
+				/*
 				//窓の色（RGB値）
 					addon_window_color_tmp = get_chapter(buf_adat, "window_color", " = (", ")")
 	
@@ -506,7 +522,7 @@
 						addon_window_color_R(cnt) = -1 : addon_window_color_G(cnt) = -1 : addon_window_color_B(cnt) = -1
 	
 					}
-					
+				*/
 	
 				//アドオンのadatファイルの詳細の読み込みへ
 					gosub *load_adat
@@ -609,9 +625,13 @@
 	
 				//一時ファイルを保存
 					temp_file = str(addon_number)
-					
-					notesel temp_file
-					notesave "data/temp/"+addon_name(cnt)+".temp"
+	
+					exist "data/temp/"+addon_name(cnt)+".temp"
+	
+					if strsize = -1 {
+						notesel temp_file
+						notesave "data/temp/"+addon_name(cnt)+".temp"
+					}
 	
 				//ディレクトリを戻す
 					chdir ""+directory+"\\addons"
@@ -1633,7 +1653,7 @@
 	randomize
 	
 	repeat
-	
+		dim trout_build, total_addons, (mapx*mapy)
 		dim done_build, 6, mapx, mapy
 	
 		main_cnt ++
@@ -1737,6 +1757,9 @@
 	
 *main_2
 		onclick 0
+	
+		x = 0
+		y = 0
 		
 		repeat mapx
 			x = cnt
@@ -1905,28 +1928,41 @@
 					}
 	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
-						
+					/*
+					//現在処理しているマス（常時非表示）
+						;redraw 1
+						;redraw 0
+						color : boxf 0, 0, 80, 60
+						pos 0, 0 : color 255, 255, 255 : mes "x:"+x+", y:"+y+"\nmx:"+mx+", my:"+my+"\nltx:"+left_top_x+", lby:"+left_bottom_y+"\nrbx:"+right_bottom_x+", rty:"+right_top_y+""
+					*/
+	
 					//オブジェクト（道路や建物など）の表示をするための準備
 						x_buf = x
 						y_buf = y
 	
+						px = 0 : py = 0
+	
 						if x > 0 and x < mapx {
-							if obj_use_tiles_x(x,y) > 0 {
+							if obj_use_tiles_x(x,y) > 0 and (obj_dire(x,y) = 1 or obj_dire(x,y) = 2) {
 								if obj_tiles_x(x,y) > 0 {
 									x -= obj_tiles_x(x,y)
 								} else {
 									x -= (obj_use_tiles_x(x,y)-1) + obj_tiles_x(x,y)
 								}
+	
+								py = (8*(obj_use_tiles_x(x,y)))
 							}
 						}
 	
 						if y > 0 and y < mapy {
-							if obj_use_tiles_y(x,y) > 0 {
+							if obj_use_tiles_y(x,y) > 0 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) {
 								if obj_tiles_y(x,y) < 0 {
 									y -= obj_tiles_y(x,y)
 								} else {
 									y += (obj_use_tiles_y(x,y)-1) + obj_tiles_y(x,y)
 								}
+	
+								py = (8*(obj_use_tiles_x(x,y)))
 							}
 						}
 	
@@ -1941,20 +1977,47 @@
 					//オブジェクトのバッファ番号、オブジェクトの左上の座標（atlx）、左下の座標（atly）、右上の座標（abrx）、右下の座標（abry）、サイズ（sizex, sizey）を取得
 						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を要する場合
 							buffer_number(x,y) = (map(x,y) + 1000) * 1001 + obj_type(x,y)
-							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
+							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
 							
 						} else {										; ひとつのアドオンでひとつの画像を要する場合
 							buffer_number(x,y) = map(x,y) + 1000
-							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey
-								
+							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
+						}
+						
+						if chipx > 1 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) {
+							if obj_dire(x,y) = 0 {
+								atlx += 64 * obj_tiles_x(x,y)
+								px += 32 * obj_tiles_x(x,y)
+								py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+							} else : if obj_dire(x,y) = 3 {
+								atlx += 64 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
+								px += 32 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
+								py += ((obj_use_tiles_x(x,y)-1)+(-obj_tiles_x(x,y))) * 16 - 16
+							}
+							sizex = 64
+						}
+	
+						if chipy > 1 and (obj_dire(x,y) = 1 or obj_dire(x,y) = 2) {
+							if obj_dire(x,y) = 1 {
+								atly += 32 * obj_tiles_y(x,y)
+								px -= ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 32
+								py += ((obj_use_tiles_y(x,y)-1)+obj_tiles_y(x,y)) * 16 - 16 - 4
+							} else : if obj_dire(x,y) = 2 {
+								atly += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
+								px += obj_tiles_y(x,y) * 32
+								py += ((obj_use_tiles_y(x,y)-1)+obj_tiles_y(x,y)) * 16 - 4
+							}
+							sizey = 32
 						}
 							
 					//オブジェクトを表示
-						pos macro1, macro2 - sizey + 1 + (8*(obj_use_tiles_x(x,y)))
-						gmode 2 : gcopy buffer_number(x,y), atlx, atly, sizex, sizey
+						pos macro1 + px, macro2 - sizey + 1 +py
+						color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
+						gmode 4, sizex, sizey, 256
+						gcopy buffer_number(x,y), atlx, atly, sizex, sizey
 	
-						x = x_buf
-						y = y_buf
+					x = x_buf
+					y = y_buf
 	
 				}
 	
@@ -2029,7 +2092,7 @@
 	
 		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
 			;title "FPS:"+fps+""
-			;title ""+happiness_ave+""
+			;title ""+obj_dire(mx,my)+""
 		}
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -3793,7 +3856,7 @@
 											total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 											workers_Industrial(mx+rx,my+ry) = 0
 		
-											done_build(1,x+rx,my+ry) = 1
+											done_build(1,mx+rx,my+ry) = 1
 										}
 		
 										if before_category = "public" and done_build(1,mx+rx,my+ry) = 0 {
