@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.7.6
+									  Cities Box Ver 0.7.6.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1935,37 +1935,7 @@
 						color : boxf 0, 0, 80, 60
 						pos 0, 0 : color 255, 255, 255 : mes "x:"+x+", y:"+y+"\nmx:"+mx+", my:"+my+"\nltx:"+left_top_x+", lby:"+left_bottom_y+"\nrbx:"+right_bottom_x+", rty:"+right_top_y+""
 					*/
-	
-					//オブジェクト（道路や建物など）の表示をするための準備
-						x_buf = x
-						y_buf = y
-	
-						px = 0 : py = 0
-	
-						if x > 0 and x < mapx {
-							if obj_use_tiles_x(x,y) > 0 and (obj_dire(x,y) = 1 or obj_dire(x,y) = 2) {
-								if obj_tiles_x(x,y) > 0 {
-									x -= obj_tiles_x(x,y)
-								} else {
-									x -= (obj_use_tiles_x(x,y)-1) + obj_tiles_x(x,y)
-								}
-	
-								py = (8*(obj_use_tiles_x(x,y)))
-							}
-						}
-	
-						if y > 0 and y < mapy {
-							if obj_use_tiles_y(x,y) > 0 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) {
-								if obj_tiles_y(x,y) < 0 {
-									y -= obj_tiles_y(x,y)
-								} else {
-									y += (obj_use_tiles_y(x,y)-1) + obj_tiles_y(x,y)
-								}
-	
-								py = (8*(obj_use_tiles_x(x,y)))
-							}
-						}
-	
+						
 					//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
 						if name(x,y) = "tile_greenfield" and obj_type(x,y) != tile_greenfield_null_type_buf {
 							obj_type(x,y) = tile_greenfield_null_type_buf
@@ -1983,31 +1953,55 @@
 							buffer_number(x,y) = map(x,y) + 1000
 							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
 						}
+	
+						px = 0 : py = 0
 						
-						if chipx > 1 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) {
+						if chipx > 1 {
 							if obj_dire(x,y) = 0 {
 								atlx += 64 * obj_tiles_x(x,y)
 								px += 32 * obj_tiles_x(x,y)
 								py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+								sizex = 64
+							} else : if obj_dire(x,y) = 1 {
+								atlx += 32 * obj_tiles_x(x,y)
+								px += 0
+								py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+								sizex = 32 + 32 * obj_tiles_x(x,y)
+							} else : if obj_dire(x,y) = 2 {
+								atlx += 32 * obj_tiles_x(x,y)
+								px += 0
+								py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+								sizex = 32 + 32 * obj_tiles_x(x,y)
 							} else : if obj_dire(x,y) = 3 {
 								atlx += 64 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
 								px += 32 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
 								py += ((obj_use_tiles_x(x,y)-1)+(-obj_tiles_x(x,y))) * 16 - 16
+								sizex = 64
 							}
-							sizex = 64
 						}
 	
-						if chipy > 1 and (obj_dire(x,y) = 1 or obj_dire(x,y) = 2) {
-							if obj_dire(x,y) = 1 {
+						if chipy > 1 {
+							if obj_dire(x,y) = 0 {
+								atlx += 32 * obj_tiles_y(x,y)
+								px += 32 - 64 * ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y))
+								py += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
+								sizex = 32 + 32 * obj_tiles_y(x,y)
+							} else : if obj_dire(x,y) = 1 {
 								atly += 32 * obj_tiles_y(x,y)
 								px -= ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 32
 								py += ((obj_use_tiles_y(x,y)-1)+obj_tiles_y(x,y)) * 16 - 16 - 4
+								sizey = 32
 							} else : if obj_dire(x,y) = 2 {
 								atly += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
 								px += obj_tiles_y(x,y) * 32
 								py += ((obj_use_tiles_y(x,y)-1)+obj_tiles_y(x,y)) * 16 - 4
+								sizey = 32
+							} else : if obj_dire(x,y) = 3 {
+								atlx += 32 * obj_tiles_y(x,y)
+								px += 32 - 64 * ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y))
+								py += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
+								sizex = 32 + 32 * obj_tiles_y(x,y)
 							}
-							sizey = 32
 						}
 							
 					//オブジェクトを表示
@@ -2015,10 +2009,6 @@
 						color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
 						gmode 4, sizex, sizey, 256
 						gcopy buffer_number(x,y), atlx, atly, sizex, sizey
-	
-					x = x_buf
-					y = y_buf
-	
 				}
 	
 				//人口・需要度変動
