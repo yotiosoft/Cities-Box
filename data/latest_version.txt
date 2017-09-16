@@ -1,6 +1,7 @@
-Release Number : 70;
-Title : Cities Box r70 (Alpha);
-Version : 0.7.6;
+Release Number : 71;
+Title : Cities Box r71 (Alpha);
+Version : 0.7.6.1;
+About : ”_‹Æ’n‹æ‚ğÀ‘• Šô‚Â‚©‚ÌƒoƒO‚ğC³;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

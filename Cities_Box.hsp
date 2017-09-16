@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									  Cities Box Ver 0.7.6.1
+									   Cities Box Ver 0.8.0
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -243,6 +243,7 @@
 	
 		SystemFont = get_chapter(config, "SystemFont", " = \"", "\"")
 		Set_Play_BGM = int( get_chapter(config, "Set_Play_BGM", " = ", ";") )
+		Ignore_Update = int( get_chapter(config, "Ignore_Update", " = ", ";") )
 	
 		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
 		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
@@ -276,6 +277,7 @@
 		celload "img/menu_icons/menu/commercial.png", 12					; メニューアイコン（商業地区建設）
 		celload "img/menu_icons/menu/office.png", 6							; メニューアイコン（オフィス建設）
 		celload "img/menu_icons/menu/industrial.png", 19					; メニューアイコン（工業地区建設）
+		celload "img/menu_icons/menu/farm.png", 57							; メニューアイコン（農業地区建設）
 		celload "img/menu_icons/menu/public.png", 7							; メニューアイコン（郵便局建設）
 		celload "img/menu_icons/menu/park.png", 29							; メニューアイコン（公園建設）
 	
@@ -317,6 +319,7 @@
 		celload "img/area/commercial.png", 41								; エリア : 商業地区
 		celload "img/area/office.png", 42									; エリア : オフィス地区
 		celload "img/area/industrial.png", 43								; エリア : 工業地区
+		celload "img/area/farm.png", 58										; エリア : 農業地区
 	
 	//ポインター
 		celload "img/pointer/blue.png", 17									; 青いポインター
@@ -327,6 +330,7 @@
 		celload "img/quarter/commercial.png", 23							; 商業地区
 		celload "img/quarter/office.png", 24								; オフィス地区
 		celload "img/quarter/industrial.png", 25							; 工業地区
+		celload "img/quarter/farm.png", 59									; 農業地区
 		celload "img/quarter/public.png", 26								; 公共施設
 		celload "img/quarter/h_residential.png", 44							; 高密度住居地区
 		celload "img/quarter/h_commercial.png", 45							; 高密度商業地区
@@ -392,6 +396,9 @@
 				sdim addon_type, total_addons
 				sdim addon_type_2, total_addons
 				dim addon_maximum_capacity, total_addons
+	
+				sdim addon_crop, total_addons
+				dim addon_crop_amount, total_addons
 	
 				sdim use_type, total_addons, 100
 				dim addon_total_use_types, total_addons
@@ -502,6 +509,10 @@
 				//建築物の建設可能回数
 					addon_build_limit(cnt) = int( get_chapter(buf_adat, "build_limit", " = \"", "\"") )
 	
+				//生産物・生産量
+					addon_crop(cnt) = get_chapter(buf_adat, "addon_crop", " = \"", "\"")
+					addon_crop_amount(cnt) = int( get_chapter(buf_adat, "addon_crop_amount", " = \"", "\"") )
+	
 				//透過色
 					addon_transparent_color_tmp = get_chapter(buf_adat, "transparent_color", " = \"", "\"")
 					split addon_transparent_color_tmp, ", ", addon_transparent_color_r_tmp, addon_transparent_color_g_tmp, addon_transparent_color_b_tmp
@@ -589,6 +600,14 @@
 						notesel type_number_industrial
 						noteadd str(cnt), -1
 					}
+	
+					if addon_type(cnt) = "farm" or addon_type(cnt) = "Farm" {
+						notesel type_farm
+						noteadd addon_name(cnt), -1
+						
+						notesel type_number_farm
+						noteadd str(cnt), -1
+					}
 					
 					if addon_type(cnt) = "public" or addon_type(cnt) = "Public" {
 						notesel type_public
@@ -637,7 +656,7 @@
 					chdir ""+directory+"\\addons"
 	
 				addon_number++
-	
+				
 			await 1
 		loop
 	
@@ -649,10 +668,21 @@
 	color 255, 255, 255 : font SystemFont, 14
 	pos 10, 10 : mes "しばらくお待ちください\nアップデートの確認中..."
 	
+	notesel about
+	noteload "data/about.txt"
+	noteget tmp_about, 2
+	split tmp_about, " : ", tmp, NOW_Release_number
+	NOW_Release_number = int(NOW_Release_number)
+	
 	//既にアップデーターがあれば削除
 		exist "Cities_Box_UD.exe"
 		if strsize != -1 {
 			delete "Cities_Box_UD.exe"
+		}
+	
+	//アップデート通知を受け取らない設定なら*menuへ
+		if Ignore_Update = 1 {
+			goto *menu
 		}
 	
 	download "http://joogle.web.fc2.com/datacenter/cities_box/", "datacenter_url.txt", "data/datacenter_url.txt"
@@ -676,19 +706,15 @@
 	latest_version__Release_number = int(get_chapter(latest_version, "Release Number", " : ", ";"))
 	latest_version__Title = get_chapter(latest_version, "Title", " : ", ";")
 	latest_version__Version = get_chapter(latest_version, "Version", " : ", ";")
-	
-	notesel about
-	noteload "data/about.txt"
-	noteget tmp_about, 2
-	split tmp_about, " : ", tmp, NOW_Release_number
-	NOW_Release_number = int(NOW_Release_number)
+	latest_version__About = get_chapter(latest_version, "About", " : ", ";")
 	
 *menu
 	onclick gosub *menu_onclick
 	
-	if latest_version__Release_number > NOW_Release_number and update_button = 0 {
-		objsize 100, 20
-		pos windowx-100-20, windowy-titlebar_h-60+20 : button gosub "更新する", *update
+	if latest_version__Release_number > NOW_Release_number and update_button = 0 and Ignore_Update = 0 {
+		objsize 150, 20
+		pos windowx-150-20, windowy-titlebar_h-65+5 : button gosub "更新する", *update
+		pos windowx-150-20, windowy-titlebar_h-65+30 : button gosub "更新通知を受け取らない", *set_ignore_update
 		update_button = 1
 	}
 	
@@ -723,16 +749,17 @@
 			
 		gmode 2
 		pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
-			cmes "新しいマップ", windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+			cmes "新しいマップ", windowx/2-50-20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
 					
 		pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
-			cmes "読み込み", windowx/2+20, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+			cmes "読み込み", windowx/2+20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
 	
 		//アップデートがあった場合
-			if latest_version__Release_number > NOW_Release_number {
-				color 0, 162, 232 : sboxf 128, 0, windowy-titlebar_h-60, windowx, windowy
+			if latest_version__Release_number > NOW_Release_number and Ignore_Update = 0 {
+				color 0, 162, 232 : sboxf 128, windowx-500-10, windowy-titlebar_h-70+5-10, windowx-10, windowy-titlebar_h-10
 				color 255, 255, 255
-				pos 10, windowy-titlebar_h-60+5 : mes "アップデートがあります！更新しますか？\n"+latest_version__Title+" Ver."+latest_version__Version+""
+				font SystemFont, 14 : pos windowx-500, windowy-titlebar_h-70+3 : mes "アップデートがあります！更新しますか？"
+				font SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+latest_version__Version+" r"+latest_version__Release_number+"\n"+latest_version__About+""
 			}
 		
 		wait 10
@@ -780,12 +807,16 @@
 		dim workers_Commercial, mapx, mapy	//商業地区の従業員数（商業地区のみ）
 		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
+		dim workers_Farm, mapx, mapy		//農業地区の従業員数（農業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
 		dim education_rate, mapx, mapy		//教育度
 		dim happiness, mapx, mapy			//幸福度
+	
+		sdim crop, 128, mapx, mapy			//生産物
+		dim crop_amount, mapx, mapy			//生産量
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
 		
@@ -808,12 +839,16 @@
 			workers_Commercial(ix,iy) = 0
 			workers_Office(ix,iy) = 0
 			workers_Industrial(ix,iy) = 0
+			workers_Farm(ix,iy) = 0
 			workers_Public(ix,iy) = 0
 	
 			land_price(ix,iy) = 20
 			crime_rate(ix,iy) = 0
 			education_rate(ix,iy) = 0
 			happiness(ix,iy) = 0
+	
+			crop(ix,iy) = "none"
+			crop_amount(ix,iy) = 0
 	
 			reservation(ix,iy) = "none"
 			
@@ -832,6 +867,7 @@
 	demand_Commercial = 0				; 商業地区の需要度
 	demand_Office = 0					; オフィス地区の需要度
 	demand_Industrial = 0				; 工業地区の需要度
+	demand_Farm = 0						; 農業地区の需要度
 	
 	time_Year = gettime(0)				; ゲーム内の時間の年
 	time_Month = gettime(1)				; ゲーム内の時間の月
@@ -954,12 +990,16 @@
 		dim workers_Commercial, mapx, mapy	//商業地区の従業員数（商業地区のみ）
 		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
+		dim workers_Farm, mapx, mapy		//農業地区の従業員数（農業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
 		dim education_rate, mapx, mapy		//教育度
 		dim happiness, mapx, mapy			//幸福度
+	
+		sdim crop, 128, mapx, mapy			//生産物
+		dim crop_amount, mapx, mapy			//生産量
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
 	}
@@ -1033,6 +1073,7 @@
 				demand_Commercial = int( get_chapter(load_mapdata, "demand_Commercial", " = ", ";") )
 				demand_Office = int( get_chapter(load_mapdata, "demand_Office", " = \"", ";") )
 				demand_Industrial = int( get_chapter(load_mapdata, "demand_Industrial", " = ", ";") )
+				demand_Farm = int( get_chapter(load_mapdata, "demand_Farm", " = ", ";") )
 	
 				if instr(load_mapdata, 0, "demand_Residential") = -1 {
 					demand_Residential = 0
@@ -1045,6 +1086,9 @@
 				}
 				if instr(load_mapdata, 0, "demand_Industrial") = -1 {
 					demand_Industrial = 0
+				}
+				if instr(load_mapdata, 0, "demand_Farm") = -1 {
+					demand_Farm = 0
 				}
 	
 			//資金(Money)を読み込み
@@ -1113,6 +1157,12 @@
 				} else {
 					tax_of_Industrial = 100
 				}
+	
+				if instr(load_mapdata, 0, "tax_of_Farm") != -1 {
+					tax_of_Farm = int( get_chapter(load_mapdata, "tax_of_Farm", " = ", ";") )
+				} else {
+					tax_of_Farm = 100
+				}
 		
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
@@ -1143,6 +1193,9 @@
 							}
 							if addon_type(map(x,y)) = "industrial" {
 								total_Industrial_maximum_capacity += addon_maximum_capacity(map(x,y))
+							}
+							if addon_type(map(x,y)) = "farm" {
+								total_Farm_maximum_capacity += addon_maximum_capacity(map(x,y))
 							}
 							if addon_type(map(x,y)) = "public" {
 								total_Public_maximum_capacity += addon_maximum_capacity(map(x,y))
@@ -1191,7 +1244,7 @@
 				loop
 	
 				} else {
-					//セーブデータにland_priceの情報がない場合は全て50万円/マスに設定
+					//セーブデータにcategory_2の情報がない場合は全て50万円/マスに設定
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -1434,6 +1487,28 @@
 					loop
 				}
 	
+			//workers_Farm(x,y)の読み込み
+				if instr(load_mapdata, 0, "workers_Farm(x,y)") != -1 {
+					workers_Farm_buf = get_chapter(load_mapdata, "workers_Farm(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel workers_Farm_buf
+						noteget workers_Farm_buf_a_line, (y+1)
+			
+						sdim workers_Farm_buf_a_tile, mapx
+						split workers_Farm_buf_a_line, ", ", workers_Farm_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							workers_Farm(x,y) = int(workers_Farm_buf_a_tile(x))
+							Total_workers_Farm += workers_Farm(x,y)
+						loop
+				
+					loop
+				}
+	
 			//workers_Public(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Public(x,y)") != -1 {
 					workers_Public_buf = get_chapter(load_mapdata, "workers_Public(x,y)", " {", "}")
@@ -1580,6 +1655,70 @@
 								y = cnt
 	
 								happiness(x,y) = 0
+							loop
+						loop
+				}
+	
+			//crop(x,y)の読み込み
+				if instr(load_mapdata, 0, "crop(x,y)") != -1 {
+					crop_buf = get_chapter(load_mapdata, "crop(x,y)", " {", "}")
+				
+					repeat mapy
+					y = cnt
+		
+					notesel crop_buf
+					noteget crop_buf_a_line, (y+1)
+		
+					sdim crop_buf_a_tile, mapx
+					split crop_buf_a_line, ", ", crop_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						crop(x,y) = crop_buf_a_tile(x)
+					loop
+			
+				loop
+	
+				} else {
+					//セーブデータにcropの情報がない場合は全て50万円/マスに設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								crop(x,y) = "none"
+							loop
+						loop
+				}
+	
+			//crop_amount(x,y)の読み込み
+				if instr(load_mapdata, 0, "crop_amount(x,y)") != -1 {
+					crop_amount_buf = get_chapter(load_mapdata, "crop_amount(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel crop_amount_buf
+						noteget crop_amount_buf_a_line, (y+1)
+			
+						sdim crop_amount_buf_a_tile, mapx
+						split crop_amount_buf_a_line, ", ", crop_amount_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							crop_amount(x,y) = int(crop_amount_buf_a_tile(x))
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにcrop_amountの情報がない場合は全て0に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								crop_amount(x,y) = 0
 							loop
 						loop
 				}
@@ -2080,10 +2219,11 @@
 				my = -1
 			}
 	
-		if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			;title "FPS:"+fps+""
-			;title ""+obj_dire(mx,my)+""
-		}
+		/*
+			if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
+				title "FPS:"+fps+""
+			}
+		*/
 	
 		//メニューを開いているときはstat_mode = "type"にする
 			if cursor_mode != "normal" and cursor_mode != "put_Road" {
@@ -2123,6 +2263,10 @@
 						if category_buf = "industrial" or instr(reservation_buf, 0, "industrial") != -1 {
 							color : gmode 4,,,128
 							pos macro1, macro2-32 : gcopy 25, 0, 0, 64, 32
+						}
+						if category_buf = "farm" or instr(reservation_buf, 0, "farm") != -1 {
+							color : gmode 4,,,128
+							pos macro1, macro2-32 : gcopy 59, 0, 0, 64, 32
 						}
 						if category_buf = "public" {
 							color : gmode 4,,,128
@@ -2347,6 +2491,8 @@
 				color 0, 0, 0
 				gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h, windowx, windowy
 	
+				//何のメニューも開かれていない場合は cursor_mode = "normal" に
+	
 				//標準カーソルボタン
 					if cursor_mode = "normal" {
 						gmode 2
@@ -2410,22 +2556,31 @@
 						pos 220, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
 					}
 	
+				//建物（農業地区）ボタン
+					if cursor_mode = "put_Farm" {
+						gmode 2
+						pos 252, windowy-70-titlebar_h : gcopy 57, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 252, windowy-70-titlebar_h : gcopy 57, 0, 0, 32, 32
+					}
+	
 				//建物（公共施設）ボタン
 					if cursor_mode = "put_Public" {
 						gmode 2
-						pos 252, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
+						pos 284, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 252, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
+						pos 284, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 					}
 	
 				//公園ボタン
 					if cursor_mode = "put_Park" {
 						gmode 2
-						pos 284, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
+						pos 316, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
 					} else {
 						gmode 2
-						pos 284, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
+						pos 316, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
 					}
 	
 				//情報ボタン
@@ -2517,17 +2672,20 @@
 					font SystemFont, 10
 					
 					//R - 住居区画
-						color 34, 177, 76 : boxf windowx-170, windowy-titlebar_h-20-(demand_Residential/3), windowx-170+10, windowy-titlebar_h-20
-						cmes "R", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
+						color 34, 177, 76 : boxf windowx-180, windowy-titlebar_h-20-(demand_Residential/3), windowx-180+10, windowy-titlebar_h-20
+						cmes "R", windowx-180, windowy-titlebar_h-20, windowx-180+10, windowy-titlebar_h-10
 					//C - 商業区画
-						color 63, 72, 204 : boxf windowx-160, windowy-titlebar_h-20-(demand_Commercial/3), windowx-160+10, windowy-titlebar_h-20
-						cmes "C", windowx-160, windowy-titlebar_h-20, windowx-160+10, windowy-titlebar_h-10
+						color 63, 72, 204 : boxf windowx-170, windowy-titlebar_h-20-(demand_Commercial/3), windowx-170+10, windowy-titlebar_h-20
+						cmes "C", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
 					//O - オフィス区画
-						color 0, 162, 232 : boxf windowx-150, windowy-titlebar_h-20-(demand_Office/3), windowx-150+10, windowy-titlebar_h-20
-						cmes "O", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
+						color 0, 162, 232 : boxf windowx-160, windowy-titlebar_h-20-(demand_Office/3), windowx-160+10, windowy-titlebar_h-20
+						cmes "O", windowx-160, windowy-titlebar_h-20, windowx-160+10, windowy-titlebar_h-10
 					//I - 工業区画
-						color 255, 242, 0 : boxf windowx-140, windowy-titlebar_h-20-(demand_Industrial/3), windowx-140+10, windowy-titlebar_h-20
-						cmes "I", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
+						color 255, 242, 0 : boxf windowx-150, windowy-titlebar_h-20-(demand_Industrial/3), windowx-150+10, windowy-titlebar_h-20
+						cmes "I", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
+					//F - 農業区画
+						color 185, 122, 87 : boxf windowx-140, windowy-titlebar_h-20-(demand_Farm/3), windowx-140+10, windowy-titlebar_h-20
+						cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
 					
 			redraw 1
 			await 30
@@ -2561,6 +2719,8 @@
 				opening_menu_put_Park = 0
 	
 				open_stat_menu = 0
+	
+				pointer_icon = -1
 			}
 				
 		//道路ボタン
@@ -2584,13 +2744,14 @@
 							notesel type_number_Two_lane_road
 							noteget addon_num_normal_road, clicked_addon_number
 							addon_num_normal_road = int(addon_num_normal_road)
-				} 
+				}
 	
 				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -2618,13 +2779,14 @@
 							notesel type_number_Two_lane_railroad
 							noteget addon_num_normal_railroad, clicked_addon_number
 							addon_num_normal_railroad = int(addon_num_normal_railroad)
-				} 
+				}
 	
 				opening_menu_put_Road = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -2652,13 +2814,14 @@
 							notesel type_number_low_density_residential
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
-				} 
+				}
 					
 				opening_menu_put_Road = 0
 				opening_menu_put_Railroad = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -2686,13 +2849,14 @@
 							notesel type_number_low_density_commercial
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
-				} 
+				}
 		
 				opening_menu_put_Road = 0
 				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -2719,13 +2883,14 @@
 							notesel type_number_office
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
-				} 
+				}
 		
 				opening_menu_put_Road = 0
 				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
 	
@@ -2752,12 +2917,47 @@
 							notesel type_number_industrial
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
-				} 
+				}
 		
 				opening_menu_put_Road = 0
 				opening_menu_put_Railroad = 0
 				opening_menu_put_Residential = 0
 				opening_menu_put_Commercial = 0
+				opening_menu_put_Farm = 0
+				opening_menu_put_Office = 0
+				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
+	
+				open_stat_menu = 0
+			}
+	
+		//建物（農業地区）ボタン
+			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
+		
+				if opening_menu_put_Office = 0 {
+					cursor_mode = "put_Farm"
+	
+					opening_addon_menu = 1
+					opening_menu_put_Farm = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+			
+						//選択されたアドオンのアドオン名を取得
+							notesel type_farm
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_farm
+							noteget addon_num_buf, clicked_addon_number
+							addon_num_buf = int(addon_num_buf)
+				}
+		
+				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
+				opening_menu_put_Industrial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
@@ -2766,7 +2966,7 @@
 			}
 				
 		//建物（公共施設）ボタン
-			if click_range( 252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 284, windowy-70-titlebar_h, 284+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Public = 0 {
 					cursor_mode = "put_Public"
@@ -2785,7 +2985,7 @@
 							notesel type_number_public
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
-				} 
+				}
 		
 				opening_menu_put_Road = 0
 				opening_menu_put_Railroad = 0
@@ -2793,13 +2993,14 @@
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Park = 0
 	
 				open_stat_menu = 0
 			}
 		
 		//建物（公園）ボタン
-			if click_range( 284, windowy-70-titlebar_h, 284+32, windowy-70-titlebar_h+32 ) = 1 {
+			if click_range( 316, windowy-70-titlebar_h, 316+32, windowy-70-titlebar_h+32 ) = 1 {
 		
 				if opening_menu_put_Park = 0 {
 					cursor_mode = "put_Park"
@@ -2818,7 +3019,7 @@
 							notesel type_number_park
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
-				} 
+				}
 		
 				opening_menu_put_Road = 0
 				opening_menu_put_Railroad = 0
@@ -2826,6 +3027,7 @@
 				opening_menu_put_Commercial = 0
 				opening_menu_put_Office = 0
 				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 	
 				open_stat_menu = 0
@@ -3155,6 +3357,27 @@
 						
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_industrial
+						noteget addon_num_buf, clicked_addon_number - 1
+						addon_num_buf = int(addon_num_buf)
+	
+					gosub *build_obj
+				}
+	
+			/*--------------------------------------------農業地区-----------------------------------------------*/
+			
+			//農業地区
+				notesel type_farm
+				if opening_menu_put_farm = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Farm"
+		
+					clicked_addon_number = mousex/35 - 1
+						
+					//選択されたアドオンのアドオン名を取得
+						notesel type_farm
+						noteget put_addon_name, clicked_addon_number - 1
+						
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_farm
 						noteget addon_num_buf, clicked_addon_number - 1
 						addon_num_buf = int(addon_num_buf)
 	
@@ -3583,8 +3806,18 @@
 	
 						//道路に接続されていない場所に建設しようとしている場合
 							if around_road_exist = -1 and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h&ginfo_my<=ginfo_wy2) and instr(put_addon_name, 0, "Area : ") = -1 and from_Build_on_Reservation_area = 0 {
-								dialog "道路に接続されていない場所には建設できません！"
-								return
+								if category(mx, my+1) = "road" and cannot_build(2) = 0 or cursor_mode = "put_Park" or cursor_mode = "put_Farm" {		; 公園、農業地区は道路に接続していない場合は下向きとする
+									around_road_exist += 1
+		
+									direction = "bottom"
+									direction_check(2) = 1
+		
+									now_direction_num = 2
+	
+								} else {
+									dialog "道路に接続されていない場所には建設できません！"
+									return
+								}
 							}
 	
 						//地区設定の場合
@@ -3612,6 +3845,11 @@
 							//建物（工業地区）建設
 								if cursor_mode = "put_Industrial" {
 									category_buf = "industrial"
+								}
+	
+							//建物（農業地区）建設
+								if cursor_mode = "put_Farm" {
+									category_buf = "farm"
 								}
 				
 							//建物（公共施設）建設
@@ -3718,7 +3956,7 @@
 														break
 														
 												//ほかに建設可能な向きが見つからなかった場合
-													} else {
+													} else {				
 														cannot_build_here = 1
 														break
 													}
@@ -3736,6 +3974,15 @@
 									}
 									
 									if cannot_build_here = 1 and found_other_obj = 1 {
+										if cursor_mode = "put_Park" or cursor_mode = "put_Farm" {		; 公園、農業地区はとりあえず下向きとする
+											direction = "bottom"
+											now_direction_num = 2
+											
+											able_build_here = 1
+	
+											return	
+										}
+	
 										if from_Build_on_Reservation_area = 0 {
 											dialog "この区画は既に占有されています"
 										}
@@ -3809,6 +4056,9 @@
 										obj_use_tiles_y(mx+rx,my+ry) = addon_chip_y(addon_num_buf, 0, obj_dire(mx+rx,my+ry)) * acy
 										obj_tiles_x(mx+rx,my+ry) = rx
 										obj_tiles_y(mx+rx,my+ry) = ry
+	
+										crop(mx+rx,my+ry) = addon_crop(addon_num_buf)
+										crop_amount(mx+rx,mx+ry) = addon_crop_amount(addon_num_buf)
 										
 										reservation(mx+rx,my+ry) = "none"
 	
@@ -3848,6 +4098,14 @@
 		
 											done_build(1,mx+rx,my+ry) = 1
 										}
+	
+										if before_category = "farm" and done_build(1,mx+rx,my+ry) = 0 {
+											Total_workers_Farm -= workers_Farm(mx+rx,my+ry)
+											total_Farm_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+											workers_Farm(mx+rx,my+ry) = 0
+		
+											done_build(1,mx+rx,my+ry) = 1
+										}
 		
 										if before_category = "public" and done_build(1,mx+rx,my+ry) = 0 {
 											Total_workers_Public -= workers_Public(mx+rx,my+ry)
@@ -3863,8 +4121,13 @@
 								addon_land_price_influence__tmp = addon_land_price_influence(addon_num_buf)
 	
 								addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_buf)
+	
+								if addon_land_price_influence_grid__tmp != 0 {
+									add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp
+								} else : if addon_land_price_influence_grid__tmp = 0 {
+									add_value = 0
+								}
 								
-								add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp
 								round = 0
 								
 								for round, 1, addon_land_price_influence_grid__tmp+1, 1
@@ -4051,6 +4314,11 @@
 									Vacancies += addon_maximum_capacity(addon_num_buf)
 									done_build(4,mx,my) = 1
 								}
+								if category_buf = "farm" and done_build(4,mx,my) = 0 {
+									total_Farm_maximum_capacity += addon_maximum_capacity(addon_num_buf)
+									Vacancies += addon_maximum_capacity(addon_num_buf)
+									done_build(4,mx,my) = 1
+								}
 								if category_buf = "public" and done_build(4,mx,my) = 0 {
 									total_Public_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
@@ -4120,6 +4388,9 @@
 							category_2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							obj_type(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_type_buf
 							obj_dire(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_dire_buf
+	
+							crop(mx+rx,my+ry) = "none"
+							crop_amount(mx+rx,mx+ry) = 0
 								
 							obj_serial_num(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 							obj_use_tiles_x(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
@@ -4152,6 +4423,13 @@
 								total_Industrial_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
 								Vacancies -= addon_maximum_capacity(addon_num_buf)
 								workers_Industrial(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
+							}
+	
+							if category_buf = "farm" {
+								Total_workers_Farm -= workers_Farm(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry)
+								total_Farm_maximum_capacity -= addon_maximum_capacity(addon_num_buf)
+								Vacancies -= addon_maximum_capacity(addon_num_buf)
+								workers_Farm(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 							}
 				
 							if category_buf = "public" {
@@ -4728,6 +5006,11 @@
 		reservation(mx,my) = "industrial"
 	}
 	
+	;農業地区の設定
+	if put_addon_name = "Area : Farm" {
+		reservation(mx,my) = "farm"
+	}
+	
 	return
 	
 *Build_on_Reservation_area
@@ -4860,6 +5143,30 @@
 			mouse_left = 1
 		}
 	
+	;農業地区
+		if instr(reservation(x,y), 0, "farm") != -1 {
+			if demand_Farm <= 0 {
+				return
+			}
+			
+			demand_Farm -= 1
+	
+			notesel type_farm
+			rnd_num = rnd(notemax)
+			noteget put_addon_name, rnd_num
+			
+			notesel type_number_farm
+			noteget addon_num_buf, rnd_num
+	
+			addon_num_buf = int(addon_num_buf)
+	
+			from_Build_on_Reservation_area = 1
+	
+			cursor_mode_tmp = cursor_mode
+			cursor_mode = "put_Farm"
+			mouse_left = 1
+		}
+	
 	x_tmp = x : y_tmp = y
 	mx_tmp = mx : my_tmp = my
 	mx = x : my = y
@@ -4882,6 +5189,10 @@
 	return
 	
 *open_menu_addon_menu
+	if opening_addon_menu = 0 {
+		return
+	}
+	
 	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, windowx, windowy-70-titlebar_h
 	
 	if cursor_mode = "put_Road" {
@@ -4924,6 +5235,9 @@
 	if cursor_mode = "put_Industrial" {
 		notesel type_number_industrial
 	}
+	if cursor_mode = "put_Farm" {
+		notesel type_number_farm
+	}
 	if cursor_mode = "put_Public" {
 		notesel type_number_public
 	}
@@ -4939,7 +5253,7 @@
 	
 	repeat notemax + p
 		noteget get_addon_number, cnt - p
-	
+		
 		gmode 2
 	
 		if p = 0 or (p = 1 and cnt > 0) {
@@ -5082,6 +5396,24 @@
 				
 			} else {
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 43, 0, 0, 32, 32
+			}
+		}
+	
+		if cursor_mode = "put_Farm" {
+			if clicked_addon_number = 0 {
+				color 255,255,255 : font "", 14
+				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "農業地区"
+				
+				color 255,255,255 : font "", 10
+				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が農作物を生産する場を提供します。農業地区を設定すると畑や田、牧場が建設されます。"
+				
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 58, 0, 32, 32, 32
+	
+				put_addon_name = "Area : Farm"
+				pointer_icon = 59
+				
+			} else {
+				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 58, 0, 0, 32, 32
 			}
 		}
 	
@@ -5299,6 +5631,7 @@
 			before_workers_Commericial = 0
 			before_workers_Office = 0
 			before_workers_Industrial = 0
+			before_workers_Farm = 0
 			before_workers_Public = 0
 	
 		//人口の増減
@@ -5472,6 +5805,50 @@
 					Total_workers_Industrial = Total_workers_Industrial - before_workers_Industrial + workers_Industrial(x,y)
 			}
 	
+		//農業区画の労働人口の増減
+			if category(x,y) = "farm" {
+				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					if demand_Farm = 0 {
+						rndv = 11
+					} else {
+						rndv = 10+(demand_Farm/10)
+					}
+					f = rnd(rndv)+1		; fの値は農業地区の需要度が100％なら20～0
+					f2 = 0
+						
+				//変更前の農業区画の労働者数
+					before_workers_Farm = workers_Farm(x,y)
+		
+				//増減処理
+					if f < 10+(demand_Farm/10) {
+						//各農業地区に何人増やすか
+							if addon_maximum_capacity(map(x,y)) - before_workers_Farm > 0 {
+								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Farm)
+								//総人口を越さないことを確認
+									if Total_workers_Farm + add_workers < Total_Population {
+										workers_Farm(x,y) = before_workers_Farm + add_workers
+									} else {
+										f2 = 1
+									}
+							}
+					}
+				
+					if f > 10+(demand_Farm/10) or f2 = 1 {
+						//各工業地区で何人減らすか
+							if before_workers_Farm > 0 {
+								cut_workers = rnd(before_workers_Farm)
+								workers_Farm(x,y) = before_workers_Farm - cut_workers
+							}
+					}
+				
+					if workers_Farm(x,y) < 0 {
+						workers_Farm(x,y) = 0
+					}
+		
+				//総労働人口数にも反映
+					Total_workers_Farm = Total_workers_Farm - before_workers_Farm + workers_Farm(x,y)
+			}
+			
 		//公共施設の労働人口の増減
 			if category(x,y) = "public" {
 				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
@@ -5564,6 +5941,17 @@
 					} else {
 						demand_Industrial 	= 100
 					}
+	
+					if Total_Farm_maximum_capacity > 0 {
+						demand_Farm 	-= rnd(20) - 10  + Special_demand_Farm
+						if demand_Farm > 100 {
+							demand_Farm = 100
+						} else : if demand_Farm < 0 {
+							demand_Farm = 0
+						}
+					} else {
+						demand_Farm 	= 100
+					}
 				}
 	
 	return
@@ -5644,7 +6032,7 @@
 	stop
 	
 *budget_panel
-	screen 1, 300, 360
+	screen 1, 300, 380
 	
 	gsel 1, 2
 	
@@ -5693,6 +6081,9 @@
 			if workers_Industrial(rx,ry) > 0 {
 				total_workers_Industrial += workers_Industrial(rx,ry)
 			}
+			if workers_Farm(rx,ry) > 0 {
+				total_workers_Farm += workers_Farm(rx,ry)
+			}
 				
 		loop
 	loop
@@ -5726,8 +6117,11 @@
 		pos 200, 250 : input tax_of_Industrial : input_stat__tax_of_Industrial = stat
 		pos 290, 250 : mes "%"
 	
+		pos 200, 280 : input tax_of_Farm : input_stat__tax_of_Farm = stat
+		pos 290, 280 : mes "%"
+	
 	objsize 50, 20
-	pos 240, 330 : button "OK", *fix_budget
+	pos 240, 350 : button "OK", *fix_budget
 	
 	repeat
 		redraw 0
@@ -5789,6 +6183,10 @@
 				tax_of_Industrial = 0
 				objprm input_stat__tax_of_Industrial, tax_of_Industrial
 			}
+			if tax_of_Farm < 0 {
+				tax_of_Farm = 0
+				objprm input_stat__tax_of_Farm, tax_of_Farm
+			}
 			
 			if tax_of_Residential > 100 {
 				tax_of_Residential = 100
@@ -5805,6 +6203,10 @@
 			if tax_of_Industrial > 100 {
 				tax_of_Industrial = 100
 				objprm input_stat__tax_of_Industrial, tax_of_Industrial
+			}
+			if tax_of_Farm > 100 {
+				tax_of_Farm = 100
+				objprm input_stat__tax_of_Farm, tax_of_Farm
 			}
 	
 		//支出の具体的な金額を算出
@@ -5850,6 +6252,11 @@
 			} else {
 				take_tax_of_Industrial = total_workers_Industrial * (10 / (11-(tax_of_Industrial/10)))
 			}
+			if total_workers_Farm = 0 {
+				take_tax_of_Farm = 0
+			} else {
+				take_tax_of_Farm = total_workers_Farm * (10 / (11-(tax_of_Farm/10)))
+			}
 	
 		font SystemFont, 14
 		
@@ -5869,6 +6276,7 @@
 		pos 10, 210 : mes "商業地区　　 §+"+take_tax_of_Commercial+""
 		pos 10, 230 : mes "オフィス地区 　§+"+take_tax_of_Office+""
 		pos 10, 250 : mes "工業地区 　　§+"+take_tax_of_Industrial+""
+		pos 10, 270 : mes "農業地区 　　§+"+take_tax_of_Farm+""
 	
 		repeat 4
 			pos 250, 70+(cnt*20)  : mes "%"
@@ -5882,7 +6290,7 @@
 		color 255, 0, 0
 		pos 10, 290 : mes "今月の支出　 §-"+expenses+""
 	
-		income = take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial
+		income = take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial + take_tax_of_Farm
 		color 0, 255, 0
 		pos 10, 310 : mes "今月の収入　 §+"+income+""
 	
@@ -5927,6 +6335,9 @@
 				}
 				if workers_Industrial(rx,ry) > 0 {
 					total_workers_Industrial += workers_Industrial(rx,ry)
+				}
+				if workers_Farm(rx,ry) > 0 {
+					total_workers_Farm += workers_Farm(rx,ry)
 				}
 					
 			loop
@@ -5975,9 +6386,14 @@
 			} else {
 				take_tax_of_Industrial = total_workers_Industrial * (10 / (11-(tax_of_Industrial/10)))
 			}
+			if total_workers_Farm = 0 {
+				take_tax_of_Farm = 0
+			} else {
+				take_tax_of_Farm = total_workers_Farm * (10 / (11-(tax_of_Farm/10)))
+			}
 		
 		Money -= take_budget_of_Police + take_budget_of_Fire_Depertment + take_budget_of_Post_Office + take_budget_of_Education
-		Money += take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial
+		Money += take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industriale + take_tax_of_Farm
 		
 	return
 	
@@ -6462,12 +6878,21 @@
 	
 	goto *new_map_setting
 	
+*set_ignore_update
+	clrobj
+	
+	setting_SystemFont = SystemFont
+	setting_Set_Play_BGM = Set_Play_BGM
+	setting_Ignore_Update = 1
+	goto *save_setting
+	
 *save_setting
 	chdir directory
 	
 	//まずは本体設定(data/config.dat)を保存
 		noteadd_SystemFont = 0
 		noteadd_Set_Play_BGM = 0
+		noteadd_Ignore_Update = 0
 		
 		notesel config
 	
@@ -6486,6 +6911,12 @@
 				noteadd_Set_Play_BGM = 1
 			}
 	
+			if instr(config_buf, 0, "Ignore_Update") != -1 {
+				Ignore_Update = setting_Ignore_Update
+				noteadd "Ignore_Update = "+Ignore_Update+";", cnt, 1
+				noteadd_Ignore_Update = 1
+			}
+	
 			wait 1
 		loop
 	
@@ -6496,6 +6927,10 @@
 		if noteadd_Set_Play_BGM = 0 {
 			Set_Play_BGM = setting_Set_Play_BGM
 			noteadd "Set_Play_BGM = "+Set_Play_BGM+";", -1
+		}
+		if noteadd_Ignore_Update = 0 {
+			Ignore_Update = setting_Ignore_Update
+			noteadd "Ignore_Update = "+Ignore_Update+";", -1
 		}
 	
 		notesave "data/config.dat"
@@ -6610,6 +7045,7 @@
 			noteadd "demand_Commercial = "+demand_Commercial+";", -1
 			noteadd "demand_Office = "+demand_Office+";", -1
 			noteadd "demand_Industrial = "+demand_Industrial+";", -1
+			noteadd "demand_Farm = "+demand_Farm+";", -1
 	
 		//資金
 			noteadd "Money = "+Money+";", -1
@@ -6628,6 +7064,7 @@
 			noteadd "tax_of_Commercial = "+tax_of_Commercial+";", -1
 			noteadd "tax_of_Office = "+tax_of_Office+";", -1
 			noteadd "tax_of_Industrial = "+tax_of_Industrial+";", -1
+			noteadd "tax_of_Farm = "+tax_of_Farm+";", -1
 	
 		//空白
 			noteadd " ", -1
@@ -6969,6 +7406,30 @@
 			
 			noteadd "}", -1
 	
+		//workers_Farm(x,y)
+			noteadd "workers_Farm(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", workers_Farm(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Farm(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
 		//workers_Public(x,y)
 			noteadd "workers_Public(x,y) {", -1
 			
@@ -7080,6 +7541,54 @@
 						map_data_buf = strf("%03d", happiness(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", happiness(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//crop(x,y)
+			noteadd "crop(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = crop(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+crop(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//crop_amount(x,y)
+			noteadd "crop_amount(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", crop_amount(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", crop_amount(x,y))+""
 					}
 				loop
 			
