@@ -644,13 +644,8 @@
 	
 				//一時ファイルを保存
 					temp_file = str(addon_number)
-	
-					exist "data/temp/"+addon_name(cnt)+".temp"
-	
-					if strsize = -1 {
-						notesel temp_file
-						notesave "data/temp/"+addon_name(cnt)+".temp"
-					}
+					notesel temp_file
+					notesave "data/temp/"+addon_name(cnt)+".temp"
 	
 				//ディレクトリを戻す
 					chdir ""+directory+"\\addons"
