@@ -1,5 +1,5 @@
-Release Number : 71;
-Title : Cities Box r72(Alpha);
+Release Number : 73;
+Title : Cities Box r73(Alpha);
 Version : 0.8.0;
 About : ”_‹Æ’n‹æ‚ğÀ‘• Šô‚Â‚©‚ÌƒoƒO‚ğC³;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;

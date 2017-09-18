@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									   Cities Box Ver 0.8.0
+								      Cities Box Ver 0.8.0.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -932,8 +932,6 @@
 	
 *map_preparating
 	clrobj
-	
-	title "マップ読み込み中..."
 	
 	oncmd gosub *OnTimer__map_preparating, WM_TIMER
 	SetTimer hwnd, TIMER_ID, 1000, 0
@@ -4288,31 +4286,41 @@
 	
 								}
 	
-							//都市全体の収容可能人数或いは求人数を増やす
+							//都市全体の収容可能人数或いは求人数を増やし、RCOIFメーターを変動
 								if category_buf = "residential" and done_build(4,mx,my) = 0 {
 									total_Residential_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
 									done_build(4,mx,my) = 1
+	
+									demand_Residential -= 1
 								}
 								if category_buf = "commercial" and done_build(4,mx,my) = 0 {
 									total_Commercial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
 									done_build(4,mx,my) = 1
+	
+									demand_Commercial -= 1
 								}
 								if category_buf = "office" and done_build(4,mx,my) = 0 {
 									total_Office_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
 									done_build(4,mx,my) = 1
+	
+									demand_Office -= 1
 								}
 								if category_buf = "industrial" and done_build(4,mx,my) = 0 {
 									total_Industrial_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
 									done_build(4,mx,my) = 1
+	
+									demand_Industrial -= 1
 								}
 								if category_buf = "farm" and done_build(4,mx,my) = 0 {
 									total_Farm_maximum_capacity += addon_maximum_capacity(addon_num_buf)
 									Vacancies += addon_maximum_capacity(addon_num_buf)
 									done_build(4,mx,my) = 1
+	
+									demand_Farm -= 1
 								}
 								if category_buf = "public" and done_build(4,mx,my) = 0 {
 									total_Public_maximum_capacity += addon_maximum_capacity(addon_num_buf)
