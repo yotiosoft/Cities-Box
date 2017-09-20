@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.8.0.1
+								       Cities Box Ver 0.8.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -812,6 +812,11 @@
 	
 		sdim crop, 128, mapx, mapy			//生産物
 		dim crop_amount, mapx, mapy			//生産量
+	
+		sdim age, 128, mapx, mapy			//住人の年齢
+		sdim gender, 128, mapx, mapy		//住人の性別
+		sdim workplace, 128, mapx, mapy		//住人が通うの職場の位置
+		sdim school, 128, mapx, mapy		//住人が通う学校の位置
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
 		
@@ -844,6 +849,8 @@
 	
 			crop(ix,iy) = "none"
 			crop_amount(ix,iy) = 0
+	
+			age(ix,iy) = ""
 	
 			reservation(ix,iy) = "none"
 			
@@ -993,6 +1000,11 @@
 	
 		sdim crop, 128, mapx, mapy			//生産物
 		dim crop_amount, mapx, mapy			//生産量
+	
+		sdim age, 128, mapx, mapy			//住人の年齢
+		sdim gender, 128, mapx, mapy		//住人の性別
+		sdim workplace, 128, mapx, mapy		//住人が通うの職場の位置
+		sdim school, 128, mapx, mapy		//住人が通う学校の位置
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
 	}
@@ -1712,6 +1724,88 @@
 								y = cnt
 	
 								crop_amount(x,y) = 0
+							loop
+						loop
+				}
+	
+			//age(x,y)の読み込み
+				if instr(load_mapdata, 0, "age(x,y)") != -1 {
+					age_buf = get_chapter(load_mapdata, "age(x,y)", " {", "}")
+				
+					repeat mapy
+					y = cnt
+		
+					notesel age_buf
+					noteget age_buf_a_line, (y+1)
+		
+					sdim age_buf_a_tile, mapx
+					split age_buf_a_line, ", ", age_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						age(x,y) = age_buf_a_tile(x)
+					loop
+			
+				loop
+	
+				} else {
+					//セーブデータにageの情報がない場合はランダムに決定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								repeat residents(x,y)
+									if cnt = 0 {
+										new_age = rnd(61) + 20
+									} else {
+										new_age = rnd(81)
+									}
+									
+									age(x,y) += "["+new_age+"]"
+								loop
+							loop
+						loop
+				}
+	
+			//gender(x,y)の読み込み
+				if instr(load_mapdata, 0, "gender(x,y)") != -1 {
+					gender_buf = get_chapter(load_mapdata, "gender(x,y)", " {", "}")
+				
+					repeat mapy
+					y = cnt
+		
+					notesel gender_buf
+					noteget gender_buf_a_line, (y+1)
+		
+					sdim gender_buf_a_tile, mapx
+					split gender_buf_a_line, ", ", gender_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						gender(x,y) = gender_buf_a_tile(x)
+					loop
+			
+				loop
+	
+				} else {
+					//セーブデータにgenderの情報がない場合はランダムに決定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								repeat residents(x,y)
+									new_gender_rnd = rnd(2)
+	
+									if new_gender_rnd = 0 {
+										new_gender = "m"
+									} else {
+										new_gender = "f"
+									}
+									
+									gender(x,y) += "["+new_gender+"]"
+								loop
 							loop
 						loop
 				}
@@ -2475,6 +2569,11 @@
 	
 		//天候の変動
 			gosub *climate
+	
+		//性別の人口を取得
+			if time_Hour = 0 or time_Minutes = 0 {
+				gosub *get_gender_all_people
+			}
 	
 *menu_buttons
 			//現在のウィンドウサイズとタイトルバーの高さを取得
@@ -5637,8 +5736,15 @@
 			before_workers_Farm = 0
 			before_workers_Public = 0
 	
+		//住民数を変化させるかどうかを決める（1/(|100-住人数|)の確率で変える、ただし住人が0の場合は2/1の確率）
+			if residents(x,y) = 0 {
+				rtmp = rnd(2)
+			} else {
+				rtmp = rnd(abs(100-residents(x,y)))
+			}
+	
 		//人口の増減
-			if category(x,y) = "residential" {
+			if category(x,y) = "residential" and rtmp = 0 {
 				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
 					if demand_Residential = 0 {
 						rndv = 11
@@ -5650,6 +5756,15 @@
 						
 				//変更前の住居地区の住民数
 					before_residents = residents(x,y)
+	
+				//変更前の住人の年齢を取得
+					sdim age_in_Residential_tmp, 16, before_residents
+					split age(x,y), "]", age_in_Residential_tmp
+	
+					dim age_in_Residential, before_residents
+					repeat before_residents
+						age_in_Residential(cnt) = int(age_in_Residential(cnt))
+					loop
 		
 				//人口の増減処理
 					if f < 10+(demand_Residential/10) {
@@ -5657,14 +5772,27 @@
 							if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
 								add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
 								residents(x,y) = before_residents + add_residents
+	
+								demand_Residential -= add_residents
+								
+								repeat add_residents
+									age(x,y) += "["+rnd(81)+"]"
+								loop
 							}
 					}
 				
-					if f > 10+(demand_Residential/10) {
+					if f >= 10+(demand_Residential/10) {
 						//各住居地区で何人減らすか
 							if before_residents > 0 {
 								cut_residents = rnd(before_residents)
 								residents(x,y) = before_residents - cut_residents
+	
+								demand_Residential += add_residents
+	
+								age(x,y) = ""
+								repeat (before_residents-cut_residents)
+									age(x,y) += "["+age_in_Resodential(cnt)+"]"
+								loop
 							}
 					}
 				
@@ -5997,6 +6125,35 @@
 	approval_rate = happiness_ave
 	return
 	
+*get_gender_all_people
+	//住民の性別の人口を取得
+		gender_M = 0
+		gender_F = 0
+		
+		repeat mapx
+			gx = cnt
+		
+			repeat mapy
+				gy = cnt
+	
+				if gender(gx,gy) != "" and residents(gx,gy) > 0 {
+					sdim gender_tmp, 8, residents(gx,gy)
+					split gender(gx,gy), "]", gender_tmp
+	
+					repeat residents(gx,gy)
+						if instr(gender_tmp(cnt), 0, "m") != -1 {
+							gender_M ++
+						}
+						if instr(gender_tmp(cnt), 0, "f") != -1 {
+							gender_F ++
+						}
+					loop
+				}
+			loop
+		loop
+	
+	return
+	
 *information_panel
 	screen 1, 400, 300
 	
@@ -6025,12 +6182,26 @@
 	font SystemFont, 16 : color 255, 255, 255
 	pos 50, 15 : mes "都市の情報"
 	
-	color 255, 255, 255 : boxf 10, 45, 390, 115
-	color 128, 128, 128 : boxf 11, 46, 389, 114
+	color 255, 255, 255 : boxf 10, 45, 390, 95
+	color 128, 128, 128 : boxf 11, 46, 389, 94
 	
 	color 255, 255, 255 : font SystemFont, 14
-	pos 15, 50  : mes "都市名 "+city_name+"\n市長　 "+mayor_name+"\n人口　 "+Total_Population+"人"
+	pos 15, 50  : mes "都市名 "+city_name+"\n市長　 "+mayor_name+""
 	pos 200, 50 : mes "資金　 § "+Money+"\n支持率 "+approval_rate+"%"
+	
+	color 255, 255, 255 : boxf 10, 100, 390, 200
+	color 128, 128, 128 : boxf 11, 101, 389, 199
+	
+	color 255, 255, 255 : font SystemFont, 14
+	pos 15, 105  : mes "商業地区の労働者数 　　"+Total_workers_Commercial+"人\nオフィス地区の労働者数　　"+Total_workers_Office+"人\n工業地区の労働者数 　　"+Total_workers_Industrial+"人\n農業地区の労働者数　　"+Total_workers_Farm+"人\n公務員の労働者数　　　"+Total_workers_Public+"人"
+	pos 230, 105  : mes "浮浪者数 　　"+Total_Vagrants+"人"
+	
+	color 255, 255, 255 : boxf 10, 205, 390, 245
+	color 128, 128, 128 : boxf 11, 206, 389, 244
+	
+	color 255, 255, 255 : font SystemFont, 14
+	pos 15, 210 : mes "人口 "+Total_Population+"人"
+	pos 200, 210 : mes "男性人口 "+gender_M+"人\n女性人口 "+gender_F+"人"
 	
 	stop
 	
@@ -7592,6 +7763,54 @@
 						map_data_buf = strf("%03d", crop_amount(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", crop_amount(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//age(x,y)
+			noteadd "age(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = age(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+age(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//gender(x,y)
+			noteadd "gender(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = gender(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+gender(x,y)+""
 					}
 				loop
 			
