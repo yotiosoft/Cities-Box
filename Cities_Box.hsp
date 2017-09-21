@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.8.1
+								      Cities Box Ver 0.8.1.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -5763,7 +5763,8 @@
 	
 					dim age_in_Residential, before_residents
 					repeat before_residents
-						age_in_Residential(cnt) = int(age_in_Residential(cnt))
+						split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
+						age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
 					loop
 		
 				//人口の増減処理
@@ -5787,11 +5788,9 @@
 								cut_residents = rnd(before_residents)
 								residents(x,y) = before_residents - cut_residents
 	
-								demand_Residential += add_residents
-	
 								age(x,y) = ""
 								repeat (before_residents-cut_residents)
-									age(x,y) += "["+age_in_Resodential(cnt)+"]"
+									age(x,y) += "["+age_in_Residential(cnt)+"]"
 								loop
 							}
 					}
@@ -6032,7 +6031,7 @@
 					Total_Vagrants = 0
 				}
 				
-			//RCOI需要メーターを変動
+			//RCOIF需要メーターを変動
 				if Vacancies > 0 and Total_Vagrants >= 0 {
 					if Total_Population > 0 {
 						demand_Residential 	= happiness_ave + Special_demand_Residential
@@ -6084,6 +6083,42 @@
 						demand_Farm 	= 100
 					}
 				}
+	
+		//毎年1月1日に、住民の年齢に1を足す
+			if Time_Month = 1 and Time_Date = 1 and residents(x,y) > 0 {
+				//変更前の住人の年齢をもう一度取得
+					sdim age_in_Residential_tmp, 16, residents(x,y)
+					split age(x,y), "]", age_in_Residential_tmp
+	
+				//年齢に1を足す
+					dim age_in_Residential, residents(x,y)
+					repeat residents(x,y)
+						split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
+						age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
+	
+					//120歳を寿命として、drop = 0なら住人一人が死亡
+						drop = rnd(121-age_in_Residential(cnt))
+						
+						if drop = 0 {
+							age_in_Residential(cnt) = -1
+	
+							Total_Population -= 1
+							
+						} else {
+							
+							age_in_Residential(cnt) ++
+						}
+	
+						age(x,y) = ""
+						repeat residents(x,y)
+							if age_in_Residential(cnt) >= 0 {
+								age(x,y) += "["+age_in_Residential(cnt)+"]"
+							}
+						loop
+					loop
+			}
+	
+					
 	
 	return
 	
