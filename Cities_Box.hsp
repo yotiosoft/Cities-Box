@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.8.1.1
+								      Cities Box Ver 0.8.1.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -470,7 +470,7 @@
 				chdir addon_path
 	
 			//アドオン名取得
-					addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
+				addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
 	
 			//読み込み中画面
 				color 0, 0, 0 : boxf
@@ -5777,6 +5777,15 @@
 								demand_Residential -= add_residents
 								
 								repeat add_residents
+								
+									new_age_tmp = rnd(120)
+									
+									if new_age_tmp <= 40 {
+										new_age_tmp = 0			; 1/3の確率で0歳児
+									} else {
+										new_age_tmp -= 40		; new_age_tmp > 40の場合、new_age_tmpから40引いた歳を新しい住民の年齢とする
+									}
+									
 									age(x,y) += "["+rnd(81)+"]"
 								loop
 							}
@@ -5785,13 +5794,21 @@
 					if f >= 10+(demand_Residential/10) {
 						//各住居地区で何人減らすか
 							if before_residents > 0 {
-								cut_residents = rnd(before_residents)
-								residents(x,y) = before_residents - cut_residents
+								cut_residents = rnd(before_residents+5) - 5
+	
+								if cut_residents < 0 and (addon_type(map(x,y)) = "low_density_residential" or addon_type(map(x,y)) = "Low_density_Residential" or addon_type(map(x,y)) = "low_density_Residential") {
+									residents(x,y) = 0										; -5 <= cut_residents < 0の場合、その家の住民全員がマップ外へ出る（低密度住宅のみ）
+								} else {
+									residents(x,y) = before_residents - (cut_residents + 5)	; その他の場合、cut_residetsに5を足した人数がマップ外へ出る
+								}
 	
 								age(x,y) = ""
-								repeat (before_residents-cut_residents)
-									age(x,y) += "["+age_in_Residential(cnt)+"]"
-								loop
+	
+								if residents(x,y) > 0 {
+									repeat (before_residents-cut_residents)
+										age(x,y) += "["+age_in_Residential(cnt)+"]"
+									loop
+								}
 							}
 					}
 				
