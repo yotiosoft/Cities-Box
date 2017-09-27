@@ -1,7 +1,7 @@
-Release Number : 76;
-Title : Cities Box r76(Alpha);
-Version : 0.8.1.1;
-About : 毎年1月1日に住民が歳をとるように変更 その他、幾つかのバグを修正;
+Release Number : 77;
+Title : Cities Box;
+Version : 0.8.1.2;
+About : 住民の年齢関連を調整;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

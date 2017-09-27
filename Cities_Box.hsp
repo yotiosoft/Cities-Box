@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.8.1.2
+								       Cities Box Ver 0.8.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1050,6 +1050,9 @@
 	
 			}
 	
+			//保存バージョン(Version)を読み込み
+				Saved_Version = int(get_chapter(load_mapdata, "Version", " = \"", "\""))
+	
 			//都市名(City_Name)を読み込み
 				City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
 	
@@ -1167,6 +1170,37 @@
 					tax_of_Farm = int( get_chapter(load_mapdata, "tax_of_Farm", " = ", ";") )
 				} else {
 					tax_of_Farm = 100
+				}
+	
+			//総労働者数を読み込み
+				if instr(load_mapdata, 0, "Total_workers_Commercial") != -1 {
+					Total_workers_Commercial = int( get_chapter(load_mapdata, "Total_workers_Commercial", " = ", ";") )
+				} else {
+					Total_workers_Commercial = 0
+				}
+	
+				if instr(load_mapdata, 0, "Total_workers_Office") != -1 {
+					Total_workers_Office = int( get_chapter(load_mapdata, "Total_workers_Office", " = ", ";") )
+				} else {
+					Total_workers_Office = 0
+				}
+	
+				if instr(load_mapdata, 0, "Total_workers_Industrial") != -1 {
+					Total_workers_Industrial = int( get_chapter(load_mapdata, "Total_workers_Industrial", " = ", ";") )
+				} else {
+					Total_workers_Industrial = 0
+				}
+	
+				if instr(load_mapdata, 0, "Total_workers_Farm") != -1 {
+					Total_workers_Farm = int( get_chapter(load_mapdata, "Total_workers_Farm", " = ", ";") )
+				} else {
+					Total_workers_Farm = 0
+				}
+				
+				if instr(load_mapdata, 0, "Total_workers_Public") != -1 {
+					Total_workers_Public = int( get_chapter(load_mapdata, "Total_workers_Public", " = ", ";") )
+				} else {
+					Total_workers_Public = 0
 				}
 		
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
@@ -1429,111 +1463,180 @@
 			//workers_Commercial(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Commercial(x,y)") != -1 {
 					workers_Commercial_buf = get_chapter(load_mapdata, "workers_Commercial(x,y)", " {", "}")
+	
+					if Saved_Version >= 78 {
+						repeat mapy
+							y = cnt
+							
+							notesel workers_Commercial_buf
+							noteget workers_Commercial_buf_a_line, (y+1)
 				
-					repeat mapy
-						y = cnt
-			
-						notesel workers_Commercial_buf
-						noteget workers_Commercial_buf_a_line, (y+1)
-			
-						sdim workers_Commercial_buf_a_tile, mapx
-						split workers_Commercial_buf_a_line, ", ", workers_Commercial_buf_a_tile
-				
-						repeat mapx
-							x = cnt
-							workers_Commercial(x,y) = int(workers_Commercial_buf_a_tile(x))
-							Total_workers_Commercial += workers_Commercial(x,y)
+							sdim workers_Commercial_buf_a_tile, mapx
+							split workers_Commercial_buf_a_line, ", ", workers_Commercial_buf_a_tile
+					
+							repeat mapx
+								x = cnt
+								workers_Commercial(x,y) = int(workers_Commercial_buf_a_tile(x))
+								Total_workers_Commercial += workers_Commercial(x,y)
+							loop
+					
 						loop
-				
-					loop
+	
+					} else {
+						repeat mapy
+							y = cnt
+	
+							repeat mapx
+								x = cnt
+	
+								workers_Commercial(x,y) = 0
+								Total_workers_Commercial = 0
+							loop
+						loop
+					}
 				}
 	
 			//workers_Office(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Office(x,y)") != -1 {
 					workers_Office_buf = get_chapter(load_mapdata, "workers_Office(x,y)", " {", "}")
+	
+					if Saved_Version >= 78 {
+						repeat mapy
+							y = cnt
 				
-					repeat mapy
-						y = cnt
-			
-						notesel workers_Office_buf
-						noteget workers_Office_buf_a_line, (y+1)
-			
-						sdim workers_Office_buf_a_tile, mapx
-						split workers_Office_buf_a_line, ", ", workers_Office_buf_a_tile
+							notesel workers_Office_buf
+							noteget workers_Office_buf_a_line, (y+1)
 				
-						repeat mapx
-							x = cnt
-							workers_Office(x,y) = int(workers_Office_buf_a_tile(x))
-							Total_workers_Office += workers_Office(x,y)
+							sdim workers_Office_buf_a_tile, mapx
+							split workers_Office_buf_a_line, ", ", workers_Office_buf_a_tile
+					
+							repeat mapx
+								x = cnt
+								workers_Office(x,y) = int(workers_Office_buf_a_tile(x))
+								Total_workers_Office += workers_Office(x,y)
+							loop
+					
 						loop
-				
-					loop
+					} else {
+						repeat mapy
+							y = cnt
+	
+							repeat mapx
+								x = cnt
+	
+								workers_Office(x,y) = 0
+								Total_workers_Office = 0
+							loop
+						loop
+					}
 				}
 	
 			//workers_Industrial(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Industrial(x,y)") != -1 {
 					workers_Industrial_buf = get_chapter(load_mapdata, "workers_Industrial(x,y)", " {", "}")
+	
+					if Saved_Version >= 78 {
+						repeat mapy
+							y = cnt
 				
-					repeat mapy
-						y = cnt
-			
-						notesel workers_Industrial_buf
-						noteget workers_Industrial_buf_a_line, (y+1)
-			
-						sdim workers_Industrial_buf_a_tile, mapx
-						split workers_Industrial_buf_a_line, ", ", workers_Industrial_buf_a_tile
+							notesel workers_Industrial_buf
+							noteget workers_Industrial_buf_a_line, (y+1)
 				
-						repeat mapx
-							x = cnt
-							workers_Industrial(x,y) = int(workers_Industrial_buf_a_tile(x))
-							Total_workers_Industrial += workers_Industrial(x,y)
+							sdim workers_Industrial_buf_a_tile, mapx
+							split workers_Industrial_buf_a_line, ", ", workers_Industrial_buf_a_tile
+					
+							repeat mapx
+								x = cnt
+								workers_Industrial(x,y) = int(workers_Industrial_buf_a_tile(x))
+								Total_workers_Industrial += workers_Industrial(x,y)
+							loop
+					
 						loop
-				
-					loop
+	
+					} else {
+						repeat mapy
+							y = cnt
+	
+							repeat mapx
+								x = cnt
+	
+								workers_Industrial(x,y) = 0
+								Total_workers_Industrial = 0
+							loop
+						loop
+					}
 				}
 	
 			//workers_Farm(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Farm(x,y)") != -1 {
 					workers_Farm_buf = get_chapter(load_mapdata, "workers_Farm(x,y)", " {", "}")
+	
+					if Saved_Version >= 78 {
+						repeat mapy
+							y = cnt
 				
-					repeat mapy
-						y = cnt
-			
-						notesel workers_Farm_buf
-						noteget workers_Farm_buf_a_line, (y+1)
-			
-						sdim workers_Farm_buf_a_tile, mapx
-						split workers_Farm_buf_a_line, ", ", workers_Farm_buf_a_tile
+							notesel workers_Farm_buf
+							noteget workers_Farm_buf_a_line, (y+1)
 				
-						repeat mapx
-							x = cnt
-							workers_Farm(x,y) = int(workers_Farm_buf_a_tile(x))
-							Total_workers_Farm += workers_Farm(x,y)
+							sdim workers_Farm_buf_a_tile, mapx
+							split workers_Farm_buf_a_line, ", ", workers_Farm_buf_a_tile
+					
+							repeat mapx
+								x = cnt
+								workers_Farm(x,y) = int(workers_Farm_buf_a_tile(x))
+								Total_workers_Farm += workers_Farm(x,y)
+							loop
+					
 						loop
-				
-					loop
+	
+					} else {
+						repeat mapy
+							y = cnt
+	
+							repeat mapx
+								x = cnt
+	
+								workers_Farm(x,y) = 0
+								Total_workers_Farm = 0
+							loop
+						loop
+					}
 				}
 	
 			//workers_Public(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Public(x,y)") != -1 {
 					workers_Public_buf = get_chapter(load_mapdata, "workers_Public(x,y)", " {", "}")
+	
+					if Saved_Version >= 78 {
+						repeat mapy
+							y = cnt
 				
-					repeat mapy
-						y = cnt
-			
-						notesel workers_Public_buf
-						noteget workers_Public_buf_a_line, (y+1)
-			
-						sdim workers_Public_buf_a_tile, mapx
-						split workers_Public_buf_a_line, ", ", workers_Public_buf_a_tile
+							notesel workers_Public_buf
+							noteget workers_Public_buf_a_line, (y+1)
 				
-						repeat mapx
-							x = cnt
-							workers_Public(x,y) = int(workers_Public_buf_a_tile(x))
-							Total_workers_Public += workers_Public(x,y)
+							sdim workers_Public_buf_a_tile, mapx
+							split workers_Public_buf_a_line, ", ", workers_Public_buf_a_tile
+					
+							repeat mapx
+								x = cnt
+								workers_Public(x,y) = int(workers_Public_buf_a_tile(x))
+								Total_workers_Public += workers_Public(x,y)
+							loop
+					
 						loop
-				
-					loop
+	
+					} else {
+						repeat mapy
+							y = cnt
+	
+							repeat mapx
+								x = cnt
+	
+								workers_Commercial(x,y) = 0
+								Total_workers_Commercial = 0
+							loop
+						loop
+					}
 				}
 	
 			//land_price(x,y)の読み込み
@@ -1733,20 +1836,20 @@
 					age_buf = get_chapter(load_mapdata, "age(x,y)", " {", "}")
 				
 					repeat mapy
-					y = cnt
-		
-					notesel age_buf
-					noteget age_buf_a_line, (y+1)
-		
-					sdim age_buf_a_tile, mapx
-					split age_buf_a_line, ", ", age_buf_a_tile
+						y = cnt
 			
-					repeat mapx
-						x = cnt
-						age(x,y) = age_buf_a_tile(x)
+						notesel age_buf
+						noteget age_buf_a_line, (y+1)
+			
+						sdim age_buf_a_tile, mapx
+						split age_buf_a_line, ", ", age_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							age(x,y) = age_buf_a_tile(x)
+						loop
+				
 					loop
-			
-				loop
 	
 				} else {
 					//セーブデータにageの情報がない場合はランダムに決定
@@ -1773,20 +1876,20 @@
 					gender_buf = get_chapter(load_mapdata, "gender(x,y)", " {", "}")
 				
 					repeat mapy
-					y = cnt
-		
-					notesel gender_buf
-					noteget gender_buf_a_line, (y+1)
-		
-					sdim gender_buf_a_tile, mapx
-					split gender_buf_a_line, ", ", gender_buf_a_tile
+						y = cnt
 			
-					repeat mapx
-						x = cnt
-						gender(x,y) = gender_buf_a_tile(x)
+						notesel gender_buf
+						noteget gender_buf_a_line, (y+1)
+			
+						sdim gender_buf_a_tile, mapx
+						split gender_buf_a_line, ", ", gender_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							gender(x,y) = gender_buf_a_tile(x)
+						loop
+				
 					loop
-			
-				loop
 	
 				} else {
 					//セーブデータにgenderの情報がない場合はランダムに決定
@@ -1806,6 +1909,82 @@
 									
 									gender(x,y) += "["+new_gender+"]"
 								loop
+							loop
+						loop
+				}
+	
+			//workplace(x,y)の読み込み
+				if instr(load_mapdata, 0, "workplace(x,y)") != -1 {
+					workplace_buf = get_chapter(load_mapdata, "workplace(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel workplace_buf
+						noteget workplace_buf_a_line, (y+1)
+			
+						sdim workplace_buf_a_tile, mapx
+						split workplace_buf_a_line, ", ", workplace_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							workplace(x,y) = workplace_buf_a_tile(x)
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにworkplaceの情報がない場合は全て50万円/マスに設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								workplace_tmp = ""
+	
+								repeat residents(x,y)
+									workplace_tmp += "[]"
+								loop
+	
+								workplace(x,y) = workplace_tmp
+							loop
+						loop
+				}
+	
+			//school(x,y)の読み込み
+				if instr(load_mapdata, 0, "school(x,y)") != -1 {
+					school_buf = get_chapter(load_mapdata, "school(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel school_buf
+						noteget school_buf_a_line, (y+1)
+			
+						sdim school_buf_a_tile, mapx
+						split school_buf_a_line, ", ", school_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							school(x,y) = school_buf_a_tile(x)
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにschoolの情報がない場合は全て50万円/マスに設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								school_tmp = ""
+	
+								repeat residents(x,y)
+									school_tmp += "[]"
+								loop
+	
+								school(x,y) = school_tmp
 							loop
 						loop
 				}
@@ -1864,7 +2043,7 @@
 		//総求人数を取得
 			Vacancies = (total_Commercial_maximum_capacity-Total_workers_Commercial) + (total_Office_maximum_capacity-Total_workers_Office) + (total_Industrial_maximum_capacity-Total_workers_Industrial) + (total_Public_maximum_capacity-Total_workers_Public)
 		
-		//総浮浪者数を取得
+		//総非労働者数を取得
 			Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
 	
 	//読み込み後最初のループであることを示す
@@ -5728,6 +5907,11 @@
 				return
 			}
 	
+		//その日の最初にジャンプした場合は、*fluctuation__get_firstにジャンプ
+			if x = 0 and y = 0 {
+				gosub *fluctuation__get_first
+			}
+	
 		//変数初期化
 			before_residents = 0
 			before_workers_Commericial = 0
@@ -5818,221 +6002,22 @@
 		
 				//総人口数にも反映
 					Total_Population = Total_Population - before_residents + residents(x,y)
+	
+				//変更後の住民の年齢を取得
+					sdim age_in_Residential_tmp, 16, residents(x,y)
+					split age(x,y), "]", age_in_Residential_tmp
+	
+				//年齢に1を足す
+					dim age_in_Residential, residents(x,y)
+					repeat residents(x,y)
+						split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
+						age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
+					loop
 			}
 	
-		//商業区画の労働人口の増減
-			if category(x,y) = "commercial" {
-				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					if demand_Commercial = 0 {
-						rndv = 11
-					} else {
-						rndv = 10+(demand_Commercial/10)
-					}
-					f = rnd(rndv)+1		; fの値は商業地区の需要度が100％なら20～0
-					f2 = 0
-						
-				//変更前の商業区画の労働者数
-					before_workers_Commercial = workers_Commercial(x,y)
-		
-				//増減処理
-					if f < 10+(demand_Commercial/10) {
-						//各商業地区に何人増やすか
-							if addon_maximum_capacity(map(x,y)) - before_workers_Commercial > 0 {
-								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Commercial)
-								//総人口を越さないことを確認
-									if Total_workers_Commercial + add_workers < Total_Population {
-										workers_Commercial(x,y) = before_workers_Commercial + add_workers
-									} else {
-										f2 = 1
-									}
-							}
-					}
-				
-					if f > 10+(demand_Commercial/10) or f2 = 1 {
-						//各商業地区で何人減らすか
-							if before_workers_Commercial > 0 {
-								cut_workers = rnd(before_workers_Commercial)
-								workers_Commercial(x,y) = before_workers_Commercial - cut_workers
-							}
-					}
-				
-					if workers_Commercial(x,y) < 0 {
-						workers_Commercial(x,y) = 0
-					}
-		
-				//総労働人口数にも反映
-					Total_workers_Commercial = Total_workers_Commercial - before_workers_Commercial + workers_Commercial(x,y)
-			}
-	
-		//オフィス区画の労働人口の増減
-			if category(x,y) = "office" {
-				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					if demand_Office = 0 {
-						rndv = 11
-					} else {
-						rndv = 10+(demand_Office/10)
-					}
-					f = rnd(rndv)+1		; fの値はオフィス地区の需要度が100％なら20～0
-					f2 = 0
-						
-				//変更前のオフィス区画の労働者数
-					before_workers_Office = workers_Office(x,y)
-		
-				//増減処理
-					if f < 10+(demand_Office/10) {
-						//各オフィス地区に何人増やすか
-							if addon_maximum_capacity(map(x,y)) - before_workers_Office > 0 {
-								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Office)
-								//総人口を越さないことを確認
-									if Total_workers_Office + add_workers < Total_Population {
-										workers_Office(x,y) = before_workers_Office + add_workers
-									} else {
-										f2 = 1
-									}
-							}
-					}
-				
-					if f > 10+(demand_Office/10) or f2 = 1 {
-						//各オフィス地区で何人減らすか
-							if before_workers_Office > 0 {
-								cut_workers = rnd(before_workers_Office)
-								workers_Office(x,y) = before_workers_Office - cut_workers
-							}
-					}
-				
-					if workers_Office(x,y) < 0 {
-						workers_Office(x,y) = 0
-					}
-		
-				//総労働人口数にも反映
-					Total_workers_Office = Total_workers_Office - before_workers_Office + workers_Office(x,y)
-			}
-	
-		//工業区画の労働人口の増減
-			if category(x,y) = "industrial" {
-				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					if demand_Industrial = 0 {
-						rndv = 11
-					} else {
-						rndv = 10+(demand_Industrial/10)
-					}
-					f = rnd(rndv)+1		; fの値は工業地区の需要度が100％なら20～0
-					f2 = 0
-						
-				//変更前の工業区画の労働者数
-					before_workers_Industrial = workers_Industrial(x,y)
-		
-				//増減処理
-					if f < 10+(demand_Industrial/10) {
-						//各工業地区に何人増やすか
-							if addon_maximum_capacity(map(x,y)) - before_workers_Industrial > 0 {
-								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Industrial)
-								//総人口を越さないことを確認
-									if Total_workers_Industrial + add_workers < Total_Population {
-										workers_Industrial(x,y) = before_workers_Industrial + add_workers
-									} else {
-										f2 = 1
-									}
-							}
-					}
-				
-					if f > 10+(demand_Industrial/10) or f2 = 1 {
-						//各工業地区で何人減らすか
-							if before_workers_Industrial > 0 {
-								cut_workers = rnd(before_workers_Industrial)
-								workers_Industrial(x,y) = before_workers_Industrial - cut_workers
-							}
-					}
-				
-					if workers_Industrial(x,y) < 0 {
-						workers_Industrial(x,y) = 0
-					}
-		
-				//総労働人口数にも反映
-					Total_workers_Industrial = Total_workers_Industrial - before_workers_Industrial + workers_Industrial(x,y)
-			}
-	
-		//農業区画の労働人口の増減
-			if category(x,y) = "farm" {
-				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					if demand_Farm = 0 {
-						rndv = 11
-					} else {
-						rndv = 10+(demand_Farm/10)
-					}
-					f = rnd(rndv)+1		; fの値は農業地区の需要度が100％なら20～0
-					f2 = 0
-						
-				//変更前の農業区画の労働者数
-					before_workers_Farm = workers_Farm(x,y)
-		
-				//増減処理
-					if f < 10+(demand_Farm/10) {
-						//各農業地区に何人増やすか
-							if addon_maximum_capacity(map(x,y)) - before_workers_Farm > 0 {
-								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Farm)
-								//総人口を越さないことを確認
-									if Total_workers_Farm + add_workers < Total_Population {
-										workers_Farm(x,y) = before_workers_Farm + add_workers
-									} else {
-										f2 = 1
-									}
-							}
-					}
-				
-					if f > 10+(demand_Farm/10) or f2 = 1 {
-						//各工業地区で何人減らすか
-							if before_workers_Farm > 0 {
-								cut_workers = rnd(before_workers_Farm)
-								workers_Farm(x,y) = before_workers_Farm - cut_workers
-							}
-					}
-				
-					if workers_Farm(x,y) < 0 {
-						workers_Farm(x,y) = 0
-					}
-		
-				//総労働人口数にも反映
-					Total_workers_Farm = Total_workers_Farm - before_workers_Farm + workers_Farm(x,y)
-			}
-			
-		//公共施設の労働人口の増減
-			if category(x,y) = "public" {
-				//労働人口を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					f = rnd(2)
-					f2 = 0
-						
-				//変更前の公共施設の労働者数
-					before_workers_Public = workers_Public(x,y)
-		
-				//増減処理
-					if f = 0 {
-						//各公共施設に何人増やすか
-							if addon_maximum_capacity(map(x,y)) - before_workers_Public > 0 {
-								add_workers = rnd(addon_maximum_capacity(map(x,y)) - before_workers_Public)
-								//総人口を越さないことを確認
-									if Total_workers_Public + add_workers < Total_Population {
-										workers_Public(x,y) = before_workers_Public + add_workers
-									} else {
-										f2 = 1
-									}
-							}
-					}
-				
-					if f = 1 {
-						//各公共施設で何人減らすか
-							if before_workers_Public > 0 or f2 = 1 {
-								cut_workers = rnd(before_workers_Public)
-								workers_Public(x,y) = before_workers_Public - cut_workers
-							}
-					}
-				
-					if workers_Public(x,y) < 0 {
-						workers_Public(x,y) = 0
-					}
-		
-				//総労働人口数にも反映
-					Total_workers_Public = Total_workers_Public - before_workers_Public + workers_Public(x,y)
+		//就職先または就学先の決定
+			if residents(x,y) > 0 {
+				gosub *fix_workplace
 			}
 	
 		//需要度を増減
@@ -6040,7 +6025,7 @@
 				before_Vacancies = Vacancies
 				Vacancies = (total_Commercial_maximum_capacity-Total_workers_Commercial) + (total_Office_maximum_capacity-Total_workers_Office) + (total_Industrial_maximum_capacity-Total_workers_Industrial) + (total_Public_maximum_capacity-Total_workers_Public)
 				
-			//総浮浪者数を取得
+			//非労働者（学生含む）数を取得
 				before_Vagrants = Vagrants
 				Total_Vagrants = Total_Population - Total_workers_Commercial - Total_workers_Office - Total_workers_Industrial - Total_workers_Public
 	
@@ -6103,16 +6088,9 @@
 	
 		//毎年1月1日に、住民の年齢に1を足す
 			if Time_Month = 1 and Time_Date = 1 and residents(x,y) > 0 {
-				//変更前の住人の年齢をもう一度取得
-					sdim age_in_Residential_tmp, 16, residents(x,y)
-					split age(x,y), "]", age_in_Residential_tmp
-	
 				//年齢に1を足す
 					dim age_in_Residential, residents(x,y)
 					repeat residents(x,y)
-						split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
-						age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
-	
 					//120歳を寿命として、drop = 0なら住人一人が死亡
 						drop = rnd(121-age_in_Residential(cnt))
 						
@@ -6136,6 +6114,150 @@
 			}
 	
 					
+	
+	return
+	
+*fluctuation__get_first
+	//*fluctuationで扱う配列データのうち、取得に時間がかかるものを予め取得しておく
+	
+		//職場
+			dim all_workplace_x, next_obj_serial_num
+			dim all_workplace_y, next_obj_serial_num
+	
+			gx = 0 : gy = 0
+			gi = 0
+			
+			repeat mapx
+				gx = cnt
+	
+				repeat mapy
+					gy = cnt
+					
+					if category(gx,gy) = "commercial" or category(gx,gy) = "office" or category(gx,gy) = "industrial" or category(gx,gy) = "farm" or category(gx,gy) = "public" {
+						all_workplace_x(gi) = gx
+						all_workplace_y(gi) = gy
+						
+						gi ++
+					}
+				loop
+			loop
+		
+	return
+	
+*fix_workplace
+	//変更前の住人の年齢を取得
+		sdim age_in_Residential_tmp, 16, residents(x,y)
+		split age(x,y), "]", age_in_Residential_tmp
+
+		dim age_in_Residential, residents(x,y)
+		repeat residents(x,y)
+			split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
+			age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
+		loop
+	
+	sdim workplace_tmp, 8, residents(x,y)
+	split workplace(x,y), "][", workplace_tmp
+	
+	workplace(x,y) = ""
+	
+	repeat residents(x,y)
+		if instr(workplace_tmp(cnt), 0, "[") != -1 {
+			split workplace_tmp(cnt), "[", cut, workplace_tmp(cnt)
+		}
+		if instr(workplace_tmp(cnt), 0, "]") != -1 {
+			split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
+		}
+		
+		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 20 and age_in_Residential(cnt) <= 60 {
+			//就職先が決まっておらず、かつ20歳以上60歳以下なら(年齢)分の1の確率で就職先を決める
+				dr = rnd(age_in_Residential(cnt))
+				
+				if dr = 0 {
+					new_workplace_rnd = rnd(gi-1)	; 職場はランダムに決める
+					new_workplace_x = all_workplace_x(new_workplace_rnd)
+					new_workplace_y = all_workplace_y(new_workplace_rnd)
+	
+					//収容人数内に収まる場合は就職を決定する
+						if category(new_workplace_x, new_workplace_y) = "commercial" {
+							if addon_maximum_capacity(map(new_workplace_x, new_workplace_y)) >= workers_Commercial(new_workplace_x, new_workplace_y) + 1 {
+								workers_Commercial(new_workplace_x, new_workplace_y) ++
+								workplace_tmp(cnt) = "c"+str(obj_serial_num(new_workplace_x, new_workplace_y))+"
+	
+								Total_workers_Commercial ++
+								demand_Commercial --
+	
+								repeat gi
+									if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y) {
+										workers_Commercial(all_workplace_x(cnt), all_workplace_y(cnt)) ++
+									}
+								loop
+							}
+						}
+						if category(new_workplace_x, new_workplace_y) = "office" {
+							if addon_maximum_capacity(map(new_workplace_x, new_workplace_y)) >= workers_Office(new_workplace_x, new_workplace_y) + 1 {
+								workers_Office(new_workplace_x, new_workplace_y) ++
+								workplace_tmp(cnt) = "o"+str(obj_serial_num(new_workplace_x, new_workplace_y))+""
+	
+								Total_workers_Office ++
+								demand_Office --
+	
+								repeat gi
+									if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y) {
+										workers_Office(all_workplace_x(cnt), all_workplace_y(cnt)) ++
+									}
+								loop
+							}
+						}
+						if category(new_workplace_x, new_workplace_y) = "industrial" {
+							if addon_maximum_capacity(map(new_workplace_x, new_workplace_y)) >= workers_Industrial(new_workplace_x, new_workplace_y) + 1 {
+								workers_Industrial(new_workplace_x, new_workplace_y) ++
+								workplace_tmp(cnt) = "i"+str(obj_serial_num(new_workplace_x, new_workplace_y))+""
+	
+								Total_workers_Industrial ++
+								demand_Industrial --
+							}
+	
+							repeat gi
+									if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y) {
+										workers_Industrial(all_workplace_x(cnt), all_workplace_y(cnt)) ++
+									}
+								loop
+						}
+						if category(new_workplace_x, new_workplace_y) = "farm" {
+							if addon_maximum_capacity(map(new_workplace_x, new_workplace_y)) >= workers_Farm(new_workplace_x, new_workplace_y) + 1 {
+								workers_Farm(new_workplace_x, new_workplace_y) ++
+								workplace_tmp(cnt) = "f"+str(obj_serial_num(new_workplace_x, new_workplace_y))+""
+	
+								Total_workers_Farm ++
+								demand_Farm --
+	
+								repeat gi
+									if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y) {
+										workers_Farm(all_workplace_x(cnt), all_workplace_y(cnt)) ++
+									}
+								loop
+							}
+						}
+						if category(new_workplace_x, new_workplace_y) = "public" {
+							if addon_maximum_capacity(map(new_workplace_x, new_workplace_y)) >= workers_Public(new_workplace_x, new_workplace_y) + 1 {
+								workers_Public(new_workplace_x, new_workplace_y) ++
+								workplace_tmp(cnt) = "p"+str(obj_serial_num(new_workplace_x, new_workplace_y))+""
+	
+								Total_workers_Public ++
+								demand_Public --
+	
+								repeat gi
+									if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y) {
+										workers_Public(all_workplace_x(cnt), all_workplace_y(cnt)) ++
+									}
+								loop
+							}
+						}
+				}
+		}
+	
+		workplace(x,y) += "["+workplace_tmp(cnt)+"]"
+	loop
 	
 	return
 	
@@ -6246,7 +6368,7 @@
 	
 	color 255, 255, 255 : font SystemFont, 14
 	pos 15, 105  : mes "商業地区の労働者数 　　"+Total_workers_Commercial+"人\nオフィス地区の労働者数　　"+Total_workers_Office+"人\n工業地区の労働者数 　　"+Total_workers_Industrial+"人\n農業地区の労働者数　　"+Total_workers_Farm+"人\n公務員の労働者数　　　"+Total_workers_Public+"人"
-	pos 230, 105  : mes "浮浪者数 　　"+Total_Vagrants+"人"
+	pos 230, 105  : mes "非労働者数 　　"+Total_Vagrants+"人"
 	
 	color 255, 255, 255 : boxf 10, 205, 390, 245
 	color 128, 128, 128 : boxf 11, 206, 389, 244
@@ -6297,20 +6419,6 @@
 			if category_2(rx,ry) = "education" {
 				total_Education += 1
 			}
-	
-			if workers_Commercial(rx,ry) > 0 {
-				total_workers_Commercial += workers_Commercial(rx,ry)
-			}
-			if workers_Office(rx,ry) > 0 {
-				total_workers_Office += workers_Office(rx,ry)
-			}
-			if workers_Industrial(rx,ry) > 0 {
-				total_workers_Industrial += workers_Industrial(rx,ry)
-			}
-			if workers_Farm(rx,ry) > 0 {
-				total_workers_Farm += workers_Farm(rx,ry)
-			}
-				
 		loop
 	loop
 	
@@ -7296,6 +7404,17 @@
 			noteadd " ", -1
 			await 2
 	
+		//総労働者数
+			noteadd "Total_workers_Commercial = "+Total_workers_Commercial+";", -1
+			noteadd "Total_workers_Office = "+Total_workers_Office+";", -1
+			noteadd "Total_workers_Industrial = "+Total_workers_Industrial+";", -1
+			noteadd "Total_workers_Farm = "+Total_workers_Farm+";", -1
+			noteadd "Total_workers_Public = "+Total_workers_Public+";", -1
+	
+		//空白
+			noteadd " ", -1
+			await 2
+	
 		//name(x,y)
 			noteadd "name(x,y) {", -1
 			
@@ -7863,6 +7982,54 @@
 						map_data_buf = gender(x,y)
 					} else {
 						map_data_buf = ""+map_data_buf+", "+gender(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//workplace(x,y)
+			noteadd "workplace(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = workplace(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+workplace(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//school(x,y)
+			noteadd "school(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = school(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+school(x,y)+""
 					}
 				loop
 			
