@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.8.2
+								      Cities Box Ver 0.8.2.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -395,6 +395,7 @@
 				sdim addon_icon, total_addons
 				sdim addon_type, total_addons
 				sdim addon_type_2, total_addons
+				sdim addon_type_3, total_addons
 				dim addon_maximum_capacity, total_addons
 	
 				sdim addon_crop, total_addons
@@ -490,6 +491,7 @@
 				//アドオンのタイプ
 					addon_type(cnt) = get_chapter(buf_adat, "addon_type", " = \"", "\"")
 					addon_type_2(cnt) = get_chapter(buf_adat, "addon_type_2", " = \"", "\"")
+					addon_type_3(cnt) = get_chapter(buf_adat, "addon_type_3", " = \"", "\"")
 	
 				//建物の収容可能人数（住居地区の場合は住民数、商業・オフィス・工業・公共施設は労働者数）
 					addon_maximum_capacity(cnt) = int( get_chapter(buf_adat, "maximum_capacity", " = \"", "\"") )
@@ -790,6 +792,7 @@
 		sdim name, 128, mapx, mapy			//各座標のアドオン名
 		sdim category, 128, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 		sdim category_2, 128, mapx, mapy	//アドオンの更に詳細なカテゴリー（公共施設などで使う）
+		sdim category_3, 128, mapx, mapy	//アドオンの更に更に詳細なカテゴリー（学校などで使う）
 		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
 		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
@@ -804,6 +807,8 @@
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
 		dim workers_Farm, mapx, mapy		//農業地区の従業員数（農業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
+	
+		dim students, mapx, mapy			//各学校の生徒・学生数
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
@@ -825,6 +830,7 @@
 			name(ix,iy) = "tile_greenfield"
 			category(ix,iy) = "tile"
 			category_2(ix,iy) = ""
+			category_3(ix,iy) = ""
 	
 			obj_type(ix,iy) = 0
 			obj_dire(ix,iy) = 0
@@ -841,6 +847,8 @@
 			workers_Industrial(ix,iy) = 0
 			workers_Farm(ix,iy) = 0
 			workers_Public(ix,iy) = 0
+	
+			students(ix,iy) = 0
 	
 			land_price(ix,iy) = 20
 			crime_rate(ix,iy) = 0
@@ -978,6 +986,7 @@
 		sdim name, 128, mapx, mapy			//各座標のアドオン名
 		sdim category, 128, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 		sdim category_2, 128, mapx, mapy	//アドオンの更に詳細なカテゴリー（公共施設などで使う）
+		sdim category_3, 128, mapx, mapy	//アドオンの更に更に詳細なカテゴリー（学校などで使う）
 		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
 		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
 		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
@@ -992,6 +1001,8 @@
 		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
 		dim workers_Farm, mapx, mapy		//農業地区の従業員数（農業地区のみ）
 		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
+	
+		dim students, mapx, mapy			//各学校の生徒・学生数
 	
 		dim land_price, mapx, mapy			//地価（万円/マス）
 		dim crime_rate, mapx, mapy			//犯罪率
@@ -1290,6 +1301,38 @@
 								y = cnt
 	
 								category_2(x,y) = ""
+							loop
+						loop
+				}
+	
+			//category_3(x,y)の読み込み
+				if instr(load_mapdata, 0, "category_3(x,y)") != -1 {
+					category_3_buf = get_chapter(load_mapdata, "category_3(x,y)", " {", "}")
+				
+					repeat mapy
+					y = cnt
+		
+					notesel category_3_buf
+					noteget category_3_buf_a_line, (y+1)
+		
+					sdim category_3_buf_a_tile, mapx
+					split category_3_buf_a_line, ", ", category_3_buf_a_tile
+			
+					repeat mapx
+						x = cnt
+						category_3(x,y) = category_3_buf_a_tile(x)
+					loop
+			
+				loop
+	
+				} else {
+					//セーブデータにcategory_3の情報がない場合は全て50万円/マスに設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								category_3(x,y) = ""
 							loop
 						loop
 				}
@@ -1633,7 +1676,42 @@
 								x = cnt
 	
 								workers_Commercial(x,y) = 0
-								Total_workers_Commercial = 0
+								Total_workers_Public = 0
+							loop
+						loop
+					}
+				}
+	
+			//students(x,y)の読み込み
+				if instr(load_mapdata, 0, "students(x,y)") != -1 {
+					students_buf = get_chapter(load_mapdata, "students(x,y)", " {", "}")
+	
+					if Saved_Version >= 78 {
+						repeat mapy
+							y = cnt
+				
+							notesel students_buf
+							noteget students_buf_a_line, (y+1)
+				
+							sdim students_buf_a_tile, mapx
+							split students_buf_a_line, ", ", students_buf_a_tile
+					
+							repeat mapx
+								x = cnt
+								students(x,y) = int(students_buf_a_tile(x))
+								Total_students += students(x,y)
+							loop
+					
+						loop
+	
+					} else {
+						repeat mapy
+							y = cnt
+	
+							repeat mapx
+								x = cnt
+	
+								workers_Public(x,y) = 0
 							loop
 						loop
 					}
@@ -1934,7 +2012,7 @@
 					loop
 	
 				} else {
-					//セーブデータにworkplaceの情報がない場合は全て50万円/マスに設定
+					//セーブデータにworkplaceの情報がない場合
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -1972,7 +2050,7 @@
 					loop
 	
 				} else {
-					//セーブデータにschoolの情報がない場合は全て50万円/マスに設定
+					//セーブデータにschoolの情報がない場合は
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -4318,6 +4396,7 @@
 										name(mx+rx,my+ry) = put_addon_name
 										category(mx+rx,my+ry) = category_buf
 										category_2(mx+rx,my+ry) = addon_type_2(addon_num_buf)
+										category_3(mx+rx,my+ry) = addon_type_3(addon_num_buf)
 	
 										obj_type(mx+rx,my+ry) = obj_type(mx, my)
 										obj_dire(mx+rx,my+ry) = obj_dire(mx, my)
@@ -4667,6 +4746,7 @@
 							name(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "tile_greenfield"
 							category(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "tile"
 							category_2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
+							category_3(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							obj_type(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_type_buf
 							obj_dire(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_dire_buf
 	
@@ -4914,6 +4994,7 @@
 		if category_2(x, y) != "train_crossing" {
 			category_2(x, y) = ""
 		}
+		category_3(x,y) = ""
 		
 		from_delete_obj = 0
 		from_build_obj = 0
@@ -5072,6 +5153,7 @@
 		if category_2(x, y) != "train_crossing" and category_2(x, y) != "" {
 			category_2(x, y) = ""
 		}
+		category_3(x,y) = ""
 		
 		from_delete_obj = 0
 		from_build_obj = 0
@@ -6018,6 +6100,7 @@
 		//就職先または就学先の決定
 			if residents(x,y) > 0 {
 				gosub *fix_workplace
+				gosub *fix_school
 			}
 	
 		//需要度を増減
@@ -6141,11 +6224,61 @@
 					}
 				loop
 			loop
+	
+		//学校
+			dim all_elementary_schools_x, next_obj_serial_num
+			dim all_elementary_schools_y, next_obj_serial_num
+			
+			dim all_junior_high_schools_x, next_obj_serial_num
+			dim all_junior_high_schools_y, next_obj_serial_num
+	
+			dim all_high_schools_x, next_obj_serial_num
+			dim all_high_schools_y, next_obj_serial_num
+	
+			dim all_universities_x, next_obj_serial_num
+			dim all_universities_y, next_obj_serial_num
+	
+			gx = 0 : gy = 0
+			gi_e = 0
+			gi_j = 0
+			gi_h = 0
+			gi_u = 0
+			
+			repeat mapx
+				gx = cnt
+	
+				repeat mapy
+					gy = cnt
+					
+					if category_3(gx,gy) = "elementary-school" or category_3(gx,gy) = "junior-high-school" or category_3(gx,gy) = "high-school" or category_3(gx,gy) = "university" {
+						if category_3(gx,gy) = "elementary-school" {
+							all_elementary_schools_x(gi_e) = gx
+							all_elementary_schools_y(gi_e) = gy
+							gi_e ++
+						}
+						if category_3(gx,gy) = "junior-high-school" {
+							all_junior_high_schools_x(gi_j) = gx
+							all_junior_high_schools_y(gi_j) = gy
+							gi_j ++
+						}
+						if category_3(gx,gy) = "high-school" {
+							all_high_schools_x(gi_h) = gx
+							all_high_schools_y(gi_h) = gy
+							gi_h ++
+						}
+						if category_3(gx,gy) = "university" {
+							all_universities_x(gi_u) = gx
+							all_universities_y(gi_u) = gy
+							gi_u ++
+						}
+					}
+				loop
+			loop
 		
 	return
 	
 *fix_workplace
-	//変更前の住人の年齢を取得
+	//住人の年齢を取得
 		sdim age_in_Residential_tmp, 16, residents(x,y)
 		split age(x,y), "]", age_in_Residential_tmp
 
@@ -6168,8 +6301,8 @@
 			split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
 		}
 		
-		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 20 and age_in_Residential(cnt) <= 60 {
-			//就職先が決まっておらず、かつ20歳以上60歳以下なら(年齢)分の1の確率で就職先を決める
+		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 18 and age_in_Residential(cnt) <= 60 {
+			//就職先が決まっておらず、かつ18歳以上60歳以下なら(年齢)分の1の確率で就職先を決める
 				dr = rnd(age_in_Residential(cnt))
 				
 				if dr = 0 {
@@ -6259,6 +6392,128 @@
 		workplace(x,y) += "["+workplace_tmp(cnt)+"]"
 	loop
 	
+	return
+	
+*fix_school
+	//住人の年齢を取得
+		sdim age_in_Residential_tmp, 16, residents(x,y)
+		split age(x,y), "]", age_in_Residential_tmp
+
+		dim age_in_Residential, residents(x,y)
+		repeat residents(x,y)
+			split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
+			age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
+		loop
+	
+	sdim school_tmp, 8, residents(x,y)
+	split school(x,y), "][", school_tmp
+	
+	sdim workplace_tmp, 8, residents(x,y)
+	split workplace(x,y), "][", workplace_tmp
+	
+	school(x,y) = ""
+	
+	repeat residents(x,y)
+		if instr(school_tmp(cnt), 0, "[") != -1 {
+			split school_tmp(cnt), "[", cut, school_tmp(cnt)
+		}
+		if instr(school_tmp(cnt), 0, "]") != -1 {
+			split school_tmp(cnt), "]", school_tmp(cnt), cut
+		}
+	
+		if instr(workplace_tmp(cnt), 0, "[") != -1 {
+			split workplace_tmp(cnt), "[", cut, workplace_tmp(cnt)
+		}
+		if instr(workplace_tmp(cnt), 0, "]") != -1 {
+			split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
+		}
+		
+		//就学先を年齢別で決める
+		if school_tmp(cnt) = "" {
+			//小学校
+			if age_in_Residential(cnt) >= 6 and age_in_Residential(cnt) <= 12 and gi_e >= 1 {
+				new_school_rnd = rnd(gi_e-1)	; 学校はランダムに決める
+				new_school_x = all_elementary_schools_x(new_school_rnd)
+				new_school_y = all_elementary_schools_y(new_school_rnd)
+	
+				if addon_maximum_capacity(map(new_school_x, new_school_y)) >= students(new_school_x, new_school_y) + 1 {
+					school_tmp(cnt) = "e"+str(obj_serial_num(new_school_x, new_school_y))+""
+					students(new_school_x, new_school_y) += 1
+	
+					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
+					repeat gi_e
+						if obj_serial_num(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt)) = obj_serial_num(new_school_x, new_school_y) {
+							students(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt)) = students(new_school_x, new_school_y)
+						}
+					loop
+				}
+			}
+			//中学校
+			if age_in_Residential(cnt) >= 13 and age_in_Residential(cnt) <= 15 and gi_j >= 1 {
+				new_school_rnd = rnd(gi_j-1)	; 学校はランダムに決める
+				new_school_x = all_junior_high_schools_x(new_school_rnd)
+				new_school_y = all_junior_high_schools_y(new_school_rnd)
+	
+				if addon_maximum_capacity(map(new_school_x, new_school_y)) >= students(new_school_x, new_school_y) + 1 {
+					school_tmp(cnt) = "j"+str(obj_serial_num(new_school_x, new_school_y))+""
+					students(new_school_x, new_school_y) += 1
+	
+					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
+					repeat gi_j
+						if obj_serial_num(all_junior_high_schools_x(cnt), all_junior_high_schools_y(cnt)) = obj_serial_num(new_school_x, new_school_y) {
+							students(all_junior_high_schools_x(cnt), all_junior_high_schools_y(cnt)) = students(new_school_x, new_school_y)
+						}
+					loop
+				}
+			}
+		}
+		if school_tmp(cnt) = "" and workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 16 and age_in_Residential(cnt) <= 50 {
+			//高校
+			dr_h = rnd(3)	; 高校は 1/3の確率で入る
+	
+			if dr_h = 0 and age_in_Residential(cnt) >= 16 and age_in_Residential(cnt) <= 18 and gi_h >= 1 {
+				new_school_rnd = rnd(gi_h-1)	; 学校はランダムに決める
+				new_school_x = all_high_schools_x(new_school_rnd)
+				new_school_y = all_high_schools_y(new_school_rnd)
+	
+				if addon_maximum_capacity(map(new_school_x, new_school_y)) >= students(new_school_x, new_school_y) + 1 {
+					school_tmp(cnt) = "h"+str(obj_serial_num(new_school_x, new_school_y))+""
+					students(new_school_x, new_school_y) += 1
+	
+					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
+					repeat gi_h
+						if obj_serial_num(all_high_schools_x(cnt), all_high_schools_y(cnt)) = obj_serial_num(new_school_x, new_school_y) {
+							students(all_high_schools_x(cnt), all_high_schools_y(cnt)) = students(new_school_x, new_school_y)
+						}
+					loop
+				}
+			}
+	
+			//大学
+			dr_u = rnd(age_in_Residential(cnt))	; 大学は1/年齢の確率で入る
+			
+			if dr_u = 0 and age_in_Residential(cnt) >= 19 and age_in_Residential(cnt) <= 50 and gi_u >= 1 {
+				new_school_rnd = rnd(gi_u-1)	; 学校はランダムに決める
+				new_school_x = all_universities_x(new_school_rnd)
+				new_school_y = all_universities_y(new_school_rnd)
+	
+				if addon_maximum_capacity(map(new_school_x, new_school_y)) >= students(new_school_x, new_school_y) + 1 {
+					school_tmp(cnt) = "u"+str(obj_serial_num(new_school_x, new_school_y))+""
+					students(new_school_x, new_school_y) += 1
+	
+					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
+					repeat gi_j
+						if obj_serial_num(all_universities_x(cnt), all_universities_y(cnt)) = obj_serial_num(new_school_x, new_school_y) {
+							students(all_universities_x(cnt), all_junior_high_universities_y(cnt)) = students(new_school_x, new_school_y)
+						}
+					loop
+				}
+			}
+		}
+	
+		school(x,y) += "["+school_tmp(cnt)+"]"
+	loop
+		
 	return
 	
 *get_happiness_level
@@ -7487,6 +7742,30 @@
 			
 			noteadd "}", -1
 	
+		//category_3(x,y)
+			noteadd "category_3(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+					
+					if cnt = 0 {
+						map_data_buf = category_3(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+category_3(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
 		//obj_type(x,y)
 			noteadd "obj_type(x,y) {", -1
 			
@@ -7790,6 +8069,30 @@
 						map_data_buf = strf("%03d", workers_Public(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", workers_Public(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+	
+		//students(x,y)
+			noteadd "students(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", students(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", students(x,y))+""
 					}
 				loop
 			

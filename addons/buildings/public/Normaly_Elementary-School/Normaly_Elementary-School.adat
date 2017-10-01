@@ -6,6 +6,7 @@ addon_icon = "icon_Normaly_Elementary-School.png"
 
 addon_type = "public"
 addon_type_2 = "education"
+addon_type_3 = "elementary-school"
 
 use_types = "null"
 

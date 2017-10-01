@@ -19,6 +19,9 @@ crime_rate_influence_grid = "0"
  
 education_rate_influence = "0"
 education_rate_influence_grid = "0"
+
+addon_crop = "chocolate"
+addon_crop_amount = "5"
  
 null {
 	image = "Charlie's_chocolate_factory.png"
