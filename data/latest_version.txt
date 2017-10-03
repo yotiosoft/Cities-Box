@@ -1,7 +1,7 @@
-Release Number : 78;
+Release Number : 79;
 Title : Cities Box;
-Version : 0.8.2;
-About : 住民の就職先を一人ずつ決定する機能を実装;
+Version : 0.8.2.1;
+About : 住民の就学先を一人ずつ決定する機能を実装;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

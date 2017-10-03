@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.8.2.1
+								       Cities Box Ver 0.9.0
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1182,37 +1182,6 @@
 				} else {
 					tax_of_Farm = 100
 				}
-	
-			//総労働者数を読み込み
-				if instr(load_mapdata, 0, "Total_workers_Commercial") != -1 {
-					Total_workers_Commercial = int( get_chapter(load_mapdata, "Total_workers_Commercial", " = ", ";") )
-				} else {
-					Total_workers_Commercial = 0
-				}
-	
-				if instr(load_mapdata, 0, "Total_workers_Office") != -1 {
-					Total_workers_Office = int( get_chapter(load_mapdata, "Total_workers_Office", " = ", ";") )
-				} else {
-					Total_workers_Office = 0
-				}
-	
-				if instr(load_mapdata, 0, "Total_workers_Industrial") != -1 {
-					Total_workers_Industrial = int( get_chapter(load_mapdata, "Total_workers_Industrial", " = ", ";") )
-				} else {
-					Total_workers_Industrial = 0
-				}
-	
-				if instr(load_mapdata, 0, "Total_workers_Farm") != -1 {
-					Total_workers_Farm = int( get_chapter(load_mapdata, "Total_workers_Farm", " = ", ";") )
-				} else {
-					Total_workers_Farm = 0
-				}
-				
-				if instr(load_mapdata, 0, "Total_workers_Public") != -1 {
-					Total_workers_Public = int( get_chapter(load_mapdata, "Total_workers_Public", " = ", ";") )
-				} else {
-					Total_workers_Public = 0
-				}
 		
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
@@ -2050,7 +2019,7 @@
 					loop
 	
 				} else {
-					//セーブデータにschoolの情報がない場合は
+					//セーブデータにschoolの情報がない場合
 						repeat mapx
 							x = cnt
 							repeat mapy
@@ -2098,6 +2067,46 @@
 							loop
 						loop
 				}
+	
+	
+			//総労働者数を読み込み
+				repeat mapx
+					x = cnt
+					repeat mapy
+						y = cnt
+	
+						sdim workplace_tmp, 8, residents(x,y)
+						split workplace(x,y), "][", workplace_tmp
+						
+						workplace(x,y) = ""
+						
+						repeat residents(x,y)
+							if instr(workplace_tmp(cnt), 0, "[") != -1 {
+								split workplace_tmp(cnt), "[", cut, workplace_tmp(cnt)
+							}
+							if instr(workplace_tmp(cnt), 0, "]") != -1 {
+								split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
+							}
+						
+							//労働者が居るのに総労働者数が0の場合（バグ対策）
+								if instr(workplace_tmp(cnt), 0, "c") != -1 {
+									Total_workers_Commercial += 1
+								}
+								if instr(workplace_tmp(cnt), 0, "o") != -1 {
+									Total_workers_Office += 1
+								}
+								if instr(workplace_tmp(cnt), 0, "i") != -1 {
+									Total_workers_Industrial += 1
+								}
+								if instr(workplace_tmp(cnt), 0, "f") != -1 {
+									Total_workers_Farm += 1
+								}
+								if instr(workplace_tmp(cnt), 0, "p") != -1 {
+									Total_workers_Public += 1
+								}
+						loop
+					loop
+				loop
 				
 		;}
 	
@@ -2618,6 +2627,9 @@
 						}
 					loop
 				loop
+	
+				color 255, 255, 255 : font SystemFont, 14
+				pos 10, 10 : mes "表示中 : 建物の種類\n緑:住宅 青:商業 水色:オフィス 黄色:工場 茶色:農業 灰色:公共施設"
 		
 			}
 	
@@ -2669,6 +2681,9 @@
 		
 					loop
 				loop
+	
+				color 255, 255, 255 : font SystemFont, 14
+				pos 10, 10 : mes "表示中 : 地価\n青:高い 赤:低い"
 		
 			}
 	
@@ -2719,6 +2734,9 @@
 		
 					loop
 				loop
+	
+				color 255, 255, 255 : font SystemFont, 14
+				pos 10, 10 : mes "表示中 : 犯罪率\n青:低い 赤:高い"
 		
 			}
 	
@@ -2770,6 +2788,9 @@
 		
 					loop
 				loop
+	
+				color 255, 255, 255 : font SystemFont, 14
+				pos 10, 10 : mes "表示中 : 教育度\n青:高い 赤:低い"
 		
 			}
 	
@@ -2821,6 +2842,9 @@
 		
 					loop
 				loop
+	
+				color 255, 255, 255 : font SystemFont, 14
+				pos 10, 10 : mes "表示中 : 幸福度\n青:高い 赤:低い"
 		
 			}
 	
@@ -2999,16 +3023,16 @@
 					}
 	
 				//人口、日付・気温を表示
-					color 255, 255, 255 : font "Yu Gothic UI", 11
-					pos 315, windowy-70-titlebar_h+5 : mes "人口 "+Total_Population+"人\n"+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"  気温 "+temperature+"℃\n§ "+Money+""
+					color 255, 255, 255 : font "Yu Gothic UI", 14
+					pos 20, windowy-40-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
 	
-				//ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
+				//[一時的に廃止]ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
-						gosub *get_news
+					;	gosub *get_news
 					}
 	
-					color 255, 255, 255 : font "Yu Gothic UI", 10
-					pos 20, windowy-32-titlebar_h+10 : mes "News : "+news_content+""
+					;color 255, 255, 255 : font "Yu Gothic UI", 10
+					;pos 20, windowy-40-titlebar_h+10 : mes "News : "+news_content+""
 	
 				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
 					if opening_addon_menu = 1 {
@@ -6300,6 +6324,29 @@
 		if instr(workplace_tmp(cnt), 0, "]") != -1 {
 			split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
 		}
+	
+		//労働者が居るのに総労働者数が0の場合（バグ対策）
+			if workers_zero = 1 {
+				if instr(workplace(x,y), 0, "c") != -1 {
+					Total_workers_Commercial += 1
+				}
+				if instr(workplace(x,y), 0, "o") != -1 {
+					Total_workers_Office += 1
+				}
+				if instr(workplace(x,y), 0, "i") != -1 {
+					Total_workers_Industrial += 1
+				}
+				if instr(workplace(x,y), 0, "f") != -1 {
+					Total_workers_Farm += 1
+				}
+				if instr(workplace(x,y), 0, "p") != -1 {
+					Total_workers_Public += 1
+				}
+	
+				if x = mapx and y = mapy {
+					workers_zero = 0
+				}
+			}
 		
 		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 18 and age_in_Residential(cnt) <= 60 {
 			//就職先が決まっておらず、かつ18歳以上60歳以下なら(年齢)分の1の確率で就職先を決める
@@ -7658,13 +7705,6 @@
 		//空白
 			noteadd " ", -1
 			await 2
-	
-		//総労働者数
-			noteadd "Total_workers_Commercial = "+Total_workers_Commercial+";", -1
-			noteadd "Total_workers_Office = "+Total_workers_Office+";", -1
-			noteadd "Total_workers_Industrial = "+Total_workers_Industrial+";", -1
-			noteadd "Total_workers_Farm = "+Total_workers_Farm+";", -1
-			noteadd "Total_workers_Public = "+Total_workers_Public+";", -1
 	
 		//空白
 			noteadd " ", -1
