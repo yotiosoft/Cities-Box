@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.0
+								      Cities Box Ver 0.9.0.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -264,6 +264,8 @@
 	
 		color 255, 255, 255 : font SystemFont, 14
 		pos 10, 10 : mes "しばらくお待ちください\nLoading images..."
+	
+		now_loading = 1
 		
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		celload "img/logo.png", 2										; ロゴ
@@ -351,7 +353,7 @@
 		color 0, 0, 0 : boxf
 	
 		color 255, 255, 255 : font SystemFont, 14
-		pos 10, 10 : mes "しばらくお待ちください\nIn preparation..."
+		pos windowx-130, windowy-40 : mes "Now Loading..."
 		
 	//onexit
 		onexit *exit
@@ -474,10 +476,10 @@
 				addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
 	
 			//読み込み中画面
-				color 0, 0, 0 : boxf
+				;color 0, 0, 0 : boxf
 				
-				color 255, 255, 255 : font SystemFont, 14
-				pos 10, 10 : mes "しばらくお待ちください\nLoading addons : "+addon_name(cnt)+""
+				;color 255, 255, 255 : font SystemFont, 14
+				;pos 10, 10 : mes "しばらくお待ちください\nLoading addons : "+addon_name(cnt)+""
 	
 			//各項目の読み込み
 	
@@ -660,10 +662,10 @@
 	chdir directory
 	
 *check_update
-	color 0, 0, 0 : boxf
+	;color 0, 0, 0 : boxf
 	
-	color 255, 255, 255 : font SystemFont, 14
-	pos 10, 10 : mes "しばらくお待ちください\nアップデートの確認中..."
+	;color 255, 255, 255 : font SystemFont, 14
+	;pos 10, 10 : mes "しばらくお待ちください\nアップデートの確認中..."
 	
 	notesel about
 	noteload "data/about.txt"
@@ -714,6 +716,8 @@
 		pos windowx-150-20, windowy-titlebar_h-65+30 : button gosub "更新通知を受け取らない", *set_ignore_update
 		update_button = 1
 	}
+	
+	now_loading = 0
 	
 	repeat
 		//ウィンドウサイズとタイトルバーの高さを取得
@@ -8470,15 +8474,17 @@
 *exit
 	if ginfo_act = 0 {
 		//一時ファイルを削除
-			repeat total_addons
-				exist "data/temp/"+addon_name(cnt)+".temp"
+			if now_loading = 0 {
+				repeat total_addons
+					exist "data/temp/"+addon_name(cnt)+".temp"
+					
+					if strsize != -1 {
+						delete "data/temp/"+addon_name(cnt)+".temp"
+					}
 				
-				if strsize != -1 {
-					delete "data/temp/"+addon_name(cnt)+".temp"
-				}
-			
-				wait 1
-			loop
+					wait 1
+				loop
+			}
 	
 		gsel 0
 		end
