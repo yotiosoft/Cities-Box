@@ -1,7 +1,7 @@
-Release Number : 80;
+Release Number : 81;
 Title : Cities Box;
-Version : 0.9.0;
-About : ベータ版へ以降。労働者が0人になるバグを修正など;
+Version : 0.9.0.1;
+About : 高校アドオンを追加 など;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

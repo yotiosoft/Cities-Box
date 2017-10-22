@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.0.1
+								      Cities Box Ver 0.9.0.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1099,7 +1099,7 @@
 				demand_Farm = int( get_chapter(load_mapdata, "demand_Farm", " = ", ";") )
 	
 				if instr(load_mapdata, 0, "demand_Residential") = -1 {
-					demand_Residential = 0
+					demand_Residential = 100
 				}
 				if instr(load_mapdata, 0, "demand_Commercial") = -1 {
 					demand_Commercial = 0
@@ -6945,7 +6945,14 @@
 	
 *fix_budget
 	gsel ginfo_act, -1
-	return
+	
+	if Set_Play_BGM = 1 {
+		mci "stop Cities-Box_2"
+		mci "play Cities-Box"
+	}
+	
+	gsel 0
+	goto *main
 	
 *pay_budget
 	//毎月1日になったら資金から予算分を引いて税金分を増やす
@@ -7633,6 +7640,12 @@
 			if stat = 0 {
 				return
 			}
+	
+	//保存中表示
+		color : sboxf 128, 0, 0, windowx, windowy
+		
+		color 255, 255, 255 : font SystemFont, 26
+		cmes "保存中...", 0, (windowy/2)-18, windowx, (windowy/2)+18
 	
 	//マップ保存
 		title "保存中..."
