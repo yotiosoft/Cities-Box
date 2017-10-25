@@ -1,7 +1,7 @@
-Release Number : 81;
+Release Number : 82;
 Title : Cities Box;
-Version : 0.9.0.1;
-About : 高校アドオンを追加 など;
+Version : 0.9.0.2;
+About : 予算パネルの「OK」ボタンを押したときにエラーが発生する問題を修正 など;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

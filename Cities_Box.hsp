@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.0.2
+								      Cities Box Ver 0.9.0.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -263,7 +263,7 @@
 		color 0, 0, 0 : boxf
 	
 		color 255, 255, 255 : font SystemFont, 14
-		pos 10, 10 : mes "‚µ‚Î‚ç‚­‚¨‘Ò‚¿‚­‚¾‚³‚¢\nLoading images..."
+		;pos 10, 10 : mes "‚µ‚Î‚ç‚­‚¨‘Ò‚¿‚­‚¾‚³‚¢\nLoading images..."
 	
 		now_loading = 1
 		
@@ -352,8 +352,10 @@
 	//“Ç‚İ‚İ’†‰æ–Ê
 		color 0, 0, 0 : boxf
 	
+		directory = dirinfo(0)
+	
 		color 255, 255, 255 : font SystemFont, 14
-		pos windowx-130, windowy-40 : mes "Now Loading..."
+		pos windowx - 120, windowy - 40 : mes "Now Loading..."
 		
 	//onexit
 		onexit *exit
@@ -1094,7 +1096,7 @@
 			//ù—v“x(demand_››)‚ğ“Ç‚İ‚İ
 				demand_Residential = int( get_chapter(load_mapdata, "demand_Residential", " = ", ";") )
 				demand_Commercial = int( get_chapter(load_mapdata, "demand_Commercial", " = ", ";") )
-				demand_Office = int( get_chapter(load_mapdata, "demand_Office", " = \"", ";") )
+				demand_Office = int( get_chapter(load_mapdata, "demand_Office", " = ", ";") )
 				demand_Industrial = int( get_chapter(load_mapdata, "demand_Industrial", " = ", ";") )
 				demand_Farm = int( get_chapter(load_mapdata, "demand_Farm", " = ", ";") )
 	
@@ -1113,7 +1115,7 @@
 				if instr(load_mapdata, 0, "demand_Farm") = -1 {
 					demand_Farm = 0
 				}
-	
+			
 			//‘‹à(Money)‚ğ“Ç‚İ‚İ
 				Money = int( get_chapter(load_mapdata, "Money", " = ", ";") )
 	
