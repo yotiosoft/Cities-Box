@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.0.3
+								      Cities Box Ver 0.9.0.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -339,8 +339,8 @@
 		celload "img/quarter/h_office.png", 46								; 高密度オフィス地区
 	
 	//最初のメニュー画面のボタン
-		celload "img/start_menu/hoe.png", 27								; 鍬
-		celload "img/start_menu/city.png", 28								; 都市
+		celload "img/start_menu/new.png", 27								; 新マップ
+		celload "img/start_menu/load.png", 28								; 都市
 	
 	//読み込み中アイコン
 		celload "img/loading/124856y.png", 53								; 読み込み中アイコン1
@@ -3076,10 +3076,10 @@
 		if opening_addon_menu = 1 {
 			menu_line_y = windowy-70-titlebar_h-32-20
 		} else {
-			menu_line_y = windowy-70-titlebar_h
+			menu_line_y = windowy-70-titlebar_h-50
 		}
 	
-		if mousey <= menu_line_y and open_stat_menu = 0 and (mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy) {
+		if mousey <= menu_line_y and (mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy) {
 			gosub *build_obj
 			return
 		}
@@ -3466,28 +3466,28 @@
 				}
 			
 			//統計メニュー
-				if open_stat_menu = 1 and click_range( windowx-92-32, windowy-70-titlebar_h-20, windowx-92-32+20, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32, windowy-70-titlebar_h-20, windowx-92-32+19, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "type" {
 						stat_mode = "type"
 					} else {
 						stat_mode = ""
 					}
 				}
-				if open_stat_menu = 1 and click_range( windowx-92-32+20, windowy-70-titlebar_h-20, windowx-92-32+40, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32+20, windowy-70-titlebar_h-20, windowx-92-32+39, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "land_price" {
 						stat_mode = "land_price"
 					} else {
 						stat_mode = ""
 					}
 				}
-				if open_stat_menu = 1 and click_range( windowx-92-32+40, windowy-70-titlebar_h-20, windowx-92-32+60, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32+40, windowy-70-titlebar_h-20, windowx-92-32+59, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "crime_rate" {
 						stat_mode = "crime_rate"
 					} else {
 						stat_mode = ""
 					}
 				}
-				if open_stat_menu = 1 and click_range( windowx-92-32+60, windowy-70-titlebar_h-20, windowx-92-32+80, windowy-70-titlebar_h ) = 1 {
+				if open_stat_menu = 1 and click_range( windowx-92-32+60, windowy-70-titlebar_h-20, windowx-92-32+79, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "education_rate" {
 						stat_mode = "education_rate"
 					} else {
@@ -4442,7 +4442,7 @@
 										
 										reservation(mx+rx,my+ry) = "none"
 	
-										if done_build(1,mx+rx,my+ry) = 0 {
+										if done_build(1,mx+rx,my+ry) = 0 and rx = 0 and ry = 0 {
 											//資金を減らす（§5/1マス）
 												Money -= 5
 										}
@@ -4494,6 +4494,8 @@
 		
 											done_build(1,mx+rx,my+ry) = 1
 										}
+	
+										done_build(1,mx+rx,my+ry) = 1
 									loop
 								loop
 	
