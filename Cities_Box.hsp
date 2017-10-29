@@ -1,11 +1,15 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.0.4
+								       Cities Box Ver 0.9.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
 	
 --------------------------------------------------------------------------------------------------*/
+
+*packopt
+#packopt name "Cities_Box"
+#packopt icon "img/logo.ico"
 
 *include
 #include "hspinet.as"
@@ -269,6 +273,7 @@
 		
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		celload "img/logo.png", 2										; ロゴ
+		celload "img/logo2.png", 62										; ロゴ2（タイトル）
 		celload "img/title_background.png", 15							; タイトル背景画像
 	
 	//メニューのアイコン
@@ -341,6 +346,15 @@
 	//最初のメニュー画面のボタン
 		celload "img/start_menu/new.png", 27								; 新マップ
 		celload "img/start_menu/load.png", 28								; 都市
+	
+		celload "img/start_menu/setting.png", 59							; 設定
+	
+	//メニューの設定画面で使うアイコン
+		celload "img/menu_setting/general.png", 60							; 一般設定
+		celload "img/menu_setting/information.png", 61						; 情報
+		celload "img/menu_setting/bug.png", 63								; バグ・ご要望の送信
+	
+		celload "img/menu_setting/text.png", 64								; テキストファイルアイコン
 	
 	//読み込み中アイコン
 		celload "img/loading/124856y.png", 53								; 読み込み中アイコン1
@@ -720,6 +734,7 @@
 	}
 	
 	now_loading = 0
+	now_in_menu = 1
 	
 	repeat
 		//ウィンドウサイズとタイトルバーの高さを取得
@@ -732,30 +747,40 @@
 		color 0, 0, 0
 		sboxf 128, 0, 0, windowx, windowy
 				
-		pos windowx/2-55, double(50./483)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
-			
-		color 255, 255, 255 : font SystemFont, 18
-		cmes "Ver."+about_version+" r"+NOW_Release_number+"", 0, double(200./483)*(windowy-titlebar_h), windowx, double(270./483)*(windowy-titlebar)+30
+		pos windowx/2-55, double(50./300)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
 			
 		font SystemFont, 14
 			
 		color 0, 162, 232
 			
 		if click_range(windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
-			gmode 3,,,200 : boxfa windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+			sboxf 200, windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 		}
 		if click_range(windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
-			gmode 3,,,200 : boxfa windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
+			sboxf 200, windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 		}
+	
+		if click_range(8, 25, 8+32, 25+32) = 1 {
+			sboxf 200, 8, 25, 8+32, 25+32
+		}
+	
+		//マップ作成・読み込みボタン
+			color 255, 255, 255
 			
-		color 255, 255, 255
+			gmode 2
+			pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
+				cmes "新しいマップ", windowx/2-50-20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+						
+			pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
+				cmes "読み込み", windowx/2+20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+	
+		//左上のメニュー（設定ボタンなど）
+			color 255, 255, 255 : font SystemFont, 14
+			pos 8, 5 : mes "Cities Box β Ver."+about_version+" r"+NOW_Release_number+""
 			
-		gmode 2
-		pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
-			cmes "新しいマップ", windowx/2-50-20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
-					
-		pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
-			cmes "読み込み", windowx/2+20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+			gmode 2
+			pos 8, 25 : gcopy 59, 0, 0, 32, 32
+			
 	
 		//アップデートがあった場合
 			if latest_version__Release_number > NOW_Release_number and Ignore_Update = 0 {
@@ -778,10 +803,163 @@
 		goto *load_map
 	}
 	
+	if click_range(8, 25, 8+32, 25+32) = 1 {
+		goto *menu_setting
+	}
+	
 	return
+	
+*menu_setting
+	screen 1, 500, 300
+	
+	menu_setting__page = "general"
+	
+*menu_setting__2
+	gsel 1, 2
+	title "設定"
+	
+	onclick *menu_setting_onclick
+	
+	color 50, 50, 50 : boxf 0, 0, 64, 300
+	color 75, 75, 75 : boxf 64, 0, 500, 28
+	color 90, 90, 90 : boxf 64, 28, 500, 300
+	
+	//設定メニュー
+		gmode 2
+		
+		pos 16, 28 + 0 + 16   : gcopy 60, 0, 0, 48, 48
+		pos 16, 28 + 64 + 16  : gcopy 63, 0, 0, 48, 48
+		pos 16, 28 + 128 + 16 : gcopy 61, 0, 0, 48, 48
+	
+	//設定画面
+	
+		; 一般設定
+			if menu_setting__page = "general" {
+				color 0, 162, 232 : boxf 60, 0+28, 64, 64+28
+				
+				font SystemFont, 16 : color 255, 255, 255
+				pos 70, 3 : mes "一般設定"
+	
+				font SystemFont, 14 : color 255, 255, 255
+	
+				; BGMの再生(Set_Play_BGM)
+					pos 90, 40 : mes "BGMを再生する"
+					if Set_Play_BGM = 0 {
+						pos 350, 40 : gcopy 14, 0, 0, 16, 16
+					} else {
+						pos 350, 40 : gcopy 14, 0, 16, 16, 16
+					}
+	
+				; アップデート通知のON/OFF（Ignore_Update）
+					pos 90, 70 : mes "アップデートを通知する"
+					if Ignore_Update = 1 {
+						pos 350, 70 : gcopy 14, 0, 0, 16, 16
+					} else {
+						pos 350, 70 : gcopy 14, 0, 16, 16, 16
+					}
+	
+				; フォント設定(SystemFont)
+					pos 90, 100 : mes "フォント"
+					
+					pos 90+ginfo(14)+100, 100 : objsize 150, 20 : input SystemFont : SyetmFont__stat = stat
+					pos 90+ginfo(14)+250, 100 : objsize 50, 20  : button gosub "参照", *refer_fonts
+			}
+	
+		; バグ・ご要望の送信
+			if menu_setting__page = "bug" {
+				clrobj
+	
+				color 0, 162, 232 : boxf 60, 64+28, 64, 128+28
+	
+				font SystemFont, 16 : color 255, 255, 255
+				pos 70, 3 : mes "バグ・ご要望の送信"
+	
+				font SystemFont, 14 : color 255, 255, 255
+				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「10.バグや問題点、今後の予定」をご覧ください。"
+				pos ((500-64)/2)-16, 100 : gcopy 64, 0, 0, 32, 32
+				pos ((500-64)/2)-16+45, 105 : mes "ReadMe.txtを開く"
+	
+				ginfo_tmp__bug_ReadMe = ginfo(14)
+	
+				pos 90, 150 : mes "この他にバグやご要望等がございましたら、\nお気軽にYotioSoft コンタクトフォームまでご一報ください。"
+				pos ((500-64)/2)-16-40, 200 : gcopy 63, 0, 0, 32, 32
+				pos ((500-64)/2)-16-40+45, 205 : mes "コンタクトフォームをブラウザで開く"
+	
+				ginfo_tmp__bug_Send = ginfo(14)
+	
+				
+			}
+	
+		; 情報
+			if menu_setting__page = "information" {
+				clrobj
+	
+				color 0, 162, 232 : boxf 60, 128+28, 64, 172+28
+				
+				font SystemFont, 16 : color 255, 255, 255
+				pos 70, 3 : mes "情報"
+	
+				pos 100, 40     : gcopy 2, 0, 0, 110, 110
+				pos 120+110, 40 : gcopy 62, 0, 0, 200, 110
+	
+				font SystemFont, 14 : color 255, 255, 255
+				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : Hot Soup Processor 3.4\n\nCopyright(C) YotioSoft 2017 All Rights Reserved."
+			}
+	
+	stop
+	
+*menu_setting_onclick
+	//設定上でクリックされたときの動作
+	
+	//設定メニュー
+		if click_range(0, 28, 64, 28+64) = 1 {
+			menu_setting__page = "general"
+		}
+		if click_range(0, 28+64, 64, 28+128) = 1 {
+			menu_setting__page = "bug"
+		}
+		if click_range(0, 28+128, 64, 28+172) = 1 {
+			menu_setting__page = "information"
+		}
+	
+	//一般設定
+		if menu_setting__page = "general" {
+		; BGMの再生(Set_Play_BGM)
+			if click_range(350, 40, 350+16, 40+16) = 1 {
+				if Set_Play_BGM = 0 {
+					Set_Play_BGM = 1
+				} else {
+					Set_Play_BGM = 0
+				}
+			}
+			if click_range(350, 70, 350+16, 70+16) = 1 {
+				if Ignore_Update = 0 {
+					Ignore_Update = 1
+				} else {
+					Ignore_Update = 0
+				}
+			}
+		}
+	
+	//バグ・ご要望の送信
+		if menu_setting__page = "bug" {
+			; ReadMe.txtを開く
+				if click_range(((500-64)/2)-16, 100, ((500-64)/2)-16+45+ginfo_tmp__bug_ReadMe, 100+32) = 1{
+					exec "ReadMe.txt", 16
+				}
+	
+			; コンタクトフォームを開く
+				if click_range(((500-64)/2)-16-40, 200, ((500-64)/2)-16-40+45+ginfo_tmp__bug_Send, 200+32) = 1{
+					exec "http://yotiosoft.com/contact-form/", 16
+				}
+		}
+	
+	goto *menu_setting__2
 	
 *new_map
 	map_mode = "new_map"
+	
+	now_in_menu = 0
 	
 	//マップ新規作成
 		mapx=100:mapy=100
@@ -945,6 +1123,9 @@
 		if from_new_map = 0 {
 			map_mode = "load_map"
 		}
+	
+		now_in_menu = 0
+		
 		goto *map_preparating
 		
 	} else {
@@ -3029,7 +3210,7 @@
 					}
 	
 				//人口、日付・気温を表示
-					color 255, 255, 255 : font "Yu Gothic UI", 14
+					color 255, 255, 255 : font SystemFont, 14
 					pos 20, windowy-40-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
 	
 				//[一時的に廃止]ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
@@ -5673,15 +5854,15 @@
 			
 					await 30		; ←awaitを入れないと誤作動を起こすため
 					
-					color 255,255,255 : font "", 14
+					color 255,255,255 : font SystemFont, 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" (§5 残り"+(addon_build_limit(addon_num_buf)-s)+"回)"
 					
 				} else {
-					color 255,255,255 : font "", 14
+					color 255,255,255 : font SystemFont, 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes ""+addon_jp_name(int(get_addon_number))+" (§5)"
 				}
 				
-				color 255,255,255 : font "", 10
+				color 255,255,255 : font SystemFont, 10
 				pos 23, (windowy-70-titlebar_h-32-20) : mes addon_summary(int(get_addon_number))
 				
 				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
@@ -5699,10 +5880,10 @@
 		if cursor_mode = "put_Residential" {
 			if clicked_addon_number = 0 {
 				if density = "low" {
-					color 255,255,255 : font "", 14
+					color 255,255,255 : font SystemFont, 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "低密度な住居地区"
 					
-					color 255,255,255 : font "", 10
+					color 255,255,255 : font SystemFont, 10
 					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が住む場所を提供します。住居地区を設定すると住居建築物が建設されます。"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 32, 32, 32
@@ -5710,10 +5891,10 @@
 					put_addon_name = "Area : low_density_Residential"
 					
 				} else : if density = "high" {
-					color 255,255,255 : font "", 14
+					color 255,255,255 : font SystemFont, 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "高密度な住居地区"
 					
-					color 255,255,255 : font "", 10
+					color 255,255,255 : font SystemFont, 10
 					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が住む場所を提供します。住居地区を設定すると住居建築物が建設されます。"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 40, 0, 32, 32, 32
@@ -5730,10 +5911,10 @@
 		if cursor_mode = "put_Commercial" {
 			if clicked_addon_number = 0 {
 				if density = "low" {
-					color 255,255,255 : font "", 14
+					color 255,255,255 : font SystemFont, 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "低密度な商業地区"
 					
-					color 255,255,255 : font "", 10
+					color 255,255,255 : font SystemFont, 10
 					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が商業を営む場所を提供します。商業地区を設定すると商業建築物が建設されます。"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 32, 32, 32
@@ -5741,10 +5922,10 @@
 					put_addon_name = "Area : low_density_Commercial"
 					
 				} else : if density = "high" {
-					color 255,255,255 : font "", 14
+					color 255,255,255 : font SystemFont, 14
 					pos 20, (windowy-70-titlebar_h-32-40+5) : mes "高密度な商業地区"
 					
-					color 255,255,255 : font "", 10
+					color 255,255,255 : font SystemFont, 10
 					pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が商業を営む場所を提供します。商業地区を設定すると商業建築物が建設されます。"
 					
 					pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 41, 0, 32, 32, 32
@@ -5760,10 +5941,10 @@
 		
 		if cursor_mode = "put_Office" {
 			if clicked_addon_number = 0 {
-				color 255,255,255 : font "", 14
+				color 255,255,255 : font SystemFont, 14
 				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "オフィス地区"
 				
-				color 255,255,255 : font "", 10
+				color 255,255,255 : font SystemFont, 10
 				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が仕事する場を提供します。オフィス地区を設定するとオフィス建築物が建設されます。"
 				
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 42, 0, 32, 32, 32
@@ -5778,10 +5959,10 @@
 	
 		if cursor_mode = "put_Industrial" {
 			if clicked_addon_number = 0 {
-				color 255,255,255 : font "", 14
+				color 255,255,255 : font SystemFont, 14
 				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "工業地区"
 				
-				color 255,255,255 : font "", 10
+				color 255,255,255 : font SystemFont, 10
 				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民がモノを生産する場を提供します。工業地区を設定すると工業建築物が建設されます。"
 				
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 43, 0, 32, 32, 32
@@ -5796,10 +5977,10 @@
 	
 		if cursor_mode = "put_Farm" {
 			if clicked_addon_number = 0 {
-				color 255,255,255 : font "", 14
+				color 255,255,255 : font SystemFont, 14
 				pos 20, (windowy-70-titlebar_h-32-40+5) : mes "農業地区"
 				
-				color 255,255,255 : font "", 10
+				color 255,255,255 : font SystemFont, 10
 				pos 23, (windowy-70-titlebar_h-32-20) : mes "市民が農作物を生産する場を提供します。農業地区を設定すると畑や田、牧場が建設されます。"
 				
 				pos 30 + 10, windowy-70-titlebar_h-32 : gcopy 58, 0, 32, 32, 32
@@ -7622,6 +7803,11 @@
 	if (logfont.5 & 0x00FF0000):style=style+8
 	size=chfont.4/10
 	memcpy setting_SystemFont,logfont,32,0,28
+
+	if now_in_menu = 1 {
+		objprm SyetmFont__stat, setting_SystemFont
+		SystemFont = setting_SystemFont
+	}
 	
 	return
 	
@@ -8514,11 +8700,37 @@
 		from_setting_onclick = 0
 	
 		gsel 0
-	
-		if from_new_map = 1 {
-			from_new_map = 0
-			goto *menu
-		}
+
+		//新マップ作成ウィンドウ
+			if from_new_map = 1 {
+				from_new_map = 0
+				goto *menu
+			}
+
+		//メニュー画面の設定
+			if now_in_menu = 1 {
+				//閉じる際に設定を保存
+					notesel config
+
+					repeat notemax
+						noteget config_tmp, cnt
+						
+						if instr(config_tmp, 0, "SystemFont") != -1 {
+							noteadd "SystemFont = \""+SystemFont+"\"", cnt, 1
+						}
+						if instr(config_tmp, 0, "Set_Play_BGM") != -1 {
+							noteadd "Set_Play_BGM = "+Set_Play_BGM+";", cnt, 1
+						}
+						if instr(config_tmp, 0, "Ignore_Update") != -1 {
+							noteadd "Ignore_Update = "+Ignore_Update+";", cnt, 1
+						}
+
+					loop
+
+					notesave "data/config.dat"
+
+				goto *menu
+			}
 	
 		cursor_mode = "normal"
 	
