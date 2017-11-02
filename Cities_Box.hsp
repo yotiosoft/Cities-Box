@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.1
+								      Cities Box Ver 0.9.1.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -875,7 +875,7 @@
 				pos 70, 3 : mes "バグ・ご要望の送信"
 	
 				font SystemFont, 14 : color 255, 255, 255
-				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「10.バグや問題点、今後の予定」をご覧ください。"
+				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「11.バグや問題点、今後の予定」をご覧ください。"
 				pos ((500-64)/2)-16, 100 : gcopy 64, 0, 0, 32, 32
 				pos ((500-64)/2)-16+45, 105 : mes "ReadMe.txtを開く"
 	
@@ -894,13 +894,13 @@
 			if menu_setting__page = "information" {
 				clrobj
 	
-				color 0, 162, 232 : boxf 60, 128+28, 64, 172+28
+				color 0, 162, 232 : boxf 60, 128+28, 64, 192+28
 				
 				font SystemFont, 16 : color 255, 255, 255
 				pos 70, 3 : mes "情報"
 	
 				pos 100, 40     : gcopy 2, 0, 0, 110, 110
-				pos 120+110, 40 : gcopy 62, 0, 0, 200, 110
+				pos 120+110, 40 : gcopy 62, 0, 0, 230, 110
 	
 				font SystemFont, 14 : color 255, 255, 255
 				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : Hot Soup Processor 3.4\n\nCopyright(C) YotioSoft 2017 All Rights Reserved."
@@ -1107,7 +1107,7 @@
 	
 *load_map
 	if from_new_map = 0 {
-		dialog "cbx;*.cbd", 16, "Cities Box 暗号マップデータ, Cities Box 非暗号マップデータ"
+		dialog "cbd;*.cbx", 16, "Cities Box マップデータ"
 	}
 	
 	if stat = 1 or from_new_map = 1 {
@@ -6740,7 +6740,7 @@
 					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
 					repeat gi_j
 						if obj_serial_num(all_universities_x(cnt), all_universities_y(cnt)) = obj_serial_num(new_school_x, new_school_y) {
-							students(all_universities_x(cnt), all_junior_high_universities_y(cnt)) = students(new_school_x, new_school_y)
+							students(all_universities_x(cnt), all_universities_y(cnt)) = students(new_school_x, new_school_y)
 						}
 					loop
 				}
@@ -7820,7 +7820,7 @@
 		}
 	
 	//保存先ファイルの選択
-			dialog "cbx", 17, "Cities Box マップデータ"
+			dialog "cbd", 17, "Cities Box マップデータ"
 			
 			save_mapdata_name = refstr
 			if instr(save_mapdata_name, 0, ".cbx") = -1 and instr(save_mapdata_name, 0, ".cbd") = -1 {

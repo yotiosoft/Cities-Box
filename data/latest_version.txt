@@ -1,7 +1,7 @@
-Release Number : 84;
+Release Number : 85;
 Title : Cities Box;
-Version : 0.9.0.4;
-About : 建物を建設したとき、建物によっては規定より多額の建設料が引かれる問題を修正;
+Version : 0.9.1;
+About : メニュー画面用の新たな設定画面を追加;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
