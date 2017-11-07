@@ -1,7 +1,7 @@
-Release Number : 85;
+Release Number : 86;
 Title : Cities Box;
-Version : 0.9.1;
-About : メニュー画面用の新たな設定画面を追加;
+Version : 0.9.1.1;
+About : 大学アドオン追加 / 標準の保存形式を非暗号ファイルの.cbd形式に;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

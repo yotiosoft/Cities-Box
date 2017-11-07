@@ -1,0 +1,1358 @@
+/*--------------------------------------------------------------------------------------------------
+
+										Cities Box Addon Maker
+	
+											  Ver.0.1.1
+	
+--------------------------------------------------------------------------------------------------*/
+
+#uselib "user32.dll"
+		#func DrawText "DrawTextW" int,wstr,int,int,int
+
+#module
+
+/*文字を中央に表示（使用例：cmes "hogehoge", 0, 640, 0, 480, 0）*/
+#deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
+	RECT = cx, cy, cx2, cy2
+	DrawText@ hdc, ctext, -1, varptr(RECT), $01
+	
+	if redraw_exist = 0 : redraw 1
+	return
+	
+/*指定された範囲内にマウスがあるか確認する関数（使用例：click_range (100, 0, 300, 300) ）*/
+#defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
+	if ginfo_wx1 <= ginfo_mx and ginfo_wx2 >= ginfo_mx and ginfo_wy1 <= ginfo_my and ginfo_wy2 >= ginfo_my and mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
+		return 1
+	}
+	
+	return 0
+	
+#global
+
+*buffering
+	dir = dirinfo(0)
+	
+	celload "i/logo.png", 1
+	
+	celload "i/building.png", 2
+	celload "i/park.png", 3
+	celload "i/road.png", 4
+	
+	celload "i/return.png", 5
+	celload "i/next.png", 6
+	
+	celload "i/circle_blue.png", 7
+	celload "i/circle_gray.png", 8
+	
+	celload "i/save.png", 9
+	celload "i/check.png", 10
+	
+	celload "i/residential.png", 11
+	celload "i/commercial.png", 12
+	celload "i/office.png", 13
+	celload "i/industrial.png", 14
+	celload "i/farm.png", 22
+
+	celload "i/road2.png", 23
+	celload "i/railroad.png", 24
+	celload "i/station.png", 25
+	
+	celload "i/info.png", 15
+	celload "i/info2.png", 16
+	
+	celload "i/turn.png", 17
+	celload "i/left_top.png", 18
+	celload "i/right_top.png", 19
+	celload "i/left_bottom.png", 20
+	celload "i/right_bottom.png", 21
+	
+*main
+	title "Cities Box Addon Maker"
+	
+	clrobj
+	
+	color 50, 50, 50 : boxf
+	pos (640/2)-(520/2), 10 : gcopy 1, 0, 0, 520, 110
+	
+	onclick 0
+	
+	color 255, 255, 255 : font "Yu Gothic", 14
+	cmes "作成するアドオンの種類を選択してください", 0, 150, 640, 170
+	
+	objsize 128, 128
+	pos 100, 230 : objimage 2 : button "", *make_building_first
+		font "Yu Gothic", 14 : cmes "建物・産業", 100, 230+128, 100+128, 230+128+20
+		font "Yu Gothic", 10 : cmes "住居、商業施設、オフィス、工場、農業", 70, 230+128+20, 130+128, 230+128+20+15
+	pos 250, 230 : objimage 3 : button "", *make_park_first
+		font "Yu Gothic", 14 : cmes "公園", 250, 230+128, 250+128, 230+128+20
+		font "Yu Gothic", 10 : cmes "公園、広場", 250, 230+128+20, 250+128, 230+128+20+15
+	pos 400, 230 : objimage 4 : button "", *make_road
+		font "Yu Gothic", 14 : cmes "交通", 400, 230+128, 400+128, 230+128+20
+		font "Yu Gothic", 10 : cmes "道路、線路、駅", 400, 230+128+20, 400+128, 230+128+20+15
+	
+	objimage 15 : objsize 32, 32
+	pos (640/2)-(32/2), 420 : button "", *hinto
+	
+	stop
+	
+	
+*make_building_first
+	/*変数初期化*/
+		Addon_Name__JP = ""
+		Addon_Name__EN = ""
+	
+		Addon_Icon_Path = ""
+	
+		Addon_Img_Null__Path = ""
+		
+		Addon_Img_Null__Left__Size_x = 64
+		Addon_Img_Null__Left__Size_y = 64
+		Addon_Img_Null__Top__Size_x = 64
+		Addon_Img_Null__Top__Size_y = 64
+		Addon_Img_Null__Bottom__Size_x = 64
+		Addon_Img_Null__Bottom__Size_y = 64
+		Addon_Img_Null__Right__Size_x = 64
+		Addon_Img_Null__Right__Size_y = 64
+		
+		Addon_Img_Null__Left__Trout_x = 1
+		Addon_Img_Null__Left__Trout_y = 1
+		Addon_Img_Null__Top__Trout_x = 1
+		Addon_Img_Null__Top__Trout_y = 1
+		Addon_Img_Null__Bottom__Trout_x = 1
+		Addon_Img_Null__Bottom__Trout_y = 1
+		Addon_Img_Null__Right__Trout_x = 1
+		Addon_Img_Null__Right__Trout_y = 1
+		
+		Addon_Img_Null__Left__Top_Left_x = 0
+		Addon_Img_Null__Left__Top_Left_y = 0
+		Addon_Img_Null__Left__Bottom_Right_x = 64
+		Addon_Img_Null__Left__Bottom_Right_y = 64
+	
+		Addon_Img_Null__Top__Top_Left_x = 64
+		Addon_Img_Null__Top__Top_Left_y = 0
+		Addon_Img_Null__Top__Bottom_Right_x = 128
+		Addon_Img_Null__Top__Bottom_Right_y = 64
+	
+		Addon_Img_Null__Bottom__Top_Left_x = 0
+		Addon_Img_Null__Bottom__Top_Left_y = 64
+		Addon_Img_Null__Bottom__Bottom_Right_x = 64
+		Addon_Img_Null__Bottom__Bottom_Right_y = 128
+	
+		Addon_Img_Null__Right__Top_Left_x = 64
+		Addon_Img_Null__Right__Top_Left_y = 64
+		Addon_Img_Null__Right__Bottom_Right_x = 128
+		Addon_Img_Null__Right__Bottom_Right_y = 128
+	
+		Addon_Img_Null__Transparent_Color__r = 0
+		Addon_Img_Null__Transparent_Color__g = 0
+		Addon_Img_Null__Transparent_Color__b = 0
+	
+		
+		Addon_About__Author = ""
+		Addon_About__Summary = ""
+	
+		Addon_Influence__Land_Price = 0
+		Addon_Influence__Land_Price__grid = 0
+		Addon_Influence__Crime_rate = 0
+		Addon_Influence__Crime_rate__grid = 0
+		Addon_Influence__Education_rate = 0
+		Addon_Influence__Education_rate__grid = 0
+	
+	
+		Addon_Maxinum_Capacity = 0
+		Addon_Density_tmp = 0
+	
+	
+		Addon_Crop = ""
+		Addon_Crop_Amount = ""
+		
+	
+		Addon_Type = "building"
+	
+		buffer_1002 = 0
+		Preview_Dire = 0
+	
+*make_building
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *main
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 建物・産業"
+	
+	color 255, 255, 255 : font "Yu Gothic", 14
+	cmes "作成する建築物の種類を選んでください", 0, 80, 640, 100
+	
+	objsize 128, 128
+	pos 100, 130 : objimage 11 : button "", *make_building__residential
+		font "Yu Gothic", 14 : cmes "住居", 100, 130+128, 100+128, 130+128+20
+	pos 250, 130 : objimage 12 : button "", *make_building__commercial
+		font "Yu Gothic", 14 : cmes "商業施設", 250, 130+128, 250+128, 130+128+20
+	pos 400, 130 : objimage 13 : button "", *make_building__office
+		font "Yu Gothic", 14 : cmes "オフィス", 400, 130+128, 400+128, 130+128+20
+		
+	pos 100, 290 : objimage 14 : button "", *make_building__industrial
+		font "Yu Gothic", 14 : cmes "工場", 100, 290+128, 100+128, 290+128+20
+	pos 250, 290 : objimage 22 : button "", *make_building__farm
+		font "Yu Gothic", 14 : cmes "農業", 250, 290+128, 250+128, 290+128+20
+	
+	/*ステータス*/
+		pos (640/2)-24, 455 : gcopy 7, 0, 0, 8, 8
+		pos (640/2)-4, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)+16, 455 : gcopy 8, 0, 0, 8, 8
+	
+	stop
+	
+*make_building__residential
+	Addon_Type_tmp = "residential" : Addon_Type_JP = "住居"
+	goto *make_building_2
+	
+*make_building__commercial
+	Addon_Type_tmp = "commercial" : Addon_Type_JP = "商業施設"
+	goto *make_building_2
+	
+*make_building__office
+	Addon_Type_tmp = "office" : Addon_Type_JP = "オフィス"
+	goto *make_building_2
+	
+*make_building__industrial
+	Addon_Type_tmp = "industrial" : Addon_Type_JP = "工場"
+	goto *make_building_2
+
+*make_building__farm
+	Addon_Type_tmp = "farm" : Addon_Type_JP = "農業"
+	goto *make_building_2
+	
+*make_building_2
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *make_building
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 建物・産業（"+Addon_Type_JP+"）"
+	
+	/*名称設定*/
+		color 255, 255, 255 : boxf 20, 50, 640-20, 130
+		color 50, 50, 50 : boxf 21, 51, 640-21, 129
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 70 : mes "名称"
+		
+		line 95, 60, 95, 120
+		
+		objsize 350, 20
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 110, 65 : mes "日本語名"
+			pos 200, 65 : input Addon_Name__JP
+		pos 110, 90 : mes "英語名"
+			pos 200, 90 : input Addon_Name__EN
+	
+	/*アイコン設定*/
+		color 255, 255, 255 : boxf 20, 135, 640-20, 185
+		color 50, 50, 50 : boxf 21, 136, 640-21, 184
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 145 : mes "アイコン"
+	
+		objsize 250, 20
+		pos 130 + 10+10 + 48, 150 : input Addon_Icon_Path : input_stat__Addon_Icon_Path = stat
+	
+		objsize 100, 20 : objimage -1
+		pos 130 + 10+10+10 + 48 + 250, 150 : button gosub "参照...", *open_icon
+	
+	/*説明*/
+		color 255, 255, 255 : boxf 20, 190, 640-20, 325
+		color 50, 50, 50 : boxf 21, 191, 640-21, 324
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 240 : mes "説明"
+		
+		line 95, 200, 95, 315
+		
+		objsize 350, 20
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 110, 205 : mes "作者名"
+			pos 200, 205 : input Addon_About__Author
+		pos 110, 230 : mes "説明文"
+			pos 200, 230 : objsize 350, 80 : mesbox Addon_About__Summary, 350, 80, 5, 0
+	
+	/*周囲への影響*/
+		color 255, 255, 255 : boxf 20, 330, 640-20, 430
+		color 50, 50, 50 : boxf 21, 331, 640-21, 429
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 360 : mes "周囲への影響"
+	
+		line 180, 340, 180, 420
+	
+		//地価
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 200, 345 : mes "地価"
+				pos 280, 345 : input Addon_Influence__Land_Price
+	
+		//地価が影響するマス
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 360, 345 : mes "地価が影響するマス"
+				pos 520, 345 : input Addon_Influence__Land_Price__grid
+	
+		//犯罪率
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 200, 370 : mes "犯罪率"
+				pos 280, 370 : input Addon_Influence__Crime_rate
+	
+		//犯罪率が影響するマス
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 360, 370 : mes "犯罪率が影響するマス"
+				pos 520, 370 : input Addon_Influence__Crime_rate__grid
+	
+		//教育度
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 200, 395 : mes "教育度"
+				pos 280, 395 : input Addon_Influence__Education_rate
+	
+		//教育度が影響するマス
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 360, 395 : mes "教育率が影響するマス"
+				pos 520, 395 : input Addon_Influence__Education_rate__grid
+	
+	/*ステータス*/
+		if Addon_Type_tmp = "industrial" or Addon_Type_tmp = "farm" {
+			pos (640/2)-24-4, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)-8-2, 455 : gcopy 7, 0, 0, 8, 8
+			pos (640/2)+8+2, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)+24+4, 455 : gcopy 8, 0, 0, 8, 8
+		} else {
+			pos (640/2)-24, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)-4, 455 : gcopy 7, 0, 0, 8, 8
+			pos (640/2)+16, 455 : gcopy 8, 0, 0, 8, 8
+		}
+	
+	/*次へ進むボタン*/
+		objsize 32, 32 : objimage 6
+		pos 560, 440 : button "", *make_building_3
+	
+	stop
+	
+*make_building_3
+	if Addon_Name__JP = "" or Addon_Name__EN {
+		dialog "名称を入力してください", 1
+		stop
+	}
+	if Addon_Icon_Path = "" {
+		dialog "アイコン用画像を選択してください", 1
+		stop
+	}
+	
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	gmode 0
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *make_building_2
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 建物・産業（"+Addon_Type_JP+"）"
+	
+	/*画像設定*/
+		color 255, 255, 255 : boxf 20, 50, 640-20, 345
+		color 50, 50, 50 : boxf 21, 51, 640-21, 344
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 180 : mes "画像"
+	
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 110, 65 : mes "画像のパス"
+	
+		line 95, 60, 95, 335
+		
+		objsize 250, 20
+		pos 198, 65 : input Addon_Img_Null__Path : input_stat__Addon_Img_Null__Path = stat
+	
+		objsize 100, 20 : objimage -1
+		pos 198+250+10, 65 : button gosub "参照...", *open_img
+	
+		//プレビュー
+			objsize 122, 20 : objimage -1
+			pos 198+250+10, 90 : button "プレビュー", *Preview
+	
+		//透過色
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 90 : mes "透過色"
+	
+			objsize 50, 20
+			
+			pos 198, 90 : mes "R"
+				pos 208+5, 90    : input Addon_Img_Null__Transparent_Color__r
+			pos 208+60, 90 : mes "G"
+				pos 208+60+15, 90 : input Addon_Img_Null__Transparent_Color__g
+			pos 218+120, 90 : mes "B"
+				pos 218+120+15, 90 : input Addon_Img_Null__Transparent_Color__b
+	
+		//左向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 120 : mes "左向き"
+	
+			pos 198, 120 : mes "サイズ : "
+			pos 250, 120 : mes "x"
+				pos 260, 120    : input Addon_Img_Null__Left__Size_x
+			pos 260+60, 120 : mes "y"
+				pos 260+60+10, 120 : input Addon_Img_Null__Left__Size_y
+	
+			pos 398, 120 : mes "マス : "
+			pos 450, 120 : mes "x"
+				pos 460, 120    : input Addon_Img_Null__Left__Trout_x
+			pos 460+60, 120 : mes "y"
+				pos 460+60+10, 120 : input Addon_Img_Null__Left__Trout_y
+	
+			pos 198, 145 : mes "左上 : "
+			pos 250, 145 : mes "x"
+				pos 260, 145    : input Addon_Img_Null__Left__Top_Left_x
+			pos 260+60, 145 : mes "y"
+				pos 260+60+10, 145 : input Addon_Img_Null__Left__Top_Left_y
+	
+			pos 398, 145 : mes "右下 : "
+			pos 450, 145 : mes "x"
+				pos 460, 145    : input Addon_Img_Null__Left__Bottom_Right_x
+			pos 460+60, 145 : mes "y"
+				pos 460+60+10, 145 : input Addon_Img_Null__Left__Bottom_Right_y
+	
+		//上向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 175 : mes "上向き"
+	
+			pos 198, 175 : mes "サイズ : "
+			pos 250, 175 : mes "x"
+				pos 260, 175    : input Addon_Img_Null__Top__Size_x
+			pos 260+60, 175 : mes "y"
+				pos 260+60+10, 175 : input Addon_Img_Null__Top__Size_y
+	
+			pos 398, 175 : mes "マス : "
+			pos 450, 175 : mes "x"
+				pos 460, 175    : input Addon_Img_Null__Top__Trout_x
+			pos 460+60, 175 : mes "y"
+				pos 460+60+10, 175 : input Addon_Img_Null__Top__Trout_y
+	
+			pos 198, 200 : mes "左上 : "
+			pos 250, 200 : mes "x"
+				pos 260, 200    : input Addon_Img_Null__Top__Top_Left_x
+			pos 260+60, 200 : mes "y"
+				pos 260+60+10, 200 : input Addon_Img_Null__Top__Top_Left_y
+	
+			pos 398, 200 : mes "右下 : "
+			pos 450, 200 : mes "x"
+				pos 460, 200    : input Addon_Img_Null__Top__Bottom_Right_x
+			pos 460+60, 200 : mes "y"
+				pos 460+60+10, 200 : input Addon_Img_Null__Top__Bottom_Right_y
+	
+		//下向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 230 : mes "下向き"
+	
+			pos 198, 230 : mes "サイズ : "
+			pos 250, 230 : mes "x"
+				pos 260, 230    : input Addon_Img_Null__Bottom__Size_x
+			pos 260+60, 230 : mes "y"
+				pos 260+60+10, 230 : input Addon_Img_Null__Bottom__Size_y
+	
+			pos 398, 230 : mes "マス : "
+			pos 450, 230 : mes "x"
+				pos 460, 230    : input Addon_Img_Null__Bottom__Trout_x
+			pos 460+60, 230 : mes "y"
+				pos 460+60+10, 230 : input Addon_Img_Null__Bottom__Trout_y
+	
+			pos 198, 255 : mes "左上 : "
+			pos 250, 255 : mes "x"
+				pos 260, 255    : input Addon_Img_Null__Bottom__Top_Left_x
+			pos 260+60, 255 : mes "y"
+				pos 260+60+10, 255 : input Addon_Img_Null__Bottom__Top_Left_y
+	
+			pos 398, 255 : mes "右下 : "
+			pos 450, 255 : mes "x"
+				pos 460, 255    : input Addon_Img_Null__Bottom__Bottom_Right_x
+			pos 460+60, 255 : mes "y"
+				pos 460+60+10, 255 : input Addon_Img_Null__Bottom__Bottom_Right_y
+	
+		//右向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 285 : mes "右向き"
+	
+			pos 198, 285 : mes "サイズ : "
+			pos 250, 285 : mes "x"
+				pos 260, 285    : input Addon_Img_Null__Right__Size_x
+			pos 260+60, 285 : mes "y"
+				pos 260+60+10, 285 : input Addon_Img_Null__Right__Size_y
+	
+			pos 398, 285 : mes "マス : "
+			pos 450, 285 : mes "x"
+				pos 460, 285    : input Addon_Img_Null__Right__Trout_x
+			pos 460+60, 285 : mes "y"
+				pos 460+60+10, 285 : input Addon_Img_Null__Right__Trout_y
+	
+			pos 198, 310 : mes "左上 : "
+			pos 250, 310 : mes "x"
+				pos 260, 310    : input Addon_Img_Null__Right__Top_Left_x
+			pos 260+60, 310 : mes "y"
+				pos 260+60+10, 310 : input Addon_Img_Null__Right__Top_Left_y
+	
+			pos 398, 310 : mes "右下 : "
+			pos 450, 310 : mes "x"
+				pos 460, 310    : input Addon_Img_Null__Right__Bottom_Right_x
+			pos 460+60, 310 : mes "y"
+				pos 460+60+10, 310 : input Addon_Img_Null__Right__Bottom_Right_y
+	
+	/*収容人数設定*/
+		color 255, 255, 255 : boxf 20, 350, 640-20, 430
+		color 50, 50, 50 : boxf 21, 351, 640-21, 429
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 370 : mes "収容人数"
+		
+		line 145, 360, 145, 420
+		
+		objsize 150, 20
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 160, 365 : mes "密度"
+			if Addon_Type_tmp = "office" {
+				pos 250, 365 : mes "オフィスでは密度は指定できません"
+			} else : if Addon_Type_tmp = "industrial" {
+				pos 250, 365 : mes "工場では密度は指定できません"
+			} else : if Addon_Type_tmp = "farm" {
+				pos 250, 365 : mes "農業地区では密度は指定できません"
+			} else {
+				pos 250, 365 : combox Addon_Density_tmp, 160, "低密度\n高密度"
+			}
+	
+		objsize 150, 20
+		pos 160, 390 : 
+			if Addon_Type_tmp = "residential" {
+				mes "最大住民数"
+			} else {
+				mes "最大雇用数"
+			}
+			
+			pos 250, 390 : input Addon_Maxinum_Capacity
+	
+	/*ステータス*/
+		if Addon_Type_tmp = "industrial" or Addon_Type_tmp = "farm" {
+			pos (640/2)-24-4, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)-8-2, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)+8+2, 455 : gcopy 7, 0, 0, 8, 8
+			pos (640/2)+24+4, 455 : gcopy 8, 0, 0, 8, 8
+		} else {
+			pos (640/2)-24, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)-4, 455 : gcopy 8, 0, 0, 8, 8
+			pos (640/2)+16, 455 : gcopy 7, 0, 0, 8, 8
+		}
+			
+	/*次へ進むボタン*/
+		objsize 32, 32 : objimage 6
+		pos 560, 440 : button "", *make_building_4
+	
+	stop
+	
+*make_building_4
+	if Addon_Density_tmp = 0 and Addon_Type_tmp != "office" and Addon_Type_tmp != "industrial" and Addon_Type_tmp != "farm" {
+		Addon_Type = "low_density_"+Addon_Type_tmp+""
+	}
+	if Addon_Density_tmp = 1 and Addon_Type_tmp != "office" and Addon_Type_tmp != "industrial" and Addon_Type_tmp != "farm" {
+		Addon_Type = "high_density_"+Addon_Type_tmp+""
+	}
+	
+	if Addon_Type_tmp = "industrial" or Addon_Type_tmp = "farm" {
+		goto *make_building_5
+	} else {
+		goto *addon_save
+	}
+	
+*make_building_5
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	gmode 0
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *make_building_2
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 建物・産業（"+Addon_Type_JP+"）"
+	
+	/*生産物*/
+		color 255, 255, 255 : boxf 20, 50, 640-20, 100
+		color 50, 50, 50 : boxf 21, 51, 640-21, 99
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 60 : mes "生産物"
+		
+		objsize 150, 20
+		pos 198, 65 : input Addon_Crop : input_stat__Addon_Crop = stat
+	
+	/*生産量*/
+		color 255, 255, 255 : boxf 20, 105, 640-20, 155
+		color 50, 50, 50 : boxf 21, 106, 640-21, 154
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 115 : mes "生産量"
+		
+		objsize 50, 20
+		pos 198, 120 : input Addon_Crop_Amount : input_stat__Addon_Crop_Amount = stat
+		
+	/*ステータス*/
+		pos (640/2)-24-4, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)-8-2, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)+8+2, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)+24+4, 455 : gcopy 7, 0, 0, 8, 8
+			
+	/*次へ進むボタン*/
+		objsize 32, 32 : objimage 6
+		pos 560, 440 : button "", *addon_save
+	
+	stop
+	
+	
+*make_park_first
+	/*変数初期化*/
+		Addon_Name__JP = ""
+		Addon_Name__EN = ""
+	
+		Addon_Icon_Path = ""
+	
+		Addon_Img_Null__Path = ""
+		
+		Addon_Img_Null__Left__Size_x = 64
+		Addon_Img_Null__Left__Size_y = 64
+		Addon_Img_Null__Top__Size_x = 64
+		Addon_Img_Null__Top__Size_y = 64
+		Addon_Img_Null__Bottom__Size_x = 64
+		Addon_Img_Null__Bottom__Size_y = 64
+		Addon_Img_Null__Right__Size_x = 64
+		Addon_Img_Null__Right__Size_y = 64
+		
+		Addon_Img_Null__Left__Trout_x = 1
+		Addon_Img_Null__Left__Trout_y = 1
+		Addon_Img_Null__Top__Trout_x = 1
+		Addon_Img_Null__Top__Trout_y = 1
+		Addon_Img_Null__Bottom__Trout_x = 1
+		Addon_Img_Null__Bottom__Trout_y = 1
+		Addon_Img_Null__Right__Trout_x = 1
+		Addon_Img_Null__Right__Trout_y = 1
+		
+		Addon_Img_Null__Left__Top_Left_x = 0
+		Addon_Img_Null__Left__Top_Left_y = 0
+		Addon_Img_Null__Left__Bottom_Right_x = 64
+		Addon_Img_Null__Left__Bottom_Right_y = 64
+	
+		Addon_Img_Null__Top__Top_Left_x = 64
+		Addon_Img_Null__Top__Top_Left_y = 0
+		Addon_Img_Null__Top__Bottom_Right_x = 128
+		Addon_Img_Null__Top__Bottom_Right_y = 64
+	
+		Addon_Img_Null__Bottom__Top_Left_x = 0
+		Addon_Img_Null__Bottom__Top_Left_y = 64
+		Addon_Img_Null__Bottom__Bottom_Right_x = 64
+		Addon_Img_Null__Bottom__Bottom_Right_y = 128
+	
+		Addon_Img_Null__Right__Top_Left_x = 64
+		Addon_Img_Null__Right__Top_Left_y = 64
+		Addon_Img_Null__Right__Bottom_Right_x = 128
+		Addon_Img_Null__Right__Bottom_Right_y = 128
+	
+		Addon_Img_Null__Transparent_Color__r = 0
+		Addon_Img_Null__Transparent_Color__g = 0
+		Addon_Img_Null__Transparent_Color__b = 0
+	
+		
+		Addon_About__Author = ""
+		Addon_About__Summary = ""
+	
+		Addon_Influence__Land_Price = 0
+		Addon_Influence__Land_Price__grid = 0
+		Addon_Influence__Crime_rate = 0
+		Addon_Influence__Crime_rate__grid = 0
+		Addon_Influence__Education_rate = 0
+		Addon_Influence__Education_rate__grid = 0
+	
+		buffer_1002 = 0
+		Preview_Dire = 0
+	
+*make_park
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	Addon_Type = "park"
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *main
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 公園"
+	
+	/*名称設定*/
+		color 255, 255, 255 : boxf 20, 50, 640-20, 130
+		color 50, 50, 50 : boxf 21, 51, 640-21, 129
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 70 : mes "名称"
+		
+		line 95, 60, 95, 120
+		
+		objsize 350, 20
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 110, 65 : mes "日本語名"
+			pos 200, 65 : input Addon_Name__JP
+		pos 110, 90 : mes "英語名"
+			pos 200, 90 : input Addon_Name__EN
+	
+	/*アイコン設定*/
+		color 255, 255, 255 : boxf 20, 135, 640-20, 185
+		color 50, 50, 50 : boxf 21, 136, 640-21, 184
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 145 : mes "アイコン"
+	
+		objsize 250, 20
+		pos 130 + 10+10 + 48, 150 : input Addon_Icon_Path : input_stat__Addon_Icon_Path = stat
+	
+		objsize 100, 20 : objimage -1
+		pos 130 + 10+10+10 + 48 + 250, 150 : button gosub "参照...", *open_icon
+	
+	/*説明*/
+		color 255, 255, 255 : boxf 20, 190, 640-20, 325
+		color 50, 50, 50 : boxf 21, 191, 640-21, 324
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 240 : mes "説明"
+		
+		line 95, 200, 95, 315
+		
+		objsize 350, 20
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 110, 205 : mes "作者名"
+			pos 200, 205 : input Addon_About__Author
+		pos 110, 230 : mes "説明文"
+			pos 200, 230 : objsize 350, 80 : mesbox Addon_About__Summary, 350, 80, 5, 0
+	
+	/*周囲への影響*/
+		color 255, 255, 255 : boxf 20, 330, 640-20, 430
+		color 50, 50, 50 : boxf 21, 331, 640-21, 429
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 360 : mes "周囲への影響"
+	
+		line 180, 340, 180, 420
+	
+		//地価
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 200, 345 : mes "地価"
+				pos 280, 345 : input Addon_Influence__Land_Price
+	
+		//地価が影響するマス
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 360, 345 : mes "地価が影響するマス"
+				pos 520, 345 : input Addon_Influence__Land_Price__grid
+	
+		//犯罪率
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 200, 370 : mes "犯罪率"
+				pos 280, 370 : input Addon_Influence__Crime_rate
+	
+		//犯罪率が影響するマス
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 360, 370 : mes "犯罪率が影響するマス"
+				pos 520, 370 : input Addon_Influence__Crime_rate__grid
+	
+		//教育度
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 200, 395 : mes "教育度"
+				pos 280, 395 : input Addon_Influence__Education_rate
+	
+		//教育度が影響するマス
+			objsize 50, 20
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 360, 395 : mes "教育率が影響するマス"
+				pos 520, 395 : input Addon_Influence__Education_rate__grid
+	
+	/*ステータス*/
+		pos (640/2)-8-2, 455 : gcopy 7, 0, 0, 8, 8
+		pos (640/2)+8+2, 455 : gcopy 8, 0, 0, 8, 8
+			
+	/*次へ進むボタン*/
+		objsize 32, 32 : objimage 6
+		pos 560, 440 : button "", *make_park_3
+	
+	stop
+	
+*make_park_3
+	if Addon_Name__JP = "" or Addon_Name__EN {
+		dialog "名称を入力してください", 1
+		stop
+	}
+	if Addon_Icon_Path = "" {
+		dialog "アイコン用画像を選択してください", 1
+		stop
+	}
+	
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	gmode 0
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *make_park
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 公園"
+	
+	/*画像設定*/
+		color 255, 255, 255 : boxf 20, 50, 640-20, 345
+		color 50, 50, 50 : boxf 21, 51, 640-21, 344
+		
+		color 255, 255, 255 : font "Yu Gothic", 22
+		pos 35, 180 : mes "画像"
+	
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 110, 65 : mes "画像のパス"
+	
+		line 95, 60, 95, 335
+		
+		objsize 250, 20
+		pos 198, 65 : input Addon_Img_Null__Path : input_stat__Addon_Img_Null__Path = stat
+	
+		objsize 100, 20 : objimage -1
+		pos 198+250+10, 65 : button gosub "参照...", *open_img
+	
+		//プレビュー
+			objsize 122, 20 : objimage -1
+			pos 198+250+10, 90 : button "プレビュー", *Preview
+	
+		//透過色
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 90 : mes "透過色"
+	
+			objsize 50, 20
+			
+			pos 198, 90 : mes "R"
+				pos 208+5, 90    : input Addon_Img_Null__Transparent_Color__r
+			pos 208+60, 90 : mes "G"
+				pos 208+60+15, 90 : input Addon_Img_Null__Transparent_Color__g
+			pos 218+120, 90 : mes "B"
+				pos 218+120+15, 90 : input Addon_Img_Null__Transparent_Color__b
+	
+		//左向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 120 : mes "左向き"
+	
+			pos 198, 120 : mes "サイズ : "
+			pos 250, 120 : mes "x"
+				pos 260, 120    : input Addon_Img_Null__Left__Size_x
+			pos 260+60, 120 : mes "y"
+				pos 260+60+10, 120 : input Addon_Img_Null__Left__Size_y
+	
+			pos 398, 120 : mes "マス : "
+			pos 450, 120 : mes "x"
+				pos 460, 120    : input Addon_Img_Null__Left__Trout_x
+			pos 460+60, 120 : mes "y"
+				pos 460+60+10, 120 : input Addon_Img_Null__Left__Trout_y
+	
+			pos 198, 145 : mes "左上 : "
+			pos 250, 145 : mes "x"
+				pos 260, 145    : input Addon_Img_Null__Left__Top_Left_x
+			pos 260+60, 145 : mes "y"
+				pos 260+60+10, 145 : input Addon_Img_Null__Left__Top_Left_y
+	
+			pos 398, 145 : mes "右下 : "
+			pos 450, 145 : mes "x"
+				pos 460, 145    : input Addon_Img_Null__Left__Bottom_Right_x
+			pos 460+60, 145 : mes "y"
+				pos 460+60+10, 145 : input Addon_Img_Null__Left__Bottom_Right_y
+	
+		//上向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 175 : mes "上向き"
+	
+			pos 198, 175 : mes "サイズ : "
+			pos 250, 175 : mes "x"
+				pos 260, 175    : input Addon_Img_Null__Top__Size_x
+			pos 260+60, 175 : mes "y"
+				pos 260+60+10, 175 : input Addon_Img_Null__Top__Size_y
+	
+			pos 398, 175 : mes "マス : "
+			pos 450, 175 : mes "x"
+				pos 460, 175    : input Addon_Img_Null__Top__Trout_x
+			pos 460+60, 175 : mes "y"
+				pos 460+60+10, 175 : input Addon_Img_Null__Top__Trout_y
+	
+			pos 198, 200 : mes "左上 : "
+			pos 250, 200 : mes "x"
+				pos 260, 200    : input Addon_Img_Null__Top__Top_Left_x
+			pos 260+60, 200 : mes "y"
+				pos 260+60+10, 200 : input Addon_Img_Null__Top__Top_Left_y
+	
+			pos 398, 200 : mes "右下 : "
+			pos 450, 200 : mes "x"
+				pos 460, 200    : input Addon_Img_Null__Top__Bottom_Right_x
+			pos 460+60, 200 : mes "y"
+				pos 460+60+10, 200 : input Addon_Img_Null__Top__Bottom_Right_y
+	
+		//下向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 230 : mes "下向き"
+	
+			pos 198, 230 : mes "サイズ : "
+			pos 250, 230 : mes "x"
+				pos 260, 230    : input Addon_Img_Null__Bottom__Size_x
+			pos 260+60, 230 : mes "y"
+				pos 260+60+10, 230 : input Addon_Img_Null__Bottom__Size_y
+	
+			pos 398, 230 : mes "マス : "
+			pos 450, 230 : mes "x"
+				pos 460, 230    : input Addon_Img_Null__Bottom__Trout_x
+			pos 460+60, 230 : mes "y"
+				pos 460+60+10, 230 : input Addon_Img_Null__Bottom__Trout_y
+	
+			pos 198, 255 : mes "左上 : "
+			pos 250, 255 : mes "x"
+				pos 260, 255    : input Addon_Img_Null__Bottom__Top_Left_x
+			pos 260+60, 255 : mes "y"
+				pos 260+60+10, 255 : input Addon_Img_Null__Bottom__Top_Left_y
+	
+			pos 398, 255 : mes "右下 : "
+			pos 450, 255 : mes "x"
+				pos 460, 255    : input Addon_Img_Null__Bottom__Bottom_Right_x
+			pos 460+60, 255 : mes "y"
+				pos 460+60+10, 255 : input Addon_Img_Null__Bottom__Bottom_Right_y
+	
+		//右向き
+			color 255, 255, 255 : font "Yu Gothic", 14
+			pos 110, 285 : mes "右向き"
+	
+			pos 198, 285 : mes "サイズ : "
+			pos 250, 285 : mes "x"
+				pos 260, 285    : input Addon_Img_Null__Right__Size_x
+			pos 260+60, 285 : mes "y"
+				pos 260+60+10, 285 : input Addon_Img_Null__Right__Size_y
+	
+			pos 398, 285 : mes "マス : "
+			pos 450, 285 : mes "x"
+				pos 460, 285    : input Addon_Img_Null__Right__Trout_x
+			pos 460+60, 285 : mes "y"
+				pos 460+60+10, 285 : input Addon_Img_Null__Right__Trout_y
+	
+			pos 198, 310 : mes "左上 : "
+			pos 250, 310 : mes "x"
+				pos 260, 310    : input Addon_Img_Null__Right__Top_Left_x
+			pos 260+60, 310 : mes "y"
+				pos 260+60+10, 310 : input Addon_Img_Null__Right__Top_Left_y
+	
+			pos 398, 310 : mes "右下 : "
+			pos 450, 310 : mes "x"
+				pos 460, 310    : input Addon_Img_Null__Right__Bottom_Right_x
+			pos 460+60, 310 : mes "y"
+				pos 460+60+10, 310 : input Addon_Img_Null__Right__Bottom_Right_y
+	
+	/*ステータス*/
+		pos (640/2)-8-2, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)+8+2, 455 : gcopy 7, 0, 0, 8, 8
+			
+	/*次へ進むボタン*/
+		objsize 32, 32 : objimage 6
+		pos 560, 440 : button "", *addon_save
+	
+	stop
+	
+*addon_save
+	if Addon_Img_Null__Path = "" {
+		dialog "アドオンの画像を選択してください", 1
+		stop
+	}
+	
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	pos (640/2)-(128/2), 150 : gcopy 9, 0, 0, 128, 128
+	
+	color 255, 255, 255 : font "Yu Gothic", 14
+	cmes "保存中... しばらくお待ちください", 0, 300, 640, 320
+	
+	chdir dir
+	
+	/*アドオン用ディレクトリ作成*/
+		dirlist x, Addon_Name__EN, 5
+	
+		if stat = 0 {
+			mkdir ""+Addon_Name__EN+""
+		}
+		
+		chdir ""+Addon_Name__EN+""
+	
+	/*画像、アイコンをコピー*/
+		bcopy Addon_Icon_Path, getpath(Addon_Icon_Path, 8)
+		bcopy Addon_Img_Null__Path, getpath(Addon_Img_Null__Path, 8)
+	
+	/*adatファイル作成*/
+		addon_adat = ""
+		
+		notesel addon_adat
+		
+		noteadd "addon_name = \""+Addon_Name__EN+"\"", -1
+		noteadd "addon_jp_name = \""+Addon_Name__JP+"\"", -1
+		noteadd "addon_author = \""+Addon_About__Author+"\"", -1
+		noteadd "addon_summary = \""+Addon_About__Summary+"\"", -1
+		noteadd "addon_icon = \""+getpath(Addon_Icon_Path, 8)+"\"", -1
+		noteadd "addon_maker_version = \"2\""
+		
+		noteadd " ", -1
+		
+		noteadd "addon_type = \""+Addon_Type+"\"", -1
+		
+		noteadd " ", -1
+		
+		noteadd "use_types = \"null\""
+	
+		if instr(Addon_Type, 0, "density") != -1 {
+			noteadd " ", -1
+			noteadd "maximum_capacity = \""+Addon_Maxinum_Capacity+"\""
+		}
+			
+		noteadd " ", -1
+		
+		noteadd "land_price_influence = \""+Addon_Influence__Land_Price+"\"", -1
+		noteadd "land_price_influence_grid = \""+Addon_Influence__Land_Price__grid+"\"", -1
+		
+		noteadd " ", -1
+		
+		noteadd "crime_rate_influence = \""+Addon_Influence__Crime_rate+"\"", -1
+		noteadd "crime_rate_influence_grid = \""+Addon_Influence__Crime_rate__grid+"\"", -1
+		
+		noteadd " ", -1
+		
+		noteadd "education_rate_influence = \""+Addon_Influence__Education_rate+"\"", -1
+		noteadd "education_rate_influence_grid = \""+Addon_Influence__Education_rate__grid+"\"", -1
+	
+		noteadd " ", -1
+	
+		if Addon_Typet_tmp = "industrial" or Addon_Typet_tmp = "farm" {
+			noteadd "addon_crop = \""+Addon_Crop+"\"", -1
+			noteadd "addon_crop_amount = \""+Addon_Crop_Amount+"\"", -1
+		}
+		
+		noteadd " ", -1
+		
+		noteadd "null {", -1
+			noteadd "	image = \""+getpath(Addon_Img_Null__Path, 8)+"\"", -1
+			noteadd "	direction = \"left, top, bottom, right\"", -1
+			noteadd "	transparent_color = \""+Addon_Img_Null__Transparent_Color__r+", "+Addon_Img_Null__Transparent_Color__g+", "+Addon_Img_Null__Transparent_Color__b+"\"", -1
+		
+			noteadd " ", -1
+		
+			noteadd "	left {", -1
+				noteadd "		size_x = \""+Addon_Img_Null__Left__Size_x+"\"", -1
+				noteadd "		size_y = \""+Addon_Img_Null__Left__Size_y+"\"", -1
+				noteadd "		chip_x = \""+Addon_Img_Null__Left__Trout_x+"\"", -1
+				noteadd "		chip_y = \""+Addon_Img_Null__Left__Trout_y+"\"", -1
+		
+				noteadd " ", -1
+		
+				noteadd "		top_left_x = \""+Addon_Img_Null__Left__Top_Left_x+"\"", -1
+				noteadd "		top_left_y = \""+Addon_Img_Null__Left__Top_Left_y+"\"", -1
+				noteadd "		bottom_right_x = \""+Addon_Img_Null__Left__Bottom_Right_x+"\"", -1
+				noteadd "		bottom_right_y = \""+Addon_Img_Null__Left__Bottom_Right_y+"\"", -1
+			noteadd "	}", -1
+		
+			noteadd "	top {", -1
+				noteadd "		size_x = \""+Addon_Img_Null__Top__Size_x+"\"", -1
+				noteadd "		size_y = \""+Addon_Img_Null__Top__Size_y+"\"", -1
+				noteadd "		chip_x = \""+Addon_Img_Null__Top__Trout_x+"\"", -1
+				noteadd "		chip_y = \""+Addon_Img_Null__Top__Trout_y+"\"", -1
+		
+				noteadd " ", -1
+		
+				noteadd "		top_left_x = \""+Addon_Img_Null__Top__Top_Left_x+"\"", -1
+				noteadd "		top_left_y = \""+Addon_Img_Null__Top__Top_Left_y+"\"", -1
+				noteadd "		bottom_right_x = \""+Addon_Img_Null__Top__Bottom_Right_x+"\"", -1
+				noteadd "		bottom_right_y = \""+Addon_Img_Null__Top__Bottom_Right_y+"\"", -1
+			noteadd "	}", -1
+		
+			noteadd "	bottom {", -1
+				noteadd "		size_x = \""+Addon_Img_Null__Bottom__Size_x+"\"", -1
+				noteadd "		size_y = \""+Addon_Img_Null__Bottom__Size_y+"\"", -1
+				noteadd "		chip_x = \""+Addon_Img_Null__Bottom__Trout_x+"\"", -1
+				noteadd "		chip_y = \""+Addon_Img_Null__Bottom__Trout_y+"\"", -1
+		
+				noteadd " ", -1
+		
+				noteadd "		top_left_x = \""+Addon_Img_Null__Bottom__Top_Left_x+"\"", -1
+				noteadd "		top_left_y = \""+Addon_Img_Null__Bottom__Top_Left_y+"\"", -1
+				noteadd "		bottom_right_x = \""+Addon_Img_Null__Bottom__Bottom_Right_x+"\"", -1
+				noteadd "		bottom_right_y = \""+Addon_Img_Null__Bottom__Bottom_Right_y+"\"", -1
+			noteadd "	}", -1
+		
+			noteadd "	right {", -1
+				noteadd "		size_x = \""+Addon_Img_Null__Right__Size_x+"\"", -1
+				noteadd "		size_y = \""+Addon_Img_Null__Right__Size_y+"\"", -1
+				noteadd "		chip_x = \""+Addon_Img_Null__Right__Trout_x+"\"", -1
+				noteadd "		chip_y = \""+Addon_Img_Null__Right__Trout_y+"\"", -1
+		
+				noteadd " ", -1
+		
+				noteadd "		top_left_x = \""+Addon_Img_Null__Right__Top_Left_x+"\"", -1
+				noteadd "		top_left_y = \""+Addon_Img_Null__Right__Top_Left_y+"\"", -1
+				noteadd "		bottom_right_x = \""+Addon_Img_Null__Right__Bottom_Right_x+"\"", -1
+				noteadd "		bottom_right_y = \""+Addon_Img_Null__Right__Bottom_Right_y+"\"", -1
+			noteadd "	}", -1
+		
+		noteadd "};", -1
+		
+		notesave ""+Addon_Name__EN+".adat"
+		
+	/*完了*/
+		clrobj
+		color 50, 50, 50 : boxf
+	
+		objsize 400, 20
+		saved_path = ""+dir+"\\"+Addon_Name__EN+"\\"
+		
+		color 255, 255, 255 : font "Yu Gothic", 36
+		pos 290, 130 : mes "完了"
+	
+		color 255, 255, 255 : font "Yu Gothic", 14
+		pos 100, 210 : mes "アドオンに必要なファイルの出力が完了しました。
+		pos 100, 230 : mes "アドオンファイルの出力先は"
+		pos 100, 250 : input saved_path
+		pos 505, 250 : mes "です。"
+		pos 100, 270 : mes "ご確認ください。"
+		
+		objsize 32, 32 : objimage 10
+		pos (640/2)-(32/2), 400 : button "", *main
+		
+	stop
+	
+*make_road
+	dialog"工事中です。もうしばらくお待ち下さい"
+	stop
+	
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *main
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 交通"
+	
+	color 255, 255, 255 : font "Yu Gothic", 14
+	cmes "作成する建築物の種類を選んでください", 0, 80, 640, 100
+	
+	objsize 128, 128
+	pos 100, 200 : objimage 23 : button "", *make_building__residential
+		font "Yu Gothic", 14 : cmes "道路", 100, 200+128, 100+128, 200+128+20
+	pos 250, 200 : objimage 24 : button "", *make_building__commercial
+		font "Yu Gothic", 14 : cmes "線路", 250, 200+128, 250+128, 200+128+20
+	pos 400, 200 : objimage 25 : button "", *make_building__office
+		font "Yu Gothic", 14 : cmes "駅", 400, 200+128, 400+128, 200+128+20
+	
+	/*ステータス*/
+		pos (640/2)-24, 455 : gcopy 7, 0, 0, 8, 8
+		pos (640/2)-4, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)+16, 455 : gcopy 8, 0, 0, 8, 8
+	
+	stop
+	
+*open_icon
+	dialog "png;*.bmp;*.jpg;*.jpeg;*.gif;*.ico", 16, "画像ファイル"
+	
+	if stat = 1 {
+		Addon_Icon_Path = refstr
+		objprm input_stat__Addon_Icon_Path, Addon_Icon_Path
+	
+		celload Addon_Icon_Path, 1001
+	
+		pos 130+15, 149 : gmode 2 : gcopy 1001, 0, 0, 32, 32
+	
+		gmode 0
+	}
+	
+	return
+	
+*open_img
+	dialog "png;*.bmp;*.jpg;*.jpeg;*.gif", 16, "画像ファイル"
+	
+	if stat = 1 {
+		Addon_Img_Null__Path = refstr
+		objprm input_stat__Addon_Img_Null__Path, Addon_Img_Null__Path
+	
+		celload Addon_Img_Null__Path, 1002
+		buffer_1002 = 1
+	}
+	
+	return
+	
+	
+*Preview
+	if buffer_1002 = 0 {
+		dialog "画像を選択してください"
+		stop
+	}
+	
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		if Addon_Type = "building" {
+			pos 10, 10 : objsize 32, 32 : button "", *make_building_3
+		} else : if Addon_Type = "park" {
+			pos 10, 10 : objsize 32, 32 : button "", *make_park_3
+		}
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "プレビュー"
+	
+	/*プレビュー表示*/
+		if Preview_Dire = 0 {
+			pos 50, (480/2)-16 : gmode 0 : gcopy 18, 0, 0, 32, 32
+			color 255, 255, 255 : font "Yu Gothic", 20
+			pos 90, (480/2)-10 : mes "左向き"
+			
+			color Addon_Img_Null__Transparent_Color__r, Addon_Img_Null__Transparent_Color__g, Addon_Img_Null__Transparent_Color__b : gmode 4, (Addon_Img_Null__Left__Bottom_Right_x - Addon_Img_Null__Left__Top_Left_x), (Addon_Img_Null__Left__Bottom_Right_y - Addon_Img_Null__Left__Top_Left_y), 256
+			pos (640/2)-(Addon_Img_Null__Left__Size_x/2), (480/2)-(Addon_Img_Null__Left__Size_y/2) : gcopy 1002, Addon_Img_Null__Left__Top_Left_x, Addon_Img_Null__Left__Top_Left_y, Addon_Img_Null__Left__Bottom_Right_x, Addon_Img_Null__Left__Bottom_Right_y
+		}
+		if Preview_Dire = 1 {
+			pos 50, (480/2)-16 : gmode 0 : gcopy 19, 0, 0, 32, 32
+			color 255, 255, 255 : font "Yu Gothic", 20
+			pos 90, (480/2)-10 : mes "上向き"
+			
+			color Addon_Img_Null__Transparent_Color__r, Addon_Img_Null__Transparent_Color__g, Addon_Img_Null__Transparent_Color__b : gmode 4, (Addon_Img_Null__Top__Bottom_Right_x - Addon_Img_Null__Top__Top_Left_x), (Addon_Img_Null__Top__Bottom_Right_y - Addon_Img_Null__Top__Top_Left_y), 256
+			pos (640/2)-(Addon_Img_Null__Top__Size_x/2), (480/2)-(Addon_Img_Null__Top__Size_y/2) : gcopy 1002, Addon_Img_Null__Top__Top_Left_x, Addon_Img_Null__Top__Top_Left_y, Addon_Img_Null__Top__Bottom_Right_x, Addon_Img_Null__Top__Bottom_Right_y
+		}
+		if Preview_Dire = 2 {
+			pos 50, (480/2)-16 : gmode 0 : gcopy 20, 0, 0, 32, 32
+			color 255, 255, 255 : font "Yu Gothic", 20
+			pos 90, (480/2)-10 : mes "下向き"
+			
+			color Addon_Img_Null__Transparent_Color__r, Addon_Img_Null__Transparent_Color__g, Addon_Img_Null__Transparent_Color__b : gmode 4, (Addon_Img_Null__Bottom__Bottom_Right_x - Addon_Img_Null__Bottom__Top_Left_x), (Addon_Img_Null__Bottom__Bottom_Right_y - Addon_Img_Null__Bottom__Top_Left_y), 256
+			pos (640/2)-(Addon_Img_Null__Bottom__Size_x/2), (480/2)-(Addon_Img_Null__Bottom__Size_y/2) : gcopy 1002, Addon_Img_Null__Bottom__Top_Left_x, Addon_Img_Null__Bottom__Top_Left_y, Addon_Img_Null__Bottom__Bottom_Right_x, Addon_Img_Null__Bottom__Bottom_Right_y
+		}
+		if Preview_Dire = 3 {
+			pos 50, (480/2)-16 : gmode 0 : gcopy 21, 0, 0, 32, 32
+			color 255, 255, 255 : font "Yu Gothic", 20
+			pos 90, (480/2)-10 : mes "右向き"
+			
+			color Addon_Img_Null__Transparent_Color__r, Addon_Img_Null__Transparent_Color__g, Addon_Img_Null__Transparent_Color__b : gmode 4, (Addon_Img_Null__Right__Bottom_Right_x - Addon_Img_Null__Right__Top_Left_x), (Addon_Img_Null__Right__Bottom_Right_y - Addon_Img_Null__Right__Top_Left_y), 256
+			pos (640/2)-(Addon_Img_Null__Right__Size_x/2), (480/2)-(Addon_Img_Null__Right__Size_y/2) : gcopy 1002, Addon_Img_Null__Right__Top_Left_x, Addon_Img_Null__Right__Top_Left_y, Addon_Img_Null__Right__Bottom_Right_x, Addon_Img_Null__Right__Bottom_Right_y
+		}
+	
+	/*回転ボタン*/
+		objimage 17 : objsize 32, 32
+		pos (640/2)-(32/2), 420 : button "", *Preview_turn
+	
+	stop
+	
+*Preview_turn
+	Preview_Dire ++
+	
+	if Preview_Dire > 3 {
+		Preview_Dire = 0
+	}
+	
+	goto *Preview
+	
+	
+*hinto
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	onclick gosub *hinto_onclick
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *main
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "Addon Makerの使い方"
+	
+	/*メニュー表示*/
+		color 255, 255, 255 : font "Yu Gothic", 14
+		cmes "項目を選んでください", 0, 80, 640, 100
+	
+		pos 210, 150 : gcopy 15, 0, 0, 32, 32
+		pos 210+40, 155 : mes "建物アドオンの作成手順"
+	
+		pos 210, 200 : gcopy 15, 0, 0, 32, 32
+		pos 210+40, 205 : mes "公共アドオンの作成手順"
+	
+		pos 210, 250 : gcopy 15, 0, 0, 32, 32
+		pos 210+40, 255 : mes "交通アドオンの作成手順"
+	
+		pos 210, 300 : gcopy 16, 0, 0, 32, 32
+		pos 210+40, 305 : mes "Addon Makerについて"
+	
+	stop
+	
+*hinto_onclick
+	if click_range(210, 150, 640-210, 180) = 1 {
+		goto *hinto_1
+	}
+	if click_range(210, 200, 640-210, 230) = 1 {
+		goto *hinto_2
+	}
+	if click_range(210, 250, 640-210, 280) = 1 {
+		goto *hinto_3
+	}
+	if click_range(210, 300, 640-210, 330) = 1 {
+		goto *information
+	}
+	
+	return
+	
+*hinto_1
+	
+*hinto_2
+	
+*hinto_3
+	dialog"工事中です..."
+	stop
+	
+*information
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *hinto
+		
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "Addon Makerについて"
+	
+	/*情報表示*/
+		pos (640/2)-(520/2), 60 : gcopy 1, 0, 0, 520, 110
+	
+		font "Yu Gothic", 14
+		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.1.2\nリリース : 2017年11月7日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
+	
+		font "Yu Gothic", 10
+		cmes "Copyright (C) YotioSoft 2017 All Rights Reserved.", 0, 450, 640, 470
+	
+	stop
