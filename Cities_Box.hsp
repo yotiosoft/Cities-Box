@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.2
+								      Cities Box Ver 0.9.2.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -903,7 +903,7 @@
 				pos 120+110, 40 : gcopy 62, 0, 0, 230, 110
 	
 				font SystemFont, 14 : color 255, 255, 255
-				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : Hot Soup Processor 3.5\n\nCopyright(C) YotioSoft 2017 All Rights Reserved."
+				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : HSP 3.5\n\nCopyright(C) YotioSoft 2017 All Rights Reserved."
 			}
 	
 	stop
@@ -2685,8 +2685,14 @@
 							
 					//オブジェクトを表示
 						pos macro1 + px, macro2 - sizey + 1 +py
-						color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
-						gmode 4, sizex, sizey, 256
+	
+						if addon_transparent_color_r(map(x,y)) = 0 and addon_transparent_color_g(map(x,y)) = 0 and addon_transparent_color_b(map(x,y)) = 0 {
+							gmode 2
+						} else {
+							color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
+							gmode 4, sizex, sizey, 256
+						}
+						
 						gcopy buffer_number(x,y), atlx, atly, sizex, sizey
 				}
 	
@@ -2759,11 +2765,11 @@
 				my = -1
 			}
 	
-		/*
-			if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-				title "FPS:"+fps+""
-			}
-		*/
+		
+			;if cnt \ 10 = 0 and mx >= 0 and mx < 100 and my >= 0 and my < 100 {
+			;	title "FPS:"+fps+""
+			;}
+		
 	
 		//メニューを開いているときはstat_mode = "type"にする
 			if cursor_mode != "normal" and cursor_mode != "put_Road" {
