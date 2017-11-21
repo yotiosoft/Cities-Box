@@ -19,45 +19,45 @@ null {
 	
 	left {
 		size_x = "96"
-		size_y = "117"
+		size_y = "125"
 		chip_x = "1"
 		chip_y = "2"
 		
 		top_left_x = "0"
-		top_left_y = "7"
+		top_left_y = "0"
 		bottom_right_x = "96"
 		bottom_right_y = "124"
 	}
 	top {
 		size_x = "96"
-		size_y = "108"
+		size_y = "125"
 		chip_x = "2"
 		chip_y = "1"
 		
 		top_left_x = "96"
-		top_left_y = "16"
+		top_left_y = "0"
 		bottom_right_x = "192"
 		bottom_right_y = "124"
 	}
 	bottom {
 		size_x = "96"
-		size_y = "119"
+		size_y = "125"
 		chip_x = "2"
 		chip_y = "1"
 		
 		top_left_x = "0"
-		top_left_y = "131"
+		top_left_y = "125"
 		bottom_right_x = "96"
 		bottom_right_y = "250"
 	}
 	right {
 		size_x = "96"
-		size_y = "109"
+		size_y = "125"
 		chip_x = "1"
 		chip_y = "2"
 		
 		top_left_x = "96"
-		top_left_y = "141"
+		top_left_y = "125"
 		bottom_right_x = "192"
 		bottom_right_y = "250"
 	}

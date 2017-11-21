@@ -1,7 +1,7 @@
-Release Number : 87;
+Release Number : 88;
 Title : Cities Box;
-Version : 0.9.2;
-About : Addon Maker‚Ìƒ¿”Å‚ğ“¯«ŠJn;
+Version : 0.9.2.1;
+About : Addon Maker‚Å“¹˜H‹y‚Ñü˜H‚Ìì¬‚É‘Î‰;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
