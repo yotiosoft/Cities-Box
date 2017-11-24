@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.3
+								       Cities Box Ver 0.9.4
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -492,6 +492,9 @@
 			notesel buf_adat
 			noteload buf_filelist
 	
+			//ステータスバーの表示
+				color 0, 167, 232 : boxf 0, windowy-2, (cnt+5) * double(double(windowx) / double(total_addons)), windowy
+	
 			//現在のパス名のみ取得
 				addon_path = getpath(buf_filelist, 32)
 	
@@ -673,8 +676,6 @@
 							pos addon_size_x(addon_number, load_adat_cnt, cnt)*0, addon_size_y(addon_number, load_adat_cnt, cnt)*1 : celput addon_buffer_number, 2
 							pos addon_size_x(addon_number, load_adat_cnt, cnt)*1, addon_size_y(addon_number, load_adat_cnt, cnt)*1 : celput addon_buffer_number, 3
 							*/
-							
-							await 1
 						loop
 					} else {
 						addon_buffer_number = (1000 + addon_number)
@@ -760,11 +761,7 @@
 					chdir ""+directory+"\\addons"
 	
 				addon_number++
-				
-			await 1
 		loop
-
-		wait 100
 	
 	chdir directory
 	
@@ -1251,6 +1248,9 @@
 		nx = 0
 		ny = 0
 	
+		showing_detail_x = -1
+		showing_detail_y = -1
+	
 	if from_new_map = 0 {
 		dim buffer_number, mapx, mapy
 		dim atlx, mapx, mapy
@@ -1340,7 +1340,7 @@
 			}
 	
 			//保存バージョン(Version)を読み込み
-				Saved_Version = int(get_chapter(load_mapdata, "Version", " = \"", "\""))
+				Saved_Version = int(get_chapter(load_mapdata, "Version", " = ", ";"))
 	
 			//都市名(City_Name)を読み込み
 				City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
@@ -1896,7 +1896,7 @@
 			//workers_Public(x,y)の読み込み
 				if instr(load_mapdata, 0, "workers_Public(x,y)") != -1 {
 					workers_Public_buf = get_chapter(load_mapdata, "workers_Public(x,y)", " {", "}")
-	
+					
 					if Saved_Version >= 78 {
 						repeat mapy
 							y = cnt
@@ -2530,12 +2530,157 @@
 	
 		x = 0
 		y = 0
+	
+		//表示する範囲や画面中央の座標などを取得
+		if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
+	
+			//画面中央の座標
+				x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
+				y_=(windowy/2)+camy
+				middle_x=(y_+x_/2)/(chip_size/2)
+				middle_y=(-x_+y_*2)/chip_size
+	
+			//左上のx座標
+				left_top_x_ = 0+camx-chip_size/2
+				left_top_y_ = 0+camy
+				left_top_x = (left_top_y_+left_top_x_/2)/(chip_size/2)
+	
+				if left_top_x < 0 {
+					left_top_x = 0
+				}
 		
+			//左下のy座標
+				left_bottom_x_ = 0+camx-chip_size/2
+				left_bottom_y_ = windowy+camy
+				left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
+	
+				if left_bottom_y >= mapy {
+					left_bottom_y = mapy-1
+				}
+		
+			//右上のy座標
+				right_top_x_ = windowx+camx-chip_size/2
+				right_top_y_ = 0+camy
+				right_top_y = (-right_top_x_+right_top_y_*2)/chip_size
+				
+				if right_top_y < 0 {
+					right_top_y = 0
+				}
+		
+			//右下のx座標
+				right_bottom_x_ = windowx+camx-chip_size/2
+				right_bottom_y_ = windowy+camy
+				right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
+	
+				if right_bottom_x >= mapx {
+					right_bottom_x = mapx-1
+				}
+				
+	
+				before_camx = camx
+				before_camy = camy
+
+				before_windowx = windowx
+				before_windowy = windowy
+	
+		}
+	
+		//各マスの値を調節
+		ny = 0
+	
+		repeat mapy
+			ny = cnt
+	
+			//周囲のオブジェクトの番号を取得
+				left_chip = ""
+				top_chip = ""
+				bottom_chip = ""
+				right_chip = ""
+					
+				if nx > 0 {
+					left_chip = category(nx-1, ny)
+				}
+				if ny > 0 {
+					top_chip = category(nx, ny-1)
+				}
+				if mapy-1 > ny {
+					bottom_chip = category(nx, ny+1)
+				}
+				if mapx-1 > nx {
+					right_chip = category(nx+1, ny)
+				}
+		
+				left_chip_2 = ""
+				top_chip_2 = ""
+				bottom_chip_2 = ""
+				right_chip_2 = ""
+			
+				if nx > 0 {
+					left_chip_2 = category_2(nx-1, ny)
+				}
+				if ny > 0 {
+					top_chip_2 = category_2(nx, ny-1)
+				}
+				if mapy-1 > ny {
+					bottom_chip_2 = category_2(nx, ny+1)
+				}
+				if mapx-1 > nx {
+					right_chip_2 = category_2(nx+1, ny)
+				}
+	
+			//道路・線路の向きを調節
+				category_buf = category(nx,ny)
+				category_2_buf = category_2(nx,ny)
+							
+				x = nx : y = ny
+	
+				put_addon_name_tmp = put_addon_name
+							
+				if category_buf = "road" {
+					gosub *adjustment_road
+				}
+				if category_buf = "railroad" or category_buf = "station" {
+					gosub *adjustment_railroad
+				}
+	
+			//幸福度の更新
+				gosub *get_happiness_level
+	
+			//値を元に戻す
+				put_addon_name = put_addon_name_tmp
+	
+			//nx, nyを増加
+				ny ++
+	
+				if ny >= mapy {
+					nx++
+				}
+				if nx >= mapx {
+					nx = 0
+					ny = 0
+				}
+		loop
+	
 		repeat mapx
 			x = cnt
 				
 			repeat mapy
 				y = cnt
+
+				//マウスのどのボタンが押されているか取得
+					mouse_left = 0
+					mouse_right = 0
+					
+					getkey mouse_left, 1
+					getkey mouse_right, 2
+	
+					if mouse_left = 1 or mouse_right = 1 {
+						gosub *main_onclick
+					}
+	
+				if (x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y) and time_Hour != 0 and time_Minutes != 0 {
+					continue
+				}
 	
 				//幸福度の平均値を取得するための加算
 					if x = 0 and y = 0 {
@@ -2556,145 +2701,6 @@
 				//予約地区に建物を建設
 					if reservation(x,y) != "none" and rnd(500) = 0 {
 						gosub *Build_on_Reservation_area
-					}
-	
-				//マウスのどのボタンが押されているか取得
-					mouse_left = 0
-					mouse_right = 0
-					
-					getkey mouse_left, 1
-					getkey mouse_right, 2
-	
-					if mouse_left = 1 or mouse_right = 1 {
-						gosub *main_onclick
-					}
-	
-				if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
-	
-					//画面中央の座標
-						x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
-						y_=(windowy/2)+camy
-						middle_x=(y_+x_/2)/(chip_size/2)
-						middle_y=(-x_+y_*2)/chip_size
-	
-					//左上のx座標
-						left_top_x_ = 0+camx-chip_size/2
-						left_top_y_ = 0+camy
-						left_top_x = (left_top_y_+left_top_x_/2)/(chip_size/2)
-	
-						if left_top_x < 0 {
-							left_top_x = 0
-						}
-		
-					//左下のy座標
-						left_bottom_x_ = 0+camx-chip_size/2
-						left_bottom_y_ = windowy+camy
-						left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
-	
-						if left_bottom_y >= mapy {
-							left_bottom_y = mapy-1
-						}
-		
-					//右上のy座標
-						right_top_x_ = windowx+camx-chip_size/2
-						right_top_y_ = 0+camy
-						right_top_y = (-right_top_x_+right_top_y_*2)/chip_size
-						
-						if right_top_y < 0 {
-							right_top_y = 0
-						}
-		
-					//右下のx座標
-						right_bottom_x_ = windowx+camx-chip_size/2
-						right_bottom_y_ = windowy+camy
-						right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
-	
-						if right_bottom_x >= mapx {
-							right_bottom_x = mapx-1
-						}
-						
-	
-						before_camx = camx
-						before_camy = camy
-
-						before_windowx = windowx
-						before_windowy = windowy
-	
-				}
-	
-				//各マスの値を調節
-					if cnt \ 1000 = 0 {
-						//周囲のオブジェクトの番号を取得
-							left_chip = ""
-							top_chip = ""
-							bottom_chip = ""
-							right_chip = ""
-							
-							if nx > 0 {
-								left_chip = category(nx-1, ny)
-							}
-							if ny > 0 {
-								top_chip = category(nx, ny-1)
-							}
-							if mapy-1 > ny {
-								bottom_chip = category(nx, ny+1)
-							}
-							if mapx-1 > nx {
-								right_chip = category(nx+1, ny)
-							}
-		
-							left_chip_2 = ""
-							top_chip_2 = ""
-							bottom_chip_2 = ""
-							right_chip_2 = ""
-			
-							if nx > 0 {
-								left_chip_2 = category_2(nx-1, ny)
-							}
-							if ny > 0 {
-								top_chip_2 = category_2(nx, ny-1)
-							}
-							if mapy-1 > ny {
-								bottom_chip_2 = category_2(nx, ny+1)
-							}
-							if mapx-1 > nx {
-								right_chip_2 = category_2(nx+1, ny)
-							}
-	
-						//道路・線路の向きを調節
-							category_buf = category(nx,ny)
-							category_2_buf = category_2(nx,ny)
-	
-							x_tmp = x : y_tmp = y
-							x = nx : y = ny
-	
-							put_addon_name_tmp = put_addon_name
-							
-							if category_buf = "road" {
-								gosub *adjustment_road
-							}
-							if category_buf = "railroad" or category_buf = "station" {
-								gosub *adjustment_railroad
-							}
-	
-						//幸福度の更新
-							gosub *get_happiness_level
-	
-						//値を元に戻す
-							x = x_tmp : y = y_tmp
-							put_addon_name = put_addon_name_tmp
-	
-						//nx, nyを増加
-							ny ++
-	
-							if ny >= left_bottom_y {
-								nx++
-								ny = right_top_y
-							}
-							if nx >= right_bottom_x {
-								nx = left_top_x
-								ny = right_top_y
-							}
 					}
 	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
@@ -2822,7 +2828,8 @@
 						} else {
 							celput buffer_number(x,y), obj_dire(x,y)
 						}
-
+	
+						/*
 						macro1_t = macro1
 						macro2_t = macro2
 						px_t = px
@@ -2830,7 +2837,7 @@
 						sizex_t = sizex
 						sizey_t = sizey
 
-						/*if x = mx and y = my {
+						if x = mx and y = my {
 							pos 0, 0 : color 255, 255, 255
 							mes "macro2 = "+macro2+" py = "+py_t+" sizey = "+sizey_t+""
 						}*/
@@ -2859,6 +2866,11 @@
 				if time_Hour = 6 {
 					color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 				}
+			}
+	
+		//タイルの詳細を表示している場合
+			if showing_detail = 1 {
+				gosub *show_detail
 			}
 	
 		//マウスポインタの位置のチップを光らせる
@@ -2905,9 +2917,9 @@
 				my = -1
 			}
 	
-		/*
-			if mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-				title "FPS:"+fps+""
+		
+			;if mx >= 0 and mx < 100 and my >= 0 and my < 100 {
+			;	title "FPS:"+fps+" "+clicked_mx+", "+clicked_my+""
 
 				;if cnt \ 10 = 0 {
 					;title "FPS "+fps+" "+obj_tiles_x(mx,my)+","+obj_tiles_y(mx,my)+" pos(x,y) = "+(macro1_t + px_t)+", "+(macro2_t - sizey_t + 1 + py_t)+" obj_dire(x,y) = "+obj_dire(mx,my)+" macro2 = "+macro2_t+" sizey = "+sizey_t+" py = "+py_t+""
@@ -2919,8 +2931,8 @@
 				;} else {
 					;pos 0, 0 : celput buffer_number(mx,my), obj_dire(mx,my)
 				;}
-			}
-		*/
+			;}
+		
 	
 		//メニューを開いているときはstat_mode = "type"にする
 			if cursor_mode != "normal" and cursor_mode != "put_Road" {
@@ -2940,6 +2952,10 @@
 					x = cnt
 					repeat mapy
 						y = cnt
+	
+						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
+							continue
+						}
 						
 						qv2 x,y
 						category_buf = category(x,y)
@@ -2984,6 +3000,10 @@
 					x = cnt
 					repeat mapy
 						y = cnt
+	
+						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
+							continue
+						}
 	
 						category_buf = category(x,y)
 	
@@ -3037,6 +3057,10 @@
 					x = cnt
 					repeat mapy
 						y = cnt
+	
+						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
+							continue
+						}
 	
 						category_buf = category(x,y)
 	
@@ -3092,6 +3116,10 @@
 					repeat mapy
 						y = cnt
 	
+						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
+							continue
+						}
+	
 						category_buf = category(x,y)
 	
 						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
@@ -3145,6 +3173,10 @@
 					x = cnt
 					repeat mapy
 						y = cnt
+	
+						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
+							continue
+						}
 	
 						category_buf = category(x,y)
 	
@@ -3414,11 +3446,19 @@
 		if opening_addon_menu = 1 {
 			menu_line_y = windowy-70-titlebar_h-32-20
 		} else {
-			menu_line_y = windowy-70-titlebar_h-50
+			menu_line_y = windowy-70-titlebar_h-20
 		}
 	
 		if mousey <= menu_line_y and (mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy) {
-			gosub *build_obj
+			if cursor_mode = "normal" {
+				clicked_mx = mx : clicked_my = my
+				clicked += 1
+				await 10
+				gosub *show_detail
+			} else {
+				gosub *build_obj
+			}
+			
 			return
 		}
 	
@@ -6276,7 +6316,7 @@
 					
 			//パス名を含めたファイル一覧を取得
 				dirlist2h 1, ','
-				dirlist2 buf_BGMs, "*.mp3*", 1, '\\'
+				dirlist2 buf_BGMs, "*.*", 1, '\\'
 					
 				sdim BGM_filelist, buf_BGMs
 				dirlist2r BGM_filelist
@@ -6297,7 +6337,21 @@
 						noteget next_BGM_file, BGM_rnd
 						
 						if next_BGM_file != playing_BGM_file {
-							if instr(next_BGM_file, 0, "[Sp]") = -1 {
+							if instr(next_BGM_file, 0, "[less_") != -1 {			; 人口○人以下の場合のみ流れるBGM
+								less_var = int(strmid(next_BGM_file, 6, instr(next_BGM_file, 0, "]")))
+									
+								if Total_Population <= less_var {
+									playing_BGM_file = next_BGM_file
+									break
+								}
+							} else : if instr(next_BGM_file, 0, "[more_") != -1 {	; 人口○人以上の場合のみ流れるBGM
+								more_var = int(strmid(next_BGM_file, 6, instr(next_BGM_file, 0, "]")))
+									
+								if Total_Population >= more_var {
+									playing_BGM_file = next_BGM_file
+									break
+								}
+							} else : if instr(next_BGM_file, 0, "[Sp]") = -1 {
 								playing_BGM_file = next_BGM_file
 								break
 							}
@@ -6305,12 +6359,6 @@
 	
 					await 1
 				loop
-	
-			//もしマップ作成直後なら、マップ作成時のBGMを流す
-				if Not_Played_NewMap_BGM = 1 {
-					Not_Played_NewMap_BGM = 0
-					playing_BGM_file = "[Sp]PROKOFIEV-PeterAndTheWolf.mp3"
-				}
 	
 			//天気が雨なら、1/3の確率でランダムで雨っぽい曲を流す
 				if add_rain > 0 {
@@ -6383,11 +6431,11 @@
 			if category(x,y) = "residential" and rtmp = 0 {
 				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
 					if demand_Residential = 0 {
-						rndv = 11
+						rndv = 6
 					} else {
-						rndv = 10+(demand_Residential/10)
+						rndv = 5+(demand_Residential/5)
 					}
-					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
+					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら10～0
 					f2 = 0
 						
 				//変更前の住居地区の住民数
@@ -6404,7 +6452,7 @@
 					loop
 		
 				//人口の増減処理
-					if f < 10+(demand_Residential/10) {
+					if f < 5+(demand_Residential/5) {
 						//各住居地区に何人増やすか
 							if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
 								add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
@@ -6427,7 +6475,7 @@
 							}
 					}
 				
-					if f >= 10+(demand_Residential/10) {
+					if f >= 5+(demand_Residential/5) {
 						//各住居地区で何人減らすか
 							if before_residents > 0 {
 								cut_residents = rnd(before_residents+5) - 5
@@ -6695,8 +6743,8 @@
 			}
 		
 		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 18 and age_in_Residential(cnt) <= 60 {
-			//就職先が決まっておらず、かつ18歳以上60歳以下なら(年齢)分の1の確率で就職先を決める
-				dr = rnd(age_in_Residential(cnt))
+			//就職先が決まっておらず、かつ18歳以上60歳以下なら(年齢/10)分の1の確率で就職先を決める
+				dr = rnd((age_in_Residential(cnt)/10))
 				
 				if dr = 0 {
 					new_workplace_rnd = rnd(gi-1)	; 職場はランダムに決める
@@ -6973,6 +7021,119 @@
 				}
 			loop
 		loop
+	
+	return
+	
+*show_detail
+	if showing_detail = 0 or (clicked_mx != before_clicked_mx and clicked_my != before_clicked_my) {
+		before_clicked_mx = clicked_mx
+		before_clicked_my = clicked_my
+
+		showing_detail = 1
+	} else : if (clicked != clicked_before and showing_detail = 1 and clicked_mx = before_clicked_mx and clicked_my = before_clicked_my) {
+		showing_detail = 0
+	}
+	
+	clicked_before = clicked
+
+	if (clicked_mx < 0 or clicked_mx > mapx or clicked_my < 0 or clicked_my > mapy) or showing_detail = 0 {
+		return
+	}
+	
+	qv2 clicked_mx, clicked_my
+	
+	font SystemFont, 14
+	
+	color 255, 255, 255
+	line macro1+32, macro2-100, macro1+32, macro2-32
+	
+	//ダイアログの大きさを文字列の長さによって決める
+		if before_showing_detail_x != showing_detail_x or before_showing_detail_y != showing_detail_y {
+			;get_str_print_length(name(clicked_mx,clicked_my))		←文字列の表示の長さを求める関数（後日作成予定）
+			buffer 999
+				font SystemFont, 14
+				mes addon_jp_name(map(clicked_mx,clicked_my))
+		
+				diax = ginfo(14) + 5
+				diay = ginfo(15) + 2
+	
+			gsel 0
+		}
+
+	if diax < 100 {
+		diax = 100
+	}
+	
+	color 0, 0, 0
+	sboxf 128, macro1+32, macro2-200, macro1+32+15+diax, macro2-100
+	
+	if category(clicked_mx, clicked_my) = "residential" {
+		color 34, 177, 76
+	}
+	if category(clicked_mx, clicked_my) = "commercial" {
+		color 63, 72, 204
+	}
+	if category(clicked_mx, clicked_my) = "office" {
+		color 0, 162, 232
+	}
+	if category(clicked_mx, clicked_my) = "industrial" {
+		color 255, 242, 0
+	}
+	if category(clicked_mx, clicked_my) = "farm" {
+		color 185, 122, 87
+	}
+	if category(clicked_mx, clicked_my) = "public" {
+		color 195, 195, 195
+	}
+	
+	if category(clicked_mx, clicked_my) = "park" {
+		color 119, 153, 17
+	}
+	
+	if category(clicked_mx, clicked_my) = "road" {
+		color 50, 50, 50
+	}
+	if category(clicked_mx, clicked_my) = "railroad" {
+		color 175, 112, 77
+	}
+	if category(clicked_mx, clicked_my) = "station" {
+		color 255, 0, 0
+	}
+	
+	boxf macro1+32, macro2-200, macro1+32+10, macro2-100
+	
+	color 255, 255, 255
+
+	//建物名（アドオン名）
+		pos macro1+32+15, macro2-200+5 : mes addon_jp_name(map(clicked_mx,clicked_my))
+
+	//詳細
+		font SystemFont, 10
+
+		pos macro1+32+17, macro2-200+diay+5
+
+		if category(clicked_mx, clicked_my) = "residential" {
+			mes "住宅地区\n住民 : "+residents(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n教育度 : "+education_rate(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+		}
+		if category(clicked_mx, clicked_my) = "commercial" {
+			mes "商業地区\n労働者数 : "+workers_Commercial(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+		}
+		if category(clicked_mx, clicked_my) = "office" {
+			mes "オフィス地区\n労働者数 : "+workers_Office(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+		}
+		if category(clicked_mx, clicked_my) = "industrial" {
+			mes "工業地区\n労働者数 : "+workers_Industrial(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+		}
+		if category(clicked_mx, clicked_my) = "farm" {
+			mes "農業地区\n労働者数 : "+workers_Farm(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000\n生産物 : "+crop(clicked_mx, clicked_my)+""
+		}
+		if category(clicked_mx, clicked_my) = "public" {
+			mes "公共施設\n労働者数 : "+workers_Public(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+		}
+
+		if category(clicked_mx, clicked_my) = "park" {
+			mes "公園\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+		}
 	
 	return
 	
