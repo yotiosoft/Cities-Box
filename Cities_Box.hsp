@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.4
+								      Cities Box Ver 0.9.4.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -308,6 +308,9 @@
 		celload "img/menu_icons/mini/high_density_residential.png", 9		; 高密度住居地区
 		celload "img/menu_icons/mini/low_density_commercial.png", 20		; 低密度商業地区
 		celload "img/menu_icons/mini/high_density_commercial.png", 21		; 高密度商業地区
+		
+		celload "img/menu_icons/mini/roadway.png", 66						; 車道
+		celload "img/menu_icons/mini/promenade.png", 67						; 歩道 / 自転車道
 	
 	//設定で使うアイコン
 		celload "img/menu_icons/setting/check.png", 14						; チェックボタン
@@ -579,6 +582,14 @@
 						notesel type_number_Two_lane_road
 						noteadd str(cnt), -1
 					}
+
+					if addon_type(cnt) = "Promenade" or addon_type(cnt) = "promenade" {
+						notesel type_Promenade
+						noteadd addon_name(cnt), -1
+	
+						notesel type_number_Promenade
+						noteadd str(cnt), -1
+					}
 	
 					if addon_type(cnt) = "Two_lane_railroad" or addon_type(cnt) = "Two_lane_Railroad" or addon_type(cnt) = "station" or addon_type(cnt) = "Station" {
 						notesel type_Two_lane_railroad
@@ -764,6 +775,112 @@
 		loop
 	
 	chdir directory
+
+	goto *check_update
+
+*load_adat
+	notesel buf_adat
+			
+	use_types_buf = get_chapter(buf_adat, "use_types", " = \"", "\"")
+	
+	//adat_use_typesを更にタイプごとに分ける
+		split use_types_buf, ", ", use_type_buf
+	
+		repeat stat
+			use_type(addon_number, cnt) = use_type_buf(cnt)
+			await 1
+		loop
+				
+	//タイプの数を取得
+		addon_total_use_types(addon_number) = stat
+				
+	//各タイプごとの概要を取得
+	
+		//取得開始
+		repeat addon_total_use_types(addon_number)
+			use_type_summary = get_chapter(buf_adat, ""+use_type(addon_number, cnt)+" {", " {", ";")
+	
+			//使用する画像の取得（image）
+				addon_image(addon_number, cnt) = get_chapter(use_type_summary, "image", " = \"", "\"")
+						
+			//タイプの向きを取得（direction）
+				addon_direction_buf = get_chapter(use_type_summary, "direction", " = \"", "\"")
+						
+				split addon_direction_buf, ", ", addon_direction_buf_2
+	
+				load_adat_cnt = cnt
+	
+				addon_total_addon_direction(addon_number, cnt) = stat
+	
+				repeat addon_total_addon_direction(addon_number, load_adat_cnt)
+					addon_direction(addon_number, load_adat_cnt, cnt) = addon_direction_buf_2(cnt)
+	
+					addon_direction_summary = get_chapter(use_type_summary, ""+addon_direction(addon_number, load_adat_cnt, cnt)+" {", " {", "}")
+	
+					//サイズを取得（size_x, size_y）
+						addon_size_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_x", " = \"", "\"")
+						addon_size_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_y", " = \"", "\"")
+										
+						addon_size_x(addon_number, load_adat_cnt, cnt) = int(addon_size_x_buf(addon_number, load_adat_cnt, cnt))
+						addon_size_y(addon_number, load_adat_cnt, cnt) = int(addon_size_y_buf(addon_number, load_adat_cnt, cnt))
+	
+					//チップのゲーム上の座標サイズを取得（chip_x, chip_y）
+						addon_chip_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_x", " = \"", "\"")
+						addon_chip_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_y", " = \"", "\"")
+										
+						addon_chip_x(addon_number, load_adat_cnt, cnt) = int(addon_chip_x_buf(addon_number, load_adat_cnt, cnt))
+						addon_chip_y(addon_number, load_adat_cnt, cnt) = int(addon_chip_y_buf(addon_number, load_adat_cnt, cnt))
+	
+					//チップの左上の座標を取得（top_left_x, top_left_y）
+						addon_top_left_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_x", " = \"", "\"")
+						addon_top_left_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_y", " = \"", "\"")
+										
+						addon_top_left_x(addon_number, load_adat_cnt, cnt) = int(addon_top_left_x_buf(addon_number, load_adat_cnt, cnt))
+						addon_top_left_y(addon_number, load_adat_cnt, cnt) = int(addon_top_left_y_buf(addon_number, load_adat_cnt, cnt))
+	
+					//チップの右下の座標を取得（bottom_right_x, bottom_right_y）
+						addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_x", " = \"", "\"")
+						addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_y", " = \"", "\"")
+										
+						addon_bottom_right_x(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt))
+						addon_bottom_right_y(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt))
+									
+					await 1
+				loop
+		
+			wait 1
+		loop
+	
+	return
+	
+*OnTimer__map_preparating
+	redraw 0
+	
+	pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 948, 635 : gblur 2
+	color 0, 0, 0 : sboxf 128, 0, 0, windowx, windowy
+	
+	color 255, 255, 255 : font SystemFont, 14
+	cmes "読み込み中...", 0, windowy-100, windowx, windowy-80
+	
+	//読み込み中アイコンを表示
+		loading_icon_cnt ++
+		
+		if loading_icon_cnt = 1 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 53, 0, 0, 200, 200
+		}
+		if loading_icon_cnt = 2 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 54, 0, 0, 200, 200
+		}
+		if loading_icon_cnt = 3 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 55, 0, 0, 200, 200
+		}
+		if loading_icon_cnt = 4 {
+			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 56, 0, 0, 200, 200
+			loading_icon_cnt = 0
+		}
+	
+	redraw 1
+	return
 	
 *check_update
 	;color 0, 0, 0 : boxf
@@ -2642,9 +2759,35 @@
 				if category_buf = "railroad" or category_buf = "station" {
 					gosub *adjustment_railroad
 				}
+
+			//幸福度の平均値を取得するための加算
+				if nx = 0 and ny = 0 {
+					happiness_ave_tmp = 0
+					happiness_ave_cnt = 0
+				}
+	
+				if category(nx,ny) != "tile" and category(nx,ny) != "road" and category(nx,ny) != "railroad" {	; タイル（更地）や道路、線路などは含めない
+					happiness_ave_tmp += happiness(nx,ny)
+					happiness_ave_cnt ++
+				}
+	
+				if nx = mapx - 1 and ny = mapy - 1 and happiness_ave_cnt != 0 {
+					happiness_ave = happiness_ave_tmp / happiness_ave_cnt
+					gosub *get_approval_rate	; 支持率を取得
+				}
 	
 			//幸福度の更新
 				gosub *get_happiness_level
+
+			//予約地区に建物を建設
+				if reservation(nx,ny) != "none" and rnd(250) = 0 {
+					gosub *Build_on_Reservation_area
+				}
+
+			//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
+				if name(nx,ny) = "tile_greenfield" and obj_type(nx,ny) != tile_greenfield_null_type_buf {
+					obj_type(nx,ny) = tile_greenfield_null_type_buf
+				}
 	
 			//値を元に戻す
 				put_addon_name = put_addon_name_tmp
@@ -2677,31 +2820,13 @@
 					if mouse_left = 1 or mouse_right = 1 {
 						gosub *main_onclick
 					}
+
+				//人口・需要度変動
+					gosub *fluctuation
 	
-				if (x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y) and time_Hour != 0 and time_Minutes != 0 {
+				if (x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y) {
 					continue
 				}
-	
-				//幸福度の平均値を取得するための加算
-					if x = 0 and y = 0 {
-						happiness_ave_tmp = 0
-						happiness_ave_cnt = 0
-					}
-	
-					if category(x,y) != "tile" and category(x,y) != "road" and category(x,y) != "railroad" {	; タイル（更地）や道路、線路などは含めない
-						happiness_ave_tmp += happiness(x,y)
-						happiness_ave_cnt ++
-					}
-	
-					if x = mapx - 1 and y = mapy - 1 and happiness_ave_cnt != 0 {
-						happiness_ave = happiness_ave_tmp / happiness_ave_cnt
-						gosub *get_approval_rate	; 支持率を取得
-					}
-		
-				//予約地区に建物を建設
-					if reservation(x,y) != "none" and rnd(500) = 0 {
-						gosub *Build_on_Reservation_area
-					}
 	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 					/*
@@ -2711,11 +2836,6 @@
 						color : boxf 0, 0, 80, 60
 						pos 0, 0 : color 255, 255, 255 : mes "x:"+x+", y:"+y+"\nmx:"+mx+", my:"+my+"\nltx:"+left_top_x+", lby:"+left_bottom_y+"\nrbx:"+right_bottom_x+", rty:"+right_top_y+""
 					*/
-						
-					//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
-						if name(x,y) = "tile_greenfield" and obj_type(x,y) != tile_greenfield_null_type_buf {
-							obj_type(x,y) = tile_greenfield_null_type_buf
-						}
 	
 					//クォータービューの座標を画面上の座標に変換
 						qv2 x, y
@@ -2842,9 +2962,6 @@
 							mes "macro2 = "+macro2+" py = "+py_t+" sizey = "+sizey_t+""
 						}*/
 				}
-	
-				//人口・需要度変動
-					gosub *fluctuation
 					
 			loop
 					
@@ -2866,11 +2983,6 @@
 				if time_Hour = 6 {
 					color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 				}
-			}
-	
-		//タイルの詳細を表示している場合
-			if showing_detail = 1 {
-				gosub *show_detail
 			}
 	
 		//マウスポインタの位置のチップを光らせる
@@ -3226,6 +3338,20 @@
 	
 		//天候の変動
 			gosub *climate
+
+		//タイルの詳細を表示している場合
+			if showing_detail = 1 {
+				gosub *show_detail
+			}
+
+		//FPS値の表示（通常時非表示）
+		/*
+			color 0, 0, 0 
+			sboxf 128, 0, 0, 50, 25
+			
+			color 255, 255, 255 : font SystemFont, 12
+			pos 5, 5 : mes "FPS : "+fps+""
+		*/
 	
 		//性別の人口を取得
 			if time_Hour = 0 or time_Minutes = 0 {
@@ -3486,6 +3612,7 @@
 				if opening_menu_put_Road = 0 {
 					cursor_mode = "put_Road"
 					density = ""
+					road_type = "roadway"
 		
 					opening_addon_menu = 1
 					opening_menu_put_Road = 1
@@ -3625,19 +3752,19 @@
 		
 				if opening_menu_put_Office = 0 {
 					cursor_mode = "put_Office"
-		
+	
 					opening_addon_menu = 1
 					opening_menu_put_Office = 1
-		
+	
 					//とりあえず一番左にあるアドオンを選択させておく
 						clicked_addon_number = 0
 			
 						//選択されたアドオンのアドオン名を取得
-							notesel type_office
+							notesel type_Office
 							noteget put_addon_name, clicked_addon_number
 				
 						//選択されたアドオンのアドオン番号を取得
-							notesel type_number_office
+							notesel type_number_Office
 							noteget addon_num_buf, clicked_addon_number
 							addon_num_buf = int(addon_num_buf)
 				}
@@ -3886,19 +4013,42 @@
 			
 			/*-------------------------------------------道路---------------------------------------------------*/
 				notesel type_Two_lane_road
-				if opening_menu_put_Road = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_Road = 1 and click_range( 0, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Road"
 		
 					clicked_addon_number = mousex/35 - 1
-		
-					//選択されたアドオンのアドオン名を取得
-						notesel type_Two_lane_road
-						noteget put_addon_name, clicked_addon_number
+
+					//車道
+						if cursor_mode = "put_Road" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
+							road_type = "roadway"
+
+							clicked_addon_number = 0
+							
+							//選択されたアドオンのアドオン名を取得
+								notesel type_Two_lane_road
+								noteget put_addon_name, clicked_addon_number
 						
-					//選択されたアドオンのアドオン番号を取得
-						notesel type_number_Two_lane_road
-						noteget addon_num_normal_road, clicked_addon_number
-						addon_num_normal_road = int(addon_num_normal_road)
+							//選択されたアドオンのアドオン番号を取得
+								notesel type_number_Two_lane_road
+								noteget addon_num_normal_road, clicked_addon_number
+								addon_num_normal_road = int(addon_num_normal_road)
+						}
+
+					//歩道 / 自転車道
+						if cursor_mode = "put_Road" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
+							road_type = "promenade"
+
+							clicked_addon_number = 0
+							
+							//選択されたアドオンのアドオン名を取得
+								notesel type_Promenade
+								noteget put_addon_name, clicked_addon_number
+						
+							//選択されたアドオンのアドオン番号を取得
+								notesel type_number_Promenade
+								noteget addon_num_Promenade, clicked_addon_number
+								addon_num_Promenade = int(addon_num_Promenade)
+						}
 	
 					gosub *build_obj
 				}
@@ -4080,17 +4230,17 @@
 	
 			/*--------------------------------------------オフィス-----------------------------------------------*/
 			
-			//高密度オフィス
+			//オフィス
 				notesel type_office
-				if opening_menu_put_Office = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
+				if opening_menu_put_office = 1 and click_range( 10+35, windowy-70-titlebar_h-32, (notemax+1)*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Office"
 		
 					clicked_addon_number = mousex/35 - 1
-		
+						
 					//選択されたアドオンのアドオン名を取得
 						notesel type_office
 						noteget put_addon_name, clicked_addon_number - 1
-		
+						
 					//選択されたアドオンのアドオン番号を取得
 						notesel type_number_office
 						noteget addon_num_buf, clicked_addon_number - 1
@@ -4209,11 +4359,11 @@
 			if from_Build_on_Reservation_area = 0 and (mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1) {
 				return
 			}
-	
+			
 		//アドオンに建設可能回数が設定されていて、建物が建設可能回数を超えている場合はreturn
-			if addon_build_limit(addon_num_buf) >= 1 and cursor_mode != "put_Road" {
+			if addon_build_limit(addon_num_buf) >= 1 and cursor_mode != "put_Road" and instr(put_addon_name, 0, "Area : ") = -1 {
 				s = 0
-					
+				
 				repeat mapx
 					sx = cnt
 					repeat mapy
@@ -4234,67 +4384,69 @@
 			}
 	
 		//周囲のオブジェクトのカテゴリを取得
-			left_chip = ""
-			top_chip = ""
-			bottom_chip = ""
-			right_chip = ""
-			
-			if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
-				left_chip = category(mx-1, my)
-				top_chip = category(mx, my-1)
-				bottom_chip = category(mx+1, my)
-				right_chip = category(mx, my+1)
-	
-			} else {
-				if mx-1 < 0 {
-					left_chip = ""
+			if instr(put_addon_name, 0, "Area : ") = -1 {
+				left_chip = ""
+				top_chip = ""
+				bottom_chip = ""
+				right_chip = ""
+				
+				if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
+					left_chip = category(mx-1, my)
+					top_chip = category(mx, my-1)
+					bottom_chip = category(mx+1, my)
+					right_chip = category(mx, my+1)
+		
+				} else {
+					if mx-1 < 0 {
+						left_chip = ""
+					}
+					if my-1 < 0 {
+						top_chip = ""
+					}
+					if mx+1 > mapx {
+						bottom_chip = ""
+					}
+					if my+1 > mapy {
+						right_chip = ""
+					}
 				}
-				if my-1 < 0 {
-					top_chip = ""
-				}
-				if mx+1 > mapx {
-					bottom_chip = ""
-				}
-				if my+1 > mapy {
-					right_chip = ""
-				}
-			}
-	
-			left_chip_2 = ""
-			top_chip_2 = ""
-			bottom_chip_2 = ""
-			right_chip_2 = ""
-			
-			if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
-				left_chip_2 = category_2(mx-1, my)
-				top_chip_2 = category_2(mx, my-1)
-				bottom_chip_2 = category_2(mx, my+1)
-				right_chip_2 = category_2(mx+1, my)
-	
-			} else {
-				if mx-1 < 0 {
-					left_chip_2 = ""
-				}
-				if my-1 < 0 {
-					top_chip_2 = ""
-				}
-				if mx+1 > mapx {
-					bottom_chip_2 = ""
-				}
-				if my+1 > mapy {
-					right_chip_2 = ""
+		
+				left_chip_2 = ""
+				top_chip_2 = ""
+				bottom_chip_2 = ""
+				right_chip_2 = ""
+				
+				if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
+					left_chip_2 = category_2(mx-1, my)
+					top_chip_2 = category_2(mx, my-1)
+					bottom_chip_2 = category_2(mx, my+1)
+					right_chip_2 = category_2(mx+1, my)
+		
+				} else {
+					if mx-1 < 0 {
+						left_chip_2 = ""
+					}
+					if my-1 < 0 {
+						top_chip_2 = ""
+					}
+					if mx+1 > mapx {
+						bottom_chip_2 = ""
+					}
+					if my+1 > mapy {
+						right_chip_2 = ""
+					}
 				}
 			}
 	
 			if mx = -1 or my = -1 {
 				return
 			}
-	
+			
 		//建設・敷設
 			if mouse_left = 1 {
 				
 				//道路敷設
-					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road {
+					if cursor_mode = "put_Road" and map(mx, my) != addon_num_normal_road and map(mx, my) != addon_num_Promenade {
 	
 						//資金を減らす（§5/1マス）
 							Money -= 5
@@ -4303,8 +4455,13 @@
 							gosub *delete_obj
 							
 							cetegory_buf = category(mx,my)
+
+							if road_type = "roadway" {
+								map(mx, my) = addon_num_normal_road
+							} else : if road_type = "promenade" {
+								map(mx, my) = addon_num_Promenade
+							}
 							
-							map(mx, my) = addon_num_normal_road
 							name(mx, my) = put_addon_name
 							category(mx, my) = "road"
 							
@@ -4313,6 +4470,12 @@
 							obj_use_tiles_y(mx,my) = 0
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
+
+							if road_type = "roadway" {
+								category_3(mx, my) = "roadway"
+							} else : if road_type = "promenade" {
+								category_3(mx, my) = "promenade"
+							}
 							
 							if category_buf = "railroad" {
 								//線路と交差している場合は予め踏切を設置しておく
@@ -4508,7 +4671,7 @@
 	
 						return
 					}
-	
+					
 				//道路・線路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
 					if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" {
 	
@@ -4519,45 +4682,47 @@
 							}
 	
 						around_road_exist = -1
-						
-						if mx > 0 {
-							if category(mx-1, my) = "road" and cannot_build(0) = 0 {
-								around_road_exist += 1
-	
-								direction = "left"
-								direction_check(0) = 1
-	
-								now_direction_num = 0
+
+						if instr(put_addon_name, 0, "Area : ") = -1 {
+							if mx > 0 {
+								if category(mx-1, my) = "road" and cannot_build(0) = 0 {
+									around_road_exist += 1
+		
+									direction = "left"
+									direction_check(0) = 1
+		
+									now_direction_num = 0
+								}
 							}
-						}
-						if my > 0 {
-							if category(mx, my-1) = "road" and cannot_build(1) = 0 {
-								around_road_exist += 1
-	
-								direction = "top"
-								direction_check(1) = 1
-	
-								now_direction_num = 1
+							if my > 0 {
+								if category(mx, my-1) = "road" and cannot_build(1) = 0 {
+									around_road_exist += 1
+		
+									direction = "top"
+									direction_check(1) = 1
+		
+									now_direction_num = 1
+								}
 							}
-						}
-						if my < mapy {
-							if category(mx, my+1) = "road" and cannot_build(2) = 0 {
-								around_road_exist += 1
-	
-								direction = "bottom"
-								direction_check(2) = 1
-	
-								now_direction_num = 2
+							if my < mapy {
+								if category(mx, my+1) = "road" and cannot_build(2) = 0 {
+									around_road_exist += 1
+		
+									direction = "bottom"
+									direction_check(2) = 1
+		
+									now_direction_num = 2
+								}
 							}
-						}
-						if mx < mapx {
-							if category(mx+1, my) = "road" and cannot_build(3) = 0 {
-								around_road_exist += 1
-	
-								direction = "right"
-								direction_check(3) = 1
-	
-								now_direction_num = 3
+							if mx < mapx {
+								if category(mx+1, my) = "road" and cannot_build(3) = 0 {
+									around_road_exist += 1
+		
+									direction = "right"
+									direction_check(3) = 1
+		
+									now_direction_num = 3
+								}
 							}
 						}
 	
@@ -5404,7 +5569,6 @@
 		if category_2(x, y) != "train_crossing" {
 			category_2(x, y) = ""
 		}
-		category_3(x,y) = ""
 		
 		from_delete_obj = 0
 		from_build_obj = 0
@@ -5968,8 +6132,19 @@
 	
 	color 0,162,232 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, windowx, windowy-70-titlebar_h
 	
-	if cursor_mode = "put_Road" {
+	if cursor_mode = "put_Road" and road_type = "roadway" {
 		notesel type_number_Two_lane_road
+
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
+		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 66, 0, 16, 16, 16
+		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 67, 0, 0, 16, 16 
+	}
+	if cursor_mode = "put_Road" and road_type = "promenade" {
+		notesel type_number_Promenade
+
+		color 127,127,127 : gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
+		pos 0, windowy-70-titlebar_h-2-32 : gmode 2 : gcopy 66, 0, 0, 16, 16
+		pos 0, windowy-70-titlebar_h-2-16 : gmode 2 : gcopy 67, 0, 16, 16, 16 
 	}
 	if cursor_mode = "put_Railroad" {
 		notesel type_number_Two_lane_railroad
@@ -6194,111 +6369,6 @@
 	
 	return
 	
-	
-*load_adat
-	notesel buf_adat
-			
-	use_types_buf = get_chapter(buf_adat, "use_types", " = \"", "\"")
-	
-	//adat_use_typesを更にタイプごとに分ける
-		split use_types_buf, ", ", use_type_buf
-	
-		repeat stat
-			use_type(addon_number, cnt) = use_type_buf(cnt)
-			await 1
-		loop
-				
-	//タイプの数を取得
-		addon_total_use_types(addon_number) = stat
-				
-	//各タイプごとの概要を取得
-	
-		//取得開始
-		repeat addon_total_use_types(addon_number)
-			use_type_summary = get_chapter(buf_adat, ""+use_type(addon_number, cnt)+" {", " {", ";")
-	
-			//使用する画像の取得（image）
-				addon_image(addon_number, cnt) = get_chapter(use_type_summary, "image", " = \"", "\"")
-						
-			//タイプの向きを取得（direction）
-				addon_direction_buf = get_chapter(use_type_summary, "direction", " = \"", "\"")
-						
-				split addon_direction_buf, ", ", addon_direction_buf_2
-	
-				load_adat_cnt = cnt
-	
-				addon_total_addon_direction(addon_number, cnt) = stat
-	
-				repeat addon_total_addon_direction(addon_number, load_adat_cnt)
-					addon_direction(addon_number, load_adat_cnt, cnt) = addon_direction_buf_2(cnt)
-	
-					addon_direction_summary = get_chapter(use_type_summary, ""+addon_direction(addon_number, load_adat_cnt, cnt)+" {", " {", "}")
-	
-					//サイズを取得（size_x, size_y）
-						addon_size_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_x", " = \"", "\"")
-						addon_size_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_y", " = \"", "\"")
-										
-						addon_size_x(addon_number, load_adat_cnt, cnt) = int(addon_size_x_buf(addon_number, load_adat_cnt, cnt))
-						addon_size_y(addon_number, load_adat_cnt, cnt) = int(addon_size_y_buf(addon_number, load_adat_cnt, cnt))
-	
-					//チップのゲーム上の座標サイズを取得（chip_x, chip_y）
-						addon_chip_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_x", " = \"", "\"")
-						addon_chip_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_y", " = \"", "\"")
-										
-						addon_chip_x(addon_number, load_adat_cnt, cnt) = int(addon_chip_x_buf(addon_number, load_adat_cnt, cnt))
-						addon_chip_y(addon_number, load_adat_cnt, cnt) = int(addon_chip_y_buf(addon_number, load_adat_cnt, cnt))
-	
-					//チップの左上の座標を取得（top_left_x, top_left_y）
-						addon_top_left_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_x", " = \"", "\"")
-						addon_top_left_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_y", " = \"", "\"")
-										
-						addon_top_left_x(addon_number, load_adat_cnt, cnt) = int(addon_top_left_x_buf(addon_number, load_adat_cnt, cnt))
-						addon_top_left_y(addon_number, load_adat_cnt, cnt) = int(addon_top_left_y_buf(addon_number, load_adat_cnt, cnt))
-	
-					//チップの右下の座標を取得（bottom_right_x, bottom_right_y）
-						addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_x", " = \"", "\"")
-						addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_y", " = \"", "\"")
-										
-						addon_bottom_right_x(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt))
-						addon_bottom_right_y(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt))
-									
-					await 1
-				loop
-		
-			wait 1
-		loop
-	
-	return
-	
-*OnTimer__map_preparating
-	redraw 0
-	
-	pos 0, 0 : gzoom windowx, windowy-titlebar_h, 15, 0, 0, 948, 635 : gblur 2
-	color 0, 0, 0 : sboxf 128, 0, 0, windowx, windowy
-	
-	color 255, 255, 255 : font SystemFont, 14
-	cmes "読み込み中...", 0, windowy-100, windowx, windowy-80
-	
-	//読み込み中アイコンを表示
-		loading_icon_cnt ++
-		
-		if loading_icon_cnt = 1 {
-			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 53, 0, 0, 200, 200
-		}
-		if loading_icon_cnt = 2 {
-			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 54, 0, 0, 200, 200
-		}
-		if loading_icon_cnt = 3 {
-			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 55, 0, 0, 200, 200
-		}
-		if loading_icon_cnt = 4 {
-			pos (windowx/2)-(200/2), (windowy/2)-(200/2) : gmode 2 : gcopy 56, 0, 0, 200, 200
-			loading_icon_cnt = 0
-		}
-	
-	redraw 1
-	return
-	
 *play_BGM
 	//現在再生しているBGMの現在の再生位置と曲の長さを取得
 		mci"status Cities-Box position"
@@ -6408,7 +6478,7 @@
 			}
 	
 		//その日の最初にジャンプした場合は、*fluctuation__get_firstにジャンプ
-			if x = 0 and y = 0 {
+			if nx = 0 and y = 0 {
 				gosub *fluctuation__get_first
 			}
 	
@@ -6420,22 +6490,19 @@
 			before_workers_Farm = 0
 			before_workers_Public = 0
 	
-		//住民数を変化させるかどうかを決める（1/(|100-住人数|)の確率で変える、ただし住人が0の場合は2/1の確率）
+		//住民数を変化させるかどうかを決める
 			if residents(x,y) = 0 {
 				rtmp = rnd(2)
 			} else {
-				rtmp = rnd(abs(100-residents(x,y)))
+				rtmp = rnd(10)
 			}
 	
 		//人口の増減
-			if category(x,y) = "residential" and rtmp = 0 {
+			if category(x,y) = "residential" and rtmp = 0 and demand_Residential != 0 {
 				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
-					if demand_Residential = 0 {
-						rndv = 6
-					} else {
-						rndv = 5+(demand_Residential/5)
-					}
-					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら10～0
+					rndv = 10+(demand_Residential/10)
+					
+					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
 					f2 = 0
 						
 				//変更前の住居地区の住民数
@@ -6452,7 +6519,7 @@
 					loop
 		
 				//人口の増減処理
-					if f < 5+(demand_Residential/5) {
+					if f >= (demand_Residential/10) / 2 {
 						//各住居地区に何人増やすか
 							if addon_maximum_capacity(map(x,y)) - before_residents > 0 {
 								add_residents = rnd(addon_maximum_capacity(map(x,y)) - before_residents)
@@ -6475,7 +6542,7 @@
 							}
 					}
 				
-					if f >= 5+(demand_Residential/5) {
+					if f < (demand_Residential/10) / 2 {
 						//各住居地区で何人減らすか
 							if before_residents > 0 {
 								cut_residents = rnd(before_residents+5) - 5
@@ -6737,7 +6804,7 @@
 					Total_workers_Public += 1
 				}
 	
-				if x = mapx and y = mapy {
+				if nx = mapx and y = mapy {
 					workers_zero = 0
 				}
 			}
@@ -7026,6 +7093,9 @@
 	
 *show_detail
 	if showing_detail = 0 or (clicked_mx != before_clicked_mx and clicked_my != before_clicked_my) {
+		before_clicked_mx_tmp = before_clicked_mx
+		before_clicked_my_tmp = before_clicked_my
+		
 		before_clicked_mx = clicked_mx
 		before_clicked_my = clicked_my
 
@@ -7042,20 +7112,18 @@
 	
 	qv2 clicked_mx, clicked_my
 	
-	font SystemFont, 14
-	
 	color 255, 255, 255
 	line macro1+32, macro2-100, macro1+32, macro2-32
 	
 	//ダイアログの大きさを文字列の長さによって決める
-		if before_showing_detail_x != showing_detail_x or before_showing_detail_y != showing_detail_y {
+		if before_clicked_mx_tmp != clicked_mx or before_clicked_my_tmp != clicked_my {
 			;get_str_print_length(name(clicked_mx,clicked_my))		←文字列の表示の長さを求める関数（後日作成予定）
 			buffer 999
 				font SystemFont, 14
 				mes addon_jp_name(map(clicked_mx,clicked_my))
 		
 				diax = ginfo(14) + 5
-				diay = ginfo(15) + 2
+				diay1 = ginfo(15) + 2
 	
 			gsel 0
 		}
@@ -7063,77 +7131,104 @@
 	if diax < 100 {
 		diax = 100
 	}
-	
-	color 0, 0, 0
-	sboxf 128, macro1+32, macro2-200, macro1+32+15+diax, macro2-100
-	
-	if category(clicked_mx, clicked_my) = "residential" {
-		color 34, 177, 76
-	}
-	if category(clicked_mx, clicked_my) = "commercial" {
-		color 63, 72, 204
-	}
-	if category(clicked_mx, clicked_my) = "office" {
-		color 0, 162, 232
-	}
-	if category(clicked_mx, clicked_my) = "industrial" {
-		color 255, 242, 0
-	}
-	if category(clicked_mx, clicked_my) = "farm" {
-		color 185, 122, 87
-	}
-	if category(clicked_mx, clicked_my) = "public" {
-		color 195, 195, 195
-	}
-	
-	if category(clicked_mx, clicked_my) = "park" {
-		color 119, 153, 17
-	}
-	
-	if category(clicked_mx, clicked_my) = "road" {
-		color 50, 50, 50
-	}
-	if category(clicked_mx, clicked_my) = "railroad" {
-		color 175, 112, 77
-	}
-	if category(clicked_mx, clicked_my) = "station" {
-		color 255, 0, 0
-	}
-	
-	boxf macro1+32, macro2-200, macro1+32+10, macro2-100
-	
-	color 255, 255, 255
-
-	//建物名（アドオン名）
-		pos macro1+32+15, macro2-200+5 : mes addon_jp_name(map(clicked_mx,clicked_my))
 
 	//詳細
-		font SystemFont, 10
+		if before_clicked_mx_tmp != clicked_mx or before_clicked_my_tmp != clicked_my {
+			
+			dia_lines = 0
+			mes_tmp = ""
+	
+			if category(clicked_mx, clicked_my) = "residential" {
+				mes_tmp = "住宅地区\n住民 : "+residents(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n教育度 : "+education_rate(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+				dia_lines = 5
+			}
+			if category(clicked_mx, clicked_my) = "commercial" {
+				mes_tmp = "商業地区\n労働者数 : "+workers_Commercial(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+				dia_lines = 4
+			}
+			if category(clicked_mx, clicked_my) = "office" {
+				mes_tmp = "オフィス地区\n労働者数 : "+workers_Office(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+				dia_lines = 4
+			}
+			if category(clicked_mx, clicked_my) = "industrial" {
+				mes_tmp = "工業地区\n労働者数 : "+workers_Industrial(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+				dia_lines = 4
+			}
+			if category(clicked_mx, clicked_my) = "farm" {
+				mes_tmp = "農業地区\n労働者数 : "+workers_Farm(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000\n生産物 : "+crop(clicked_mx, clicked_my)+""
+				dia_lines = 5
+			}
+			if category(clicked_mx, clicked_my) = "public" {
+				mes_tmp = "公共施設\n労働者数 : "+workers_Public(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+				dia_lines = 4
+			}
+	
+			if category(clicked_mx, clicked_my) = "park" {
+				mes_tmp = "公園\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+				dia_lines = 2
+			}
+	
+			; 詳細の表示にかかるサイズを取得
+				buffer 999
 
-		pos macro1+32+17, macro2-200+diay+5
-
+				font SystemFont, 10
+	
+				pos 0, 0
+				mes mes_tmp
+	
+				diay2 = ginfo(15) * dia_lines
+				
+				gsel 0
+		}
+			
+	//表示
+		color 0, 0, 0
+		sboxf 128, macro1+32, macro2-100-(diay1+5+diay2+5), macro1+32+15+diax, macro2-100
+	
 		if category(clicked_mx, clicked_my) = "residential" {
-			mes "住宅地区\n住民 : "+residents(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n教育度 : "+education_rate(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+			color 34, 177, 76
 		}
 		if category(clicked_mx, clicked_my) = "commercial" {
-			mes "商業地区\n労働者数 : "+workers_Commercial(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+			color 63, 72, 204
 		}
 		if category(clicked_mx, clicked_my) = "office" {
-			mes "オフィス地区\n労働者数 : "+workers_Office(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+			color 0, 162, 232
 		}
 		if category(clicked_mx, clicked_my) = "industrial" {
-			mes "工業地区\n労働者数 : "+workers_Industrial(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+			color 255, 242, 0
 		}
 		if category(clicked_mx, clicked_my) = "farm" {
-			mes "農業地区\n労働者数 : "+workers_Farm(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000\n生産物 : "+crop(clicked_mx, clicked_my)+""
+			color 185, 122, 87
 		}
 		if category(clicked_mx, clicked_my) = "public" {
-			mes "公共施設\n労働者数 : "+workers_Public(clicked_mx, clicked_my)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my)+"\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+			color 195, 195, 195
 		}
-
+	
 		if category(clicked_mx, clicked_my) = "park" {
-			mes "公園\n地価 : §"+land_price(clicked_mx, clicked_my)+"0000"
+			color 119, 153, 17
 		}
+	
+		if category(clicked_mx, clicked_my) = "road" {
+			color 50, 50, 50
+		}
+		if category(clicked_mx, clicked_my) = "railroad" {
+			color 175, 112, 77
+		}
+		if category(clicked_mx, clicked_my) = "station" {
+			color 255, 0, 0
+		}
+	
+		boxf macro1+32, macro2-100-(diay1+5+diay2+5), macro1+32+10, macro2-100
+	
+		color 255, 255, 255
+
+		//建物名（アドオン名）
+			font SystemFont, 14
+			pos macro1+32+15, macro2-100-(diay1+5+diay2+5)+5 : mes addon_jp_name(map(clicked_mx,clicked_my))	
+
+		//詳細
+			font SystemFont, 10
+			pos macro1+32+15, macro2-100-(diay1+5+diay2+5)+diay1+5 : mes mes_tmp
 	
 	return
 	
