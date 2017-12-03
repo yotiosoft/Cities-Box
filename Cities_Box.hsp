@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.4.1
+								      Cities Box Ver 0.9.4.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -372,6 +372,11 @@
 		celload "img/loading/124856y-2.png", 54								; 読み込み中アイコン2
 		celload "img/loading/124856y-3.png", 55								; 読み込み中アイコン3
 		celload "img/loading/124856y-4.png", 56								; 読み込み中アイコン4
+
+	//速さ
+		celload "img/speed/normal.png", 68									; 普通
+		celload "img/speed/fast.png", 69									; 速い
+		celload "img/speed/pause.png", 70									; 一時停止
 	
 *preparation
 	//読み込み中画面
@@ -1367,6 +1372,9 @@
 	
 		showing_detail_x = -1
 		showing_detail_y = -1
+
+		speed = 1
+		pause = 0
 	
 	if from_new_map = 0 {
 		dim buffer_number, mapx, mapy
@@ -2544,49 +2552,52 @@
 		dim done_build, 6, mapx, mapy
 	
 		main_cnt ++
+
+		if pause = 0 {
 	
-		//1回のループで1分とする
-			time_Minutes ++
+			//1回のループで1分とする
+				time_Minutes += speed
+			
+			//time_Minutes=60で1時間とする
+				if time_Minutes > 59 {
+					time_Minutes = 0
+					time_Hour ++
+				}
 		
-		//time_Minutes=60で1時間とする
-			if time_Minutes = 60 {
-				time_Minutes = 0
-				time_Hour ++
-			}
-	
-		//time_Hour=24で1日とする
-			if time_Hour= 24 {
-				time_Date ++
-				time_Hour = 0
-				time_Minutes = 0
-	
-				if time_Date > 28 and time_Month = 2 and time_Year\4 != 0 {
-					time_Date = 1
-					time_Month ++
+			//time_Hour=24で1日とする
+				if time_Hour= 24 {
+					time_Date ++
+					time_Hour = 0
+					time_Minutes = 0
+		
+					if time_Date > 28 and time_Month = 2 and time_Year\4 != 0 {
+						time_Date = 1
+						time_Month ++
+					}
+					if time_Date > 29 and time_Month = 2 and time_Year\4 = 0 {
+						time_Date = 1
+						time_Month ++
+					}
+					if time_Date > 30 and (time_Month = 4 or time_Month = 6 or time_Month = 9 or time_Month = 11) {
+						time_Date = 1
+						time_Month ++
+					}
+					if time_Date > 31 and (time_Month = 1 or time_Month = 3 or time_Month = 5 or time_Month = 7 or time_Month = 8 or time_Month = 10 or time_Month = 12) {
+						time_Date = 1
+						time_Month ++
+					}
+		
+					if time_Month > 12 {
+						time_Year ++
+						time_Month = 1
+						time_Date = 1
+					}
 				}
-				if time_Date > 29 and time_Month = 2 and time_Year\4 = 0 {
-					time_Date = 1
-					time_Month ++
+		
+				if time_Hour = 0 and time_Minutes = 0 and time_Date = 1 {
+					gosub *pay_budget
 				}
-				if time_Date > 30 and (time_Month = 4 or time_Month = 6 or time_Month = 9 or time_Month = 11) {
-					time_Date = 1
-					time_Month ++
-				}
-				if time_Date > 31 and (time_Month = 1 or time_Month = 3 or time_Month = 5 or time_Month = 7 or time_Month = 8 or time_Month = 10 or time_Month = 12) {
-					time_Date = 1
-					time_Month ++
-				}
-	
-				if time_Month > 12 {
-					time_Year ++
-					time_Month = 1
-					time_Date = 1
-				}
-			}
-	
-			if time_Hour = 0 and time_Minutes = 0 and time_Date = 1 {
-				gosub *pay_budget
-			}
+		}
 	
 		/*カメラ操作*/
 			getkey key_left, 37
@@ -3522,11 +3533,29 @@
 						} else {
 							pos windowx-92-32+80, windowy-70-titlebar_h-20 : gcopy 51, 0, 0, 20, 20
 						}
+					}	
+
+				//速さ
+					gmode 2
+					pos 20, windowy-45-titlebar_h+10
+
+					if speed = 1 {	; 普通
+						gcopy 68, 0, 0, 32, 32
+					}
+					if speed = 2 {	; 速い
+						gcopy 69, 0, 0, 32, 32
+					}
+
+					pos 52, windowy-45-titlebar_h+10
+					if pause = 1 {	; 一時停止中
+						gcopy 70, 0, 32, 32, 32
+					} else {		; 一時停止していないとき
+						gcopy 70, 0, 0, 32, 32
 					}
 	
 				//人口、日付・気温を表示
-					color 255, 255, 255 : font SystemFont, 14
-					pos 20, windowy-40-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
+					color 255, 255, 255 : font SystemFont, 10
+					pos 90, windowy-38-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
 	
 				//[一時的に廃止]ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
@@ -3977,6 +4006,8 @@
 					} else {
 						stat_mode = ""
 					}
+
+					return
 				}
 				if open_stat_menu = 1 and click_range( windowx-92-32+20, windowy-70-titlebar_h-20, windowx-92-32+39, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "land_price" {
@@ -3984,6 +4015,8 @@
 					} else {
 						stat_mode = ""
 					}
+
+					return
 				}
 				if open_stat_menu = 1 and click_range( windowx-92-32+40, windowy-70-titlebar_h-20, windowx-92-32+59, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "crime_rate" {
@@ -3991,6 +4024,8 @@
 					} else {
 						stat_mode = ""
 					}
+
+					return
 				}
 				if open_stat_menu = 1 and click_range( windowx-92-32+60, windowy-70-titlebar_h-20, windowx-92-32+79, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "education_rate" {
@@ -3998,6 +4033,8 @@
 					} else {
 						stat_mode = ""
 					}
+
+					return
 				}
 				if open_stat_menu = 1 and click_range( windowx-92-32+80, windowy-70-titlebar_h-20, windowx-92-32+100, windowy-70-titlebar_h ) = 1 {
 					if stat_mode != "happiness" {
@@ -4005,9 +4042,43 @@
 					} else {
 						stat_mode = ""
 					}
+
+					return
 				}
 	
 		}
+
+		//速さ
+			if click_range(20, windowy-45-titlebar_h+10, 20+32, windowy-45-titlebar+10+32) = 1 {
+				if speed = 1 {
+					speed = 2
+
+					if pause = 1 {
+						speed = 1
+						pause = 0
+					}
+
+					return
+				} else {
+					speed = 1
+
+					if pause = 1 {
+						speed = 2
+						pause = 0
+					}
+
+					return
+				}
+			}
+			if click_range(52, windowy-45-titlebar_h+10, 52+32, windowy-45-titlebar+10+32) = 1 {
+				if pause = 0 {
+					pause = 1
+				} else {
+					pause = 0
+				}
+
+				return
+			}
 		
 		//アドオン選択ボタン（水色のメニューバー）
 			
@@ -7647,7 +7718,7 @@
 		//気温の変動
 			change_temperature = rnd(5)
 	
-			if change_temperature = 0 {
+			if change_temperature = 0 and pause = 0 {
 				
 				//日中は気温が上がりやすく、夜間は下がりやすくする
 					temperature_increase_or_decrease = rnd(8)
@@ -7774,12 +7845,16 @@
 							color 255, 255, 255
 			
 							if temperature >= 3 {	; 気温が3℃以上なら雨
-								rain_y(cnt) += 5
+								if pause = 0 {
+									rain_y(cnt) += 5 * speed
+								}
 								line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+20
 									
 							} else {				; 気温が2℃以下なら雪
-								rain_x(cnt) += (rnd(3)-1)*2
-								rain_y(cnt) += 1
+								if pause = 0 {
+									rain_x(cnt) += (rnd(3)-1)*2
+									rain_y(cnt) += 1 * speed
+								}
 								circle rain_x(cnt), rain_y(cnt), rain_x(cnt)+snow_size(cnt), rain_y(cnt)+snow_size(cnt)
 									
 							}
