@@ -3,30 +3,37 @@ addon_jp_name = "åªë„ïóê}èëäŸ"
 addon_author = "YotioSoft"
 addon_summary = "ÉKÉâÉXí£ÇËÇÃì˙ìñÇΩÇËÇÃó«Ç¢ê}èëäŸÅB"
 addon_icon = "icon_Modern_Library.png"
-
+addon_maker_version = "2"
+ 
 addon_type = "public"
 addon_type_2 = "education"
-
+addon_type_3 = "library"
+ 
 use_types = "null"
-
-maximum_capacity = "100"
+ 
 land_price_influence = "5"
 land_price_influence_grid = "3"
-
+ 
+crime_rate_influence = "0"
+crime_rate_influence_grid = "0"
+ 
 education_rate_influence = "20"
 education_rate_influence_grid = "10"
-
+ 
+addon_crop = "0"
+addon_crop_amount = "0"
+ 
 null {
 	image = "Modern_Library.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
-	
+ 
 	left {
 		size_x = "64"
 		size_y = "64"
 		chip_x = "1"
 		chip_y = "1"
-		
+ 
 		top_left_x = "0"
 		top_left_y = "0"
 		bottom_right_x = "64"
@@ -37,7 +44,7 @@ null {
 		size_y = "64"
 		chip_x = "1"
 		chip_y = "1"
-		
+ 
 		top_left_x = "64"
 		top_left_y = "0"
 		bottom_right_x = "128"
@@ -48,7 +55,7 @@ null {
 		size_y = "64"
 		chip_x = "1"
 		chip_y = "1"
-		
+ 
 		top_left_x = "0"
 		top_left_y = "64"
 		bottom_right_x = "64"
@@ -59,7 +66,7 @@ null {
 		size_y = "64"
 		chip_x = "1"
 		chip_y = "1"
-		
+ 
 		top_left_x = "64"
 		top_left_y = "64"
 		bottom_right_x = "128"

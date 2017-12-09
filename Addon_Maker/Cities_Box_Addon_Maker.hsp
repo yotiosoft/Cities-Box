@@ -2,7 +2,7 @@
 
 										Cities Box Addon Maker
 	
-											  Ver.0.2.0
+											  Ver.0.2.1
 	
 --------------------------------------------------------------------------------------------------*/
 
@@ -53,6 +53,8 @@
 	celload "i/industrial.png", 14
 	celload "i/farm.png", 22
 
+	celload "i/public.png", 26
+
 	celload "i/road2.png", 23
 	celload "i/railroad.png", 24
 	celload "i/station.png", 25
@@ -82,10 +84,10 @@
 	objsize 128, 128
 	pos 100, 230 : objimage 2 : button "", *make_building_first
 		font "Yu Gothic", 14 : cmes "建物・産業", 100, 230+128, 100+128, 230+128+20
-		font "Yu Gothic", 10 : cmes "住居、商業施設、オフィス、工場、農業", 70, 230+128+20, 130+128, 230+128+20+15
-	pos 250, 230 : objimage 3 : button "", *make_park_first
-		font "Yu Gothic", 14 : cmes "公園", 250, 230+128, 250+128, 230+128+20
-		font "Yu Gothic", 10 : cmes "公園、広場", 250, 230+128+20, 250+128, 230+128+20+15
+		font "Yu Gothic", 10 : cmes "住居、商業施設、オフィスなど", 70, 230+128+20, 130+128, 230+128+20+15
+	pos 250, 230 : objimage 3 : button "", *make_public_first
+		font "Yu Gothic", 14 : cmes "公共施設", 250, 230+128, 250+128, 230+128+20
+		font "Yu Gothic", 10 : cmes "学校、警察署、公園など", 250, 230+128+20, 250+128, 230+128+20+15
 	pos 400, 230 : objimage 4 : button "", *make_road_first
 		font "Yu Gothic", 14 : cmes "交通", 400, 230+128, 400+128, 230+128+20
 		font "Yu Gothic", 10 : cmes "道路、線路、駅", 400, 230+128+20, 400+128, 230+128+20+15
@@ -104,6 +106,10 @@
 		Addon_Icon_Path = ""
 	
 		Addon_Img_Null__Path = ""
+
+		Addon_Type = ""
+		Addon_Type_2 = ""
+		Addon_Type_3 = ""
 		
 		Addon_Img_Null__Left__Size_x = 64
 		Addon_Img_Null__Left__Size_y = 64
@@ -208,22 +214,27 @@
 	
 *make_building__residential
 	Addon_Type_tmp = "residential" : Addon_Type_JP = "住居"
+	output = "../addons/buildings/residential/"
 	goto *make_building_2
 	
 *make_building__commercial
 	Addon_Type_tmp = "commercial" : Addon_Type_JP = "商業施設"
+	output = "../addons/buildings/commercial/"
 	goto *make_building_2
 	
 *make_building__office
 	Addon_Type_tmp = "office" : Addon_Type_JP = "オフィス"
+	output = "../addons/buildings/office/"
 	goto *make_building_2
 	
 *make_building__industrial
 	Addon_Type_tmp = "industrial" : Addon_Type_JP = "工場"
+	output = "../addons/buildings/industrial/"
 	goto *make_building_2
 
 *make_building__farm
 	Addon_Type_tmp = "farm" : Addon_Type_JP = "農業"
+	output = "../addons/farms/"
 	goto *make_building_2
 	
 *make_building_2
@@ -624,7 +635,7 @@
 	stop
 	
 	
-*make_park_first
+*make_public_first
 	/*変数初期化*/
 		Addon_Name__JP = ""
 		Addon_Name__EN = ""
@@ -632,6 +643,10 @@
 		Addon_Icon_Path = ""
 	
 		Addon_Img_Null__Path = ""
+
+		Addon_Type = ""
+		Addon_Type_2 = ""
+		Addon_Type_3 = ""
 		
 		Addon_Img_Null__Left__Size_x = 64
 		Addon_Img_Null__Left__Size_y = 64
@@ -689,18 +704,117 @@
 		buffer_1002 = 0
 		Preview_Dire = 0
 	
-*make_park
+*make_public
 	clrobj
 	color 50, 50, 50 : boxf
-	
-	Addon_Type = "park"
 	
 	/*戻るボタンとページタイトル*/
 		objimage 5
 		pos 10, 10 : objsize 32, 32 : button "", *main
 	
 		color 255, 255, 255 : font "Yu Gothic", 20
-		pos 50, 10 : mes "アドオン設定 - 公園"
+		pos 50, 10 : mes "アドオン設定 - 公共施設"
+	
+	color 255, 255, 255 : font "Yu Gothic", 14
+	cmes "作成する建築物の種類を選んでください", 0, 80, 640, 100
+	
+	objsize 128, 128
+	pos 150, 150 : objimage 3 : button "", *make_public__park
+		font "Yu Gothic", 14 : cmes "公園", 150, 150+128, 150+128, 150+128+20
+	pos 300, 150 : objimage 26 : button "", *make_public_select
+		font "Yu Gothic", 14 : cmes "公共施設", 300, 150+128, 300+128, 150+128+20
+	
+	/*ステータス*/
+		pos (640/2)-24, 455 : gcopy 7, 0, 0, 8, 8
+		pos (640/2)-4, 455 : gcopy 8, 0, 0, 8, 8
+		pos (640/2)+16, 455 : gcopy 8, 0, 0, 8, 8
+	
+	stop
+
+*make_public__park
+	Addon_Type_tmp = "park" : Addon_Type_JP = "公園"
+	output = "../parks/"
+	goto *make_public_2
+
+*make_public_select
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *main
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - 公共施設"
+	
+	color 255, 255, 255 : font "Yu Gothic", 14
+	cmes "作成する建築物の種類を選んでください", 0, 80, 640, 100
+
+	objsize 100, 20
+	pos 640/2-50, 480/2-10 : combox combox_p, 20, "小学校\n中学校\n高校\n大学\n図書館\n郵便局\n警察署\n消防署\n市役所"
+
+	/*次へ進むボタン*/
+		objsize 32, 32 : objimage 6
+		pos 560, 440 : button "", *make_public_select_2
+
+	stop
+
+*make_public_select_2
+	Addon_Type_tmp = "public" : Addon_Type_JP = "公共施設"
+	
+	if combox_p = 0 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "elementary-school"
+	}
+	if combox_p = 1 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "junior-high-school"
+	}
+	if combox_p = 2 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "high-school"
+	}
+	if combox_p = 3 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "university"
+	}
+	if combox_p = 4 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "library"
+	}
+	if combox_p = 5 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "post_office"
+	}
+	if combox_p = 6 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "police_station"
+	}
+	if combox_p = 7 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "fire_depertment"
+	}
+	if combox_p = 8 {
+		Addon_Type_2 = "education"
+		Addon_Type_3 = "city_hall"
+	}
+
+	output = "../addons/buildings/public/"
+
+	goto *make_public_2
+
+*make_public_2
+	clrobj
+	color 50, 50, 50 : boxf
+	
+	Addon_Type = Addon_Type_tmp
+	
+	/*戻るボタンとページタイトル*/
+		objimage 5
+		pos 10, 10 : objsize 32, 32 : button "", *main
+	
+		color 255, 255, 255 : font "Yu Gothic", 20
+		pos 50, 10 : mes "アドオン設定 - "+Addon_Type_JP+""
 	
 	/*名称設定*/
 		color 255, 255, 255 : boxf 20, 50, 640-20, 130
@@ -798,11 +912,11 @@
 			
 	/*次へ進むボタン*/
 		objsize 32, 32 : objimage 6
-		pos 560, 440 : button "", *make_park_3
+		pos 560, 440 : button "", *make_public_3
 	
 	stop
 	
-*make_park_3
+*make_public_3
 	if Addon_Name__JP = "" or Addon_Name__EN {
 		dialog "名称を入力してください", 1
 		stop
@@ -819,10 +933,10 @@
 	
 	/*戻るボタンとページタイトル*/
 		objimage 5
-		pos 10, 10 : objsize 32, 32 : button "", *make_park
+		pos 10, 10 : objsize 32, 32 : button "", *make_public
 	
 		color 255, 255, 255 : font "Yu Gothic", 20
-		pos 50, 10 : mes "アドオン設定 - 公園"
+		pos 50, 10 : mes "アドオン設定 - "+Addon_Type_JP+""
 	
 	/*画像設定*/
 		color 255, 255, 255 : boxf 20, 50, 640-20, 345
@@ -1025,6 +1139,13 @@
 		noteadd " ", -1
 		
 		noteadd "addon_type = \""+Addon_Type+"\"", -1
+
+		if Addon_Type_2 != "" {
+			noteadd "addon_type_2 = \""+Addon_Type_2+"\"", -1
+		}
+		if Addon_Type_3 != "" {
+			noteadd "addon_type_3 = \""+Addon_Type_3+"\"", -1
+		}
 		
 		noteadd " ", -1
 		
@@ -1161,8 +1282,8 @@
 		objimage 5
 		if Addon_Type = "building" {
 			pos 10, 10 : objsize 32, 32 : button "", *make_building_3
-		} else : if Addon_Type = "park" {
-			pos 10, 10 : objsize 32, 32 : button "", *make_park_3
+		} else : if Addon_Type = "park" or Addon_Type = "public" {
+			pos 10, 10 : objsize 32, 32 : button "", *make_public_3
 		}
 	
 		color 255, 255, 255 : font "Yu Gothic", 20
@@ -1225,8 +1346,11 @@
 	
 		Addon_Icon_Path = ""
 
-		
 		Addon_Img_Default__Path = ""
+
+		Addon_Type = ""
+		Addon_Type_2 = ""
+		Addon_Type_3 = ""
 		
 		Addon_Img_Default__Width__Size_x = 64
 		Addon_Img_Default__Width__Size_y = 64
@@ -1503,10 +1627,12 @@
 
 *make_road__road
 	Addon_Type_tmp = "road" : Addon_Type_JP = "道路"
+	output = "../addons/road/"
 	goto *make_road_2
 	
 *make_road__railroad
 	Addon_Type_tmp = "railroad" : Addon_Type_JP = "線路"
+	output = "../addons/railroad/"
 	goto *make_road_2
 
 *make_road__station
@@ -3350,7 +3476,7 @@
 		pos (640/2)-(520/2), 60 : gcopy 1, 0, 0, 520, 110
 	
 		font "Yu Gothic", 14
-		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.2.0\nリリース : 2017年11月10日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
+		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.2.1\nリリース : 2017年12月9日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
 	
 		font "Yu Gothic", 10
 		cmes "Copyright (C) YotioSoft 2017 All Rights Reserved.", 0, 450, 640, 470
