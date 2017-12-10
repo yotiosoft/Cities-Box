@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.4.2
+								       Cities Box Ver 0.9.5
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1113,7 +1113,9 @@
 				pos 120+110, 40 : gcopy 62, 0, 0, 230, 110
 	
 				font SystemFont, 14 : color 255, 255, 255
-				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : HSP 3.5\n\nCopyright(C) YotioSoft 2017 All Rights Reserved."
+				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : HSP 3.5"
+				font SystemFont, 10 : color 255, 255, 255
+				pos 100, 270 : mes "Copyright(C) YotioSoft 2017 All Rights Reserved."
 			}
 	
 	stop
@@ -1288,6 +1290,8 @@
 	budget_of_Fire_Depertment = 100		; 消防への予算（%）
 	budget_of_Post_Office = 100			; 郵便への予算（%）
 	budget_of_Education = 100			; 教育への予算（%）
+
+	Money = 50000						; 資金
 	
 	Not_Played_NewMap_BGM = 1		; マップ作成直後のBGMをまだ鳴らしていない場合は1
 	
@@ -2541,6 +2545,9 @@
 	
 	//読み込み中アイコンを閉じる
 		oncmd 0
+
+	//人口を反映
+		before_Total_Population = Total_Population
 		
 *main
 	title about_title
@@ -2791,7 +2798,7 @@
 				gosub *get_happiness_level
 
 			//予約地区に建物を建設
-				if reservation(nx,ny) != "none" and rnd(250) = 0 {
+				if reservation(nx,ny) != "none" and rnd(10) = 0 {
 					gosub *Build_on_Reservation_area
 				}
 
@@ -3554,16 +3561,16 @@
 					}
 	
 				//人口、日付・気温を表示
-					color 255, 255, 255 : font SystemFont, 10
-					pos 90, windowy-38-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
+					color 255, 255, 255 : font SystemFont, 11
+					pos 90, windowy-45-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
 	
 				//[一時的に廃止]ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
-					;	gosub *get_news
+						gosub *get_news
 					}
 	
-					;color 255, 255, 255 : font "Yu Gothic UI", 10
-					;pos 20, windowy-40-titlebar_h+10 : mes "News : "+news_content+""
+					color 255, 255, 255 : font "Yu Gothic UI", 10
+					pos 90, windowy-30-titlebar_h+10 : mes "News : "+news_content+""
 	
 				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
 					if opening_addon_menu = 1 {
@@ -4086,14 +4093,14 @@
 				notesel type_Two_lane_road
 				if opening_menu_put_Road = 1 and click_range( 0, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Road"
-		
-					clicked_addon_number = mousex/35 - 1
+
+					clicked_addon_number = 0
 
 					//車道
-						if cursor_mode = "put_Road" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1 {
+						if (cursor_mode = "put_Road" and click_range( 0, windowy-70-titlebar_h-32, 16, windowy-70-titlebar_h-16 ) = 1) or road_type = "roadway" {
 							road_type = "roadway"
 
-							clicked_addon_number = 0
+							clicked_addon_number = mousex/35 - 1
 							
 							//選択されたアドオンのアドオン名を取得
 								notesel type_Two_lane_road
@@ -4106,10 +4113,10 @@
 						}
 
 					//歩道 / 自転車道
-						if cursor_mode = "put_Road" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1 {
+						if (cursor_mode = "put_Road" and click_range( 0, windowy-70-titlebar_h-16, 16, windowy-70-titlebar_h ) = 1) or road_type = "promenade" {
 							road_type = "promenade"
 
-							clicked_addon_number = 0
+							clicked_addon_number = mousex/35 - 1
 							
 							//選択されたアドオンのアドオン名を取得
 								notesel type_Promenade
@@ -4461,7 +4468,7 @@
 				bottom_chip = ""
 				right_chip = ""
 				
-				if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
+				if mx-1 >= 0 and my-1 >= 0 and mx+1 < mapx and my+1 < mapy {
 					left_chip = category(mx-1, my)
 					top_chip = category(mx, my-1)
 					bottom_chip = category(mx+1, my)
@@ -4487,7 +4494,7 @@
 				bottom_chip_2 = ""
 				right_chip_2 = ""
 				
-				if mx-1 >= 0 and my-1 >= 0 and mx+1 <= mapx and my+1 <= mapy {
+				if mx-1 >= 0 and my-1 >= 0 and mx+1 < mapx and my+1 < mapy {
 					left_chip_2 = category_2(mx-1, my)
 					top_chip_2 = category_2(mx, my-1)
 					bottom_chip_2 = category_2(mx, my+1)
@@ -6492,6 +6499,13 @@
 									playing_BGM_file = next_BGM_file
 									break
 								}
+							} else : if instr(next_BGM_file, 0, "[m_") != -1 {	; ○月のみ流れる曲
+								month_var = int(strmid(next_BGM_file, 3, instr(next_BGM_file, 0, "]")))
+								
+								if month_var = time_month {
+									playing_BGM_file = next_BGM_file
+									break
+								}
 							} else : if instr(next_BGM_file, 0, "[Sp]") = -1 {
 								playing_BGM_file = next_BGM_file
 								break
@@ -6580,10 +6594,10 @@
 					before_residents = residents(x,y)
 	
 				//変更前の住人の年齢を取得
-					sdim age_in_Residential_tmp, 16, before_residents
+					sdim age_in_Residential_tmp, 16, before_residents + 10
 					split age(x,y), "]", age_in_Residential_tmp
 	
-					dim age_in_Residential, before_residents
+					dim age_in_Residential, before_residents + 10
 					repeat before_residents
 						split age_in_Residential_tmp(cnt), "[", cut, age_in_Residential_tmp(cnt)
 						age_in_Residential(cnt) = int(age_in_Residential_tmp(cnt))
@@ -6628,7 +6642,7 @@
 	
 								if residents(x,y) > 0 {
 									repeat (before_residents-cut_residents)
-										age(x,y) += "["+age_in_Residential(cnt)+"]"
+										age(x,y) += "["+age_in_Residential(cnt)+"]"					; 要修正
 									loop
 								}
 							}
@@ -7896,6 +7910,77 @@
 						news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
 					}
 				}
+
+			; 人口増加
+				if before_Total_Population != Total_Population {
+					show_news_population = ""
+
+					if before_Total_Population < 1000 and Total_Population >= 1000 {
+						show_news_population = "over_1000"
+					}
+					if before_Total_Population < 5000 and Total_Population >= 5000 {
+						show_news_population = "over_5000"
+					}
+					if before_Total_Population < 10000 and Total_Population >= 10000 {
+						show_news_population = "over_10000"
+					}
+					if before_Total_Population < 30000 and Total_Population >= 30000 {
+						show_news_population = "over_30000"
+					}
+					if before_Total_Population < 50000 and Total_Population >= 50000 {
+						show_news_population = "over_50000"
+					}
+					if before_Total_Population < 80000 and Total_Population >= 80000 {
+						show_news_population = "over_80000"
+					}
+					if before_Total_Population < 100000 and Total_Population >= 100000 {
+						show_news_population = "over_100000"
+					}
+					if before_Total_Population < 200000 and Total_Population >= 200000 {
+						show_news_population = "over_200000"
+					}
+					if before_Total_Population < 300000 and Total_Population >= 300000 {
+						show_news_population = "over_300000"
+					}
+					if before_Total_Population < 400000 and Total_Population >= 400000 {
+						show_news_population = "over_400000"
+					}
+					if before_Total_Population < 500000 and Total_Population >= 500000 {
+						show_news_population = "over_500000"
+					}
+					if before_Total_Population < 600000 and Total_Population >= 600000 {
+						show_news_population = "over_600000"
+					}
+					if before_Total_Population < 700000 and Total_Population >= 700000 {
+						show_news_population = "over_700000"
+					}
+					if before_Total_Population < 800000 and Total_Population >= 800000 {
+						show_news_population = "over_800000"
+					}
+					if before_Total_Population < 900000 and Total_Population >= 900000 {
+						show_news_population = "over_900000"
+					}
+					if before_Total_Population < 1000000 and Total_Population >= 1000000 {
+						show_news_population = "over_1000000"
+					}
+					
+					same_news = 0
+	
+					; 同じ内容のニュースを複数読み込む
+					repeat notemax
+						noteget news_tmp, cnt
+	
+						if instr(news_tmp, 0, "case=\""+show_news_population+"\"") != -1 {
+							split news_tmp, ", ", tmp, news_content_candidate_tmp
+							news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; 表示するニュースの候補
+							same_news ++	; 同じ内容のニュースの数
+						}
+					loop
+					
+					if same_news > 0 {
+						news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
+					}
+				}
 	
 		//特に報じることがない場合、どうでもいいニュースを表示
 			notesel news_file
@@ -7921,6 +8006,8 @@
 					news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
 				}
 			}
+
+		before_Total_Population = Total_Population
 	
 	return
 					
@@ -8312,7 +8399,7 @@
 			
 			save_mapdata_name = refstr
 			if instr(save_mapdata_name, 0, ".cbx") = -1 and instr(save_mapdata_name, 0, ".cbd") = -1 {
-				save_mapdata_name = ""+save_mapdata_name+".cbx"
+				save_mapdata_name = ""+save_mapdata_name+".cbd"
 			}
 			
 			if stat = 0 {
@@ -9144,6 +9231,12 @@
 	
 *update
 	//アップデーター起動
+		color 0, 0, 0
+		sboxf 128, 0, 0, windowx, windowy
+		
+		font SystemFont, 14
+		color 255, 255, 255 : cmes "アップデータをダウンロード中です\nしばらくお待ち下さい...", 0, windowy/2-20, windowx, windowy/2+20
+		
 		latest_version__Updater = get_chapter(latest_version, "Updater", " : ", ";")
 		latest_version__Updater_Name = get_chapter(latest_version, "Updater_Name", " : ", ";")
 	
