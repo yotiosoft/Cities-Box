@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.5
+								      Cities Box Ver 0.9.5.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -232,6 +232,41 @@
 	netterm@
 	
 	return
+
+/*--------------透過input関連------------------*/
+#uselib "gdi32.dll"
+	#cfunc CreatePatternBrush "CreatePatternBrush" int
+	#func DeleteObject "DeleteObject"
+	#func SetBkMode "SetBkMode" int,int 
+	#func SetBrushOrgEx "SetBrushOrgEx" int,int,int,int
+	
+#uselib "user32.dll"
+	#func GetWindowRect "GetWindowRect" int,int
+	#func MapWindowPoints "MapWindowPoints" int,int,int,int
+
+	#func  SetWindowPos@  "SetWindowPos" int,int,int,int,int,int,int
+	
+#deffunc UpdateBackgroundBrush
+    if ginfo_sel >= length(hBrush) : hBrush.ginfo_sel = 0
+    mref bmscr,67 : hBrush.ginfo_sel = CreatePatternBrush(bmscr.7)
+    oncmd gosub *onctlcolor, $133
+	
+    return
+
+*onctlcolor
+    oldsel = ginfo_sel : gsel ginfo_intid : dim rect,4
+    setbkmode wparam, 1 // TRANSPARENT
+    getwindowrect lparam, varptr(rect)
+    mapwindowpoints 0, hwnd, varptr(rect), 2
+    setbrushorgex wparam, -rect.0, -rect.1, 0
+ 
+ 	#include "gdi32.as"
+	#define ctype RGB(%1,%2,%3) (%1 | %2 << 8 | %3 << 16)
+    settextcolor wparam, RGB (255, 255, 255)
+    
+    gsel oldsel : return hBrush.ginfo_intid
+
+/*------------------------------------------------*/
 								
 #global
 
@@ -377,6 +412,9 @@
 		celload "img/speed/normal.png", 68									; 普通
 		celload "img/speed/fast.png", 69									; 速い
 		celload "img/speed/pause.png", 70									; 一時停止
+
+	//建物詳細ダイアログ
+		celload "img/show_detail/change_name.png", 71						; 建物名の変更
 	
 *preparation
 	//読み込み中画面
@@ -1220,6 +1258,8 @@
 		sdim school, 128, mapx, mapy		//住人が通う学校の位置
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
+
+		sdim original_name, 128, mapx, mapy	//建物名（ユーザーがつけた名前）
 		
 		repeat mapx * mapy
 			map(ix,iy) = addon_num_buf
@@ -1257,6 +1297,8 @@
 			age(ix,iy) = ""
 	
 			reservation(ix,iy) = "none"
+
+			original_name(ix,iy) = ""
 			
 			ix++
 			if ix = mapx {
@@ -1425,6 +1467,8 @@
 		sdim school, 128, mapx, mapy		//住人が通う学校の位置
 		
 		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
+
+		sdim original_name, 128, mapx, mapy	//建物名（ユーザーがつけた名前）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -2474,6 +2518,38 @@
 							loop
 						loop
 				}
+
+			//original_name(x,y)の読み込み
+				if instr(load_mapdata, 0, "original_name(x,y)") != -1 {
+					original_name_buf = get_chapter(load_mapdata, "original_name(x,y)", " {", "}")
+				
+					repeat mapy
+						y = cnt
+			
+						notesel original_name_buf
+						noteget original_name_buf_a_line, (y+1)
+			
+						sdim original_name_buf_a_tile, mapx
+						split original_name_buf_a_line, ", ", original_name_buf_a_tile
+				
+						repeat mapx
+							x = cnt
+							original_name(x,y) = original_name_buf_a_tile(x)
+						loop
+				
+					loop
+	
+				} else {
+					//セーブデータにoriginal_nameの情報がない場合は全て0に設定
+						repeat mapx
+							x = cnt
+							repeat mapy
+								y = cnt
+	
+								original_name(x,y) = ""
+							loop
+						loop
+				}
 	
 	
 			//総労働者数を読み込み
@@ -3362,6 +3438,14 @@
 				gosub *show_detail
 			}
 
+		//建物名変更inputの背景
+			if showing_new_name_input = 1 {
+				color 0, 162, 232 : boxf windowx-370, 0, windowx, 30
+
+				color 255, 255, 255 : font SystemFont, 14
+				pos windowx-360, 5 : mes "新しい建物名 : "
+			}
+
 		//FPS値の表示（通常時非表示）
 		/*
 			color 0, 0, 0 
@@ -3613,11 +3697,46 @@
 	
 		if mousey <= menu_line_y and (mousex >= 0 and mousey >= 0 and mousex <= windowx and mousey <= windowy) {
 			if cursor_mode = "normal" {
-				clicked_mx = mx : clicked_my = my
-				clicked += 1
-				await 10
-				gosub *show_detail
+				if showing_detail = 1 and click_range(macro1_sd+32+15+diax+25-20, macro2_sd-100-(diay1+5+diay2+5), macro1_sd+32+15+diax+25-20+20, macro2_sd-100-(diay1+5+diay2+5)+20) = 1 {
+					if showing_new_name_input = 0 {
+						if original_name(clicked_mx, clicked_my) != "" {
+							new_name = original_name(clicked_mx, clicked_my)
+						} else {
+							new_name = addon_jp_name(map(clicked_mx,clicked_my))
+						}
+
+						showing_new_name_input = 1
+						
+						objsize 200, 16
+						pos windowx-255, 7 : input new_name : new_name_stat = stat
+
+						objsize 40, 16
+						pos windowx-255+200, 7 : button gosub "OK", *fix_new_name
+
+						await 10
+						return
+					}
+				}
+
+				if click_range(macro1_sd+32, macro2_sd-100-(diay1+5+diay2+5), macro1_sd+32+15+diax+25, macro2_sd-100) = 1 {
+					return
+				} else {
+					await 10
+
+					if showing_new_name_input = 0 {
+						clicked_mx = mx : clicked_my = my
+						clicked += 1
+					}
+					
+					gosub *show_detail
+				}
+				
 			} else {
+				if new_name_stat != 0 {
+					clrobj new_name_stat
+					showing_new_name_input = 0
+				}
+				
 				gosub *build_obj
 			}
 			
@@ -4549,6 +4668,10 @@
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
 
+							reservation(mx, my) = "none"
+
+							original_name(mx, my) = ""
+
 							if road_type = "roadway" {
 								category_3(mx, my) = "roadway"
 							} else : if road_type = "promenade" {
@@ -4725,6 +4848,10 @@
 							obj_use_tiles_y(mx,my) = 0
 							obj_tiles_x(mx, my) = 0
 							obj_tiles_y(mx, my) = 0
+
+							reservation(mx, my) = "none"
+
+							original_name(mx, my) = ""
 							
 							if cetegory_buf = "road" and category(mx, my) != "station" {
 								//線路と交差している場合は予め踏切を設置しておく
@@ -5062,6 +5189,8 @@
 										crop_amount(mx+rx,mx+ry) = addon_crop_amount(addon_num_buf)
 										
 										reservation(mx+rx,my+ry) = "none"
+
+										original_name(mx+rx,my+ry) = ""
 	
 										if done_build(1,mx+rx,my+ry) = 0 and rx = 0 and ry = 0 {
 											//資金を減らす（§5/1マス）
@@ -5402,9 +5531,11 @@
 							category_3(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							obj_type(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_type_buf
 							obj_dire(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_dire_buf
+
+							original_name(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 	
-							crop(mx+rx,my+ry) = "none"
-							crop_amount(mx+rx,mx+ry) = 0
+							crop(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "none"
+							crop_amount(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 								
 							obj_serial_num(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 							obj_use_tiles_x(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
@@ -7196,16 +7327,23 @@
 	}
 	
 	qv2 clicked_mx, clicked_my
+
+	macro1_sd = macro1 : macro2_sd = macro2
 	
 	color 255, 255, 255
-	line macro1+32, macro2-100, macro1+32, macro2-32
+	line macro1_sd+32, macro2_sd-100, macro1_sd+32, macro2_sd-32
 	
 	//ダイアログの大きさを文字列の長さによって決める
 		if before_clicked_mx_tmp != clicked_mx or before_clicked_my_tmp != clicked_my {
 			;get_str_print_length(name(clicked_mx,clicked_my))		←文字列の表示の長さを求める関数（後日作成予定）
 			buffer 999
 				font SystemFont, 14
-				mes addon_jp_name(map(clicked_mx,clicked_my))
+
+				if original_name(clicked_mx, clicked_my) = "" {
+					mes addon_jp_name(map(clicked_mx,clicked_my))
+				} else {
+					mes original_name(clicked_mx, clicked_my)
+				}
 		
 				diax = ginfo(14) + 5
 				diay1 = ginfo(15) + 2
@@ -7268,7 +7406,7 @@
 			
 	//表示
 		color 0, 0, 0
-		sboxf 128, macro1+32, macro2-100-(diay1+5+diay2+5), macro1+32+15+diax, macro2-100
+		sboxf 128, macro1_sd+32, macro2_sd-100-(diay1+5+diay2+5), macro1_sd+32+15+diax+25, macro2_sd-100
 	
 		if category(clicked_mx, clicked_my) = "residential" {
 			color 34, 177, 76
@@ -7303,19 +7441,36 @@
 			color 255, 0, 0
 		}
 	
-		boxf macro1+32, macro2-100-(diay1+5+diay2+5), macro1+32+10, macro2-100
+		boxf macro1_sd+32, macro2_sd-100-(diay1+5+diay2+5), macro1_sd+32+10, macro2_sd-100
 	
 		color 255, 255, 255
 
 		//建物名（アドオン名）
 			font SystemFont, 14
-			pos macro1+32+15, macro2-100-(diay1+5+diay2+5)+5 : mes addon_jp_name(map(clicked_mx,clicked_my))	
+			pos macro1_sd+32+15, macro2_sd-100-(diay1+5+diay2+5)+5
+			if original_name(clicked_mx, clicked_my) = "" {
+				mes addon_jp_name(map(clicked_mx,clicked_my))
+			} else {
+				mes original_name(clicked_mx, clicked_my)
+			}
 
 		//詳細
 			font SystemFont, 10
-			pos macro1+32+15, macro2-100-(diay1+5+diay2+5)+diay1+5 : mes mes_tmp
-	
+			pos macro1_sd+32+15, macro2_sd-100-(diay1+5+diay2+5)+diay1+5 : mes mes_tmp
+
+		//建物名変更ボタン
+			pos macro1_sd+32+15+diax+25-20, macro2_sd-100-(diay1+5+diay2+5) : gmode 2 : gcopy 71, 0, 0, 20, 20
+			
 	return
+
+*fix_new_name
+	original_name(clicked_mx, clicked_my) = new_name
+	
+	clrobj new_name_stat
+	showing_new_name_input = 0
+					
+	return
+	
 	
 *information_panel
 	screen 1, 400, 300
@@ -9179,6 +9334,30 @@
 						map_data_buf = reservation(x,y)
 					} else {
 						map_data_buf = ""+map_data_buf+", "+reservation(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+
+		//original_name(x,y)
+			noteadd "original_name(x,y) {", -1
+			
+			repeat mapy
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapx
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = original_name(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+original_name(x,y)+""
 					}
 				loop
 			
