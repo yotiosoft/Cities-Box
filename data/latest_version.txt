@@ -1,7 +1,7 @@
-Release Number : 94;
+Release Number : 95;
 Title : Cities Box;
-Version : 0.9.5;
-About : ニュースの表示機能が復活 / 季節限定BGM / バグ修正 etc.;
+Version : 0.9.5.1;
+About : 建物名変更機能を実装 / 公園を追加;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;/;

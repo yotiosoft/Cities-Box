@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.5.1
+								       Cities Box Ver 0.9.6
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -13,6 +13,7 @@
 
 *include
 #include "hspinet.as"
+#include "hspext.as"
 
 *define
 /*チップサイズ（64x64）*/
@@ -437,8 +438,7 @@
 	//バッファ番号1000以降はオブジェクト
 		//まずAddonフォルダ内のアドオンの数を取得
 			directory = dirinfo(0)
-	
-			#include "hspext.as"
+			
 				chdir "addons"
 	
 				//まずパス名を覗いたファイル一覧を取得
@@ -1212,56 +1212,56 @@
 	now_in_menu = 0
 	
 	//マップ新規作成
-		mapx=100:mapy=100
+		mapsize = 100
 	
-		dim buffer_number, mapx, mapy
-		dim atlx, mapx, mapy
-		dim atly, mapx, mapy
-		dim abrx, mapx, mapy
-		dim abry, mapx, mapy
-		dim sizex, mapx, mapy
-		dim sizey, mapx, mapy
+		dim buffer_number, mapsize, mapsize
+		dim atlx, mapsize, mapsize
+		dim atly, mapsize, mapsize
+		dim abrx, mapsize, mapsize
+		dim abry, mapsize, mapsize
+		dim sizex, mapsize, mapsize
+		dim sizey, mapsize, mapsize
 	
-		dim map, mapx, mapy					//各座標のアドオン番号
-		sdim name, 128, mapx, mapy			//各座標のアドオン名
-		sdim category, 128, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-		sdim category_2, 128, mapx, mapy	//アドオンの更に詳細なカテゴリー（公共施設などで使う）
-		sdim category_3, 128, mapx, mapy	//アドオンの更に更に詳細なカテゴリー（学校などで使う）
-		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
-		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
-		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
-		dim obj_use_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
-		dim obj_use_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
-		dim obj_tiles_x, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
-		dim obj_tiles_y, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
+		dim map, mapsize, mapsize					//各座標のアドオン番号
+		sdim name, 128, mapsize, mapsize			//各座標のアドオン名
+		sdim category, 128, mapsize, mapsize		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		sdim category_2, 128, mapsize, mapsize		//アドオンの更に詳細なカテゴリー（公共施設などで使う）
+		sdim category_3, 128, mapsize, mapsize		//アドオンの更に更に詳細なカテゴリー（学校などで使う）
+		dim obj_type, mapsize, mapsize				//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapsize, mapsize				//座標上にあるオブジェクトの向き
+		dim obj_serial_num, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
+		dim obj_use_tiles_x, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
+		dim obj_use_tiles_y, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
+		dim obj_tiles_x, mapsize, mapsize			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
+		dim obj_tiles_y, mapsize, mapsize			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
 		
-		dim residents, mapx, mapy			//各建築物の住民の数（住宅地のみ）
-		dim workers_Commercial, mapx, mapy	//商業地区の従業員数（商業地区のみ）
-		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
-		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
-		dim workers_Farm, mapx, mapy		//農業地区の従業員数（農業地区のみ）
-		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
+		dim residents, mapsize, mapsize				//各建築物の住民の数（住宅地のみ）
+		dim workers_Commercial, mapsize, mapsize	//商業地区の従業員数（商業地区のみ）
+		dim workers_Office, mapsize, mapsize		//オフィス地区の従業員数（オフィス地区のみ）
+		dim workers_Industrial, mapsize, mapsize	//工業地区の従業員数（工業地区のみ）
+		dim workers_Farm, mapsize, mapsize			//農業地区の従業員数（農業地区のみ）
+		dim workers_Public, mapsize, mapsize		//公共施設の従業員数（公共施設のみ）
 	
-		dim students, mapx, mapy			//各学校の生徒・学生数
+		dim students, mapsize, mapsize				//各学校の生徒・学生数
 	
-		dim land_price, mapx, mapy			//地価（万円/マス）
-		dim crime_rate, mapx, mapy			//犯罪率
-		dim education_rate, mapx, mapy		//教育度
-		dim happiness, mapx, mapy			//幸福度
+		dim land_price, mapsize, mapsize			//地価（万円/マス）
+		dim crime_rate, mapsize, mapsize			//犯罪率
+		dim education_rate, mapsize, mapsize		//教育度
+		dim happiness, mapsize, mapsize				//幸福度
 	
-		sdim crop, 128, mapx, mapy			//生産物
-		dim crop_amount, mapx, mapy			//生産量
+		sdim crop, 128, mapsize, mapsize			//生産物
+		dim crop_amount, mapsize, mapsize			//生産量
 	
-		sdim age, 128, mapx, mapy			//住人の年齢
-		sdim gender, 128, mapx, mapy		//住人の性別
-		sdim workplace, 128, mapx, mapy		//住人が通うの職場の位置
-		sdim school, 128, mapx, mapy		//住人が通う学校の位置
+		sdim age, 128, mapsize, mapsize				//住人の年齢
+		sdim gender, 128, mapsize, mapsize			//住人の性別
+		sdim workplace, 128, mapsize, mapsize		//住人が通うの職場の位置
+		sdim school, 128, mapsize, mapsize			//住人が通う学校の位置
 		
-		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
+		sdim reservation, 128, mapsize, mapsize		//地区の予約（地域設定されたがまだ建物が立っていない区域）
 
-		sdim original_name, 128, mapx, mapy	//建物名（ユーザーがつけた名前）
+		sdim original_name, 128, mapsize, mapsize	//建物名（ユーザーがつけた名前）
 		
-		repeat mapx * mapy
+		repeat mapsize * mapsize
 			map(ix,iy) = addon_num_buf
 			name(ix,iy) = "tile_greenfield"
 			category(ix,iy) = "tile"
@@ -1301,7 +1301,7 @@
 			original_name(ix,iy) = ""
 			
 			ix++
-			if ix = mapx {
+			if ix = mapsize {
 				ix = 0
 				iy += 1
 			}
@@ -1396,7 +1396,6 @@
 	
 	//変数を初期化
 		camx=-300:camy=-150		//カメラの位地
-		mapx=100:mapy=100
 		
 		menu_line_y = 400		//メニューとの境界線
 		cursor_mode = "normal"	//カーソルのモード
@@ -1421,54 +1420,56 @@
 
 		speed = 1
 		pause = 0
+
+		mapsize = 100
 	
 	if from_new_map = 0 {
-		dim buffer_number, mapx, mapy
-		dim atlx, mapx, mapy
-		dim atly, mapx, mapy
-		dim abrx, mapx, mapy
-		dim abry, mapx, mapy
-		dim sizex, mapx, mapy
-		dim sizey, mapx, mapy
+		dim buffer_number, mapsize, mapsize
+		dim atlx, mapsize, mapsize
+		dim atly, mapsize, mapsize
+		dim abrx, mapsize, mapsize
+		dim abry, mapsize, mapsize
+		dim sizex, mapsize, mapsize
+		dim sizey, mapsize, mapsize
 	
-		dim map, mapx, mapy					//各座標のアドオン番号
-		sdim name, 128, mapx, mapy			//各座標のアドオン名
-		sdim category, 128, mapx, mapy		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-		sdim category_2, 128, mapx, mapy	//アドオンの更に詳細なカテゴリー（公共施設などで使う）
-		sdim category_3, 128, mapx, mapy	//アドオンの更に更に詳細なカテゴリー（学校などで使う）
-		dim obj_type, mapx, mapy			//座標上にあるオブジェクトのタイプ
-		dim obj_dire, mapx, mapy			//座標上にあるオブジェクトの向き
-		dim obj_serial_num, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
-		dim obj_use_tiles_x, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
-		dim obj_use_tiles_y, mapx, mapy		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
-		dim obj_tiles_x, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
-		dim obj_tiles_y, mapx, mapy			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
+		dim map, mapsize, mapsize					//各座標のアドオン番号
+		sdim name, 128, mapsize, mapsize			//各座標のアドオン名
+		sdim category, 128, mapsize, mapsize		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+		sdim category_2, 128, mapsize, mapsize		//アドオンの更に詳細なカテゴリー（公共施設などで使う）
+		sdim category_3, 128, mapsize, mapsize		//アドオンの更に更に詳細なカテゴリー（学校などで使う）
+		dim obj_type, mapsize, mapsize				//座標上にあるオブジェクトのタイプ
+		dim obj_dire, mapsize, mapsize				//座標上にあるオブジェクトの向き
+		dim obj_serial_num, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
+		dim obj_use_tiles_x, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
+		dim obj_use_tiles_y, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
+		dim obj_tiles_x, mapsize, mapsize			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのx方向のタイルの数
+		dim obj_tiles_y, mapsize, mapsize			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からのy方向のタイルの数
 		
-		dim residents, mapx, mapy			//各建築物の住民の数（住宅地のみ）
-		dim workers_Commercial, mapx, mapy	//商業地区の従業員数（商業地区のみ）
-		dim workers_Office, mapx, mapy		//オフィス地区の従業員数（オフィス地区のみ）
-		dim workers_Industrial, mapx, mapy	//工業地区の従業員数（工業地区のみ）
-		dim workers_Farm, mapx, mapy		//農業地区の従業員数（農業地区のみ）
-		dim workers_Public, mapx, mapy		//公共施設の従業員数（公共施設のみ）
+		dim residents, mapsize, mapsize				//各建築物の住民の数（住宅地のみ）
+		dim workers_Commercial, mapsize, mapsize	//商業地区の従業員数（商業地区のみ）
+		dim workers_Office, mapsize, mapsize		//オフィス地区の従業員数（オフィス地区のみ）
+		dim workers_Industrial, mapsize, mapsize	//工業地区の従業員数（工業地区のみ）
+		dim workers_Farm, mapsize, mapsize			//農業地区の従業員数（農業地区のみ）
+		dim workers_Public, mapsize, mapsize		//公共施設の従業員数（公共施設のみ）
 	
-		dim students, mapx, mapy			//各学校の生徒・学生数
+		dim students, mapsize, mapsize				//各学校の生徒・学生数
 	
-		dim land_price, mapx, mapy			//地価（万円/マス）
-		dim crime_rate, mapx, mapy			//犯罪率
-		dim education_rate, mapx, mapy		//教育度
-		dim happiness, mapx, mapy			//幸福度
+		dim land_price, mapsize, mapsize			//地価（万円/マス）
+		dim crime_rate, mapsize, mapsize			//犯罪率
+		dim education_rate, mapsize, mapsize		//教育度
+		dim happiness, mapsize, mapsize				//幸福度
 	
-		sdim crop, 128, mapx, mapy			//生産物
-		dim crop_amount, mapx, mapy			//生産量
+		sdim crop, 128, mapsize, mapsize			//生産物
+		dim crop_amount, mapsize, mapsize			//生産量
 	
-		sdim age, 128, mapx, mapy			//住人の年齢
-		sdim gender, 128, mapx, mapy		//住人の性別
-		sdim workplace, 128, mapx, mapy		//住人が通うの職場の位置
-		sdim school, 128, mapx, mapy		//住人が通う学校の位置
+		sdim age, 128, mapsize, mapsize				//住人の年齢
+		sdim gender, 128, mapsize, mapsize			//住人の性別
+		sdim workplace, 128, mapsize, mapsize		//住人が通うの職場の位置
+		sdim school, 128, mapsize, mapsize			//住人が通う学校の位置
 		
-		sdim reservation, 128, mapx, mapy	//地区の予約（地域設定されたがまだ建物が立っていない区域）
+		sdim reservation, 128, mapsize, mapsize		//地区の予約（地域設定されたがまだ建物が立っていない区域）
 
-		sdim original_name, 128, mapx, mapy	//建物名（ユーザーがつけた名前）
+		sdim original_name, 128, mapsize, mapsize	//建物名（ユーザーがつけた名前）
 	}
 	if from_new_map = 1 {
 		from_new_map = 0
@@ -1637,16 +1638,16 @@
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
 			
-				repeat mapy
+				repeat mapsize
 					y = cnt
 		
 					notesel name_buf
 					noteget name_buf_a_line, (y+1)
 		
-					sdim name_buf_a_tile, mapx
+					sdim name_buf_a_tile, mapsize
 					split name_buf_a_line, ", ", name_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						name(x,y) = name_buf_a_tile(x)
 						map(x,y) = addon_num(name_buf_a_tile(x))
@@ -1677,16 +1678,16 @@
 			//category(x,y)の読み込み
 				category_buf = get_chapter(load_mapdata, "category(x,y)", " {", "}")
 			
-				repeat mapy
+				repeat mapsize
 					y = cnt
 		
 					notesel category_buf
 					noteget category_buf_a_line, (y+1)
 		
-					sdim category_buf_a_tile, mapx
+					sdim category_buf_a_tile, mapsize
 					split category_buf_a_line, ", ", category_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						category(x,y) = category_buf_a_tile(x)
 					loop
@@ -1697,16 +1698,16 @@
 				if instr(load_mapdata, 0, "category_2(x,y)") != -1 {
 					category_2_buf = get_chapter(load_mapdata, "category_2(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 					y = cnt
 		
 					notesel category_2_buf
 					noteget category_2_buf_a_line, (y+1)
 		
-					sdim category_2_buf_a_tile, mapx
+					sdim category_2_buf_a_tile, mapsize
 					split category_2_buf_a_line, ", ", category_2_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						category_2(x,y) = category_2_buf_a_tile(x)
 					loop
@@ -1715,9 +1716,9 @@
 	
 				} else {
 					//セーブデータにcategory_2の情報がない場合は全て50万円/マスに設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								category_2(x,y) = ""
@@ -1729,16 +1730,16 @@
 				if instr(load_mapdata, 0, "category_3(x,y)") != -1 {
 					category_3_buf = get_chapter(load_mapdata, "category_3(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 					y = cnt
 		
 					notesel category_3_buf
 					noteget category_3_buf_a_line, (y+1)
 		
-					sdim category_3_buf_a_tile, mapx
+					sdim category_3_buf_a_tile, mapsize
 					split category_3_buf_a_line, ", ", category_3_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						category_3(x,y) = category_3_buf_a_tile(x)
 					loop
@@ -1747,9 +1748,9 @@
 	
 				} else {
 					//セーブデータにcategory_3の情報がない場合は全て50万円/マスに設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								category_3(x,y) = ""
@@ -1760,16 +1761,16 @@
 			//obj_type(x,y)の読み込み
 				obj_type_buf = get_chapter(load_mapdata, "obj_type(x,y)", " {", "}")
 			
-				repeat mapy
+				repeat mapsize
 					y = cnt
 		
 					notesel obj_type_buf
 					noteget obj_type_buf_a_line, (y+1)
 		
-					sdim obj_type_buf_a_tile, mapx
+					sdim obj_type_buf_a_tile, mapsize
 					split obj_type_buf_a_line, ", ", obj_type_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						obj_type(x,y) = int(obj_type_buf_a_tile(x))
 					loop
@@ -1779,16 +1780,16 @@
 			//obj_dire(x,y)の読み込み
 				obj_dire_buf = get_chapter(load_mapdata, "obj_dire(x,y)", " {", "}")
 			
-				repeat mapy
+				repeat mapsize
 					y = cnt
 		
 					notesel obj_dire_buf
 					noteget obj_dire_buf_a_line, (y+1)
 		
-					sdim obj_dire_buf_a_tile, mapx
+					sdim obj_dire_buf_a_tile, mapsize
 					split obj_dire_buf_a_line, ", ", obj_dire_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						obj_dire(x,y) = int(obj_dire_buf_a_tile(x))
 					loop
@@ -1799,16 +1800,16 @@
 				if instr(load_mapdata, 0, "obj_serial_num(x,y)") != -1 {
 					obj_serial_num_buf = get_chapter(load_mapdata, "obj_serial_num(x,y)", " {", "}")
 					
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel obj_serial_num_buf
 						noteget obj_serial_num_buf_a_line, (y+1)
 			
-						sdim obj_serial_num_buf_a_tile, mapx
+						sdim obj_serial_num_buf_a_tile, mapsize
 						split obj_serial_num_buf_a_line, ", ", obj_serial_num_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							obj_serial_num(x,y) = int(obj_serial_num_buf_a_tile(x))
 	
@@ -1823,16 +1824,16 @@
 				if instr(load_mapdata, 0, "obj_use_tiles_x(x,y)") != -1 {
 					obj_use_tiles_x_buf = get_chapter(load_mapdata, "obj_use_tiles_x(x,y)", " {", "}")
 					
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel obj_use_tiles_x_buf
 						noteget obj_use_tiles_x_buf_a_line, (y+1)
 			
-						sdim obj_use_tiles_x_buf_a_tile, mapx
+						sdim obj_use_tiles_x_buf_a_tile, mapsize
 						split obj_use_tiles_x_buf_a_line, ", ", obj_use_tiles_x_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							obj_use_tiles_x(x,y) = int(obj_use_tiles_x_buf_a_tile(x))
 						loop
@@ -1844,16 +1845,16 @@
 				if instr(load_mapdata, 0, "obj_use_tiles_y(x,y)") != -1 {
 					obj_use_tiles_y_buf = get_chapter(load_mapdata, "obj_use_tiles_y(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel obj_use_tiles_y_buf
 						noteget obj_use_tiles_y_buf_a_line, (y+1)
 			
-						sdim obj_use_tiles_y_buf_a_tile, mapx
+						sdim obj_use_tiles_y_buf_a_tile, mapsize
 						split obj_use_tiles_y_buf_a_line, ", ", obj_use_tiles_y_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							obj_use_tiles_y(x,y) = int(obj_use_tiles_y_buf_a_tile(x))
 						loop
@@ -1865,16 +1866,16 @@
 				if instr(load_mapdata, 0, "obj_tiles_x(x,y)") != -1 {
 					obj_tiles_x_buf = get_chapter(load_mapdata, "obj_tiles_x(x,y)", " {", "}")
 					
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel obj_tiles_x_buf
 						noteget obj_tiles_x_buf_a_line, (y+1)
 			
-						sdim obj_tiles_x_buf_a_tile, mapx
+						sdim obj_tiles_x_buf_a_tile, mapsize
 						split obj_tiles_x_buf_a_line, ", ", obj_tiles_x_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							obj_tiles_x(x,y) = int(obj_tiles_x_buf_a_tile(x))
 						loop
@@ -1886,16 +1887,16 @@
 				if instr(load_mapdata, 0, "obj_tiles_y(x,y)") != -1 {
 					obj_tiles_y_buf = get_chapter(load_mapdata, "obj_tiles_y(x,y)", " {", "}")
 	
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel obj_tiles_y_buf
 						noteget obj_tiles_y_buf_a_line, (y+1)
 			
-						sdim obj_tiles_y_buf_a_tile, mapx
+						sdim obj_tiles_y_buf_a_tile, mapsize
 						split obj_tiles_y_buf_a_line, ", ", obj_tiles_y_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							obj_tiles_y(x,y) = int(obj_tiles_y_buf_a_tile(x))
 						loop
@@ -1906,16 +1907,16 @@
 			//residents(x,y)の読み込み
 				residents_buf = get_chapter(load_mapdata, "residents(x,y)", " {", "}")
 			
-				repeat mapy
+				repeat mapsize
 					y = cnt
 		
 					notesel residents_buf
 					noteget residents_buf_a_line, (y+1)
 		
-					sdim residents_buf_a_tile, mapx
+					sdim residents_buf_a_tile, mapsize
 					split residents_buf_a_line, ", ", residents_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						residents(x,y) = int(residents_buf_a_tile(x))
 						Total_Population += residents(x,y)
@@ -1928,16 +1929,16 @@
 					workers_Commercial_buf = get_chapter(load_mapdata, "workers_Commercial(x,y)", " {", "}")
 	
 					if Saved_Version >= 78 {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 							
 							notesel workers_Commercial_buf
 							noteget workers_Commercial_buf_a_line, (y+1)
 				
-							sdim workers_Commercial_buf_a_tile, mapx
+							sdim workers_Commercial_buf_a_tile, mapsize
 							split workers_Commercial_buf_a_line, ", ", workers_Commercial_buf_a_tile
 					
-							repeat mapx
+							repeat mapsize
 								x = cnt
 								workers_Commercial(x,y) = int(workers_Commercial_buf_a_tile(x))
 								Total_workers_Commercial += workers_Commercial(x,y)
@@ -1946,10 +1947,10 @@
 						loop
 	
 					} else {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 	
-							repeat mapx
+							repeat mapsize
 								x = cnt
 	
 								workers_Commercial(x,y) = 0
@@ -1964,16 +1965,16 @@
 					workers_Office_buf = get_chapter(load_mapdata, "workers_Office(x,y)", " {", "}")
 	
 					if Saved_Version >= 78 {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 				
 							notesel workers_Office_buf
 							noteget workers_Office_buf_a_line, (y+1)
 				
-							sdim workers_Office_buf_a_tile, mapx
+							sdim workers_Office_buf_a_tile, mapsize
 							split workers_Office_buf_a_line, ", ", workers_Office_buf_a_tile
 					
-							repeat mapx
+							repeat mapsize
 								x = cnt
 								workers_Office(x,y) = int(workers_Office_buf_a_tile(x))
 								Total_workers_Office += workers_Office(x,y)
@@ -1981,10 +1982,10 @@
 					
 						loop
 					} else {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 	
-							repeat mapx
+							repeat mapsize
 								x = cnt
 	
 								workers_Office(x,y) = 0
@@ -1999,16 +2000,16 @@
 					workers_Industrial_buf = get_chapter(load_mapdata, "workers_Industrial(x,y)", " {", "}")
 	
 					if Saved_Version >= 78 {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 				
 							notesel workers_Industrial_buf
 							noteget workers_Industrial_buf_a_line, (y+1)
 				
-							sdim workers_Industrial_buf_a_tile, mapx
+							sdim workers_Industrial_buf_a_tile, mapsize
 							split workers_Industrial_buf_a_line, ", ", workers_Industrial_buf_a_tile
 					
-							repeat mapx
+							repeat mapsize
 								x = cnt
 								workers_Industrial(x,y) = int(workers_Industrial_buf_a_tile(x))
 								Total_workers_Industrial += workers_Industrial(x,y)
@@ -2017,10 +2018,10 @@
 						loop
 	
 					} else {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 	
-							repeat mapx
+							repeat mapsize
 								x = cnt
 	
 								workers_Industrial(x,y) = 0
@@ -2035,16 +2036,16 @@
 					workers_Farm_buf = get_chapter(load_mapdata, "workers_Farm(x,y)", " {", "}")
 	
 					if Saved_Version >= 78 {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 				
 							notesel workers_Farm_buf
 							noteget workers_Farm_buf_a_line, (y+1)
 				
-							sdim workers_Farm_buf_a_tile, mapx
+							sdim workers_Farm_buf_a_tile, mapsize
 							split workers_Farm_buf_a_line, ", ", workers_Farm_buf_a_tile
 					
-							repeat mapx
+							repeat mapsize
 								x = cnt
 								workers_Farm(x,y) = int(workers_Farm_buf_a_tile(x))
 								Total_workers_Farm += workers_Farm(x,y)
@@ -2053,10 +2054,10 @@
 						loop
 	
 					} else {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 	
-							repeat mapx
+							repeat mapsize
 								x = cnt
 	
 								workers_Farm(x,y) = 0
@@ -2071,16 +2072,16 @@
 					workers_Public_buf = get_chapter(load_mapdata, "workers_Public(x,y)", " {", "}")
 					
 					if Saved_Version >= 78 {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 				
 							notesel workers_Public_buf
 							noteget workers_Public_buf_a_line, (y+1)
 				
-							sdim workers_Public_buf_a_tile, mapx
+							sdim workers_Public_buf_a_tile, mapsize
 							split workers_Public_buf_a_line, ", ", workers_Public_buf_a_tile
 					
-							repeat mapx
+							repeat mapsize
 								x = cnt
 								workers_Public(x,y) = int(workers_Public_buf_a_tile(x))
 								Total_workers_Public += workers_Public(x,y)
@@ -2089,10 +2090,10 @@
 						loop
 	
 					} else {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 	
-							repeat mapx
+							repeat mapsize
 								x = cnt
 	
 								workers_Commercial(x,y) = 0
@@ -2107,16 +2108,16 @@
 					students_buf = get_chapter(load_mapdata, "students(x,y)", " {", "}")
 	
 					if Saved_Version >= 78 {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 				
 							notesel students_buf
 							noteget students_buf_a_line, (y+1)
 				
-							sdim students_buf_a_tile, mapx
+							sdim students_buf_a_tile, mapsize
 							split students_buf_a_line, ", ", students_buf_a_tile
 					
-							repeat mapx
+							repeat mapsize
 								x = cnt
 								students(x,y) = int(students_buf_a_tile(x))
 								Total_students += students(x,y)
@@ -2125,10 +2126,10 @@
 						loop
 	
 					} else {
-						repeat mapy
+						repeat mapsize
 							y = cnt
 	
-							repeat mapx
+							repeat mapsize
 								x = cnt
 	
 								workers_Public(x,y) = 0
@@ -2141,16 +2142,16 @@
 				if instr(load_mapdata, 0, "land_price(x,y)") != -1 {
 					land_price_buf = get_chapter(load_mapdata, "land_price(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel land_price_buf
 						noteget land_price_buf_a_line, (y+1)
 			
-						sdim land_price_buf_a_tile, mapx
+						sdim land_price_buf_a_tile, mapsize
 						split land_price_buf_a_line, ", ", land_price_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							land_price(x,y) = int(land_price_buf_a_tile(x))
 						loop
@@ -2159,9 +2160,9 @@
 	
 				} else {
 					//セーブデータにland_priceの情報がない場合は全て50万円/マスに設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								land_price(x,y) = 50
@@ -2173,16 +2174,16 @@
 				if instr(load_mapdata, 0, "crime_rate(x,y)") != -1 {
 					crime_rate_buf = get_chapter(load_mapdata, "crime_rate(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel crime_rate_buf
 						noteget crime_rate_buf_a_line, (y+1)
 			
-						sdim crime_rate_buf_a_tile, mapx
+						sdim crime_rate_buf_a_tile, mapsize
 						split crime_rate_buf_a_line, ", ", crime_rate_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							crime_rate(x,y) = int(crime_rate_buf_a_tile(x))
 						loop
@@ -2191,9 +2192,9 @@
 	
 				} else {
 					//セーブデータにcrime_rateの情報がない場合は全て0に設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								crime_rate(x,y) = 0
@@ -2205,16 +2206,16 @@
 				if instr(load_mapdata, 0, "education_rate(x,y)") != -1 {
 					education_rate_buf = get_chapter(load_mapdata, "education_rate(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel education_rate_buf
 						noteget education_rate_buf_a_line, (y+1)
 			
-						sdim education_rate_buf_a_tile, mapx
+						sdim education_rate_buf_a_tile, mapsize
 						split education_rate_buf_a_line, ", ", education_rate_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							education_rate(x,y) = int(education_rate_buf_a_tile(x))
 						loop
@@ -2223,9 +2224,9 @@
 	
 				} else {
 					//セーブデータにeducation_rateの情報がない場合は全て0に設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								education_rate(x,y) = 0
@@ -2237,16 +2238,16 @@
 				if instr(load_mapdata, 0, "happiness(x,y)") != -1 {
 					happiness_buf = get_chapter(load_mapdata, "happiness(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel happiness_buf
 						noteget happiness_buf_a_line, (y+1)
 			
-						sdim happiness_buf_a_tile, mapx
+						sdim happiness_buf_a_tile, mapsize
 						split happiness_buf_a_line, ", ", happiness_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							happiness(x,y) = int(happiness_buf_a_tile(x))
 						loop
@@ -2255,9 +2256,9 @@
 	
 				} else {
 					//セーブデータにhappinessの情報がない場合は全て0に設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								happiness(x,y) = 0
@@ -2269,16 +2270,16 @@
 				if instr(load_mapdata, 0, "crop(x,y)") != -1 {
 					crop_buf = get_chapter(load_mapdata, "crop(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 					y = cnt
 		
 					notesel crop_buf
 					noteget crop_buf_a_line, (y+1)
 		
-					sdim crop_buf_a_tile, mapx
+					sdim crop_buf_a_tile, mapsize
 					split crop_buf_a_line, ", ", crop_buf_a_tile
 			
-					repeat mapx
+					repeat mapsize
 						x = cnt
 						crop(x,y) = crop_buf_a_tile(x)
 					loop
@@ -2287,9 +2288,9 @@
 	
 				} else {
 					//セーブデータにcropの情報がない場合は全て50万円/マスに設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								crop(x,y) = "none"
@@ -2301,16 +2302,16 @@
 				if instr(load_mapdata, 0, "crop_amount(x,y)") != -1 {
 					crop_amount_buf = get_chapter(load_mapdata, "crop_amount(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel crop_amount_buf
 						noteget crop_amount_buf_a_line, (y+1)
 			
-						sdim crop_amount_buf_a_tile, mapx
+						sdim crop_amount_buf_a_tile, mapsize
 						split crop_amount_buf_a_line, ", ", crop_amount_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							crop_amount(x,y) = int(crop_amount_buf_a_tile(x))
 						loop
@@ -2319,9 +2320,9 @@
 	
 				} else {
 					//セーブデータにcrop_amountの情報がない場合は全て0に設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								crop_amount(x,y) = 0
@@ -2333,16 +2334,16 @@
 				if instr(load_mapdata, 0, "age(x,y)") != -1 {
 					age_buf = get_chapter(load_mapdata, "age(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel age_buf
 						noteget age_buf_a_line, (y+1)
 			
-						sdim age_buf_a_tile, mapx
+						sdim age_buf_a_tile, mapsize
 						split age_buf_a_line, ", ", age_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							age(x,y) = age_buf_a_tile(x)
 						loop
@@ -2351,9 +2352,9 @@
 	
 				} else {
 					//セーブデータにageの情報がない場合はランダムに決定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								repeat residents(x,y)
@@ -2373,16 +2374,16 @@
 				if instr(load_mapdata, 0, "gender(x,y)") != -1 {
 					gender_buf = get_chapter(load_mapdata, "gender(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel gender_buf
 						noteget gender_buf_a_line, (y+1)
 			
-						sdim gender_buf_a_tile, mapx
+						sdim gender_buf_a_tile, mapsize
 						split gender_buf_a_line, ", ", gender_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							gender(x,y) = gender_buf_a_tile(x)
 						loop
@@ -2391,9 +2392,9 @@
 	
 				} else {
 					//セーブデータにgenderの情報がない場合はランダムに決定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								repeat residents(x,y)
@@ -2415,16 +2416,16 @@
 				if instr(load_mapdata, 0, "workplace(x,y)") != -1 {
 					workplace_buf = get_chapter(load_mapdata, "workplace(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel workplace_buf
 						noteget workplace_buf_a_line, (y+1)
 			
-						sdim workplace_buf_a_tile, mapx
+						sdim workplace_buf_a_tile, mapsize
 						split workplace_buf_a_line, ", ", workplace_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							workplace(x,y) = workplace_buf_a_tile(x)
 						loop
@@ -2433,9 +2434,9 @@
 	
 				} else {
 					//セーブデータにworkplaceの情報がない場合
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								workplace_tmp = ""
@@ -2453,16 +2454,16 @@
 				if instr(load_mapdata, 0, "school(x,y)") != -1 {
 					school_buf = get_chapter(load_mapdata, "school(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel school_buf
 						noteget school_buf_a_line, (y+1)
 			
-						sdim school_buf_a_tile, mapx
+						sdim school_buf_a_tile, mapsize
 						split school_buf_a_line, ", ", school_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							school(x,y) = school_buf_a_tile(x)
 						loop
@@ -2471,9 +2472,9 @@
 	
 				} else {
 					//セーブデータにschoolの情報がない場合
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								school_tmp = ""
@@ -2491,16 +2492,16 @@
 				if instr(load_mapdata, 0, "reservation(x,y)") != -1 {
 					reservation_buf = get_chapter(load_mapdata, "reservation(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel reservation_buf
 						noteget reservation_buf_a_line, (y+1)
 			
-						sdim reservation_buf_a_tile, mapx
+						sdim reservation_buf_a_tile, mapsize
 						split reservation_buf_a_line, ", ", reservation_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							reservation(x,y) = reservation_buf_a_tile(x)
 						loop
@@ -2509,9 +2510,9 @@
 	
 				} else {
 					//セーブデータにreservationの情報がない場合は全て0に設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								reservation(x,y) = "none"
@@ -2523,16 +2524,16 @@
 				if instr(load_mapdata, 0, "original_name(x,y)") != -1 {
 					original_name_buf = get_chapter(load_mapdata, "original_name(x,y)", " {", "}")
 				
-					repeat mapy
+					repeat mapsize
 						y = cnt
 			
 						notesel original_name_buf
 						noteget original_name_buf_a_line, (y+1)
 			
-						sdim original_name_buf_a_tile, mapx
+						sdim original_name_buf_a_tile, mapsize
 						split original_name_buf_a_line, ", ", original_name_buf_a_tile
 				
-						repeat mapx
+						repeat mapsize
 							x = cnt
 							original_name(x,y) = original_name_buf_a_tile(x)
 						loop
@@ -2541,9 +2542,9 @@
 	
 				} else {
 					//セーブデータにoriginal_nameの情報がない場合は全て0に設定
-						repeat mapx
+						repeat mapsize
 							x = cnt
-							repeat mapy
+							repeat mapsize
 								y = cnt
 	
 								original_name(x,y) = ""
@@ -2553,9 +2554,9 @@
 	
 	
 			//総労働者数を読み込み
-				repeat mapx
+				repeat mapsize
 					x = cnt
-					repeat mapy
+					repeat mapsize
 						y = cnt
 	
 						sdim workplace_tmp, 8, residents(x,y)
@@ -2631,8 +2632,8 @@
 	randomize
 	
 	repeat
-		dim trout_build, total_addons, (mapx*mapy)
-		dim done_build, 6, mapx, mapy
+		dim trout_build, total_addons, (mapsize*mapsize)
+		dim done_build, 6, mapsize, mapsize
 	
 		main_cnt ++
 
@@ -2706,7 +2707,8 @@
 		/*マップ描写*/
 			redraw 0
 			color 0, 0, 0 : boxf
-	
+
+		/*マウス座標取得*/
 			if mousex != before_mousex or mousey != before_mousey or camx != before_camx or camy != before_camy {
 				mousex_=mousex+camx-(chip_size/2)	//mx,myにマウス座標取得
 				mousey_=mousey+camy+16
@@ -2765,8 +2767,8 @@
 				left_bottom_y_ = windowy+camy
 				left_bottom_y = (-left_bottom_x_+left_bottom_y_*2)/chip_size
 	
-				if left_bottom_y >= mapy {
-					left_bottom_y = mapy-1
+				if left_bottom_y >= mapsize {
+					left_bottom_y = mapsize-1
 				}
 		
 			//右上のy座標
@@ -2783,8 +2785,8 @@
 				right_bottom_y_ = windowy+camy
 				right_bottom_x = (right_bottom_y_+right_bottom_x_/2)/(chip_size/2)
 	
-				if right_bottom_x >= mapx {
-					right_bottom_x = mapx-1
+				if right_bottom_x >= mapsize {
+					right_bottom_x = mapsize-1
 				}
 				
 	
@@ -2797,130 +2799,155 @@
 		}
 	
 		//各マスの値を調節
-		ny = 0
-	
-		repeat mapy
-			ny = cnt
-	
-			//周囲のオブジェクトの番号を取得
-				left_chip = ""
-				top_chip = ""
-				bottom_chip = ""
-				right_chip = ""
-					
-				if nx > 0 {
-					left_chip = category(nx-1, ny)
-				}
-				if ny > 0 {
-					top_chip = category(nx, ny-1)
-				}
-				if mapy-1 > ny {
-					bottom_chip = category(nx, ny+1)
-				}
-				if mapx-1 > nx {
-					right_chip = category(nx+1, ny)
-				}
+		if cnt \ 2 = 0 {
+			ny = 0
 		
-				left_chip_2 = ""
-				top_chip_2 = ""
-				bottom_chip_2 = ""
-				right_chip_2 = ""
+			repeat mapsize
+				ny = cnt
+		
+				//周囲のオブジェクトの番号を取得
+					left_chip = ""
+					top_chip = ""
+					bottom_chip = ""
+					right_chip = ""
+						
+					if nx > 0 {
+						left_chip = category(nx-1, ny)
+					}
+					if ny > 0 {
+						top_chip = category(nx, ny-1)
+					}
+					if mapsize-1 > ny {
+						bottom_chip = category(nx, ny+1)
+					}
+					if mapsize-1 > nx {
+						right_chip = category(nx+1, ny)
+					}
 			
-				if nx > 0 {
-					left_chip_2 = category_2(nx-1, ny)
-				}
-				if ny > 0 {
-					top_chip_2 = category_2(nx, ny-1)
-				}
-				if mapy-1 > ny {
-					bottom_chip_2 = category_2(nx, ny+1)
-				}
-				if mapx-1 > nx {
-					right_chip_2 = category_2(nx+1, ny)
-				}
-	
-			//道路・線路の向きを調節
-				category_buf = category(nx,ny)
-				category_2_buf = category_2(nx,ny)
-							
-				x = nx : y = ny
-	
-				put_addon_name_tmp = put_addon_name
-							
-				if category_buf = "road" {
-					gosub *adjustment_road
-				}
-				if category_buf = "railroad" or category_buf = "station" {
-					gosub *adjustment_railroad
-				}
-
-			//幸福度の平均値を取得するための加算
-				if nx = 0 and ny = 0 {
-					happiness_ave_tmp = 0
-					happiness_ave_cnt = 0
-				}
-	
-				if category(nx,ny) != "tile" and category(nx,ny) != "road" and category(nx,ny) != "railroad" {	; タイル（更地）や道路、線路などは含めない
-					happiness_ave_tmp += happiness(nx,ny)
-					happiness_ave_cnt ++
-				}
-	
-				if nx = mapx - 1 and ny = mapy - 1 and happiness_ave_cnt != 0 {
-					happiness_ave = happiness_ave_tmp / happiness_ave_cnt
-					gosub *get_approval_rate	; 支持率を取得
-				}
-	
-			//幸福度の更新
-				gosub *get_happiness_level
-
-			//予約地区に建物を建設
-				if reservation(nx,ny) != "none" and rnd(10) = 0 {
-					gosub *Build_on_Reservation_area
-				}
-
-			//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
-				if name(nx,ny) = "tile_greenfield" and obj_type(nx,ny) != tile_greenfield_null_type_buf {
-					obj_type(nx,ny) = tile_greenfield_null_type_buf
-				}
-	
-			//値を元に戻す
-				put_addon_name = put_addon_name_tmp
-	
-			//nx, nyを増加
-				ny ++
-	
-				if ny >= mapy {
-					nx++
-				}
-				if nx >= mapx {
-					nx = 0
-					ny = 0
-				}
-		loop
-	
-		repeat mapx
-			x = cnt
+					left_chip_2 = ""
+					top_chip_2 = ""
+					bottom_chip_2 = ""
+					right_chip_2 = ""
 				
-			repeat mapy
+					if nx > 0 {
+						left_chip_2 = category_2(nx-1, ny)
+					}
+					if ny > 0 {
+						top_chip_2 = category_2(nx, ny-1)
+					}
+					if mapsize-1 > ny {
+						bottom_chip_2 = category_2(nx, ny+1)
+					}
+					if mapsize-1 > nx {
+						right_chip_2 = category_2(nx+1, ny)
+					}
+		
+				//道路・線路の向きを調節
+					category_buf = category(nx,ny)
+					category_2_buf = category_2(nx,ny)
+								
+					x = nx : y = ny
+		
+					put_addon_name_tmp = put_addon_name
+								
+					if category_buf = "road" {
+						gosub *adjustment_road
+					}
+					if category_buf = "railroad" or category_buf = "station" {
+						gosub *adjustment_railroad
+					}
+	
+				//幸福度の平均値を取得するための加算
+					if nx = 0 and ny = 0 {
+						happiness_ave_tmp = 0
+						happiness_ave_cnt = 0
+					}
+		
+					if category(nx,ny) != "tile" and category(nx,ny) != "road" and category(nx,ny) != "railroad" {	; タイル（更地）や道路、線路などは含めない
+						happiness_ave_tmp += happiness(nx,ny)
+						happiness_ave_cnt ++
+					}
+		
+					if nx = mapsize - 1 and ny = mapsize - 1 and happiness_ave_cnt != 0 {
+						happiness_ave = happiness_ave_tmp / happiness_ave_cnt
+						gosub *get_approval_rate	; 支持率を取得
+					}
+		
+				//幸福度の更新
+					gosub *get_happiness_level
+	
+				//予約地区に建物を建設
+					if reservation(nx,ny) != "none" and rnd(10) = 0 {
+						gosub *Build_on_Reservation_area
+					}
+	
+				//name(x,y)が"tile_greenfield"にも関わらずobj_type(x,y)が0以外の場合（黒いマス防止）
+					if name(nx,ny) = "tile_greenfield" and obj_type(nx,ny) != tile_greenfield_null_type_buf {
+						obj_type(nx,ny) = tile_greenfield_null_type_buf
+					}
+		
+				//値を元に戻す
+					put_addon_name = put_addon_name_tmp
+		
+				//nx, nyを増加
+					ny ++
+		
+					if ny >= mapsize {
+						nx++
+					}
+					if nx >= mapsize {
+						nx = 0
+						ny = 0
+					}
+			loop
+		}
+
+		if time_Hour = 0 and time_Minutes = 0 {
+			repeat mapsize
 				y = cnt
 
-				//マウスのどのボタンが押されているか取得
-					mouse_left = 0
-					mouse_right = 0
-					
-					getkey mouse_left, 1
-					getkey mouse_right, 2
-	
-					if mouse_left = 1 or mouse_right = 1 {
-						gosub *main_onclick
-					}
+				repeat mapsize
+					x = cnt
 
-				//人口・需要度変動
+					//人口・需要度変動
 					gosub *fluctuation
-	
-				if (x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y) {
-					continue
-				}
+				loop
+			loop
+		}
+
+		qvvw1=mx-32
+		qvvw2=mx+32
+		qvvw3=my-32
+		qvvw4=my+32
+
+		x=qvvw1
+		y=qvvw3
+
+		if x < 0 {
+			x = 0
+		}
+		if y < 0 {
+			y = 0
+		}
+
+		if qvvw1<-64{
+			goto *skip2
+		}
+
+		if qvvw2>mapsize+64{
+			goto *skip2
+		}
+
+		if qvvw3<-64{
+			goto *skip2
+		}
+
+		if qvvw4>mapsize+64{
+			goto *skip2
+		}
+				
+
+		repeat
 	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 					/*
@@ -2930,9 +2957,27 @@
 						color : boxf 0, 0, 80, 60
 						pos 0, 0 : color 255, 255, 255 : mes "x:"+x+", y:"+y+"\nmx:"+mx+", my:"+my+"\nltx:"+left_top_x+", lby:"+left_bottom_y+"\nrbx:"+right_bottom_x+", rty:"+right_top_y+""
 					*/
-	
+
 					//クォータービューの座標を画面上の座標に変換
 						qv2 x, y
+
+						if x<0{
+							goto *skip1
+						}
+			
+						if y<0{
+							goto *skip1
+						}
+			
+						if x=mapsize{
+							x=qvvw1
+							y+
+							goto *skip1
+						}
+			
+						if y=mapsize{
+							break
+						}
 	
 					//オブジェクトのバッファ番号、オブジェクトの左上の座標（atlx）、左下の座標（atly）、右上の座標（abrx）、右下の座標（abry）、サイズ（sizex, sizey）を取得
 						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を要する場合
@@ -3042,25 +3087,32 @@
 						} else {
 							celput buffer_number(x,y), obj_dire(x,y)
 						}
-	
-						/*
-						macro1_t = macro1
-						macro2_t = macro2
-						px_t = px
-						py_t = py
-						sizex_t = sizex
-						sizey_t = sizey
-
-						if x = mx and y = my {
-							pos 0, 0 : color 255, 255, 255
-							mes "macro2 = "+macro2+" py = "+py_t+" sizey = "+sizey_t+""
-						}*/
 				}
+
+	*skip1
+			//マウスのどのボタンが押されているか取得
+				mouse_left = 0
+				mouse_right = 0
 					
-			loop
-					
-		loop
+				getkey mouse_left, 1
+				getkey mouse_right, 2
 	
+				if mouse_left = 1 or mouse_right = 1 {
+					gosub *main_onclick
+				}
+				
+			x+=1
+
+			if x>qvvw2{
+				x=qvvw1
+				y+=1
+			}
+
+			if y>qvvw4:break
+
+		loop
+
+	*skip2
 		//時間帯に応じて明るさを調節
 			if Set_Dark_on_Night = 1 {
 				//夜間
@@ -3117,27 +3169,7 @@
 						pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32	; 個別の建物の場合
 					}
 				}
-				
-			} else {
-				mx = -1
-				my = -1
 			}
-	
-		
-			;if mx >= 0 and mx < 100 and my >= 0 and my < 100 {
-			;	title "FPS:"+fps+" "+clicked_mx+", "+clicked_my+""
-
-				;if cnt \ 10 = 0 {
-					;title "FPS "+fps+" "+obj_tiles_x(mx,my)+","+obj_tiles_y(mx,my)+" pos(x,y) = "+(macro1_t + px_t)+", "+(macro2_t - sizey_t + 1 + py_t)+" obj_dire(x,y) = "+obj_dire(mx,my)+" macro2 = "+macro2_t+" sizey = "+sizey_t+" py = "+py_t+""
-					;title ""+mx+","+my+" buffer_number="+buffer_number(mx,my)+" atlx="+atlx+" addon_size_x="+sizex+" atly="+atly+" abry="+abry+" addon_size_y="+sizey+" image_number="+image_number+" obj_dire="+obj_dire(mx,my)+" py="+py+""
-				;}
-
-				;if obj_use_tiles_y(mx,my) != 0 {
-					;pos 0, 0 : celput (10 * buffer_number(mx,my)) + obj_dire(mx,my), obj_tiles_y(mx,my)
-				;} else {
-					;pos 0, 0 : celput buffer_number(mx,my), obj_dire(mx,my)
-				;}
-			;}
 		
 	
 		//メニューを開いているときはstat_mode = "type"にする
@@ -3154,9 +3186,9 @@
 		//stat_mode = "type"の場合は地区を示す色を表示する
 			if stat_mode = "type" {
 		
-				repeat mapx
+				repeat mapsize
 					x = cnt
-					repeat mapy
+					repeat mapsize
 						y = cnt
 	
 						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
@@ -3202,9 +3234,9 @@
 		//stat_mode = "land_price"の場合は地価を示す色を表示する
 			if stat_mode = "land_price" {
 		
-				repeat mapx
+				repeat mapsize
 					x = cnt
-					repeat mapy
+					repeat mapsize
 						y = cnt
 	
 						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
@@ -3259,9 +3291,9 @@
 	
 		//stat_mode = "crime_rate"の場合は犯罪率を示す色を表示する
 			if stat_mode = "crime_rate" {
-				repeat mapx
+				repeat mapsize
 					x = cnt
-					repeat mapy
+					repeat mapsize
 						y = cnt
 	
 						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
@@ -3317,9 +3349,9 @@
 		//stat_mode = "education_rate"の場合は教育度を示す色を表示する
 			if stat_mode = "education_rate" {
 		
-				repeat mapx
+				repeat mapsize
 					x = cnt
-					repeat mapy
+					repeat mapsize
 						y = cnt
 	
 						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
@@ -3375,9 +3407,9 @@
 		//stat_mode = "hsppiness"の場合は幸福度を示す色を表示する
 			if stat_mode = "happiness" {
 		
-				repeat mapx
+				repeat mapsize
 					x = cnt
-					repeat mapy
+					repeat mapsize
 						y = cnt
 	
 						if x < left_top_x or x > right_bottom_x or y < right_top_y or y > left_bottom_y {
@@ -3683,7 +3715,7 @@
 						cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
 					
 			redraw 1
-			await 30
+			await 16
 			c+=16
 	loop
 	
@@ -4553,7 +4585,7 @@
 			}
 	
 		//カーソルがマップ外にある場合はreturn
-			if from_Build_on_Reservation_area = 0 and (mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1) {
+			if from_Build_on_Reservation_area = 0 and (mx < 0 or my < 0 or mx > mapsize-1 or my > mapsize-1) {
 				return
 			}
 			
@@ -4561,9 +4593,9 @@
 			if addon_build_limit(addon_num_buf) >= 1 and cursor_mode != "put_Road" and instr(put_addon_name, 0, "Area : ") = -1 {
 				s = 0
 				
-				repeat mapx
+				repeat mapsize
 					sx = cnt
-					repeat mapy
+					repeat mapsize
 						sy = cnt
 	
 						if map(sx, sy) = addon_num_buf {
@@ -4587,7 +4619,7 @@
 				bottom_chip = ""
 				right_chip = ""
 				
-				if mx-1 >= 0 and my-1 >= 0 and mx+1 < mapx and my+1 < mapy {
+				if mx-1 >= 0 and my-1 >= 0 and mx+1 < mapsize and my+1 < mapsize {
 					left_chip = category(mx-1, my)
 					top_chip = category(mx, my-1)
 					bottom_chip = category(mx+1, my)
@@ -4600,10 +4632,10 @@
 					if my-1 < 0 {
 						top_chip = ""
 					}
-					if mx+1 > mapx {
+					if mx+1 > mapsize {
 						bottom_chip = ""
 					}
-					if my+1 > mapy {
+					if my+1 > mapsize {
 						right_chip = ""
 					}
 				}
@@ -4613,7 +4645,7 @@
 				bottom_chip_2 = ""
 				right_chip_2 = ""
 				
-				if mx-1 >= 0 and my-1 >= 0 and mx+1 < mapx and my+1 < mapy {
+				if mx-1 >= 0 and my-1 >= 0 and mx+1 < mapsize and my+1 < mapsize {
 					left_chip_2 = category_2(mx-1, my)
 					top_chip_2 = category_2(mx, my-1)
 					bottom_chip_2 = category_2(mx, my+1)
@@ -4626,10 +4658,10 @@
 					if my-1 < 0 {
 						top_chip_2 = ""
 					}
-					if mx+1 > mapx {
+					if mx+1 > mapsize {
 						bottom_chip_2 = ""
 					}
-					if my+1 > mapy {
+					if my+1 > mapsize {
 						right_chip_2 = ""
 					}
 				}
@@ -4732,7 +4764,7 @@
 								for round, 1, addon_land_price_influence_grid__tmp+1, 1
 									
 									repeat (round*2-1)
-										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my+round-1>0 and my+round-1<mapy {
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize and my+round-1>0 and my+round-1<mapsize {
 											if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
 												land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx+cnt-(round-1), my+round-1) = 1
@@ -4741,7 +4773,7 @@
 									loop
 									
 									repeat (round*2-1)
-										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my-round+1>0 and my-round+1<mapy {
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize and my-round+1>0 and my-round+1<mapsize {
 											if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
 												land_price(mx+cnt-(round-1),my-round+1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx+cnt-(round-1), my-round+1) = 1
@@ -4750,7 +4782,7 @@
 									loop
 	
 									repeat (round*2-1)
-										if mx+round-1>0 and mx+round-1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+										if mx+round-1>0 and mx+round-1<mapsize and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize {
 											if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
 												land_price(mx+round-1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx+round-1, my+cnt-(round-1)) = 1
@@ -4759,7 +4791,7 @@
 									loop
 	
 									repeat (round*2-1)
-										if mx-round+1>0 and mx-round+1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+										if mx-round+1>0 and mx-round+1<mapsize and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize {
 											if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
 												land_price(mx-round+1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx-round+1, my+cnt-(round-1)) = 1
@@ -4780,7 +4812,7 @@
 									
 									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my+round-1) >= 0 and (my+round-1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
 													crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+cnt-(round-1),my+round-1) > 100 {
@@ -4795,7 +4827,7 @@
 										loop
 										
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my-round+1) >= 0 and (my-round+1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
 													crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+cnt-(round-1),my-round+1) > 100 {
@@ -4810,7 +4842,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+round-1,my+cnt-(round-1)) > 100 {
@@ -4825,7 +4857,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx-round+1,my+cnt-(round-1)) > 100 {
@@ -4909,7 +4941,7 @@
 									now_direction_num = 1
 								}
 							}
-							if my < mapy {
+							if my < mapsize {
 								if category(mx, my+1) = "road" and cannot_build(2) = 0 {
 									around_road_exist += 1
 		
@@ -4919,7 +4951,7 @@
 									now_direction_num = 2
 								}
 							}
-							if mx < mapx {
+							if mx < mapsize {
 								if category(mx+1, my) = "road" and cannot_build(3) = 0 {
 									around_road_exist += 1
 		
@@ -5265,7 +5297,7 @@
 								for round, 1, addon_land_price_influence_grid__tmp+1, 1
 									
 									repeat (round*2-1)
-										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my+round-1>0 and my+round-1<mapy {
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize and my+round-1>0 and my+round-1<mapsize {
 											if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
 												land_price(mx+cnt-(round-1),my+round-1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx+cnt-(round-1), my+round-1) = 1
@@ -5274,7 +5306,7 @@
 									loop
 									
 									repeat (round*2-1)
-										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my-round+1>0 and my-round+1<mapy {
+										if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize and my-round+1>0 and my-round+1<mapsize {
 											if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
 												land_price(mx+cnt-(round-1),my-round+1) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx+cnt-(round-1), my-round+1) = 1
@@ -5283,7 +5315,7 @@
 									loop
 	
 									repeat (round*2-1)
-										if mx+round-1>0 and mx+round-1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+										if mx+round-1>0 and mx+round-1<mapsize and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize {
 											if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
 												land_price(mx+round-1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx+round-1, my+cnt-(round-1)) = 1
@@ -5292,7 +5324,7 @@
 									loop
 	
 									repeat (round*2-1)
-										if mx-round+1>0 and mx-round+1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+										if mx-round+1>0 and mx-round+1<mapsize and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize {
 											if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
 												land_price(mx-round+1,my+cnt-(round-1)) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 												done_build(2, mx-round+1, my+cnt-(round-1)) = 1
@@ -5313,7 +5345,7 @@
 									
 									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my+round-1) >= 0 and (my+round-1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
 													crime_rate(mx+cnt-(round-1),my+round-1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+cnt-(round-1),my+round-1) > 100 {
@@ -5328,7 +5360,7 @@
 										loop
 										
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my-round+1) >= 0 and (my-round+1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
 													crime_rate(mx+cnt-(round-1),my-round+1) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+cnt-(round-1),my-round+1) > 100 {
@@ -5343,7 +5375,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx+round-1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+round-1,my+cnt-(round-1)) > 100 {
@@ -5358,7 +5390,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx-round+1,my+cnt-(round-1)) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx-round+1,my+cnt-(round-1)) > 100 {
@@ -5387,7 +5419,7 @@
 									
 									for round, 1, addon_education_rate_influence_grid__tmp+1, 1
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my+round-1) >= 0 and (my+round-1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
 													education_rate(mx+cnt-(round-1),my+round-1) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx+cnt-(round-1), my+round-1) = 1
@@ -5396,7 +5428,7 @@
 										loop
 										
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my-round+1) >= 0 and (my-round+1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
 													education_rate(mx+cnt-(round-1),my-round+1) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx+cnt-(round-1), my-round+1) = 1
@@ -5405,7 +5437,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
 													education_rate(mx+round-1,my+cnt-(round-1)) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
@@ -5414,7 +5446,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
 													education_rate(mx-round+1,my+cnt-(round-1)) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
@@ -5476,7 +5508,7 @@
 *delete_obj
 		//撤去
 			//カーソルがマップ外にある場合はreturn
-				if mx < 0 or my < 0 or mx > mapx-1 or my > mapy-1 {
+				if mx < 0 or my < 0 or mx > mapsize-1 or my > mapsize-1 {
 					return
 				}
 			
@@ -5599,7 +5631,7 @@
 									for round, 1, addon_land_price_influence_grid__tmp+1, 1
 										
 										repeat (round*2-1)
-											if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my+round-1>0 and my+round-1<mapy {
+											if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize and my+round-1>0 and my+round-1<mapsize {
 												if done_build(2, mx+cnt-(round-1), my+round-1) = 0 {
 													land_price(mx+cnt-(round-1),my+round-1) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 													done_build(2, mx+cnt-(round-1), my+round-1) = 1
@@ -5608,7 +5640,7 @@
 										loop
 										
 										repeat (round*2-1)
-											if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapx and my-round+1>0 and my-round+1<mapy {
+											if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize and my-round+1>0 and my-round+1<mapsize {
 												if done_build(2, mx+cnt-(round-1), my-round+1) = 0 {
 													land_price(mx+cnt-(round-1),my-round+1) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 													done_build(2, mx+cnt-(round-1), my-round+1) = 1
@@ -5617,7 +5649,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if mx+round-1>0 and mx+round-1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+											if mx+round-1>0 and mx+round-1<mapsize and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize {
 												if done_build(2, mx+round-1, my+cnt-(round-1)) = 0 {
 													land_price(mx+round-1,my+cnt-(round-1)) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 													done_build(2, mx+round-1, my+cnt-(round-1)) = 1
@@ -5626,7 +5658,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if mx-round+1>0 and mx-round+1<mapx and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapy {
+											if mx-round+1>0 and mx-round+1<mapsize and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize {
 												if done_build(2, mx-round+1, my+cnt-(round-1)) = 0 {
 													land_price(mx-round+1,my+cnt-(round-1)) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 													done_build(2, mx-round+1, my+cnt-(round-1)) = 1
@@ -5648,7 +5680,7 @@
 									
 									for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my+round-1) >= 0 and (my+round-1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
 													crime_rate(mx+cnt-(round-1),my+round-1) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+cnt-(round-1),my+round-1) > 100 {
@@ -5663,7 +5695,7 @@
 										loop
 										
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my-round+1) >= 0 and (my-round+1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
 													crime_rate(mx+cnt-(round-1),my-round+1) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+cnt-(round-1),my-round+1) > 100 {
@@ -5678,7 +5710,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx+round-1,my+cnt-(round-1)) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx+round-1,my+cnt-(round-1)) > 100 {
@@ -5693,7 +5725,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
 													crime_rate(mx-round+1,my+cnt-(round-1)) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 													if crime_rate(mx-round+1,my+cnt-(round-1)) > 100 {
@@ -5722,7 +5754,7 @@
 									
 									for round, 1, addon_education_rate_influence_grid__tmp+1, 1
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my+round-1) >= 0 and (my+round-1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my+round-1) >= 0 and (my+round-1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my+round-1) = 0 {
 													education_rate(mx+cnt-(round-1),my+round-1) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx+cnt-(round-1), my+round-1) = 1
@@ -5731,7 +5763,7 @@
 										loop
 										
 										repeat (round*2-1)
-											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapx and (my-round+1) >= 0 and (my-round+1) <= mapx {
+											if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize and (my-round+1) >= 0 and (my-round+1) <= mapsize {
 												if done_build(5, mx+cnt-(round-1), my-round+1) = 0 {
 													education_rate(mx+cnt-(round-1),my-round+1) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx+cnt-(round-1), my-round+1) = 1
@@ -5740,7 +5772,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx+round-1) >= 0 and (mx+round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx+round-1) >= 0 and (mx+round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx+round-1, my+cnt-(round-1)) = 0 {
 													education_rate(mx+round-1,my+cnt-(round-1)) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx+round-1, my+cnt-(round-1)) = 1
@@ -5749,7 +5781,7 @@
 										loop
 		
 										repeat (round*2-1)
-											if (mx-round-1) >= 0 and (mx-round-1) <= mapx and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapy {
+											if (mx-round-1) >= 0 and (mx-round-1) <= mapsize and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize {
 												if done_build(5, mx-round+1, my+cnt-(round-1)) = 0 {
 													education_rate(mx-round+1,my+cnt-(round-1)) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 													done_build(5, mx-round+1, my+cnt-(round-1)) = 1
@@ -5826,7 +5858,7 @@
 				}
 	
 				//マップの端なら直線道路に変更
-					/*if x = mapx {
+					/*if x = mapsize {
 						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 					}*/
@@ -5842,7 +5874,7 @@
 				}
 	
 				//マップの端なら直線道路に変更
-					/*if y = mapy {
+					/*if y = mapsize {
 						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 					}*/
@@ -6010,7 +6042,7 @@
 					}
 					
 					//マップの端なら直線道路に変更
-						/*if x = mapx {
+						/*if x = mapsize {
 							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 						}*/
@@ -6026,7 +6058,7 @@
 					}
 		
 					//マップの端なら直線道路に変更
-						/*if y = mapy {
+						/*if y = mapsize {
 							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
 							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 						}*/
@@ -6422,9 +6454,9 @@
 				if addon_build_limit(addon_num_buf) >= 1 {
 					s = 0
 							
-					repeat mapx
+					repeat mapsize
 						sx = cnt
-						repeat mapy
+						repeat mapsize
 							sy = cnt
 		
 							if map(sx, sy) = addon_num_buf {
@@ -6688,13 +6720,8 @@
 *fluctuation
 	//人口・労働人口・需要度などを増減
 	
-		//毎日午前0時に増減
-			if time_Hour != 0 or time_Minutes != 0 {
-				return
-			}
-	
-		//その日の最初にジャンプした場合は、*fluctuation__get_firstにジャンプ
-			if nx = 0 and y = 0 {
+		//nx = 0 and ny = 0の場合は、*fluctuation__get_firstにジャンプ
+			if x = 0 and y = 0 {
 				gosub *fluctuation__get_first
 			}
 	
@@ -6708,9 +6735,9 @@
 	
 		//住民数を変化させるかどうかを決める
 			if residents(x,y) = 0 {
-				rtmp = rnd(2)
-			} else {
 				rtmp = rnd(10)
+			} else {
+				rtmp = rnd(100)
 			}
 	
 		//人口の増減
@@ -6911,10 +6938,10 @@
 			gx = 0 : gy = 0
 			gi = 0
 			
-			repeat mapx
+			repeat mapsize
 				gx = cnt
 	
-				repeat mapy
+				repeat mapsize
 					gy = cnt
 					
 					if category(gx,gy) = "commercial" or category(gx,gy) = "office" or category(gx,gy) = "industrial" or category(gx,gy) = "farm" or category(gx,gy) = "public" {
@@ -6945,10 +6972,10 @@
 			gi_h = 0
 			gi_u = 0
 			
-			repeat mapx
+			repeat mapsize
 				gx = cnt
 	
-				repeat mapy
+				repeat mapsize
 					gy = cnt
 					
 					if category_3(gx,gy) = "elementary-school" or category_3(gx,gy) = "junior-high-school" or category_3(gx,gy) = "high-school" or category_3(gx,gy) = "university" {
@@ -7020,7 +7047,7 @@
 					Total_workers_Public += 1
 				}
 	
-				if nx = mapx and y = mapy {
+				if nx = mapsize and y = mapsize {
 					workers_zero = 0
 				}
 			}
@@ -7283,10 +7310,10 @@
 		gender_M = 0
 		gender_F = 0
 		
-		repeat mapx
+		repeat mapsize
 			gx = cnt
 		
-			repeat mapy
+			repeat mapsize
 				gy = cnt
 	
 				if gender(gx,gy) != "" and residents(gx,gy) > 0 {
@@ -7322,7 +7349,7 @@
 	
 	clicked_before = clicked
 
-	if (clicked_mx < 0 or clicked_mx > mapx or clicked_my < 0 or clicked_my > mapy) or showing_detail = 0 {
+	if (clicked_mx < 0 or clicked_mx > mapsize or clicked_my < 0 or clicked_my > mapsize) or showing_detail = 0 {
 		return
 	}
 	
@@ -7546,9 +7573,9 @@
 		mci "play Cities-Box_2"
 	}
 	
-	repeat mapx
+	repeat mapsize
 		rx = cnt
-		repeat mapy
+		repeat mapsize
 			ry = cnt
 	
 			if category_2(rx,ry) = "police_station" {
@@ -7794,9 +7821,9 @@
 	
 *pay_budget
 	//毎月1日になったら資金から予算分を引いて税金分を増やす
-		repeat mapx
+		repeat mapsize
 			rx = cnt
-			repeat mapy
+			repeat mapsize
 				ry = cnt
 		
 				if category_2(rx,ry) = "police_station" {
@@ -8595,8 +8622,8 @@
 			await 2
 	
 		//マップサイズ
-			noteadd "mapx = "+mapx+";", -1
-			noteadd "mapy = "+mapy+";", -1
+			noteadd "mapsize = "+mapsize+";", -1
+			noteadd "mapsize = "+mapsize+";", -1
 	
 		//空白
 			noteadd " ", -1
@@ -8650,12 +8677,12 @@
 		//name(x,y)
 			noteadd "name(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 					
 					if cnt = 0 {
@@ -8674,12 +8701,12 @@
 		//category(x,y)
 			noteadd "category(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 					
 					if cnt = 0 {
@@ -8698,12 +8725,12 @@
 		//category_2(x,y)
 			noteadd "category_2(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 					
 					if cnt = 0 {
@@ -8722,12 +8749,12 @@
 		//category_3(x,y)
 			noteadd "category_3(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 					
 					if cnt = 0 {
@@ -8746,12 +8773,12 @@
 		//obj_type(x,y)
 			noteadd "obj_type(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8770,12 +8797,12 @@
 		//obj_dire(x,y)
 			noteadd "obj_dire(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8794,12 +8821,12 @@
 		//obj_serial_num(x,y)
 			noteadd "obj_serial_num(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8818,12 +8845,12 @@
 		//obj_use_tiles_x(x,y)
 			noteadd "obj_use_tiles_x(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8842,12 +8869,12 @@
 		//obj_use_tiles_y(x,y)
 			noteadd "obj_use_tiles_y(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8866,12 +8893,12 @@
 		//obj_tiles_x(x,y)
 			noteadd "obj_tiles_x(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8890,12 +8917,12 @@
 		//obj_tiles_y(x,y)
 			noteadd "obj_tiles_y(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8914,12 +8941,12 @@
 		//residents(x,y)
 			noteadd "residents(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8938,12 +8965,12 @@
 		//workers_Commercial(x,y)
 			noteadd "workers_Commercial(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8962,12 +8989,12 @@
 		//workers_Office(x,y)
 			noteadd "workers_Office(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -8986,12 +9013,12 @@
 		//workers_Industrial(x,y)
 			noteadd "workers_Industrial(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9010,12 +9037,12 @@
 		//workers_Farm(x,y)
 			noteadd "workers_Farm(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9034,12 +9061,12 @@
 		//workers_Public(x,y)
 			noteadd "workers_Public(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9058,12 +9085,12 @@
 		//students(x,y)
 			noteadd "students(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9082,12 +9109,12 @@
 		//land_price(x,y)
 			noteadd "land_price(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9106,12 +9133,12 @@
 		//crime_rate(x,y)
 			noteadd "crime_rate(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9130,12 +9157,12 @@
 		//education_rate(x,y)
 			noteadd "education_rate(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9154,12 +9181,12 @@
 		//happiness(x,y)
 			noteadd "happiness(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9178,12 +9205,12 @@
 		//crop(x,y)
 			noteadd "crop(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9202,12 +9229,12 @@
 		//crop_amount(x,y)
 			noteadd "crop_amount(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9226,12 +9253,12 @@
 		//age(x,y)
 			noteadd "age(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9250,12 +9277,12 @@
 		//gender(x,y)
 			noteadd "gender(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9274,12 +9301,12 @@
 		//workplace(x,y)
 			noteadd "workplace(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9298,12 +9325,12 @@
 		//school(x,y)
 			noteadd "school(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9322,12 +9349,12 @@
 		//reservation(x,y)
 			noteadd "reservation(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
@@ -9346,12 +9373,12 @@
 		//original_name(x,y)
 			noteadd "original_name(x,y) {", -1
 			
-			repeat mapy
+			repeat mapsize
 				y = cnt
 			
 				map_data_buf = ""
 			
-				repeat mapx
+				repeat mapsize
 					x = cnt
 			
 					if cnt = 0 {
