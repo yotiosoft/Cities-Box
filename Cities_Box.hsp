@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 0.9.6
+								      Cities Box Ver 0.9.6.1
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -2746,6 +2746,11 @@
 	
 		//表示する範囲や画面中央の座標などを取得
 		if camx != before_camx or camy != before_camy or windowx != before_windowx or windowy != before_windowy {
+
+			//(mx, my)を中心とした描写範囲
+				if windowx != before_windowx or windowy != before_windowy {
+					draw_area = (sqrt(powf(windowx, 2)+powf(windowy, 2))/sqrt(powf(64/2, 2)+powf(32/2, 2)))
+				}
 	
 			//画面中央の座標
 				x_=(windowx/2)+camx-chip_size/2	//mx,myにマウス座標取得
@@ -2915,13 +2920,39 @@
 			loop
 		}
 
-		qvvw1=mx-32
-		qvvw2=mx+32
-		qvvw3=my-32
-		qvvw4=my+32
+		if mx < left_top_x {
+			mx = left_top_x
+		}
+		if my < right_top_y {
+			my = right_top_y
+		}
+		if mx > right_bottom_x {
+			mx = right_bottom_x
+		}
+		if my > left_bottom_y {
+			my = left_bottom_y
+		}
 
-		x=qvvw1
-		y=qvvw3
+		qvvw1 = mx-draw_area-2	; mxを中心として、左draw_area-2マスまでを処理
+		qvvw2 = mx+draw_area+2	; mxを中心として、右draw_area+2マスまでを処理
+		qvvw3 = my-draw_area-2	; myを中心として、上draw_area-2マスまでを処理
+		qvvw4 = my+draw_area+2	; myを中心として、下draw_area+2マスまでを処理
+
+		if qvvw1 < left_top_x {
+			qvvw1 = left_top_x
+		}
+		if qvvw2 > right_bottom_x {
+			qvvw2 = right_bottom_x
+		}
+		if qvvw3 < right_top_y {
+			qvvw3 = right_top_y
+		}
+		if qvvw4 > left_bottom_y {
+			qvvw4 = left_bottom_y
+		}
+
+		x = qvvw1
+		y = qvvw3
 
 		if x < 0 {
 			x = 0
@@ -2930,19 +2961,19 @@
 			y = 0
 		}
 
-		if qvvw1<-64{
+		if qvvw1 < -64 {
 			goto *skip2
 		}
 
-		if qvvw2>mapsize+64{
+		if qvvw2 > mapsize+64 {
 			goto *skip2
 		}
 
-		if qvvw3<-64{
+		if qvvw3 < -64 {
 			goto *skip2
 		}
 
-		if qvvw4>mapsize+64{
+		if qvvw4 > mapsize+64 {
 			goto *skip2
 		}
 				
@@ -2961,21 +2992,21 @@
 					//クォータービューの座標を画面上の座標に変換
 						qv2 x, y
 
-						if x<0{
+						if x < 0 {
 							goto *skip1
 						}
 			
-						if y<0{
+						if y < 0 {
 							goto *skip1
 						}
 			
-						if x=mapsize{
+						if x = mapsize {
 							x=qvvw1
 							y+
 							goto *skip1
 						}
 			
-						if y=mapsize{
+						if y = mapsize {
 							break
 						}
 	
@@ -3101,14 +3132,14 @@
 					gosub *main_onclick
 				}
 				
-			x+=1
+			x += 1
 
-			if x>qvvw2{
-				x=qvvw1
-				y+=1
+			if x > qvvw2 {
+				x = qvvw1
+				y += 1
 			}
 
-			if y>qvvw4:break
+			if y > qvvw4 : break
 
 		loop
 
@@ -3700,19 +3731,19 @@
 					
 					//R - 住居区画
 						color 34, 177, 76 : boxf windowx-180, windowy-titlebar_h-20-(demand_Residential/3), windowx-180+10, windowy-titlebar_h-20
-						cmes "R", windowx-180, windowy-titlebar_h-20, windowx-180+10, windowy-titlebar_h-10
+						cmes "R", windowx-180, windowy-titlebar_h-20, windowx-180+10, windowy-titlebar_h-10, 1
 					//C - 商業区画
 						color 63, 72, 204 : boxf windowx-170, windowy-titlebar_h-20-(demand_Commercial/3), windowx-170+10, windowy-titlebar_h-20
-						cmes "C", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10
+						cmes "C", windowx-170, windowy-titlebar_h-20, windowx-170+10, windowy-titlebar_h-10, 1
 					//O - オフィス区画
 						color 0, 162, 232 : boxf windowx-160, windowy-titlebar_h-20-(demand_Office/3), windowx-160+10, windowy-titlebar_h-20
-						cmes "O", windowx-160, windowy-titlebar_h-20, windowx-160+10, windowy-titlebar_h-10
+						cmes "O", windowx-160, windowy-titlebar_h-20, windowx-160+10, windowy-titlebar_h-10, 1
 					//I - 工業区画
 						color 255, 242, 0 : boxf windowx-150, windowy-titlebar_h-20-(demand_Industrial/3), windowx-150+10, windowy-titlebar_h-20
-						cmes "I", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10
+						cmes "I", windowx-150, windowy-titlebar_h-20, windowx-150+10, windowy-titlebar_h-10, 1
 					//F - 農業区画
 						color 185, 122, 87 : boxf windowx-140, windowy-titlebar_h-20-(demand_Farm/3), windowx-140+10, windowy-titlebar_h-20
-						cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10
+						cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10, 1
 					
 			redraw 1
 			await 16
