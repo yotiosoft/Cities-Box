@@ -1,7 +1,7 @@
-Release Number : 95;
+Release Number : 97;
 Title : Cities Box;
-Version : 0.9.5.1;
-About : 建物名変更機能を実装 / 公園を追加;
+Version : 0.9.6.1;
+About : 描写処理関連のバグを修正し更に改善;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;/;

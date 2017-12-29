@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.6.1
+								      Cities Box Ver 0.9.6.2
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -395,6 +395,7 @@
 		celload "img/start_menu/load.png", 28								; 都市
 	
 		celload "img/start_menu/setting.png", 65							; 設定
+		celload "img/start_menu/addon_maker.png", 72						; Addon Maker
 	
 	//メニューの設定画面で使うアイコン
 		celload "img/menu_setting/general.png", 60							; 一般設定
@@ -1011,23 +1012,27 @@
 		if click_range(8, 25, 8+32, 25+32) = 1 {
 			sboxf 200, 8, 25, 8+32, 25+32
 		}
+		if click_range(45, 25, 45+32, 25+32) = 1 {
+			sboxf 200, 45, 25, 45+32, 25+32
+		}
 	
 		//マップ作成・読み込みボタン
 			color 255, 255, 255
 			
 			gmode 2
 			pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
-				cmes "新しいマップ", windowx/2-50-20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+				cmes "新しいマップ", windowx/2-50-20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20, 1
 						
 			pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
-				cmes "読み込み", windowx/2+20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20
+				cmes "読み込み", windowx/2+20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20, 1
 	
 		//左上のメニュー（設定ボタンなど）
 			color 255, 255, 255 : font SystemFont, 14
 			pos 8, 5 : mes "Cities Box β Ver."+about_version+" r"+NOW_Release_number+""
 			
 			gmode 2
-			pos 8, 25 : gcopy 65, 0, 0, 32, 32
+			pos 8, 25  : gcopy 65, 0, 0, 32, 32
+			pos 45, 25 : gcopy 72, 0, 0, 32, 32
 			
 	
 		//アップデートがあった場合
@@ -1053,6 +1058,9 @@
 	
 	if click_range(8, 25, 8+32, 25+32) = 1 {
 		goto *menu_setting
+	}
+	if click_range(45, 25, 45+32, 25+32) = 1 {
+		gosub *menu_addon_maker
 	}
 	
 	return
@@ -1205,6 +1213,18 @@
 		}
 	
 	goto *menu_setting__2
+
+*menu_addon_maker
+	exist "Addon_Maker/Cities_Box_Addon_Maker.exe"
+
+	if strsize = -1 {
+		dialog "Cities_Box_Addon_Maker.exeがありません\n別途ダウンロードしてください"
+	} else {
+		exec "Addon_Maker/Cities_Box_Addon_Maker.exe"
+	}
+
+	return
+	
 	
 *new_map
 	map_mode = "new_map"
@@ -6658,7 +6678,7 @@
 					
 			//パス名を含めたファイル一覧を取得
 				dirlist2h 1, ','
-				dirlist2 buf_BGMs, "*.*", 1, '\\'
+				dirlist2 buf_BGMs, "*.mp3", 1, '\\'
 					
 				sdim BGM_filelist, buf_BGMs
 				dirlist2r BGM_filelist
