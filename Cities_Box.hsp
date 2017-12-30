@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.6.2
+								      Cities Box Ver 0.9.6.3
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -411,8 +411,10 @@
 		celload "img/loading/124856y-4.png", 56								; 読み込み中アイコン4
 
 	//速さ
+		celload "img/speed/slow.png", 73									; 遅い
 		celload "img/speed/normal.png", 68									; 普通
 		celload "img/speed/fast.png", 69									; 速い
+		celload "img/speed/very_fast.png", 74								; とても早い
 		celload "img/speed/pause.png", 70									; 一時停止
 
 	//建物詳細ダイアログ
@@ -1033,6 +1035,21 @@
 			gmode 2
 			pos 8, 25  : gcopy 65, 0, 0, 32, 32
 			pos 45, 25 : gcopy 72, 0, 0, 32, 32
+
+			if click_range(8, 25, 8+32, 25+32) = 1 {
+				font SystemFont, 10
+				
+				color 255, 255, 255 : sboxf 200, 8, 25+32, 8+50, 25+32+18
+				color 0, 0, 0
+				pos 8+2, 25+32+2 : mes "設定"
+			}
+			if click_range(45, 25, 45+32, 25+32) = 1 {
+				font SystemFont, 10
+				
+				color 255, 255, 255 : sboxf 200, 45, 25+32, 45+70, 25+32+18
+				color 0, 0, 0
+				pos 45+2, 25+32+2 : mes "Addon Maker"
+			}
 			
 	
 		//アップデートがあった場合
@@ -1438,7 +1455,7 @@
 		showing_detail_x = -1
 		showing_detail_y = -1
 
-		speed = 1
+		speed = 2
 		pause = 0
 
 		mapsize = 100
@@ -2659,8 +2676,14 @@
 
 		if pause = 0 {
 	
-			//1回のループで1分とする
-				time_Minutes += speed
+			//Speed=2のとき、1回のループで1分とする
+				if speed = 1 {
+					if cnt \ 4 = 0 {
+						time_Minutes += 1
+					}
+				} else {
+					time_Minutes += speed - 1
+				}
 			
 			//time_Minutes=60で1時間とする
 				if time_Minutes > 59 {
@@ -3140,18 +3163,7 @@
 						}
 				}
 
-	*skip1
-			//マウスのどのボタンが押されているか取得
-				mouse_left = 0
-				mouse_right = 0
-					
-				getkey mouse_left, 1
-				getkey mouse_right, 2
-	
-				if mouse_left = 1 or mouse_right = 1 {
-					gosub *main_onclick
-				}
-				
+	*skip1				
 			x += 1
 
 			if x > qvvw2 {
@@ -3542,6 +3554,20 @@
 			if time_Hour = 0 or time_Minutes = 0 {
 				gosub *get_gender_all_people
 			}
+
+		//マウスのどのボタンが押されているか取得
+			mouse_left = 0
+			mouse_right = 0
+						
+			getkey mouse_left, 1
+			getkey mouse_right, 2
+		
+			if mouse_left = 1 or mouse_right = 1 {
+				gosub *main_onclick
+			}
+
+			mouse_left = 0
+			mouse_right = 0
 	
 *menu_buttons
 			//現在のウィンドウサイズとタイトルバーの高さを取得
@@ -3552,6 +3578,15 @@
 				gmode 3,,,200 : boxfa 0, windowy-70-titlebar_h, windowx, windowy
 	
 				//何のメニューも開かれていない場合は cursor_mode = "normal" に
+
+				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
+					if opening_addon_menu = 1 {
+						gosub *open_menu_addon_menu
+					} else : if cursor_mode = "normal" {
+						put_addon_name = ""
+					}
+
+					font SystemFont, 10
 	
 				//標準カーソルボタン
 					if cursor_mode = "normal" {
@@ -3561,14 +3596,35 @@
 						gmode 2
 						pos 20, windowy-70-titlebar_h : gcopy 3, 0, 0, 32, 32
 					}
+					if click_range(20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 20, windowy-70-titlebar_h-18, 20+60, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 20+2, windowy-70-titlebar_h-18+2 : mes "標準カーソル"
+					}
 	
 				//道路ボタン
 					if cursor_mode = "put_Road" {
 						gmode 2
 						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 32, 32, 32
+
+						if click_range(0, windowy-70-titlebar_h-2-32, 0+16, windowy-70-titlebar_h-2-32+16) = 1 and opening_addon_menu = 1 {
+							color 255, 255, 255 : sboxf 200, 0, windowy-70-titlebar_h-2-32-18, 16+40, windowy-70-titlebar_h-2-32
+							color 0, 0, 0
+							pos 0+2, windowy-70-titlebar_h-2-32-18+2 : mes "車道"
+						}
+						if click_range(0, windowy-70-titlebar_h-2-16, 0+16, windowy-70-titlebar_h-2-16+16) = 1 and opening_addon_menu = 1 {
+							color 255, 255, 255 : sboxf 200, 0, windowy-70-titlebar_h-2-16-18, 16+40, windowy-70-titlebar_h-2-16
+							color 0, 0, 0
+							pos 0+2, windowy-70-titlebar_h-2-16-18+2 : mes "歩道"
+						}
 					} else {
 						gmode 2
 						pos 60, windowy-70-titlebar_h : gcopy 4, 0, 0, 32, 32
+					}
+					if click_range(60, windowy-70-titlebar_h, 60+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 60, windowy-70-titlebar_h-18, 60+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 60+2, windowy-70-titlebar_h-18+2 : mes "道路・歩道"
 					}
 	
 				//線路ボタン
@@ -3579,23 +3635,60 @@
 						gmode 2
 						pos 92, windowy-70-titlebar_h : gcopy 50, 0, 0, 32, 32
 					}
+					if click_range(92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 92, windowy-70-titlebar_h-18, 92+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 92+2, windowy-70-titlebar_h-18+2 : mes "線路・駅"
+					}
 	
 				//建物（住居地区）ボタン
 					if cursor_mode = "put_Residential" {
 						gmode 2
 						pos 124, windowy-70-titlebar_h : gcopy 5, 0, 32, 32, 32
+
+						if click_range(0, windowy-70-titlebar_h-2-32, 0+16, windowy-70-titlebar_h-2-32+16) = 1 and opening_addon_menu = 1 {
+							color 255, 255, 255 : sboxf 200, 0, windowy-70-titlebar_h-2-32-18, 16+40, windowy-70-titlebar_h-2-32
+							color 0, 0, 0
+							pos 0+2, windowy-70-titlebar_h-2-32-18+2 : mes "低密度"
+						}
+						if click_range(0, windowy-70-titlebar_h-2-16, 0+16, windowy-70-titlebar_h-2-16+16) = 1 and opening_addon_menu = 1 {
+							color 255, 255, 255 : sboxf 200, 0, windowy-70-titlebar_h-2-16-18, 16+40, windowy-70-titlebar_h-2-16
+							color 0, 0, 0
+							pos 0+2, windowy-70-titlebar_h-2-16-18+2 : mes "高密度"
+						}
 					} else {
 						gmode 2
 						pos 124, windowy-70-titlebar_h : gcopy 5, 0, 0, 32, 32
+					}
+					if click_range(124, windowy-70-titlebar_h, 124+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 124, windowy-70-titlebar_h-18, 124+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 124+2, windowy-70-titlebar_h-18+2 : mes "住居区画"
 					}
 	
 				//建物（商業地区）ボタン
 					if cursor_mode = "put_Commercial" {
 						gmode 2
 						pos 156, windowy-70-titlebar_h : gcopy 12, 0, 32, 32, 32
+
+						if click_range(0, windowy-70-titlebar_h-2-32, 0+16, windowy-70-titlebar_h-2-32+16) = 1 and opening_addon_menu = 1 {
+							color 255, 255, 255 : sboxf 200, 0, windowy-70-titlebar_h-2-32-18, 16+40, windowy-70-titlebar_h-2-32
+							color 0, 0, 0
+							pos 0+2, windowy-70-titlebar_h-2-32-18+2 : mes "低密度"
+						}
+						if click_range(0, windowy-70-titlebar_h-2-16, 0+16, windowy-70-titlebar_h-2-16+16) = 1 and opening_addon_menu = 1 {
+							color 255, 255, 255 : sboxf 200, 0, windowy-70-titlebar_h-2-16-18, 16+40, windowy-70-titlebar_h-2-16
+							color 0, 0, 0
+							pos 0+2, windowy-70-titlebar_h-2-16-18+2 : mes "高密度"
+						}
 					} else {
 						gmode 2
 						pos 156, windowy-70-titlebar_h : gcopy 12, 0, 0, 32, 32
+					}
+					if click_range(156, windowy-70-titlebar_h, 156+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 156, windowy-70-titlebar_h-18, 156+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 156+2, windowy-70-titlebar_h-18+2 : mes "商業区画"
 					}
 	
 				//建物（オフィス）ボタン
@@ -3606,6 +3699,11 @@
 						gmode 2
 						pos 188, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
 					}
+					if click_range(188, windowy-70-titlebar_h, 188+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 188, windowy-70-titlebar_h-18, 188+60, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 188+2, windowy-70-titlebar_h-18+2 : mes "オフィス区画"
+					}
 	
 				//建物（工業地区）ボタン
 					if cursor_mode = "put_Industrial" {
@@ -3614,6 +3712,11 @@
 					} else {
 						gmode 2
 						pos 220, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
+					}
+					if click_range(220, windowy-70-titlebar_h, 220+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 220, windowy-70-titlebar_h-18, 220+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 220+2, windowy-70-titlebar_h-18+2 : mes "工業区画"
 					}
 	
 				//建物（農業地区）ボタン
@@ -3624,6 +3727,11 @@
 						gmode 2
 						pos 252, windowy-70-titlebar_h : gcopy 57, 0, 0, 32, 32
 					}
+					if click_range(252, windowy-70-titlebar_h, 252+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 252, windowy-70-titlebar_h-18, 252+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 252+2, windowy-70-titlebar_h-18+2 : mes "農業区画"
+					}
 	
 				//建物（公共施設）ボタン
 					if cursor_mode = "put_Public" {
@@ -3632,6 +3740,11 @@
 					} else {
 						gmode 2
 						pos 284, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
+					}
+					if click_range(284, windowy-70-titlebar_h, 284+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 284, windowy-70-titlebar_h-18, 284+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 284+2, windowy-70-titlebar_h-18+2 : mes "公共施設"
 					}
 	
 				//公園ボタン
@@ -3642,14 +3755,31 @@
 						gmode 2
 						pos 316, windowy-70-titlebar_h : gcopy 29, 0, 0, 32, 32
 					}
+					if click_range(316, windowy-70-titlebar_h, 316+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 316, windowy-70-titlebar_h-18, 316+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 316+2, windowy-70-titlebar_h-18+2 : mes "公園"
+					}
 	
 				//情報ボタン
 					gmode 2
 					pos windowx-54-64, windowy-70-titlebar_h : gcopy 52, 0, 0, 32, 32
+					
+					if click_range(windowx-54-64, windowy-70-titlebar_h, windowx-54-64+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, windowx-54-64, windowy-70-titlebar_h-18, windowx-54-64+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos windowx-54-64+2, windowy-70-titlebar_h-18+2 : mes "情報"
+					}
 	
 				//予算ボタン
 					gmode 2
 					pos windowx-54-64, windowy-40-titlebar_h : gcopy 49, 0, 0, 32, 32
+
+					if click_range(windowx-54-64, windowy-40-titlebar_h, windowx-54-64+32, windowy-40-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 200, windowx-54-64, windowy-40-titlebar_h-18, windowx-54-64+50, windowy-40-titlebar_h
+						color 0, 0, 0
+						pos windowx-54-64+2, windowy-40-titlebar_h-18+2 : mes "予算"
+					}
 	
 				//撤去ボタン
 					if cursor_mode = "bulldozer" {
@@ -3659,18 +3789,42 @@
 						gmode 2
 						pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 0, 32, 32
 					}
+
+					if click_range(windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, windowx-54, windowy-70-titlebar_h-18, windowx-54+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos windowx-54+2, windowy-70-titlebar_h-18+2 : mes "撤去"
+					}
 	
 				//設定ボタン
 					gmode 2
 					pos windowx-54-32, windowy-40-titlebar_h : gcopy 13, 0, 0, 32, 32
+
+					if click_range(windowx-54-32, windowy-40-titlebar_h, windowx-54-32+32, windowy-40-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 200, windowx-54-32, windowy-40-titlebar_h-18, windowx-54-32+50, windowy-40-titlebar_h
+						color 0, 0, 0
+						pos windowx-54-32+2, windowy-40-titlebar_h-18+2 : mes "設定"
+					}
 	
 				//保存ボタン
 					gmode 2
 					pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
+
+					if click_range(windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 200, windowx-54, windowy-40-titlebar_h-18, windowx-54+50, windowy-40-titlebar_h
+						color 0, 0, 0
+						pos windowx-54+2, windowy-40-titlebar_h-18+2 : mes "保存"
+					}
 	
 				//統計ボタン
 					gmode 2
 					pos windowx-54-32, windowy-70-titlebar_h : gcopy 30, 0, 0, 32, 32
+
+					if click_range(windowx-54-32, windowy-70-titlebar_h, windowx-54-32+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, windowx-32-54, windowy-70-titlebar_h-18, windowx-32-54+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos windowx-32-54+2, windowy-70-titlebar_h-18+2 : mes "統計"
+					}
 	
 				//統計メニュー（oepn_stat_menu = 1のとき）
 					if open_stat_menu = 1 {
@@ -3683,11 +3837,21 @@
 						} else {
 							pos windowx-92-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 0, 20, 20
 						}
+						if click_range(windowx-92-32, windowy-70-titlebar_h-20, windowx-92-32+20, windowy-70-titlebar_h-20+20) = 1 {
+							color 255, 255, 255 : sboxf 128, windowx-92-32, windowy-70-titlebar_h-20-18, windowx-92-32+50, windowy-70-titlebar_h-20
+							color 0, 0, 0
+							pos windowx-92-32+2, windowy-70-titlebar_h-20-18+2 : mes "種類"
+						}
 	
 						if stat_mode = "land_price" {
 							pos windowx-92-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 20, 20, 20
 						} else {
 							pos windowx-92-32+20, windowy-70-titlebar_h-20 : gcopy 32, 0, 0, 20, 20
+						}
+						if click_range(windowx-92-32+20, windowy-70-titlebar_h-20, windowx-92-32+20+20, windowy-70-titlebar_h-20+20) = 1 {
+							color 255, 255, 255 : sboxf 128, windowx-92-32+20, windowy-70-titlebar_h-20-18, windowx-92-32+20+50, windowy-70-titlebar_h-20
+							color 0, 0, 0
+							pos windowx-92-32+20+2, windowy-70-titlebar_h-20-18+2 : mes "地価"
 						}
 	
 						if stat_mode = "crime_rate" {
@@ -3695,11 +3859,21 @@
 						} else {
 							pos windowx-92-32+40, windowy-70-titlebar_h-20 : gcopy 33, 0, 0, 20, 20
 						}
+						if click_range(windowx-92-32+40, windowy-70-titlebar_h-20, windowx-92-32+40+20, windowy-70-titlebar_h-20+20) = 1 {
+							color 255, 255, 255 : sboxf 128, windowx-92-32+40, windowy-70-titlebar_h-20-18, windowx-92-32+40+50, windowy-70-titlebar_h-20
+							color 0, 0, 0
+							pos windowx-92-32+40+2, windowy-70-titlebar_h-20-18+2 : mes "犯罪率"
+						}
 	
 						if stat_mode = "education_rate" {
 							pos windowx-92-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 20, 20, 20
 						} else {
 							pos windowx-92-32+60, windowy-70-titlebar_h-20 : gcopy 47, 0, 0, 20, 20
+						}
+						if click_range(windowx-92-32+60, windowy-70-titlebar_h-20, windowx-92-32+60+20, windowy-70-titlebar_h-20+20) = 1 {
+							color 255, 255, 255 : sboxf 128, windowx-92-32+60, windowy-70-titlebar_h-20-18, windowx-92-32+60+50, windowy-70-titlebar_h-20
+							color 0, 0, 0
+							pos windowx-92-32+60+2, windowy-70-titlebar_h-20-18+2 : mes "教育度"
 						}
 	
 						if stat_mode = "happiness" {
@@ -3707,17 +3881,28 @@
 						} else {
 							pos windowx-92-32+80, windowy-70-titlebar_h-20 : gcopy 51, 0, 0, 20, 20
 						}
+						if click_range(windowx-92-32+80, windowy-70-titlebar_h-20, windowx-92-32+80+20, windowy-70-titlebar_h-20+20) = 1 {
+							color 255, 255, 255 : sboxf 128, windowx-92-32+80, windowy-70-titlebar_h-20-18, windowx-92-32+80+50, windowy-70-titlebar_h-20
+							color 0, 0, 0
+							pos windowx-92-32+80+2, windowy-70-titlebar_h-20-18+2 : mes "幸福度"
+						}
 					}	
 
 				//速さ
 					gmode 2
 					pos 20, windowy-45-titlebar_h+10
 
-					if speed = 1 {	; 普通
+					if speed = 1 {	; 遅い
+						gcopy 73, 0, 0, 32, 32
+					}
+					if speed = 2 {	; 普通
 						gcopy 68, 0, 0, 32, 32
 					}
-					if speed = 2 {	; 速い
+					if speed = 3 {	; 早い
 						gcopy 69, 0, 0, 32, 32
+					}
+					if speed = 4 {	; とても早い
+						gcopy 74, 0, 0, 32, 32
 					}
 
 					pos 52, windowy-45-titlebar_h+10
@@ -3725,6 +3910,19 @@
 						gcopy 70, 0, 32, 32, 32
 					} else {		; 一時停止していないとき
 						gcopy 70, 0, 0, 32, 32
+					}
+
+					font SystemFont, 10
+
+					if click_range(20, windowy-45-titlebar_h+10, 20+32, windowy-45-titlebar_h+10+32) = 1 {
+						color 255, 255, 255 : sboxf 200, 20, windowy-45-titlebar_h+10-18, 20+50, windowy-45-titlebar_h+10
+						color 0, 0, 0
+						pos 20+2, windowy-45-titlebar_h+10-18+2 : mes "時間の早さ"
+					}
+					if click_range(52, windowy-45-titlebar_h+10, 52+32, windowy-45-titlebar_h+10+32) = 1 {
+						color 255, 255, 255 : sboxf 200, 52, windowy-45-titlebar_h+10-18, 52+50, windowy-45-titlebar_h+10
+						color 0, 0, 0
+						pos 52+2, windowy-45-titlebar_h+10-18+2 : mes "一時停止"
 					}
 	
 				//人口、日付・気温を表示
@@ -3738,13 +3936,6 @@
 	
 					color 255, 255, 255 : font "Yu Gothic UI", 10
 					pos 90, windowy-30-titlebar_h+10 : mes "News : "+news_content+""
-	
-				//アドオン選択メニューが開かれている場合はアドオン選択メニューの背景色を表示
-					if opening_addon_menu = 1 {
-						gosub *open_menu_addon_menu
-					} else : if cursor_mode = "normal" {
-						put_addon_name = ""
-					}
 				
 				//RCOI需要メータ
 					font SystemFont, 10
@@ -3803,7 +3994,7 @@
 
 				if click_range(macro1_sd+32, macro2_sd-100-(diay1+5+diay2+5), macro1_sd+32+15+diax+25, macro2_sd-100) = 1 {
 					return
-				} else {
+				} else : if cnt \ 5 = 0 {
 					await 10
 
 					if showing_new_name_input = 0 {
@@ -4258,35 +4449,25 @@
 		}
 
 		//速さ
-			if click_range(20, windowy-45-titlebar_h+10, 20+32, windowy-45-titlebar+10+32) = 1 {
-				if speed = 1 {
-					speed = 2
-
-					if pause = 1 {
+			if cnt \ 5 = 0 {
+				if click_range(20, windowy-45-titlebar_h+10, 20+32, windowy-45-titlebar+10+32) = 1 {
+					speed++
+	
+					if speed > 4 {
 						speed = 1
-						pause = 0
 					}
-
-					return
-				} else {
-					speed = 1
-
-					if pause = 1 {
-						speed = 2
-						pause = 0
-					}
-
+	
 					return
 				}
-			}
-			if click_range(52, windowy-45-titlebar_h+10, 52+32, windowy-45-titlebar+10+32) = 1 {
-				if pause = 0 {
-					pause = 1
-				} else {
-					pause = 0
+				if click_range(52, windowy-45-titlebar_h+10, 52+32, windowy-45-titlebar+10+32) = 1 {
+					if pause = 0 {
+						pause = 1
+					} else {
+						pause = 0
+					}
+	
+					return
 				}
-
-				return
 			}
 		
 		//アドオン選択ボタン（水色のメニューバー）
@@ -7386,7 +7567,7 @@
 	return
 	
 *show_detail
-	if showing_detail = 0 or (clicked_mx != before_clicked_mx and clicked_my != before_clicked_my) {
+	if showing_detail = 0 or (clicked_mx != before_clicked_mx and clicked_my != before_clicked_my) and mouse_right = 0 {
 		before_clicked_mx_tmp = before_clicked_mx
 		before_clicked_my_tmp = before_clicked_my
 		
@@ -7394,7 +7575,7 @@
 		before_clicked_my = clicked_my
 
 		showing_detail = 1
-	} else : if (clicked != clicked_before and showing_detail = 1 and clicked_mx = before_clicked_mx and clicked_my = before_clicked_my) {
+	} else : if (clicked != clicked_before and showing_detail = 1 and clicked_mx = before_clicked_mx and clicked_my = before_clicked_my) or mouse_right = 1 {
 		showing_detail = 0
 	}
 	
