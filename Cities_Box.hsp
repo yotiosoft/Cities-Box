@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								      Cities Box Ver 0.9.6.3
+								       Cities Box Ver 1.0.0
 										 Main Source Code
 	
 										(C)YotioSoft 2017
@@ -1030,7 +1030,7 @@
 	
 		//左上のメニュー（設定ボタンなど）
 			color 255, 255, 255 : font SystemFont, 14
-			pos 8, 5 : mes "Cities Box β Ver."+about_version+" r"+NOW_Release_number+""
+			pos 8, 5 : mes "Cities Box Ver."+about_version+" r"+NOW_Release_number+""
 			
 			gmode 2
 			pos 8, 25  : gcopy 65, 0, 0, 32, 32
@@ -3202,7 +3202,7 @@
 			}
 					
 			if mousey < menu_line_y and (ginfo(0)-ginfo(4)) >= 0 and (ginfo(0)-ginfo(4)) <= (ginfo(4)+windowx) and (ginfo(1)-ginfo(5)) >= titlebar_h {
-				if pointer_icon = -1 {
+				if pointer_icon = -1 or cursor_mode = "bulldozer" {
 					color 0, 0, 0
 					
 					qv2 mx,my
@@ -3599,7 +3599,7 @@
 					if click_range(20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
 						color 255, 255, 255 : sboxf 128, 20, windowy-70-titlebar_h-18, 20+60, windowy-70-titlebar_h
 						color 0, 0, 0
-						pos 20+2, windowy-70-titlebar_h-18+2 : mes "標準カーソル"
+						pos 20+2, windowy-70-titlebar_h-18+2 : mes "カーソル"
 					}
 	
 				//道路ボタン
@@ -5374,7 +5374,7 @@
 											return	
 										}
 	
-										if from_Build_on_Reservation_area = 0 {
+										if from_Build_on_Reservation_area = 0 and (addon_chip_x(addon_num_buf, 0, obj_dire(mx,my)) = 1 and addon_chip_y(addon_num_buf, 0, obj_dire(mx,my)) = 1) {
 											dialog "この区画は既に占有されています"
 										}
 	

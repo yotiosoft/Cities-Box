@@ -1,0 +1,251 @@
+addon_name = "Wooden_Promenade_with_Tree"
+addon_jp_name = "–Ø‚ª‚ ‚é–Ø‚Ì—V•à“¹"
+addon_author = "YotioSoft"
+addon_summary = "–Ø‚Å‚Â‚­‚ç‚ê‚½ŠX˜HŽ÷•t‚«‚Ì—V•à“¹‚Å‚·"
+addon_icon = "icon_Wooden_Promenade_with_Tree.png"
+addon_maker_version = "2"
+ 
+addon_type = "Promenade"
+ 
+use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_crossing, under_construction"
+ 
+default {
+	image = "Wooden_Promenade_with_Tree.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+ 
+	width {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	depth {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "32"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+};
+dead_end {
+	image = "Wooden_Promenade_with_Tree_dead_end.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+ 
+	left {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "32"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "96"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "96"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};
+turn {
+	image = "Wooden_Promenade_with_Tree_turn.png"
+	direction = "left-top, right-top, left-bottom, right-bottom"
+	transparent_color = "0, 0, 0"
+ 
+	left-top {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	right-top {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "32"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	left-bottom {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "96"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right-bottom {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "96"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};
+intersection_T {
+	image = "Wooden_Promenade_with_Tree_intersection_T.png"
+	direction = "left-top-bottom, left-right-top, left-right-bottom, right-top-bottom"
+	transparent_color = "0, 0, 0"
+ 
+	left-top-bottom {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	left-right-top {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "32"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	left-right-bottom {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "96"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right-top-bottom {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "96"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};
+intersection_cross {
+	image = "Wooden_Promenade_with_Tree_intersection_cross.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+ 
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};
+train_crossing {
+	image = "Wooden_Promenade_with_Tree_train_crossing.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+ 
+	width {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	depth {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "32"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+};
+under_construction {
+	image = "Wooden_Promenade_with_Tree_under_construction.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+ 
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};

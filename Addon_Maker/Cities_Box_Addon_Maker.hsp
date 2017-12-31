@@ -2,7 +2,7 @@
 
 										Cities Box Addon Maker
 	
-											  Ver.0.3.0
+											  Ver.0.3.1
 	
 --------------------------------------------------------------------------------------------------*/
 
@@ -285,15 +285,15 @@
 			Addon_Img_Null__Right__Bottom_Right_x = 192
 			Addon_Img_Null__Right__Bottom_Right_y = 224
 			
-		} else : if addon_size = 2 {
+		} else : if addon_size = 2 {		; 向き：横長
 			Addon_Img_Null__Left__Size_x = 96
 			Addon_Img_Null__Left__Size_y = 112
 			Addon_Img_Null__Top__Size_x = 96
 			Addon_Img_Null__Top__Size_y = 112
 			Addon_Img_Null__Bottom__Size_x = 96
-			Addon_Img_Null__Bottom__Size_y = 112
+			Addon_Img_Null__Bottom__Size_y = 111
 			Addon_Img_Null__Right__Size_x = 96
-			Addon_Img_Null__Right__Size_y = 112
+			Addon_Img_Null__Right__Size_y = 111
 			
 			Addon_Img_Null__Left__Trout_x = 1
 			Addon_Img_Null__Left__Trout_y = 2
@@ -307,20 +307,20 @@
 			Addon_Img_Null__Left__Top_Left_x = 0
 			Addon_Img_Null__Left__Top_Left_y = 0
 			Addon_Img_Null__Left__Bottom_Right_x = 96
-			Addon_Img_Null__Left__Bottom_Right_y = 112
+			Addon_Img_Null__Left__Bottom_Right_y = 113
 		
 			Addon_Img_Null__Top__Top_Left_x = 96
 			Addon_Img_Null__Top__Top_Left_y = 0
 			Addon_Img_Null__Top__Bottom_Right_x = 192
-			Addon_Img_Null__Top__Bottom_Right_y = 112
+			Addon_Img_Null__Top__Bottom_Right_y = 113
 		
 			Addon_Img_Null__Bottom__Top_Left_x = 0
-			Addon_Img_Null__Bottom__Top_Left_y = 112
+			Addon_Img_Null__Bottom__Top_Left_y = 113
 			Addon_Img_Null__Bottom__Bottom_Right_x = 96
 			Addon_Img_Null__Bottom__Bottom_Right_y = 224
 		
 			Addon_Img_Null__Right__Top_Left_x = 96
-			Addon_Img_Null__Right__Top_Left_y = 112
+			Addon_Img_Null__Right__Top_Left_y = 113
 			Addon_Img_Null__Right__Bottom_Right_x = 192
 			Addon_Img_Null__Right__Bottom_Right_y = 224
 
@@ -667,9 +667,12 @@
 *make_building_4
 	if Addon_Density_tmp = 0 and Addon_Type_tmp != "office" and Addon_Type_tmp != "industrial" and Addon_Type_tmp != "farm" {
 		Addon_Type = "low_density_"+Addon_Type_tmp+""
-	}
-	if Addon_Density_tmp = 1 and Addon_Type_tmp != "office" and Addon_Type_tmp != "industrial" and Addon_Type_tmp != "farm" {
+		output += "low_density/"
+	} else : if Addon_Density_tmp = 1 and Addon_Type_tmp != "office" and Addon_Type_tmp != "industrial" and Addon_Type_tmp != "farm" {
 		Addon_Type = "high_density_"+Addon_Type_tmp+""
+		output += "high_density/"
+	} else {
+		Addon_Type = Addon_Type_tmp
 	}
 	
 	if Addon_Type_tmp = "industrial" or Addon_Type_tmp = "farm" {
@@ -940,15 +943,15 @@
 			Addon_Img_Null__Right__Bottom_Right_x = 192
 			Addon_Img_Null__Right__Bottom_Right_y = 224
 			
-		} else : if addon_size = 2 {
+		} else : if addon_size = 2 {		; 向き：横長
 			Addon_Img_Null__Left__Size_x = 96
 			Addon_Img_Null__Left__Size_y = 112
 			Addon_Img_Null__Top__Size_x = 96
 			Addon_Img_Null__Top__Size_y = 112
 			Addon_Img_Null__Bottom__Size_x = 96
-			Addon_Img_Null__Bottom__Size_y = 112
+			Addon_Img_Null__Bottom__Size_y = 111
 			Addon_Img_Null__Right__Size_x = 96
-			Addon_Img_Null__Right__Size_y = 112
+			Addon_Img_Null__Right__Size_y = 111
 			
 			Addon_Img_Null__Left__Trout_x = 1
 			Addon_Img_Null__Left__Trout_y = 2
@@ -962,20 +965,20 @@
 			Addon_Img_Null__Left__Top_Left_x = 0
 			Addon_Img_Null__Left__Top_Left_y = 0
 			Addon_Img_Null__Left__Bottom_Right_x = 96
-			Addon_Img_Null__Left__Bottom_Right_y = 112
+			Addon_Img_Null__Left__Bottom_Right_y = 113
 		
 			Addon_Img_Null__Top__Top_Left_x = 96
 			Addon_Img_Null__Top__Top_Left_y = 0
 			Addon_Img_Null__Top__Bottom_Right_x = 192
-			Addon_Img_Null__Top__Bottom_Right_y = 112
+			Addon_Img_Null__Top__Bottom_Right_y = 113
 		
 			Addon_Img_Null__Bottom__Top_Left_x = 0
-			Addon_Img_Null__Bottom__Top_Left_y = 112
+			Addon_Img_Null__Bottom__Top_Left_y = 113
 			Addon_Img_Null__Bottom__Bottom_Right_x = 96
 			Addon_Img_Null__Bottom__Bottom_Right_y = 224
 		
 			Addon_Img_Null__Right__Top_Left_x = 96
-			Addon_Img_Null__Right__Top_Left_y = 112
+			Addon_Img_Null__Right__Top_Left_y = 113
 			Addon_Img_Null__Right__Bottom_Right_x = 192
 			Addon_Img_Null__Right__Bottom_Right_y = 224
 
@@ -1301,8 +1304,15 @@
 		chdir output2
 	
 	/*画像、アイコンをコピー*/
-		bcopy Addon_Icon_Path, getpath(Addon_Icon_Path, 8)
-		bcopy Addon_Img_Null__Path, getpath(Addon_Img_Null__Path, 8)
+		exist Addon_Icon_Path
+		if strsize = -1 {
+			bcopy Addon_Icon_Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Null__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Null__Path, getpath(Addon_Img_Null__Path, 8)
+		}
 	
 	/*adatファイル作成*/
 		addon_adat = ""
@@ -2887,14 +2897,50 @@
 		chdir output2
 	
 	/*画像、アイコンをコピー*/
-		bcopy Addon_Icon_Path					, getpath(Addon_Icon_Path, 8)
-		bcopy Addon_Img_Default__Path			, getpath(Addon_Img_Default__Path, 8)
-		bcopy Addon_Img_Dead_End__Path			, getpath(Addon_Img_Dead_End__Path, 8)
-		bcopy Addon_Img_Turn__Path				, getpath(Addon_Img_Turn__Path, 8)
-		bcopy Addon_Img_Intersection_T__Path	, getpath(Addon_Img_Intersection_T__Path, 8)
-		bcopy Addon_Img_Intersection_Cross__Path, getpath(Addon_Img_Intersection_Cross__Path, 8)
-		bcopy Addon_Img_Train_Crossing__Path	, getpath(Addon_Img_Train_Crossing__Path, 8)
-		bcopy Addon_Img_Under_Construction__Path, getpath(Addon_Img_Under_Construction__Path, 8)
+		exist Addon_Icon_Path
+		if strsize = -1 {
+			bcopy Addon_Icon_Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Default__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Default__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Dead_End__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Dead_End__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Turn__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Turn__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Intersection_T__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Intersection_T__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Intersection_Cross__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Intersection_Cross__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Train_Crossing__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Train_Crossing__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Under_Construction__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Under_Construction__Path, getpath(Addon_Icon_Path, 8)
+		}
+
+		exist Addon_Img_Null__Path
+		if strsize = -1 {
+			bcopy Addon_Img_Null__Path, getpath(Addon_Img_Null__Path, 8)
+		}
 	
 	/*adatファイル作成*/
 		addon_adat = ""
@@ -3658,7 +3704,7 @@
 		pos (640/2)-(520/2), 60 : gcopy 1, 0, 0, 520, 110
 	
 		font "Yu Gothic", 14
-		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.3.0\nリリース : 2017年12月29日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
+		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.3.1\nリリース : 2017年12月31日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
 	
 		font "Yu Gothic", 10
 		cmes "Copyright (C) YotioSoft 2017 All Rights Reserved.", 0, 450, 640, 470
