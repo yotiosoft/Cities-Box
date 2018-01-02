@@ -1,0 +1,7 @@
+Release Number : 102;
+Title : Cities Box;
+Version : 1.0.1.1;
+About : 開発版アップデートテスト中;
+Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
+Updater_Name : Cities_Box_UD_Dev.exe;
+URL : https://github.com/YotioSoft/Cities-Box-Dev/raw/master/;/;

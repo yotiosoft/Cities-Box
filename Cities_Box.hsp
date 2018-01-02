@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 1.0.0
+								       Cities Box Ver 1.0.1
 										 Main Source Code
 	
-										(C)YotioSoft 2017
+						 			  (C)YotioSoft 2017-2018
 	
 --------------------------------------------------------------------------------------------------*/
 
@@ -292,6 +292,7 @@
 		SystemFont = get_chapter(config, "SystemFont", " = \"", "\"")
 		Set_Play_BGM = int( get_chapter(config, "Set_Play_BGM", " = ", ";") )
 		Ignore_Update = int( get_chapter(config, "Ignore_Update", " = ", ";") )
+		Get_Dev_Version = int( get_chapter(config, "Get_Dev_Version", " = ", ";") )
 	
 		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
 		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
@@ -945,39 +946,78 @@
 		if strsize != -1 {
 			delete "Cities_Box_UD.exe"
 		}
+
+		exist "Cities_Box_UD_Dev.exe"
+		if strsize != -1 {
+			delete "Cities_Box_UD_Dev.exe"
+		}
 	
 	//アップデート通知を受け取らない設定なら*menuへ
 		if Ignore_Update = 1 {
 			goto *menu
 		}
+
+	//通常のアップデートの確認
+		download "http://joogle.web.fc2.com/datacenter/cities_box/", "datacenter_url.txt", "data/datacenter_url.txt"
+		
+		notesel datacenter_url
+		noteload "data/datacenter_url.txt"
+		
+		if instr(datacenter_url, 0, "http://") = -1 {
+			datacenter_url = "http://yotiosoft.com/dc/cities_box/"
+		}
+		
+		download datacenter_url, "latest_version.txt", "data/latest_version.txt"
+		
+		notesel latest_version
+		noteload "data/latest_version.txt"
+		
+		if instr(latest_version, 0, "<!DOCTYPE html>") != -1 {
+			goto *menu
+		}
+		
+		latest_version__Release_number = int(get_chapter(latest_version, "Release Number", " : ", ";"))
+		latest_version__Title = get_chapter(latest_version, "Title", " : ", ";")
+		latest_version__Version = get_chapter(latest_version, "Version", " : ", ";")
+		latest_version__About = get_chapter(latest_version, "About", " : ", ";")
+		
+		if latest_version__Release_number > NOW_Release_number {
+			normalUpdate = 1
 	
-	download "http://joogle.web.fc2.com/datacenter/cities_box/", "datacenter_url.txt", "data/datacenter_url.txt"
-	
-	notesel datacenter_url
-	noteload "data/datacenter_url.txt"
-	
-	if instr(datacenter_url, 0, "http://") = -1 {
-		datacenter_url = "http://yotiosoft.com/dc/cities_box/"
-	}
-	
-	download datacenter_url, "latest_version.txt", "data/latest_version.txt"
-	
-	notesel latest_version
-	noteload "data/latest_version.txt"
-	
-	if instr(latest_version, 0, "<!DOCTYPE html>") != -1 {
-		goto *menu
-	}
-	
-	latest_version__Release_number = int(get_chapter(latest_version, "Release Number", " : ", ";"))
-	latest_version__Title = get_chapter(latest_version, "Title", " : ", ";")
-	latest_version__Version = get_chapter(latest_version, "Version", " : ", ";")
-	latest_version__About = get_chapter(latest_version, "About", " : ", ";")
+			goto *menu
+		}
+
+	//開発版のアップデートの確認
+		if get_Dev_Version = 1 {
+			if instr(datacenter_url, 0, "http://") = -1 {
+				datacenter_url = "http://yotiosoft.com/dc/cities_box/"
+			}
+			
+			download datacenter_url, "Dev_latest_version.txt", "data/Dev_latest_version.txt"
+			
+			notesel Dev_latest_version
+			noteload "data/Dev_latest_version.txt"
+			
+			if instr(Dev_latest_version, 0, "<!DOCTYPE html>") != -1 {
+				goto *menu
+			}
+			
+			Dev_latest_version__Release_number = int(get_chapter(Dev_latest_version, "Release Number", " : ", ";"))
+			Dev_latest_version__Title = get_chapter(Dev_latest_version, "Title", " : ", ";")
+			Dev_latest_version__Version = get_chapter(Dev_latest_version, "Version", " : ", ";")
+			Dev_latest_version__About = get_chapter(Dev_latest_version, "About", " : ", ";")
+			
+			if Dev_latest_version__Release_number > NOW_Release_number {
+				devUpdate = 1
+		
+				goto *menu
+			}
+		}
 	
 *menu
 	onclick gosub *menu_onclick
 	
-	if latest_version__Release_number > NOW_Release_number and update_button = 0 and Ignore_Update = 0 {
+	if (devUpdate = 1 or normalUpdate = 1) and update_button = 0 and Ignore_Update = 0 {
 		objsize 150, 20
 		pos windowx-150-20, windowy-titlebar_h-65+5 : button gosub "更新する", *update
 		pos windowx-150-20, windowy-titlebar_h-65+30 : button gosub "更新通知を受け取らない", *set_ignore_update
@@ -1053,11 +1093,17 @@
 			
 	
 		//アップデートがあった場合
-			if latest_version__Release_number > NOW_Release_number and Ignore_Update = 0 {
+			if (latest_version__Release_number > NOW_Release_number or Dev_latest_version__Release_number > NOW_Release_number) and Ignore_Update = 0 {
 				color 0, 162, 232 : sboxf 128, windowx-500-10, windowy-titlebar_h-70+5-10, windowx-10, windowy-titlebar_h-10
 				color 255, 255, 255
-				font SystemFont, 14 : pos windowx-500, windowy-titlebar_h-70+3 : mes "アップデートがあります！更新しますか？"
-				font SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+latest_version__Version+" r"+latest_version__Release_number+"\n"+latest_version__About+""
+
+				if latest_version__Release_number > NOW_Release_number {
+					font SystemFont, 14 : pos windowx-500, windowy-titlebar_h-70+3 : mes "アップデートがあります！更新しますか？"
+					font SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+latest_version__Version+" r"+latest_version__Release_number+"\n"+latest_version__About+""
+				} else : if Dev_latest_version__Release_number > NOW_Release_number {
+					font SystemFont, 14 : pos windowx-500, windowy-titlebar_h-70+3 : mes "開発版にアップデートがあります！更新しますか？"
+					font SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+"\n"+Dev_latest_version__About+""
+				}
 			}
 		
 		wait 10
@@ -1130,12 +1176,20 @@
 					} else {
 						pos 350, 70 : gcopy 14, 0, 16, 16, 16
 					}
+
+				; 開発版のアップデートを受け取る（Get_Dev_Version）
+					pos 90, 100 : mes "開発版のアップデートを受け取る"
+					if Get_Dev_Version = 0 {
+						pos 350, 100 : gcopy 14, 0, 0, 16, 16
+					} else {
+						pos 350, 100 : gcopy 14, 0, 16, 16, 16
+					}
 	
 				; フォント設定(SystemFont)
-					pos 90, 100 : mes "フォント"
+					pos 90, 130 : mes "フォント"
 					
-					pos 90+ginfo(14)+100, 100 : objsize 150, 20 : input SystemFont : SyetmFont__stat = stat
-					pos 90+ginfo(14)+250, 100 : objsize 50, 20  : button gosub "参照", *refer_fonts
+					pos 90+ginfo(14)+100, 130 : objsize 150, 20 : input SystemFont : SyetmFont__stat = stat
+					pos 90+ginfo(14)+250, 130 : objsize 50, 20  : button gosub "参照", *refer_fonts
 			}
 	
 		; バグ・ご要望の送信
@@ -1148,7 +1202,7 @@
 				pos 70, 3 : mes "バグ・ご要望の送信"
 	
 				font SystemFont, 14 : color 255, 255, 255
-				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「12.バグや問題点、今後の予定」をご覧ください。"
+				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「13.バグや問題点、今後の予定」をご覧ください。"
 				pos ((500-64)/2)-16, 100 : gcopy 64, 0, 0, 32, 32
 				pos ((500-64)/2)-16+45, 105 : mes "ReadMe.txtを開く"
 	
@@ -1178,7 +1232,7 @@
 				font SystemFont, 14 : color 255, 255, 255
 				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : HSP 3.5"
 				font SystemFont, 10 : color 255, 255, 255
-				pos 100, 270 : mes "Copyright(C) YotioSoft 2017 All Rights Reserved."
+				pos 100, 270 : mes "Copyright(C) YotioSoft 2017-2018 All Rights Reserved."
 			}
 	
 	stop
@@ -1199,7 +1253,6 @@
 	
 	//一般設定
 		if menu_setting__page = "general" {
-		; BGMの再生(Set_Play_BGM)
 			if click_range(350, 40, 350+16, 40+16) = 1 {
 				if Set_Play_BGM = 0 {
 					Set_Play_BGM = 1
@@ -1212,6 +1265,13 @@
 					Ignore_Update = 1
 				} else {
 					Ignore_Update = 0
+				}
+			}
+			if click_range(350, 100, 350+16, 100+16) = 1 {
+				if Get_Dev_Version = 0 {
+					Get_Dev_Version = 1
+				} else {
+					Get_Dev_Version = 0
 				}
 			}
 		}
@@ -8714,6 +8774,7 @@
 		noteadd_SystemFont = 0
 		noteadd_Set_Play_BGM = 0
 		noteadd_Ignore_Update = 0
+		noteadd_Get_Dev_Version = 0
 		
 		notesel config
 	
@@ -8737,6 +8798,12 @@
 				noteadd "Ignore_Update = "+Ignore_Update+";", cnt, 1
 				noteadd_Ignore_Update = 1
 			}
+
+			if instr(config_buf, 0, "Get_Dev_Version") != -1 {
+				Ignore_Update = setting_Ignore_Update
+				noteadd "Get_Dev_Version = "+Get_Dev_Version+";", cnt, 1
+				noteadd_Get_Dev_Version = 1
+			}
 	
 			wait 1
 		loop
@@ -8752,6 +8819,10 @@
 		if noteadd_Ignore_Update = 0 {
 			Ignore_Update = setting_Ignore_Update
 			noteadd "Ignore_Update = "+Ignore_Update+";", -1
+		}
+		if noteadd_Get_Dev_Version = 0 {
+			Get_Dev_Version = setting_Get_Dev_Version
+			noteadd "Get_Dev_Version = "+Get_Dev_Version+";", -1
 		}
 	
 		notesave "data/config.dat"
@@ -9674,20 +9745,29 @@
 		
 		font SystemFont, 14
 		color 255, 255, 255 : cmes "アップデータをダウンロード中です\nしばらくお待ち下さい...", 0, windowy/2-20, windowx, windowy/2+20
-		
-		latest_version__Updater = get_chapter(latest_version, "Updater", " : ", ";")
-		latest_version__Updater_Name = get_chapter(latest_version, "Updater_Name", " : ", ";")
+
+		if normalUpdate = 1 {
+			latest_version__Updater = get_chapter(latest_version, "Updater", " : ", ";")
+			latest_version__Updater_Name = get_chapter(latest_version, "Updater_Name", " : ", ";")
 	
-		download latest_version__Updater, latest_version__Updater_Name, latest_version__Updater_Name
+			download latest_version__Updater, latest_version__Updater_Name, latest_version__Updater_Name
 	
-		exist latest_version__Updater_Name
+			exist latest_version__Updater_Name
+		} else : if devUpdate = 1 {
+			Dev_latest_version__Updater = get_chapter(Dev_latest_version, "Updater", " : ", ";")
+			Dev_latest_version__Updater_Name = get_chapter(Dev_latest_version, "Updater_Name", " : ", ";")
+	
+			download Dev_latest_version__Updater, Dev_latest_version__Updater_Name, Dev_latest_version__Updater_Name
+	
+			exist Dev_latest_version__Updater_Name
+		}
 	
 		if strsize = -1 {
 			dialog "アップデートに失敗しました"
 			return
 			
 		} else {
-			exec latest_version__Updater_Name
+			exec Dev_latest_version__Updater_Name
 			end
 		}
 	
@@ -9730,6 +9810,9 @@
 			if now_in_menu = 1 {
 				//閉じる際に設定を保存
 					notesel config
+					noteload "data/config.dat"
+
+					Get_Dev_Version__before = int( get_chapter(config, "Get_Dev_Version", " = ", ";") )
 
 					repeat notemax
 						noteget config_tmp, cnt
@@ -9743,12 +9826,19 @@
 						if instr(config_tmp, 0, "Ignore_Update") != -1 {
 							noteadd "Ignore_Update = "+Ignore_Update+";", cnt, 1
 						}
+						if instr(config_tmp, 0, "Get_Dev_Version") != -1 {
+							noteadd "Get_Dev_Version = "+Get_Dev_Version+";", cnt, 1
+						}
 
 					loop
 
 					notesave "data/config.dat"
 
-				goto *menu
+				if Get_Dev_Version__before != Get_Dev_Version and Get_Dev_Version = 1 {
+					goto *check_update
+				} else {
+					goto *menu
+				}
 			}
 	
 		cursor_mode = "normal"

@@ -1,6 +1,7 @@
 SystemFont = "Yu Gothic UI"
 Set_Play_BGM = 1;
 Ignore_Update = 0;
+Get_Dev_Version = 0;
 
 Config_WindowSize_X = 640;
 Config_WindowSize_Y = 480;
