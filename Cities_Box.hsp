@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 1.0.1
+								       Cities Box Ver 1.0.2
 										 Main Source Code
 	
 						 			  (C)YotioSoft 2017-2018
@@ -9767,7 +9767,11 @@
 			return
 			
 		} else {
-			exec Dev_latest_version__Updater_Name
+			if normalUpdate = 1 {
+				exec latest_version__Updater_Name
+			} else {
+				exec Dev_latest_version__Updater_Name
+			}
 			end
 		}
 	
