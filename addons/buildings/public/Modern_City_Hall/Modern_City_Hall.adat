@@ -17,6 +17,7 @@ build_limit = "1"
 
 null {
 	image = "Modern_City_Hall.png"
+	night_mask = "Modern_City_Hall__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

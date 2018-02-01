@@ -14,6 +14,7 @@ land_price_influence_grid = "2"
 
 null {
 	image = "red_roof_house.png"
+	night_mask = "red_roof_house__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
@@ -27,6 +28,9 @@ null {
 		top_left_y = "0"
 		bottom_right_x = "64"
 		bottom_right_y = "64"
+		
+		light_at_night_settings = "1"
+		light_at_night_RGB = "[(195, 195, 195) to (255, 242, 0)]"
 	}
 	top {
 		size_x = "64"
@@ -38,6 +42,9 @@ null {
 		top_left_y = "0"
 		bottom_right_x = "128"
 		bottom_right_y = "64"
+		
+		light_at_night_settings = "1"
+		light_at_night_RGB = "[(195, 195, 195) to (255, 242, 0)]"
 	}
 	bottom {
 		size_x = "64"
@@ -49,6 +56,9 @@ null {
 		top_left_y = "64"
 		bottom_right_x = "64"
 		bottom_right_y = "128"
+		
+		light_at_night_settings = "1"
+		light_at_night_RGB = "[(195, 195, 195) to (255, 242, 0)]"
 	}
 	right {
 		size_x = "64"
@@ -60,5 +70,8 @@ null {
 		top_left_y = "64"
 		bottom_right_x = "128"
 		bottom_right_y = "128"
+		
+		light_at_night_settings = "1"
+		light_at_night_RGB = "[(195, 195, 195) to (255, 242, 0)]"
 	}
 };

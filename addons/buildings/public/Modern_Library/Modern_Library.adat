@@ -25,6 +25,7 @@ addon_crop_amount = "0"
  
 null {
 	image = "Modern_Library.png"
+	night_mask = "Modern_Library__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
  

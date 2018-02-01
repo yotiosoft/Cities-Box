@@ -15,6 +15,7 @@ land_price_influence_grid = "8"
 
 null {
 	image = "small_fire_depertment.png"
+	night_mask = "small_fire_depertment__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

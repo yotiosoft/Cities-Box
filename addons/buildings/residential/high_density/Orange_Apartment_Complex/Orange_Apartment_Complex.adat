@@ -25,6 +25,7 @@ addon_crop_amount = ""
  
 null {
 	image = "Orange_Apartment_Complex.png"
+	night_mask = "Orange_Apartment_Complex__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
  

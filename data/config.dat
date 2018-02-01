@@ -1,7 +1,12 @@
-SystemFont = "Meiryo UI"
+SystemFont = "Yu Gothic UI"
 Set_Play_BGM = 1;
 Ignore_Update = 0;
 Get_Dev_Version = 1;
+
+OS = "Windows";
+
+Adjustment_Interval = 2;
+Drow_Interval = 8;
 
 Config_WindowSize_X = 640;
 Config_WindowSize_Y = 480;

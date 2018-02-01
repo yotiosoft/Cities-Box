@@ -209,6 +209,7 @@ intersection_cross {
 
 train_crossing {
 	image = "Two_lane_Normal_Railroad_train_crossing.png"
+	night_mask = "Two_lane_Normal_Railroad_train_crossing__night_mask.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	

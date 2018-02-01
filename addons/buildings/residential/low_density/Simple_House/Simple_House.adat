@@ -14,6 +14,7 @@ land_price_influence_grid = "2"
 
 null {
 	image = "Simple_House.png"
+	night_mask = "Simple_House__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

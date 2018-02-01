@@ -14,6 +14,7 @@ land_price_influence_grid = "8"
 
 default {
 	image = "White-Roof_Normaly_Station.png"
+	night_mask = "White-Roof_Normaly_Station__night_mask.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	
@@ -43,6 +44,7 @@ default {
 
 dead_end {
 	image = "White-Roof_Normaly_Station_dead_end.png"
+	night_mask = "White-Roof_Normaly_Station_dead_end__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

@@ -16,6 +16,7 @@ window_color = (195, 195, 195)
 
 null {
 	image = "blue_roof_house.png"
+	night_mask = "blue_roof_house__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

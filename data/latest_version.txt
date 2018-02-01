@@ -1,7 +1,9 @@
-Release Number : 101;
+Release Number : 102;
 Title : Cities Box;
-Version : 1.0.1;
-About : 開発版のアップデートに対応;
+Version : 1.0.2;
+About : アップデーター起動時の問題を修正
+（Ver.1.0.1では手動でCities_Box_UD.exeを起動してください）;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;/;
+OS : Windows, macOS;

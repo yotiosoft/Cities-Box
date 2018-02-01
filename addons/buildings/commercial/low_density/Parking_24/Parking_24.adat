@@ -17,6 +17,7 @@ crime_rate_influence_grid = "0"
 
 null {
 	image = "Parking_24.png"
+	night_mask = "Parking_24__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

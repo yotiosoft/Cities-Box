@@ -18,6 +18,7 @@ crime_rate_influence_grid = "10"
 
 null {
 	image = "small_police_station.png"
+	night_mask = "small_police_station__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	

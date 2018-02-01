@@ -23,6 +23,7 @@ addon_crop_amount = "1000"
  
 null {
 	image = "Electronics_Factory.png"
+	night_mask = "Electronics_Factory__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
  

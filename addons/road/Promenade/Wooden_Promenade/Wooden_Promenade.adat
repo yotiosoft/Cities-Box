@@ -11,6 +11,7 @@ use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_
  
 default {
 	image = "Wooden_Promenade.png"
+	night_mask = "Wooden_Promenade__night_mask.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
  

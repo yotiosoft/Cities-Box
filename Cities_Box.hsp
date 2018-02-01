@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 1.0.2
+								       Cities Box Ver 1.1.0
 										 Main Source Code
 	
 						 			  (C)YotioSoft 2017-2018
@@ -293,6 +293,11 @@
 		Set_Play_BGM = int( get_chapter(config, "Set_Play_BGM", " = ", ";") )
 		Ignore_Update = int( get_chapter(config, "Ignore_Update", " = ", ";") )
 		Get_Dev_Version = int( get_chapter(config, "Get_Dev_Version", " = ", ";") )
+
+		OS = get_chapter(config, "OS", " = \"", "\"")
+
+		Adjustment_Interval = int( get_chapter(config, "Adjustment_Interval", " = ", ";") )
+		Drow_Interval = int( get_chapter(config, "Drow_Interval", " = ", ";") )
 	
 		Config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
 		Config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
@@ -319,6 +324,7 @@
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		celload "img/logo.png", 2										; ロゴ
 		celload "img/logo2.png", 62										; ロゴ2（タイトル）
+		celload "img/logo2_Mac.png", 75									; ロゴ2（macOS向け）
 		celload "img/title_background.png", 15							; タイトル背景画像
 	
 	//メニューのアイコン
@@ -520,6 +526,9 @@
 	
 				dim addon_education_rate_influence, 128
 				dim addon_education_rate_influence_grid, 128
+
+				dim addon_night_mask_set, total_addons, 100
+				sdim addon_night_mask, 128, total_addons, 100
 	
 				dim addon_build_limit, 128
 	
@@ -595,28 +604,6 @@
 				//生産物・生産量
 					addon_crop(cnt) = get_chapter(buf_adat, "addon_crop", " = \"", "\"")
 					addon_crop_amount(cnt) = int( get_chapter(buf_adat, "addon_crop_amount", " = \"", "\"") )
-	
-				//透過色
-					addon_transparent_color_tmp = get_chapter(buf_adat, "transparent_color", " = \"", "\"")
-					split addon_transparent_color_tmp, ", ", addon_transparent_color_r_tmp, addon_transparent_color_g_tmp, addon_transparent_color_b_tmp
-	
-					addon_transparent_color_r(cnt) = int(addon_transparent_color_r_tmp)
-					addon_transparent_color_g(cnt) = int(addon_transparent_color_g_tmp)
-					addon_transparent_color_b(cnt) = int(addon_transparent_color_b_tmp)
-	
-				/*
-				//窓の色（RGB値）
-					addon_window_color_tmp = get_chapter(buf_adat, "window_color", " = (", ")")
-	
-					if instr(buf_adat, 0, "window_color") != -1 {
-						split addon_window_color_tmp, ", ", addon_window_color_R_tmp, addon_window_color_G_tmp, addon_window_color_B_tmp
-						addon_window_color_R(cnt) = int(addon_window_color_R_tmp) : addon_window_color_G(cnt) = int(addon_window_color_G_tmp) : addon_window_color_B(cnt) = int(addon_window_color_B_tmp)
-	
-					} else {
-						addon_window_color_R(cnt) = -1 : addon_window_color_G(cnt) = -1 : addon_window_color_B(cnt) = -1
-	
-					}
-				*/
 	
 				//アドオンのadatファイルの詳細の読み込みへ
 					gosub *load_adat
@@ -716,41 +703,116 @@
 						noteadd str(cnt), -1
 					}
 	
-				//アドオンのバッファ（10001～、複数の画像を利用する場合は2000～）および画像の仮想分割、および画像のサイズ取得
+				//アドオンのバッファ（1000000～）および画像の仮想分割、および画像のサイズ取得
+					addon_buffer_number_basic = (addon_number+1) * 10 * 100 * 100
+
+					//タイプが複数ある場合
 					if addon_total_use_types(addon_number) > 1 {
 						repeat addon_total_use_types(addon_number)
-							addon_buffer_number = (10 * addon_number) + cnt
-							celload addon_image(addon_number, cnt), addon_buffer_number
-							celdiv addon_buffer_number, (addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0)), (addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))
+							addon_buffer_number_0 = addon_buffer_number_basic + (cnt*100)
+							
+							celload addon_image(addon_number, cnt), addon_buffer_number_0
+
+							gsel addon_buffer_number_0
+							img_x = ginfo(12) : img_y = ginfo(13)
+
+							gsel 0
+							;celdiv addon_buffer_number, (addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0)), (addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))
+							celdiv addon_buffer_number_0, (addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0)), (addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))
+
+							; 夜間バージョン
+							addon_buffer_number_1 = addon_buffer_number_0 + 10000
+
+							if addon_night_mask_set(addon_number, cnt) = 1 {
+								celload addon_night_mask(addon_number, cnt), 998
+							}
+							
+							buffer addon_buffer_number_1, img_x, img_y
+								color : boxf
+								pos 0, 0 : gcopy addon_buffer_number_0, 0, 0, img_x, img_y
+								
+								color 0, 0, 0 : sboxf 200, 0, 0, img_x, img_y
+	
+								if addon_night_mask_set(addon_number, cnt) = 1 {
+									gmode 2, , , 256
+									pos 0, 0 : gcopy 998, 0, 0, img_x, img_y
+								}
+							
+							gsel 0
+
+							celdiv addon_buffer_number_1, (addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0)), (addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))
+
+							; 夕方・明け方バージョン
+							addon_buffer_number_2 = addon_buffer_number_0 + 20000
+
+							buffer addon_buffer_number_2, img_x, img_y
+								color : boxf
+								pos 0, 0 : gcopy addon_buffer_number_0, 0, 0, img_x, img_y
+								
+								color 0, 0, 0 : sboxf 128, 0, 0, img_x, img_y
+	
+								if addon_night_mask_set(addon_number, cnt) = 1 and rnd(2) = 1 {
+									gmode 2, , , 256
+									pos 0, 0 : gcopy 998, 0, 0, img_x, img_y
+								}
+							
+							gsel 0
+
+							celdiv addon_buffer_number_2, (addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0)), (addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))
+							
+							; 停電バージョン
+							addon_buffer_number_3 = addon_buffer_number_0 + 30000
+
+							buffer addon_buffer_number_3, img_x, img_y
+								color : boxf
+								pos 0, 0 : gcopy addon_buffer_number_0, 0, 0, img_x, img_y
+								
+								color 0, 0, 0 : sboxf 200, 0, 0, img_x, img_y
+							
+							gsel 0
+
+							celdiv addon_buffer_number_3, (addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0)), (addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))
+
+							gmode 0
 
 							/*
 							color 0, 0, 0 : boxf
 
 							color 255, 255, 255
-							pos 0, 300 : mes ""+addon_buffer_number+" divx="+(addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0))+" divy="+(addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))+""
+							pos 0, 300 : mes ""+addon_buffer_number_1+" divx="+(addon_size_x(addon_number, cnt, 0) + addon_top_left_x(addon_number, cnt, 0))+" divy="+(addon_size_y(addon_number, cnt, 0) + addon_top_left_y(addon_number, cnt, 0))+""
+							mes addon_top_left_x( addon_number, cnt, 0 )
+							mes addon_top_left_y( addon_number, cnt, 0 )
+							;pos 0, 0    : celput addon_buffer_number_1, 0
+							;pos 0, 64*1 : celput addon_buffer_number_1, 1
+							;pos 0, 64*2 : celput addon_buffer_number_1, 2
+							;pos 0, 64*3 : celput addon_buffer_number_1, 3
 
-							pos addon_size_x(addon_number, load_adat_cnt, cnt)*0, addon_size_y(addon_number, load_adat_cnt, cnt)*0 : celput addon_buffer_number, 0
-							pos addon_size_x(addon_number, load_adat_cnt, cnt)*1, addon_size_y(addon_number, load_adat_cnt, cnt)*0 : celput addon_buffer_number, 1
-							pos addon_size_x(addon_number, load_adat_cnt, cnt)*0, addon_size_y(addon_number, load_adat_cnt, cnt)*1 : celput addon_buffer_number, 2
-							pos addon_size_x(addon_number, load_adat_cnt, cnt)*1, addon_size_y(addon_number, load_adat_cnt, cnt)*1 : celput addon_buffer_number, 3
+							pos 0, 0 : gcopy addon_buffer_number_1, 0, 0, windowx, windowy
+
+							wait 50
 							*/
+							
 						loop
-					} else {
-						addon_buffer_number = (1000 + addon_number)
 						
-						celload addon_image(addon_number, 0), addon_buffer_number
-
-						gsel addon_buffer_number
-						img_x = ginfo(12) : img_y = ginfo(13)
+					} else {
 
 						gsel 0
 
+						;color 0, 0, 0 : boxf 0, 0, windowx, 50
+						;pos 0, 0 : color 255, 255, 255 : mes addon_jp_name(addon_number)
+
 						//向きごとに位置を変える（左向き：左上、上向き：右上、下向き：左下、右向き：右下）
+							addon_buffer_number_0 = addon_buffer_number_basic + 0
+							celload addon_image(addon_number, 0), addon_buffer_number_0
+
+							gsel addon_buffer_number_0
+							img_x = ginfo(12) : img_y = ginfo(13)
+							
 							buffer 999, img_x, img_y + (addon_top_left_y( addon_number, 0, 0 ) * 2)
 							color : boxf
-							pos 0, 0 : gcopy addon_buffer_number, 0, 0, img_x, img_y
+							pos 0, 0 : gcopy addon_buffer_number_0, 0, 0, img_x, img_y
 							
-							buffer addon_buffer_number, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+							buffer addon_buffer_number_0, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
 							color : boxf
 
 							pos 0, addon_top_left_y( addon_number, 0, 0 )																	 
@@ -762,21 +824,156 @@
 							pos 64 + (addon_size_x(addon_number, 0, 2) - 64), 64 + (addon_size_y(addon_number, 0, 1) - 64)
 									gcopy 999, addon_top_left_x( addon_number, 0, 3 ), addon_top_left_y( addon_number, 0, 3 ), addon_bottom_right_x( addon_number, 0, 3 ), addon_bottom_right_y( addon_number, 0, 3 )
 
+						//夜間向け
+							addon_buffer_number_1 = addon_buffer_number_basic + 10000
+
+							/*
+							gsel 0
+							color 0, 0, 0 : boxf
+							pos 0, 0 : color 255, 255, 255 : mes addon_name(addon_number)
+							*/
+
+							if addon_night_mask_set(addon_number, 0) = 1 {
+								celload addon_night_mask(addon_number, 0), addon_buffer_number_1
+							
+								buffer 998, img_x, img_y + (addon_top_left_y( addon_number, 0, 0 ) * 2)
+								color : boxf
+								pos 0, 0 : gcopy addon_buffer_number_1, 0, 0, img_x, img_y
+							}
+							
+							buffer addon_buffer_number_1, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+								color : boxf
+	
+								pos 0, addon_top_left_y( addon_number, 0, 0 )																	 
+										gcopy 999, addon_top_left_x( addon_number, 0, 0 ), addon_top_left_y( addon_number, 0, 0 ), addon_bottom_right_x( addon_number, 0, 0 ), addon_bottom_right_y( addon_number, 0, 0 )
+								pos 64 + (addon_size_x(addon_number, 0, 0) + addon_top_left_x( addon_number, 0, 0 ) - 64), addon_top_left_y( addon_number, 0, 1 )									 
+										gcopy 999, addon_top_left_x( addon_number, 0, 1 ), addon_top_left_y( addon_number, 0, 1 ), addon_bottom_right_x( addon_number, 0, 1 ), addon_bottom_right_y( addon_number, 0, 1 )
+								pos 0, 64 + (addon_size_y(addon_number, 0, 0) - 64)		 
+										gcopy 999, addon_top_left_x( addon_number, 0, 2 ), addon_top_left_y( addon_number, 0, 2 ), addon_bottom_right_x( addon_number, 0, 2 ), addon_bottom_right_y( addon_number, 0, 2 )
+								pos 64 + (addon_size_x(addon_number, 0, 2) - 64), 64 + (addon_size_y(addon_number, 0, 1) - 64)
+										gcopy 999, addon_top_left_x( addon_number, 0, 3 ), addon_top_left_y( addon_number, 0, 3 ), addon_bottom_right_x( addon_number, 0, 3 ), addon_bottom_right_y( addon_number, 0, 3 )
+	
+								color 0, 0, 0 : sboxf 200, 0, 0, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+	
+								if addon_night_mask_set(addon_number, 0) = 1 {
+									gmode 2, , , 256
+									
+									pos 0, addon_top_left_y( addon_number, 0, 0 )																	 
+											gcopy 998, addon_top_left_x( addon_number, 0, 0 ), addon_top_left_y( addon_number, 0, 0 ), addon_bottom_right_x( addon_number, 0, 0 ), addon_bottom_right_y( addon_number, 0, 0 )
+									pos 64 + (addon_size_x(addon_number, 0, 0) + addon_top_left_x( addon_number, 0, 0 ) - 64), addon_top_left_y( addon_number, 0, 1 )									 
+											gcopy 998, addon_top_left_x( addon_number, 0, 1 ), addon_top_left_y( addon_number, 0, 1 ), addon_bottom_right_x( addon_number, 0, 1 ), addon_bottom_right_y( addon_number, 0, 1 )
+									pos 0, 64 + (addon_size_y(addon_number, 0, 0) - 64)		 
+											gcopy 998, addon_top_left_x( addon_number, 0, 2 ), addon_top_left_y( addon_number, 0, 2 ), addon_bottom_right_x( addon_number, 0, 2 ), addon_bottom_right_y( addon_number, 0, 2 )
+									pos 64 + (addon_size_x(addon_number, 0, 2) - 64), 64 + (addon_size_y(addon_number, 0, 1) - 64)
+											gcopy 998, addon_top_left_x( addon_number, 0, 3 ), addon_top_left_y( addon_number, 0, 3 ), addon_bottom_right_x( addon_number, 0, 3 ), addon_bottom_right_y( addon_number, 0, 3 )
+								}
+
+						//夕方・明け方バージョン
+							addon_buffer_number_2 = addon_buffer_number_basic + 20000
+
+							if addon_night_mask_set(addon_number, 0) = 1 {
+								celload addon_night_mask(addon_number, 0), addon_buffer_number_2
+							
+								buffer 998, img_x, img_y + (addon_top_left_y( addon_number, 0, 0 ) * 2)
+								color : boxf
+								pos 0, 0 : gcopy addon_buffer_number_2, 0, 0, img_x, img_y
+							}
+							
+							buffer addon_buffer_number_2, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+								color : boxf
+	
+								pos 0, addon_top_left_y( addon_number, 0, 0 )																	 
+										gcopy 999, addon_top_left_x( addon_number, 0, 0 ), addon_top_left_y( addon_number, 0, 0 ), addon_bottom_right_x( addon_number, 0, 0 ), addon_bottom_right_y( addon_number, 0, 0 )
+								pos 64 + (addon_size_x(addon_number, 0, 0) + addon_top_left_x( addon_number, 0, 0 ) - 64), addon_top_left_y( addon_number, 0, 1 )									 
+										gcopy 999, addon_top_left_x( addon_number, 0, 1 ), addon_top_left_y( addon_number, 0, 1 ), addon_bottom_right_x( addon_number, 0, 1 ), addon_bottom_right_y( addon_number, 0, 1 )
+								pos 0, 64 + (addon_size_y(addon_number, 0, 0) - 64)		 
+										gcopy 999, addon_top_left_x( addon_number, 0, 2 ), addon_top_left_y( addon_number, 0, 2 ), addon_bottom_right_x( addon_number, 0, 2 ), addon_bottom_right_y( addon_number, 0, 2 )
+								pos 64 + (addon_size_x(addon_number, 0, 2) - 64), 64 + (addon_size_y(addon_number, 0, 1) - 64)
+										gcopy 999, addon_top_left_x( addon_number, 0, 3 ), addon_top_left_y( addon_number, 0, 3 ), addon_bottom_right_x( addon_number, 0, 3 ), addon_bottom_right_y( addon_number, 0, 3 )
+	
+								color 0, 0, 0 : sboxf 128, 0, 0, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+	
+								if addon_night_mask_set(addon_number, 0) = 1 and rnd(2) = 1 {
+									gmode 2, , , 256
+									
+									pos 0, addon_top_left_y( addon_number, 0, 0 )																	 
+											gcopy 998, addon_top_left_x( addon_number, 0, 0 ), addon_top_left_y( addon_number, 0, 0 ), addon_bottom_right_x( addon_number, 0, 0 ), addon_bottom_right_y( addon_number, 0, 0 )
+									pos 64 + (addon_size_x(addon_number, 0, 0) + addon_top_left_x( addon_number, 0, 0 ) - 64), addon_top_left_y( addon_number, 0, 1 )									 
+											gcopy 998, addon_top_left_x( addon_number, 0, 1 ), addon_top_left_y( addon_number, 0, 1 ), addon_bottom_right_x( addon_number, 0, 1 ), addon_bottom_right_y( addon_number, 0, 1 )
+									pos 0, 64 + (addon_size_y(addon_number, 0, 0) - 64)		 
+											gcopy 998, addon_top_left_x( addon_number, 0, 2 ), addon_top_left_y( addon_number, 0, 2 ), addon_bottom_right_x( addon_number, 0, 2 ), addon_bottom_right_y( addon_number, 0, 2 )
+									pos 64 + (addon_size_x(addon_number, 0, 2) - 64), 64 + (addon_size_y(addon_number, 0, 1) - 64)
+											gcopy 998, addon_top_left_x( addon_number, 0, 3 ), addon_top_left_y( addon_number, 0, 3 ), addon_bottom_right_x( addon_number, 0, 3 ), addon_bottom_right_y( addon_number, 0, 3 )
+								}
+
+						//停電バージョン
+							addon_buffer_number_3 = addon_buffer_number_basic + 30000
+
+							if addon_night_mask_set(addon_number, 0) = 1 {
+								celload addon_night_mask(addon_number, 0), addon_buffer_number_3
+							
+								buffer 998, img_x, img_y + (addon_top_left_y( addon_number, 0, 0 ) * 2)
+								color : boxf
+								pos 0, 0 : gcopy addon_buffer_number_3, 0, 0, img_x, img_y
+							}
+							
+							buffer addon_buffer_number_3, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+								color : boxf
+	
+								pos 0, addon_top_left_y( addon_number, 0, 0 )																	 
+										gcopy 999, addon_top_left_x( addon_number, 0, 0 ), addon_top_left_y( addon_number, 0, 0 ), addon_bottom_right_x( addon_number, 0, 0 ), addon_bottom_right_y( addon_number, 0, 0 )
+								pos 64 + (addon_size_x(addon_number, 0, 0) + addon_top_left_x( addon_number, 0, 0 ) - 64), addon_top_left_y( addon_number, 0, 1 )									 
+										gcopy 999, addon_top_left_x( addon_number, 0, 1 ), addon_top_left_y( addon_number, 0, 1 ), addon_bottom_right_x( addon_number, 0, 1 ), addon_bottom_right_y( addon_number, 0, 1 )
+								pos 0, 64 + (addon_size_y(addon_number, 0, 0) - 64)		 
+										gcopy 999, addon_top_left_x( addon_number, 0, 2 ), addon_top_left_y( addon_number, 0, 2 ), addon_bottom_right_x( addon_number, 0, 2 ), addon_bottom_right_y( addon_number, 0, 2 )
+								pos 64 + (addon_size_x(addon_number, 0, 2) - 64), 64 + (addon_size_y(addon_number, 0, 1) - 64)
+										gcopy 999, addon_top_left_x( addon_number, 0, 3 ), addon_top_left_y( addon_number, 0, 3 ), addon_bottom_right_x( addon_number, 0, 3 ), addon_bottom_right_y( addon_number, 0, 3 )
+	
+								color 0, 0, 0 : sboxf 200, 0, 0, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) * 2, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)) * 2
+
+								
 							gsel 0
 
 						//仮想分割
-							celdiv addon_buffer_number, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
-
+							celdiv addon_buffer_number_0, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+							celdiv addon_buffer_number_1, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+							celdiv addon_buffer_number_2, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+							celdiv addon_buffer_number_3, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+							
 						//2マス以上のアドオンを更に分割
 							if (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) > 64 {
 								repeat 4
-									buffer ((10 * addon_buffer_number) + cnt), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									buffer (addon_buffer_number_0 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
 										color : boxf
-										pos 0, 0 : celput addon_buffer_number, cnt
+										pos 0, 0 : celput addon_buffer_number_0, cnt
 	
 									gsel 0
 	
-									celdiv (10 * addon_buffer_number) + cnt, 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									celdiv (addon_buffer_number_0 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+
+									buffer (addon_buffer_number_1 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+										color : boxf
+										pos 0, 0 : celput addon_buffer_number_1, cnt
+	
+									gsel 0
+	
+									celdiv (addon_buffer_number_1 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+
+									buffer (addon_buffer_number_2 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+										color : boxf
+										pos 0, 0 : celput addon_buffer_number_2, cnt
+	
+									gsel 0
+	
+									celdiv (addon_buffer_number_2 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+
+									buffer (addon_buffer_number_3 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+										color : boxf
+										pos 0, 0 : celput addon_buffer_number_3, cnt
+	
+									gsel 0
+	
+									celdiv (addon_buffer_number_3 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
 								loop
 							}
 
@@ -805,13 +1002,20 @@
 					}
 	
 				//アドオンのアイコンのバッファ（10001000～）
-					celload addon_icon(addon_number), (10001000 + addon_number)
+					celload addon_icon(addon_number), addon_number + 90000
 
 				//ディレクトリを戻す
 					chdir directory
 	
 				//一時ファイルを保存
 					temp_file = str(addon_number)
+
+					exist "data/temp/"+addon_name(cnt)+".temp"
+					
+					if strsize != -1 {
+						delete "data/temp/"+addon_name(cnt)+".temp"
+					}
+					
 					notesel temp_file
 					notesave "data/temp/"+addon_name(cnt)+".temp"
 	
@@ -849,6 +1053,13 @@
 	
 			//使用する画像の取得（image）
 				addon_image(addon_number, cnt) = get_chapter(use_type_summary, "image", " = \"", "\"")
+
+			//夜間向けマスク画像の取得（night_mask）
+				addon_night_mask(addon_number, cnt) = get_chapter(use_type_summary, "night_mask", " = \"", "\"")
+				
+				if instr(use_type_summary, 0, "night_mask") != -1 {
+					addon_night_mask_set(addon_number, cnt) = 1
+				}
 						
 			//タイプの向きを取得（direction）
 				addon_direction_buf = get_chapter(use_type_summary, "direction", " = \"", "\"")
@@ -863,6 +1074,8 @@
 					addon_direction(addon_number, load_adat_cnt, cnt) = addon_direction_buf_2(cnt)
 	
 					addon_direction_summary = get_chapter(use_type_summary, ""+addon_direction(addon_number, load_adat_cnt, cnt)+" {", " {", "}")
+
+					load_adat_cnt_2 = cnt
 	
 					//サイズを取得（size_x, size_y）
 						addon_size_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "size_x", " = \"", "\"")
@@ -891,7 +1104,7 @@
 										
 						addon_bottom_right_x(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_bottom_right_y(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt))
-									
+						
 					await 1
 				loop
 		
@@ -980,8 +1193,9 @@
 		latest_version__Title = get_chapter(latest_version, "Title", " : ", ";")
 		latest_version__Version = get_chapter(latest_version, "Version", " : ", ";")
 		latest_version__About = get_chapter(latest_version, "About", " : ", ";")
+		latest_version__OS = get_chapter(latest_version, "OS", " : ", ";")
 		
-		if latest_version__Release_number > NOW_Release_number {
+		if latest_version__Release_number > NOW_Release_number and instr(latest_version__OS, 0, OS) != -1 {
 			normalUpdate = 1
 	
 			goto *menu
@@ -1006,8 +1220,9 @@
 			Dev_latest_version__Title = get_chapter(Dev_latest_version, "Title", " : ", ";")
 			Dev_latest_version__Version = get_chapter(Dev_latest_version, "Version", " : ", ";")
 			Dev_latest_version__About = get_chapter(Dev_latest_version, "About", " : ", ";")
+			Dev_latest_version__OS = get_chapter(latest_version, "OS", " : ", ";")
 			
-			if Dev_latest_version__Release_number > NOW_Release_number {
+			if Dev_latest_version__Release_number > NOW_Release_number and instr(Dev_latest_version__OS, 0, OS) != -1 {
 				devUpdate = 1
 		
 				goto *menu
@@ -1070,11 +1285,15 @@
 	
 		//左上のメニュー（設定ボタンなど）
 			color 255, 255, 255 : font SystemFont, 14
-			pos 8, 5 : mes "Cities Box Ver."+about_version+" r"+NOW_Release_number+""
+			pos 8, 5 : mes about_title+" Ver."+about_version+" r"+NOW_Release_number+""
 			
 			gmode 2
 			pos 8, 25  : gcopy 65, 0, 0, 32, 32
 			pos 45, 25 : gcopy 72, 0, 0, 32, 32
+
+			if OS = "macOS" {
+				pos 82, 25 : gcopy 64, 0, 0, 32, 32
+			}
 
 			if click_range(8, 25, 8+32, 25+32) = 1 {
 				font SystemFont, 10
@@ -1089,6 +1308,16 @@
 				color 255, 255, 255 : sboxf 200, 45, 25+32, 45+70, 25+32+18
 				color 0, 0, 0
 				pos 45+2, 25+32+2 : mes "Addon Maker"
+			}
+
+			if OS = "macOS" {
+				if click_range(82, 25, 82+32, 25+32) = 1 {
+					font SystemFont, 10
+					
+					color 255, 255, 255 : sboxf 200, 82, 25+32, 82+70, 25+32+18
+					color 0, 0, 0
+					pos 82+2, 25+32+2 : mes "ReadMe.txt"
+				}
 			}
 			
 	
@@ -1124,6 +1353,12 @@
 	}
 	if click_range(45, 25, 45+32, 25+32) = 1 {
 		gosub *menu_addon_maker
+	}
+
+	if OS = "macOS" {
+		if click_range(82, 25, 82+32, 25+32) = 1 {
+			exec "ReadMe.txt", 16
+		}
 	}
 	
 	return
@@ -1187,9 +1422,51 @@
 	
 				; フォント設定(SystemFont)
 					pos 90, 130 : mes "フォント"
+
+					gtmp = ginfo(14)
 					
-					pos 90+ginfo(14)+100, 130 : objsize 150, 20 : input SystemFont : SyetmFont__stat = stat
-					pos 90+ginfo(14)+250, 130 : objsize 50, 20  : button gosub "参照", *refer_fonts
+					pos 90+gtmp+100, 130 : objsize 150, 20 : input SystemFont : SyetmFont__stat = stat
+					pos 90+gtmp+250, 130 : objsize 50, 20  : button gosub "参照", *refer_fonts
+
+				; 動作モード設定(OS)
+					pos 90, 160 : mes "動作モード"
+					
+					pos 90+gtmp+200, 160 : objsize 100, 20 : combox os_num, 100, "Windows\nmacOS"
+
+				; 数値調節間隔（Adjustment_Interval）
+					pos 90, 190 : mes "数値調節等の間隔（数値が低いほど間隔が短い）"
+					
+					pos 90+gtmp+250, 190 : objsize 50, 20 : input Adjustment_Interval : AIinpStat = stat
+
+				; 描写間隔（Drow_Interval）
+					pos 90, 220 : mes "描写間隔（数値が低いほど間隔が短い）"
+					
+					pos 90+gtmp+250, 220 : objsize 50, 20 : input Drow_Interval : DIinpStat = stat
+
+
+				repeat
+					if os_num != os_num_before and os_num = 0 {
+						OS = "Windows"
+
+						Adjustment_Interval = 2
+						Drow_Interval = 16
+						
+						objprm AIinpStat, Adjustment_Interval
+						objprm DIinpStat, Drow_Interval
+					} else : if os_num != os_num_before and os_num = 1 {
+						OS = "macOS"
+
+						Adjustment_Interval = 2
+						Drow_Interval = 8
+						
+						objprm AIinpStat, Adjustment_Interval
+						objprm DIinpStat, Drow_Interval
+					}
+
+					os_num_before = os_num
+
+					wait 100
+				loop
 			}
 	
 		; バグ・ご要望の送信
@@ -1220,14 +1497,19 @@
 		; 情報
 			if menu_setting__page = "information" {
 				clrobj
-	
+				
 				color 0, 162, 232 : boxf 60, 128+28, 64, 192+28
 				
 				font SystemFont, 16 : color 255, 255, 255
 				pos 70, 3 : mes "情報"
 	
 				pos 100, 40     : gcopy 2, 0, 0, 110, 110
-				pos 120+110, 40 : gcopy 62, 0, 0, 230, 110
+
+				if OS = "Windows" {
+					pos 120+110, 40 : gcopy 62, 0, 0, 230, 110
+				} else : OS = "macOS" {
+					pos 120+110, 40 : gcopy 75, 0, 0, 230, 110
+				}
 	
 				font SystemFont, 14 : color 255, 255, 255
 				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+NOW_Release_number+"\nDevelopment Language : HSP 3.5"
@@ -2706,6 +2988,18 @@
 		
 		//更地（tile_greenfield）の"null"のobj_dire番号
 			tile_greenfield_null_dire_buf = element3( "tile_greenfield", use_type, addon_total_use_types, "null", addon_direction, addon_total_addon_direction, "null")
+
+		//更地（tile_greenfield）の"null"のobj_type番号
+			tile_greenfield_autumn_type_buf = element2( "tile_greenfield", use_type, addon_total_use_types, "autumn")
+		
+		//更地（tile_greenfield）の"null"のobj_dire番号
+			tile_greenfield_autumn_dire_buf = element3( "tile_greenfield", use_type, addon_total_use_types, "autumn", addon_direction, addon_total_addon_direction, "null")
+
+		//更地（tile_greenfield）の"null"のobj_type番号
+			tile_greenfield_snow_type_buf = element2( "tile_greenfield", use_type, addon_total_use_types, "snow")
+		
+		//更地（tile_greenfield）の"null"のobj_dire番号
+			tile_greenfield_snow_dire_buf = element3( "tile_greenfield", use_type, addon_total_use_types, "snow", addon_direction, addon_total_addon_direction, "null")
 	
 	//需要度を増減
 		//総求人数を取得
@@ -2722,6 +3016,12 @@
 
 	//人口を反映
 		before_Total_Population = Total_Population
+
+		goto *main
+
+*e
+	dialoG""+(buffer_number(x,y) + obj_dire(x,y) + 1)+""
+	end
 		
 *main
 	title about_title
@@ -2729,7 +3029,7 @@
 	randomize
 	
 	repeat
-		dim trout_build, total_addons, (mapsize*mapsize)
+		dim trout_build, total_addons, (mapsize*mapsize) ; check
 		dim done_build, 6, mapsize, mapsize
 	
 		main_cnt ++
@@ -2907,7 +3207,7 @@
 		}
 	
 		//各マスの値を調節
-		if cnt \ 2 = 0 {
+		if cnt \ Adjustment_Interval = 0 {
 			ny = 0
 		
 			repeat mapsize
@@ -3079,10 +3379,11 @@
 		if qvvw4 > mapsize+64 {
 			goto *skip2
 		}
-				
+
+
+		//ここから描画
 
 		repeat
-	
 				if x>(left_top_x-1) and x<(right_bottom_x+1) and y>(right_top_y-1) and y<(left_bottom_y+1) {
 					/*
 					//現在処理しているマス（常時非表示）
@@ -3114,13 +3415,34 @@
 						}
 	
 					//オブジェクトのバッファ番号、オブジェクトの左上の座標（atlx）、左下の座標（atly）、右上の座標（abrx）、右下の座標（abry）、サイズ（sizex, sizey）を取得
-						if addon_total_use_types( map(x,y) ) > 1 {		; ひとつのアドオンで複数の画像を要する場合
-							buffer_number(x,y) = (10 * map(x,y)) + obj_type(x,y)
-							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
-							
-						} else {										; ひとつのアドオンでひとつの画像を要する場合
-							buffer_number(x,y) = map(x,y) + 1000
-							get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
+						if Set_Dark_on_Night = 1 {
+							if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
+								buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + 10000 + obj_type(x,y)*100
+							} else : if (time_Hour >= 16 and time_Hour <= 17) or (time_hour = 6) {
+								buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + 20000 + obj_type(x,y)*100
+							} else {
+								buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + obj_type(x,y)*100
+							}
+						} else {
+							buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + obj_type(x,y)*100
+						}
+
+						get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
+
+						if name(x,y) = "tile_greenfield" {
+							if time_Month >= 9 and time_Month <= 11 {
+								;buffer_number(x,y) = (10 * map(x,y)) + tile_greenfield_autumn_type_buf
+								tile_type_tmp = tile_greenfield_snow_type_buf
+								get_about_addon map(x,y), tile_greenfield_autumn_type_buf, tile_greenfield_autumn_dire_buf, atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
+							} else : if time_Month = 12 or (time_Month >= 1 and time_Month <= 2) {
+								;buffer_number(x,y) = (10 * map(x,y)) + tile_greenfield_snow_type_buf
+								tile_type_tmp = tile_greenfield_snow_type_buf
+								get_about_addon map(x,y), tile_greenfield_snow_type_buf, tile_greenfield_snow_dire_buf, atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
+							} else {
+								;buffer_number(x,y) = (10 * map(x,y)) + tile_greenfield_null_type_buf
+								tile_type_tmp = tile_greenfield_null_type_buf
+								get_about_addon map(x,y), tile_greenfield_null_type_buf, tile_greenfield_null_dire_buf, atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
+							}
 						}
 	
 						px = 0 : py = 0
@@ -3198,29 +3520,36 @@
 						if ( obj_use_tiles_x(x,y) != 0 or obj_use_tiles_y(x,y) != 0 ) and category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "station" {
 							if obj_use_tiles_x(x,y) != 0 and obj_use_tiles_y(x,y) = 0 {
 								if obj_use_tiles_x(x,y) > 0 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 1 or obj_dire(x,y) = 2) {
-									celput (10 * buffer_number(x,y)) + obj_dire(x,y), obj_tiles_x(x,y)
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, obj_tiles_x(x,y)
 								} else : if obj_use_tiles_x(x,y) > 0 and obj_dire(x,y) = 3 {
-									celput (10 * buffer_number(x,y)) + obj_dire(x,y), obj_use_tiles_x(x,y) - 1 + obj_tiles_x(x,y)
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, obj_use_tiles_x(x,y) - 1 + obj_tiles_x(x,y)
 								}
 							}
 							if obj_use_tiles_x(x,y) = 0 and obj_use_tiles_y(x,y) != 0 {
 								if obj_use_tiles_y(x,y) > 0 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 1 or obj_dire(x,y) = 3) {
-									celput (10 * buffer_number(x,y)) + obj_dire(x,y), obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
 								} else : if obj_use_tiles_y(x,y) > 0 and obj_dire(x,y) = 2 {
-									celput (10 * buffer_number(x,y)) + obj_dire(x,y), abs(obj_tiles_y(x,y))
+									onerror *e
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, abs(obj_tiles_y(x,y))
 								}
 							}
 							if obj_use_tiles_x(x,y) != 0 and obj_use_tiles_y(x,y) != 0 {
 								if obj_tiles_x(x,y) >= 0 {
-									celput (10 * buffer_number(x,y)) + obj_dire(x,y), (atlx / sizex + (2 * int((atly-1) / sizey)))
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, (atlx / sizex + (2 * int((atly-1) / sizey)))
 								} else {
-									celput (10 * buffer_number(x,y)) + obj_dire(x,y), (atlx / sizex + (2 * int((atly-1) / sizey))) + obj_tiles_x(x,y) + obj_tiles_y(x,y)
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, (atlx / sizex + (2 * int((atly-1) / sizey))) + obj_tiles_x(x,y) + obj_tiles_y(x,y)
 								}
 							}
 							
 						} else {
-							celput buffer_number(x,y), obj_dire(x,y)
+							if category(x,y) = "tile" {
+								celput buffer_number(x,y), tile_type_tmp
+							} else {
+								celput buffer_number(x,y), obj_dire(x,y)
+							}
 						}
+							
+						
 				}
 
 	*skip1				
@@ -3236,6 +3565,7 @@
 		loop
 
 	*skip2
+		/*
 		//時間帯に応じて明るさを調節
 			if Set_Dark_on_Night = 1 {
 				//夜間
@@ -3253,7 +3583,8 @@
 					color 0, 0, 0 : sboxf 200-double(time_Minutes+1.0)/60*200, 0, 0, windowx, windowy
 				}
 			}
-	
+		*/
+		
 		//マウスポインタの位置のチップを光らせる
 			if opening_addon_menu = 1 {
 				menu_line_y = windowy-70-titlebar_h-32-20
@@ -3289,7 +3620,7 @@
 						pos macro1,macro2-32 : gcopy pointer_icon, 0, 0, 64, 32					; 地区設定の場合
 	
 					} else {
-						pos macro1+16,macro2-32 : gcopy (10001000+pointer_icon), 0, 0, 32, 32	; 個別の建物の場合
+						pos macro1+16,macro2-32 : gcopy pointer_icon, 0, 0, 32, 32	; 個別の建物の場合
 					}
 				}
 			}
@@ -3998,6 +4329,22 @@
 					pos 90, windowy-30-titlebar_h+10 : mes "News : "+news_content+""
 				
 				//RCOI需要メータ
+					if demand_Residential < 0 {
+						demand_Residential = 1
+					}
+					if demand_Commercial < 0 {
+						demand_Commercial = 1
+					}
+					if demand_Office < 0 {
+						demand_Office = 1
+					}
+					if demand_Industrial < 0 {
+						demand_Industrial = 1
+					}
+					if demand_Farm < 0 {
+						demand_Farm = 1
+					}
+					
 					font SystemFont, 10
 					
 					//R - 住居区画
@@ -4017,7 +4364,7 @@
 						cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10, 1
 					
 			redraw 1
-			await 16
+			await Drow_Interval
 			c+=16
 	loop
 	
@@ -6739,7 +7086,7 @@
 	
 		if p = 0 or (p = 1 and cnt > 0) {
 			if clicked_addon_number != cnt {
-				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 0, 32, 32
+				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy int(get_addon_number) + 90000, 0, 0, 32, 32
 			}
 			if clicked_addon_number = cnt {
 				//アドオンにアドオン建設可能回数が設定されている場合
@@ -6770,9 +7117,9 @@
 				color 255,255,255 : font SystemFont, 10
 				pos 23, (windowy-70-titlebar_h-32-20) : mes addon_summary(int(get_addon_number))
 				
-				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy (10001000 + int(get_addon_number)), 0, 32, 32, 64
+				pos 30 + (cnt)*35+10, windowy-70-titlebar_h-32 : gcopy int(get_addon_number) + 90000, 0, 32, 32, 64
 		
-				pointer_icon = int(get_addon_number)
+				pointer_icon = int(get_addon_number) + 90000
 			}
 		}
 		
@@ -7035,6 +7382,10 @@
 		//人口の増減
 			if category(x,y) = "residential" and rtmp = 0 and demand_Residential != 0 {
 				//住民数を増やすか・減らすかをランダムに決める（需要度によって確率が変動する）
+					if demand_Residential < 0 {
+						demand_Residential = 0
+					}
+
 					rndv = 10+(demand_Residential/10)
 					
 					f = rnd(rndv)+1		; fの値は住居地区の需要度が100％なら20～0
@@ -7137,15 +7488,18 @@
 				}
 				
 			//RCOIF需要メーターを変動
-				if Vacancies > 0 and Total_Vagrants >= 0 {
+				;if Vacancies > 0 and Total_Vagrants >= 0 {
 					if Total_Population > 0 {
-						demand_Residential 	= happiness_ave + Special_demand_Residential
+						demand_Residential 	= happiness_ave + (rnd(20) - 10) + Special_demand_Residential
 					} else {
 						demand_Residential 	= 100
 					}
+					if demand_Residential < 0 {
+						demand_Residential = 1
+					}
 					
 					if Total_Commercial_maximum_capacity > 0 {
-						demand_Commercial 	-= rnd(20) - 10  + Special_demand_Commercial
+						demand_Commercial 	-= r - 10  + Special_demand_Commercial
 						if demand_Commercial > 100 {
 							demand_Commercial = 100
 						} else : if demand_Commercial < 0 {
@@ -7153,6 +7507,9 @@
 						}
 					} else {
 						demand_Commercial 	= 100
+					}
+					if demand_Commercial < 0 {
+						demand_Commercial = 1
 					}
 					
 					if Total_Office_maximum_capacity > 0 {
@@ -7165,6 +7522,9 @@
 					} else {
 						demand_Office 		= 100
 					}
+					if demand_Office < 0 {
+						demand_Office = 1
+					}
 					
 					if Total_Industrial_maximum_capacity > 0 {
 						demand_Industrial 	-= rnd(20) - 10  + Special_demand_Industrial
@@ -7175,6 +7535,9 @@
 						}
 					} else {
 						demand_Industrial 	= 100
+					}
+					if demand_Industrial < 0 {
+						demand_Industrial = 1
 					}
 	
 					if Total_Farm_maximum_capacity > 0 {
@@ -7187,7 +7550,10 @@
 					} else {
 						demand_Farm 	= 100
 					}
-				}
+					if demand_Farm < 0 {
+						demand_Farm = 1
+					}
+				;}
 	
 		//毎年1月1日に、住民の年齢に1を足す
 			if Time_Month = 1 and Time_Date = 1 and residents(x,y) > 0 {
@@ -9832,6 +10198,17 @@
 						}
 						if instr(config_tmp, 0, "Get_Dev_Version") != -1 {
 							noteadd "Get_Dev_Version = "+Get_Dev_Version+";", cnt, 1
+						}
+
+						if instr(config_tmp, 0, "OS") != -1 {
+							noteadd "OS = \""+OS+"\";", cnt, 1
+						}
+
+						if instr(config_tmp, 0, "Adjustment_Interval") != -1 {
+							noteadd "Adjustment_Interval = "+Adjustment_Interval+";", cnt, 1
+						}
+						if instr(config_tmp, 0, "Drow_Interval") != -1 {
+							noteadd "Drow_Interval = "+Drow_Interval+";", cnt, 1
 						}
 
 					loop

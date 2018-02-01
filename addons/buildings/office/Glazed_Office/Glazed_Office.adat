@@ -23,6 +23,7 @@ addon_crop_amount = ""
  
 null {
 	image = "Glazed_Office.png"
+	night_mask = "Glazed_Office__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
  

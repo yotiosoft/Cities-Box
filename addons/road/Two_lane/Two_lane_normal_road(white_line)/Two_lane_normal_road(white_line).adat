@@ -9,6 +9,7 @@ use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_
 
 default {
 	image = "Two_lane_normal_road(white_line).png"
+	night_mask = "Two_lane_normal_road(white_line)__night_mask.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	
@@ -38,6 +39,7 @@ default {
 
 dead_end {
 	image = "Two_lane_normal_road(white_line)_dead_end.png"
+	night_mask = "Two_lane_normal_road(white_line)_dead_end__night_mask.png"
 	direction = "left, top, bottom, right"
 	transparent_color = "0, 0, 0"
 	
@@ -89,6 +91,7 @@ dead_end {
 
 turn {
 	image = "Two_lane_normal_road(white_line)_turn.png"
+	night_mask = "Two_lane_normal_road(white_line)_turn__night_mask.png"
 	direction = "left-top, right-top, left-bottom, right-bottom"
 	transparent_color = "0, 0, 0"
 	
@@ -140,6 +143,7 @@ turn {
 
 intersection_T {
 	image = "Two_lane_normal_road_intersection_T.png"
+	night_mask = "Two_lane_normal_road_intersection_T__night_mask.png"
 	direction = "left-top-bottom, left-right-top, left-right-bottom, right-top-bottom"
 	transparent_color = "0, 0, 0"
 	
@@ -191,6 +195,7 @@ intersection_T {
 
 intersection_cross {
 	image = "Two_lane_normal_road_intersection_cross.png"
+	night_mask = "Two_lane_normal_road_intersection_cross__night_mask.png"
 	direction = "null"
 	transparent_color = "0, 0, 0"
 	
@@ -209,6 +214,7 @@ intersection_cross {
 
 train_crossing {
 	image = "Two_lane_normal_road_train_crossing.png"
+	night_mask = "Two_lane_normal_road_train_crossing__night_mask.png"
 	direction = "width, depth"
 	transparent_color = "0, 0, 0"
 	
