@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 1.1.0
+								       Cities Box Ver 1.1.1
 										 Main Source Code
 	
 						 			  (C)YotioSoft 2017-2018
@@ -8,8 +8,8 @@
 --------------------------------------------------------------------------------------------------*/
 
 *packopt
-#packopt name "Cities_Box"
-#packopt icon "img/logo.ico"
+	#packopt name "Cities_Box"
+	#packopt icon "img/logo.ico"
 
 *include
 #include "hspinet.as"
@@ -275,13 +275,13 @@
 	//タイトルとバージョンの読み込み
 		notesel about
 		noteload "data/about.txt"
-		
+			
 		noteget about_title, 0
 		noteget about_version, 1
-	
+		
 		split about_title, " : ", not_use, about_title
 		split about_version, " : ", not_use, about_version
-	
+		
 		title about_title
 		
 *load_config
@@ -311,19 +311,27 @@
 		SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
 	
 		gsel 0
-	
-*buffering
+
 	//読み込み中画面
 		color 0, 0, 0 : boxf
 	
-		color 255, 255, 255 : font SystemFont, 14
-		;pos 10, 10 : mes "しばらくお待ちください\nLoading images..."
+		directory = dirinfo(0)
 	
+		color 255, 255, 255 : font SystemFont, 14
+		pos windowx - 120, windowy - 40 : mes "Now Loading..."
+
 		now_loading = 1
-		
+	
+*buffering
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
-		celload "img/logo.png", 2										; ロゴ
-		celload "img/logo2.png", 62										; ロゴ2（タイトル）
+		if instr(about_title, 0, "Dev") != -1 {
+			celload "img/logo_Dev.png", 2									; ロゴ
+			celload "img/logo2_Dev.png", 62									; ロゴ2（タイトル）
+		} else {
+			celload "img/logo.png", 2										; ロゴ
+			celload "img/logo2.png", 62										; ロゴ2（タイトル）
+		}
+		
 		celload "img/logo2_Mac.png", 75									; ロゴ2（macOS向け）
 		celload "img/title_background.png", 15							; タイトル背景画像
 	
@@ -428,14 +436,6 @@
 		celload "img/show_detail/change_name.png", 71						; 建物名の変更
 	
 *preparation
-	//読み込み中画面
-		color 0, 0, 0 : boxf
-	
-		directory = dirinfo(0)
-	
-		color 255, 255, 255 : font SystemFont, 14
-		pos windowx - 120, windowy - 40 : mes "Now Loading..."
-		
 	//onexit
 		onexit *exit
 	
@@ -941,39 +941,58 @@
 							celdiv addon_buffer_number_3, (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
 							
 						//2マス以上のアドオンを更に分割
-							if (addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) > 64 {
+							if img_x/2 > 64 {
 								repeat 4
-									buffer (addon_buffer_number_0 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									div_y = addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0)
+									
+									buffer (addon_buffer_number_0 + cnt + 1), 64 * (img_x / 64 + 1), img_y / 2
 										color : boxf
 										pos 0, 0 : celput addon_buffer_number_0, cnt
 	
 									gsel 0
 	
-									celdiv (addon_buffer_number_0 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									celdiv (addon_buffer_number_0 + cnt + 1), 64, div_y
 
-									buffer (addon_buffer_number_1 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									buffer (addon_buffer_number_1 + cnt + 1), 64 * (img_x / 64 + 1), img_y / 2
 										color : boxf
 										pos 0, 0 : celput addon_buffer_number_1, cnt
 	
 									gsel 0
 	
-									celdiv (addon_buffer_number_1 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									celdiv (addon_buffer_number_1 + cnt + 1), 64, div_y
 
-									buffer (addon_buffer_number_2 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									buffer (addon_buffer_number_2 + cnt + 1), 64 * (img_x / 64 + 1), img_y / 2
 										color : boxf
 										pos 0, 0 : celput addon_buffer_number_2, cnt
 	
 									gsel 0
 	
-									celdiv (addon_buffer_number_2 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									celdiv (addon_buffer_number_2 + cnt + 1), 64, div_y
 
-									buffer (addon_buffer_number_3 + cnt + 1), 64 * (((addon_size_x(addon_number, 0, 0) + addon_top_left_x(addon_number, 0, 0)) / 64) + 1), (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									buffer (addon_buffer_number_3 + cnt + 1), 64 * (img_x / 64 + 1), img_y / 2
 										color : boxf
 										pos 0, 0 : celput addon_buffer_number_3, cnt
 	
 									gsel 0
 	
-									celdiv (addon_buffer_number_3 + cnt + 1), 64, (addon_size_y(addon_number, 0, 0) + addon_top_left_y(addon_number, 0, 0))
+									celdiv (addon_buffer_number_3 + cnt + 1), 64, div_y
+
+									/*
+									color : boxf 0, 0, windowx, windowy-20
+									pos 0, 0		: celput (addon_buffer_number_0 + cnt + 1), 0
+									pos 64, 0		: celput (addon_buffer_number_0 + cnt + 1), 1
+	
+									color 255, 255, 255
+									line 64, 0, 64, div_y*2
+									line 0, div_y, 64*2, div_y
+	
+									pos 10, windowy-70
+									mes "Addon Number : "+addon_number
+									mes "Addon Chip Size : ("+addon_chip_x(addon_number, 0, cnt)+","+addon_chip_y(addon_number, 0, cnt)+")"
+									mes "Image Size : ("+(addon_size_x(addon_number, 0, cnt) + addon_top_left_x(addon_number, 0, cnt))+","+(addon_size_y(addon_number, 0, cnt) + addon_top_left_y(addon_number, 0, cnt))+")"
+	
+									wait 10
+									*/
 								loop
 							}
 
@@ -1143,10 +1162,9 @@
 	return
 	
 *check_update
-	;color 0, 0, 0 : boxf
-	
-	;color 255, 255, 255 : font SystemFont, 14
-	;pos 10, 10 : mes "しばらくお待ちください\nアップデートの確認中..."
+	color 0, 0, 0 : boxf 0, 0, windowx, windowy-5
+	color 255, 255, 255 : font SystemFont, 14
+	pos windowx -200, windowy - 40 : mes "Now Checking for Updates..."
 	
 	notesel about
 	noteload "data/about.txt"
@@ -3018,10 +3036,6 @@
 		before_Total_Population = Total_Population
 
 		goto *main
-
-*e
-	dialoG""+(buffer_number(x,y) + obj_dire(x,y) + 1)+""
-	end
 		
 *main
 	title about_title
@@ -3507,8 +3521,6 @@
 						if abry-atly >= sizey and (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "") {
 							atly -= sizey
 						}
-						
-						pos macro1 + px, macro2 - sizey + 1 + py
 	
 						if addon_transparent_color_r(map(x,y)) = 0 and addon_transparent_color_g(map(x,y)) = 0 and addon_transparent_color_b(map(x,y)) = 0 {
 							gmode 2
@@ -3516,51 +3528,87 @@
 							color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
 							gmode 4, sizex, sizey, 256
 						}
-						
+	
+						; 2マス以上の大きさのアドオンの場合（道路・線路・駅除く）
 						if ( obj_use_tiles_x(x,y) != 0 or obj_use_tiles_y(x,y) != 0 ) and category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "station" {
-							if obj_use_tiles_x(x,y) != 0 and obj_use_tiles_y(x,y) = 0 {
-								if obj_use_tiles_x(x,y) > 0 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 1 or obj_dire(x,y) = 2) {
-									celput buffer_number(x,y) + obj_dire(x,y) + 1, obj_tiles_x(x,y)
-								} else : if obj_use_tiles_x(x,y) > 0 and obj_dire(x,y) = 3 {
-									celput buffer_number(x,y) + obj_dire(x,y) + 1, obj_use_tiles_x(x,y) - 1 + obj_tiles_x(x,y)
+							celnum = 0
+							al = 0
+
+							if obj_tiles_x(x,y) = 0 and obj_dire(x,y) = 3 and ((obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1) or obj_use_tiles_y(x,y) = 0) {
+								celnum = obj_use_tiles_x(x,y) - 1
+							} else : if (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) and obj_use_tiles_x(x,y) <= 1 {
+								celnum = obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
+								al = 1
+							} else : if obj_tiles_x(x,y) < 0 {
+								celnum = obj_tiles_x(x,y) + obj_use_tiles_x(x,y) - 1
+							} else {
+								celnum = obj_tiles_x(x,y)
+							}
+
+							if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and ((obj_tiles_y(x,y) = 1 and obj_dire(x,y) = 3) or (obj_tiles_y(x,y) != 0 and obj_dire(x,y) != 3)) {
+								cm = 1
+
+								if obj_dire(x,y) = 2 {
+									px -= 64
+								}
+							} else {
+								cm = 0
+							}
+
+							if al = 0 {
+								if obj_tiles_y(x,y-cm) = 0 and obj_dire(x,y-cm) = 1 and obj_use_tiles_x(x,y-cm) = 0 {
+									celnum = obj_use_tiles_y(x,y-cm) - 1
+								} else : if obj_tiles_y(x,y-cm) != 0 {
+									if obj_tiles_y(x,y-cm) < 0 {
+										celnum = obj_tiles_y(x,y-cm) + obj_use_tiles_y(x,y-cm)
+									} else {
+										if obj_dire(x,y-cm) = 1 {
+											celnum = obj_tiles_y(x,y-cm) - (obj_use_tiles_y(x,y-cm) - 1)
+										} else {
+											celnum = obj_tiles_y(x,y-cm)
+										}
+									}
 								}
 							}
-							if obj_use_tiles_x(x,y) = 0 and obj_use_tiles_y(x,y) != 0 {
-								if obj_use_tiles_y(x,y) > 0 and (obj_dire(x,y) = 0 or obj_dire(x,y) = 1 or obj_dire(x,y) = 3) {
-									celput buffer_number(x,y) + obj_dire(x,y) + 1, obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
-								} else : if obj_use_tiles_y(x,y) > 0 and obj_dire(x,y) = 2 {
-									onerror *e
-									celput buffer_number(x,y) + obj_dire(x,y) + 1, abs(obj_tiles_y(x,y))
-								}
+
+							if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and obj_tiles_y(x,y) = 0 {
+								celnum = -1
 							}
-							if obj_use_tiles_x(x,y) != 0 and obj_use_tiles_y(x,y) != 0 {
-								if obj_tiles_x(x,y) >= 0 {
-									celput buffer_number(x,y) + obj_dire(x,y) + 1, (atlx / sizex + (2 * int((atly-1) / sizey)))
-								} else {
-									celput buffer_number(x,y) + obj_dire(x,y) + 1, (atlx / sizex + (2 * int((atly-1) / sizey))) + obj_tiles_x(x,y) + obj_tiles_y(x,y)
-								}
+
+							if celnum >= 0 {
+								pos macro1 + px, macro2 - sizey + 1 + py
+								celput buffer_number(x,y) + obj_dire(x,y) + 1, celnum
+								;pos macro1 + px, macro2-100 : color 0, 162, 232 : font SystemFont, 16, 1 : mes ""+celnum+" / "+cm+" / "+al+""
 							}
-							
+	
+						; 1x1のアドオンの場合
 						} else {
+							pos macro1 + px, macro2 - sizey + 1 + py
+							
 							if category(x,y) = "tile" {
 								celput buffer_number(x,y), tile_type_tmp
 							} else {
 								celput buffer_number(x,y), obj_dire(x,y)
 							}
 						}
+
+						/* ;描写する順番
+							color 0, 162, 232 : font SystemFont, 16, 1
+							pos macro1 + px + 2, macro2 - 30 : mes cnt
+						*/
 							
 						
 				}
 
 	*skip1				
-			x += 1
+			y += 1
 
-			if x > qvvw2 {
-				x = qvvw1
-				y += 1
+			if y> qvvw4 {
+				y = qvvw3
+				x++
 			}
 
-			if y > qvvw4 : break
+			if x > qvvw2 : break
 
 		loop
 
@@ -5783,6 +5831,7 @@
 	
 										if from_Build_on_Reservation_area = 0 and (addon_chip_x(addon_num_buf, 0, obj_dire(mx,my)) = 1 and addon_chip_y(addon_num_buf, 0, obj_dire(mx,my)) = 1) {
 											dialog "この区画は既に占有されています"
+											return
 										}
 	
 										if from_Build_on_Reservation_area = 0 {

@@ -1,7 +1,7 @@
-Release Number : 106;
+Release Number : 109;
 Title : Cities Box Dev;
-Version : 1.0.2.4;
-About : 道路など複数の画像を用いるアドオンにも夜間の電飾に対応 etc.;
+Version : 1.1.0.2;
+About : 2x2のアドオンの表示関連のバグを修正;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD_Dev.exe;
 URL : https://github.com/YotioSoft/Cities-Box-Dev/raw/master/;/;

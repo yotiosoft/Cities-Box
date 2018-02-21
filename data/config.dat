@@ -1,7 +1,7 @@
 SystemFont = "Yu Gothic UI"
 Set_Play_BGM = 1;
 Ignore_Update = 0;
-Get_Dev_Version = 1;
+Get_Dev_Version = 0;
 
 OS = "Windows";
 
