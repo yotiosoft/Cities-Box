@@ -5,7 +5,7 @@ addon_icon = "icon_Two_lane_gravel_road.png"
 
 addon_type = "Two_lane_road"
 
-use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_crossing, under_construction"
+use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_crossing, bridge, under_construction"
 
 default {
 	image = "Two_lane_gravel_road.png"
@@ -231,6 +231,35 @@ train_crossing {
 		
 		top_left_x = "64"
 		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+};
+
+bridge {
+	image = "Two_lane_gravel_road_bridge.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+	
+	width {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	depth {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "32"
 		bottom_right_x = "128"
 		bottom_right_y = "64"
 	}

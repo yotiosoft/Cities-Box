@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-								       Cities Box Ver 1.1.1
+								       Cities Box Ver 1.2.0
 										 Main Source Code
 	
 						 			  (C)YotioSoft 2017-2018
@@ -55,6 +55,20 @@
 *module
 #module
 
+//エラー表示
+#deffunc error str errmes
+	if errmes = "" {
+		errmes = "U01 : 原因を特定できません"
+	}
+	
+	dialog "エラーが発生しました\n"+errmes+"\n処理を中断しますか？", 3, "Cities Box Error"
+
+	if stat = 6 {
+		goto *exit@
+	} else {
+		return
+	}
+
 /*指定された範囲内にマウスがあるか確認する関数（使用例：click_range (100, 0, 300, 300) ）*/
 #defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
 	if ginfo_wx1 <= ginfo_mx and ginfo_wx2 >= ginfo_mx and ginfo_wy1 <= ginfo_my and ginfo_wy2 >= ginfo_my and mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
@@ -89,6 +103,8 @@
 	chdir directory@
 	exist "data/temp/"+search_addon_name+".temp"
 	if strsize = -1 {
+		error@ "Cities Box Error A01 : 一時ファイルが見つかりません\n/data/tempフォルダ内に"+search_addon_name+"の一時ファイルが見つかりません。"
+		
 		return -2
 	}
 	
@@ -103,6 +119,10 @@
 			break
 		}
 	loop
+
+	if finish = -1 {
+		error@ "Cities Box Error A02 : 要素名が見つかりません\n"+search_addon_name+"のアドオンファイル(*.adat)内のタイプ要素名\n"+search_word+"が、\n規定のタイプ要素と合致しません。\nアドオン製作者にお問い合わせください。" 
+	}
 	
 	return finish
 	
@@ -112,6 +132,8 @@
 	exist "data/temp/"+search_addon_name+".temp"
 	
 	if strsize = -1 {
+		error@ "A01 : 一時ファイルが見つかりません\n/data/tempフォルダ内に"+search_addon_name+"の一時ファイルが見つかりません。" 
+	
 		return -2
 	}
 	
@@ -131,6 +153,10 @@
 			loop
 		}
 	loop
+
+	if finish = -1 {
+		error@ "A02 : 要素名が見つかりません\n"+search_addon_name+"のアドオンファイル(*.adat)内のタイプ要素名\n"+search_word+"の"+second_search_word+"が、\n規定のタイプ要素と合致しません。\nアドオン製作者にお問い合わせください。" 
+	}
 	
 	return finish
 
@@ -141,6 +167,175 @@
 	} else {
 		return (v1 / v2)
 	}
+
+/*文字列の取得（マップサイズを超えている場合は空白を返す）*/
+#defcfunc safesearch_str array buf, int x, int y, int mapsizex, int mapsizey
+	if x < 0 or y < 0 or x >= mapsizex or y >= mapsizey {
+		return ""
+	} else {
+		return buf(x,y)
+	}
+
+/*数値の取得（マップサイズを超えている場合は-1を返す）*/
+#defcfunc safesearch_int array buf, int x, int y, int mapsizex, int mapsizey
+	if x < 0 or y < 0 or x >= mapsizex or y >= mapsizey {
+		return -1
+	} else {
+		return buf(x,y)
+	}
+
+/*連言標準形の条件分岐 if (... = ** or ... = **) and (... != * or ... != *) and ..を短縮する関数*/
+#defcfunc iforand var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2, int eq1, int eq2, int eq3, int eq4
+	correct = 0
+
+	if eq1 = 0 {
+		if a1 != searchword1 and (a2 != searchword2 or a2 = "") {
+			correct++
+		}
+	} else {
+		if a1 = searchword1 or a2 = searchword2 {
+			correct++
+		}
+	}
+	
+	if eq2 = 0 {
+		if b1 != searchword1 and (b2 != searchword2 or b2 = "") {
+			correct++
+		}
+	} else {
+		if b1 = searchword1 or b2 = searchword2 {
+			correct++
+		}
+	}
+
+	if eq3 = 0 {
+		if c1 != searchword1 and (c2 != searchword2 or c2 = "") {
+			correct++
+		}
+	} else {
+		if c1 = searchword1 or c2 = searchword2  {
+			correct++
+		}
+	}
+
+	if eq4 = 0 {
+		if d1 != searchword1 and (d2 != searchword2 or d2 = "") {
+			correct++
+		}
+	} else {
+		if d1 = searchword1 or d2 = searchword2 {
+			correct++
+		}
+	}
+
+	if correct = 4 {
+		return 1
+	} else {
+		return 0
+	}
+
+/*連言標準形の条件分岐 if (... = ** or ... = **) and (... != * or ... != *) and ..を短縮する関数（条件2つ用）*/
+#defcfunc iforand2 var a1, var a2, var b1, var b2, str searchword1, str searchword2, int eq1, int eq2
+	correct = 0
+
+	if eq1 = 0 {
+		if a1 != searchword1 and (a2 != searchword2 or a2 = "") {
+			correct++
+		}
+	} else {
+		if a1 = searchword1 or a2 = searchword2 {
+			correct++
+		}
+	}
+	
+	if eq2 = 0 {
+		if b1 != searchword1 and (b2 != searchword2 or b2 = "") {
+			correct++
+		}
+	} else {
+		if b1 = searchword1 or b2 = searchword2 {
+			correct++
+		}
+	}
+
+	if correct = 2 {
+		return 1
+	} else {
+		return 0
+	}
+
+/*条件分岐 if (... = ** or ... = **) or (... != * or ... != *) or ..を短縮する関数*/
+#defcfunc iforor var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2, int eq1, int eq2, int eq3, int eq4
+	correct = 0
+
+	if eq1 = 0 {
+		if a1 != searchword1 and (a2 != searchword2 or a2 = "") {
+			correct++
+		}
+	} else {
+		if a1 = searchword1 or a2 = searchword2 {
+			correct++
+		}
+	}
+	
+	if eq2 = 0 {
+		if b1 != searchword1 and (b2 != searchword2 or b2 = "") {
+			correct++
+		}
+	} else {
+		if b1 = searchword1 or b2 = searchword2 {
+			correct++
+		}
+	}
+
+	if eq3 = 0 {
+		if c1 != searchword1 and (c2 != searchword2 or c2 = "") {
+			correct++
+		}
+	} else {
+		if c1 = searchword1 or c2 = searchword2  {
+			correct++
+		}
+	}
+
+	if eq4 = 0 {
+		if d1 != searchword1 and (d2 != searchword2 or d2 = "") {
+			correct++
+		}
+	} else {
+		if d1 = searchword1 or d2 = searchword2 {
+			correct++
+		}
+	}
+
+	if correct >= 1 {
+		return 1
+	} else {
+		return 0
+	}
+
+/*条件分岐 if (... = ** or ... = **) ..に当てはまる数を返す関数*/
+#defcfunc iforandcorrect var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2
+	correct = 0
+	
+	if a1 = searchword1 or a2 = searchword2 {
+		correct++
+	}
+	
+	if b1 = searchword1 or b2 = searchword2 {
+		correct++
+	}
+
+	if c1 = searchword1 or c2 = searchword2 {
+		correct++
+	}
+
+	if d1 = searchword1 or d2 = searchword2 {
+		correct++
+	}
+
+	return correct
+		
 
 /*文字を中央に表示（使用例：cmes "hogehoge", 0, 640, 0, 480, 0）*/
 #deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
@@ -185,6 +380,8 @@
 /*アドオンの情報を取得*/
 #deffunc get_about_addon int search_addon_number@, int search_type_number@, int search_direction_number@, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y, var input_chip_x, var input_chip_y
 	//オブジェクトの画像上の座標を取得
+		onerror gosub *er
+		
 		input_top_left_x = addon_top_left_x@( search_addon_number@, search_type_number@, search_direction_number@ )
 		input_top_left_y = addon_top_left_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 		input_bottom_right_x = addon_bottom_right_x@( search_addon_number@, search_type_number@, search_direction_number@ )
@@ -197,6 +394,11 @@
 		input_chip_y = addon_chip_y@( search_addon_number@, search_type_number@, search_direction_number@ )
 	
 	return
+
+	*er
+		error@ "A13 : obj_type(x,y)またはobj_dire(x,y)の数値が異常です\nアドオンに存在しないobj_type(x,y)またはobj_dire(x.y)が設定されています。\nアドオン番号:"+search_addon_number+"\nobj_type(x,y):"+search_type_number+"\nobj_dire(x,y):"+obj_dire(x,y)+""
+
+		return
 	
 /*暗号化＆復号（言うほど難しいものでもないけど…）*/
 //暗号化
@@ -273,6 +475,11 @@
 
 *load_about
 	//タイトルとバージョンの読み込み
+		exist "data/about.txt"
+		if strsize = -1 {
+			error "F01 : about.txtが見つかりません\ndataフォルダ内にabout.txtが見つかりません。"
+		}
+		
 		notesel about
 		noteload "data/about.txt"
 			
@@ -286,6 +493,11 @@
 		
 *load_config
 	//本体設定読み込み
+		exist "data/config.dat"
+		if strsize = -1 {
+			error "F02 : 設定ファイルが見つかりません\ndataフォルダ内にconfig.datが見つかりません。"
+		}
+		
 		notesel config
 		noteload "data/config.dat"
 	
@@ -323,6 +535,8 @@
 		now_loading = 1
 	
 *buffering
+	onerror *buffering_error
+	
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		if instr(about_title, 0, "Dev") != -1 {
 			celload "img/logo_Dev.png", 2									; ロゴ
@@ -346,6 +560,7 @@
 		celload "img/menu_icons/menu/farm.png", 57							; メニューアイコン（農業地区建設）
 		celload "img/menu_icons/menu/public.png", 7							; メニューアイコン（郵便局建設）
 		celload "img/menu_icons/menu/park.png", 29							; メニューアイコン（公園建設）
+		celload "img/menu_icons/menu/waterway.png", 76						; メニューアイコン（水路建設）
 	
 		celload "img/menu_icons/menu/bulldozer.png", 10						; 撤去ボタン
 		celload "img/menu_icons/save/save.png", 11							; 保存ボタン
@@ -434,6 +649,13 @@
 
 	//建物詳細ダイアログ
 		celload "img/show_detail/change_name.png", 71						; 建物名の変更
+
+	onerror 0
+
+	goto *preparation
+
+*buffering_error
+	error "F03 : 画像ファイルが見つかりません\n必要な画像ファイルが欠けています。"
 	
 *preparation
 	//onexit
@@ -562,6 +784,10 @@
 	
 			//アドオン名取得
 				addon_name(cnt) = get_chapter(buf_adat, "addon_name", " = \\", "\"")
+
+				if addon_name(cnt) = "" {
+					error "A03 : アドオン名が取得できません\n"+buf_filelist+"のアドオン名を取得できません。名前が指定されていない可能性があります。"
+				}
 	
 			//読み込み中画面
 				;color 0, 0, 0 : boxf
@@ -609,12 +835,16 @@
 					gosub *load_adat
 	
 				//カテゴリ分け
+					ct_done = 0
+					
 					if addon_type(cnt) = "Two_lane_road" or addon_type(cnt) = "Two_lane_Road" {
 						notesel type_Two_lane_road
 						noteadd addon_name(cnt), -1
 	
 						notesel type_number_Two_lane_road
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 
 					if addon_type(cnt) = "Promenade" or addon_type(cnt) = "promenade" {
@@ -623,6 +853,8 @@
 	
 						notesel type_number_Promenade
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 	
 					if addon_type(cnt) = "Two_lane_railroad" or addon_type(cnt) = "Two_lane_Railroad" or addon_type(cnt) = "station" or addon_type(cnt) = "Station" {
@@ -631,6 +863,8 @@
 	
 						notesel type_number_Two_lane_railroad
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 							
 					if addon_type(cnt) = "low_density_residential" or addon_type(cnt) = "low_density_Residential" or addon_type(cnt) = "Low_density_Residential" {
@@ -639,6 +873,8 @@
 	
 						notesel type_number_low_density_residential
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 					if addon_type(cnt) = "high_density_residential" or addon_type(cnt) = "high_density_Residential" or addon_type(cnt) = "High_density_Residential" {
 						notesel type_high_density_residential
@@ -646,6 +882,8 @@
 	
 						notesel type_number_high_density_residential
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 	
 					if addon_type(cnt) = "low_density_commercial" or addon_type(cnt) = "low_density_Commercial" or addon_type(cnt) = "Low_density_Commercial" {
@@ -654,6 +892,8 @@
 	
 						notesel type_number_low_density_commercial
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 					if addon_type(cnt) = "high_density_commercial" or addon_type(cnt) = "high_density_Commercial" or addon_type(cnt) = "High_density_Commercial" {
 						notesel type_high_density_commercial
@@ -661,6 +901,8 @@
 	
 						notesel type_number_high_density_commercial
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 					
 					if addon_type(cnt) = "office" or addon_type(cnt) = "Office" {
@@ -669,6 +911,8 @@
 	
 						notesel type_number_office
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 	
 					if addon_type(cnt) = "industrial" or addon_type(cnt) = "Industrial" {
@@ -677,6 +921,8 @@
 						
 						notesel type_number_industrial
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 	
 					if addon_type(cnt) = "farm" or addon_type(cnt) = "Farm" {
@@ -685,6 +931,8 @@
 						
 						notesel type_number_farm
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 					
 					if addon_type(cnt) = "public" or addon_type(cnt) = "Public" {
@@ -693,6 +941,8 @@
 
 						notesel type_number_public
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
 	
 					if addon_type(cnt) = "park" or addon_type(cnt) = "Park" {
@@ -701,8 +951,28 @@
 
 						notesel type_number_park
 						noteadd str(cnt), -1
+
+						ct_done = 1
 					}
-	
+
+					if addon_type(cnt) = "waterway" or addon_type(cnt) = "Waterway" {
+						notesel type_waterway
+						noteadd addon_name(cnt), -1
+
+						notesel type_number_waterway
+						noteadd str(cnt), -1
+
+						ct_done = 1
+					}
+
+					if addon_type(cnt) = "tile" or addon_type(cnt) = "Tile" {
+						ct_done = 1
+					}
+
+					if ct_done = 0 {
+						error "A04 : アドオンをカテゴリ分けできません\n"+addon_name(cnt)+"を規定のカテゴリーに区別できないため、このアドオンは利用できません。\nアドオンファイル(*.adat)のaddon_type要素をご確認ください。"
+					}
+					
 				//アドオンのバッファ（1000000～）および画像の仮想分割、および画像のサイズ取得
 					addon_buffer_number_basic = (addon_number+1) * 10 * 100 * 100
 
@@ -710,6 +980,12 @@
 					if addon_total_use_types(addon_number) > 1 {
 						repeat addon_total_use_types(addon_number)
 							addon_buffer_number_0 = addon_buffer_number_basic + (cnt*100)
+
+							;color : boxf  :  color 255, 255, 255 : pos 0, 0 : mes ""+dirinfo(0)+"\n"+addon_image(addon_number, cnt)+""	; 読み込んでいる画像名
+							exist addon_image(addon_number, cnt)
+							if strsize = -1 {
+								error "A05 : アドオンの画像ファイルが見つかりません\n"+addon_name(addon_number)+"で利用する"+addon_image(addon_number, cnt)+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
+							}
 							
 							celload addon_image(addon_number, cnt), addon_buffer_number_0
 
@@ -724,6 +1000,11 @@
 							addon_buffer_number_1 = addon_buffer_number_0 + 10000
 
 							if addon_night_mask_set(addon_number, cnt) = 1 {
+								exist addon_night_mask(addon_number, cnt)
+								if strsize = -1 {
+									error "A06 : アドオンの画像ファイルが見つかりません\n"+addon_name(addon_number)+"で利用する"+addon_night_mask(addon_number, cnt)+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
+								}
+							
 								celload addon_night_mask(addon_number, cnt), 998
 							}
 							
@@ -803,6 +1084,12 @@
 
 						//向きごとに位置を変える（左向き：左上、上向き：右上、下向き：左下、右向き：右下）
 							addon_buffer_number_0 = addon_buffer_number_basic + 0
+
+							exist addon_image(addon_number, 0)
+							if strsize = -1 {
+								error "A05 : アドオンの画像ファイルが見つかりません\n"+addon_name(cnt)+"で利用する"+addon_image(addon_number, 0)+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
+							}
+							
 							celload addon_image(addon_number, 0), addon_buffer_number_0
 
 							gsel addon_buffer_number_0
@@ -834,6 +1121,10 @@
 							*/
 
 							if addon_night_mask_set(addon_number, 0) = 1 {
+								exist addon_image(addon_number, 0)
+								if strsize = -1 {
+									error "A06 : アドオンの画像ファイルが見つかりません\n"+addon_name(cnt)+"で利用する"+addon_night_mask(addon_number, 0)+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
+								}
 								celload addon_night_mask(addon_number, 0), addon_buffer_number_1
 							
 								buffer 998, img_x, img_y + (addon_top_left_y( addon_number, 0, 0 ) * 2)
@@ -1021,6 +1312,11 @@
 					}
 	
 				//アドオンのアイコンのバッファ（10001000～）
+					exist addon_icon(addon_number)
+					if strsize = -1 {
+						error "A07 : アドオンのアイコン画像が見つかりません\n"+addon_name(addon_number)+"で利用する"+addon_icon(addon_number)+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
+					}
+					
 					celload addon_icon(addon_number), addon_number + 90000
 
 				//ディレクトリを戻す
@@ -1050,8 +1346,12 @@
 
 *load_adat
 	notesel buf_adat
-			
+
 	use_types_buf = get_chapter(buf_adat, "use_types", " = \"", "\"")
+
+	if instr(buf_adat, 0, "use_types") = -1 {
+		error "A08 : アドオンのuse_typesが指定されていません\n"+addon_name(addon_number)+"のアドオンファイル(*.adat)でuse_typesが指定されていません。\nアドオン製作者にお問い合わせください。"
+	}
 	
 	//adat_use_typesを更にタイプごとに分ける
 		split use_types_buf, ", ", use_type_buf
@@ -1102,6 +1402,10 @@
 										
 						addon_size_x(addon_number, load_adat_cnt, cnt) = int(addon_size_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_size_y(addon_number, load_adat_cnt, cnt) = int(addon_size_y_buf(addon_number, load_adat_cnt, cnt))
+
+						if instr(addon_direction_summary, 0, "size_x") = -1 or instr(addon_direction_summary, 0, "size_y") = -1 {
+							error "A09 : アドオンのサイズが指定されていません\n"+addon_name(addon_number)+"のアドオンファイル(*.adat)内でsize_xまたはsize_yが指定されていません。\nアドオン製作者にお問い合わせください。"
+						}
 	
 					//チップのゲーム上の座標サイズを取得（chip_x, chip_y）
 						addon_chip_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "chip_x", " = \"", "\"")
@@ -1109,6 +1413,10 @@
 										
 						addon_chip_x(addon_number, load_adat_cnt, cnt) = int(addon_chip_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_chip_y(addon_number, load_adat_cnt, cnt) = int(addon_chip_y_buf(addon_number, load_adat_cnt, cnt))
+
+						if instr(addon_direction_summary, 0, "chip_x") = -1 or instr(addon_direction_summary, 0, "chip_y") = -1 {
+							error "A10 : アドオンで用いるマスの数が指定されていません\n"+addon_name(addon_number)+"のアドオンファイル(*.adat)内でchip_xまたはchip_yが指定されていません。\nアドオン製作者にお問い合わせください。"
+						}
 	
 					//チップの左上の座標を取得（top_left_x, top_left_y）
 						addon_top_left_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "top_left_x", " = \"", "\"")
@@ -1116,6 +1424,10 @@
 										
 						addon_top_left_x(addon_number, load_adat_cnt, cnt) = int(addon_top_left_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_top_left_y(addon_number, load_adat_cnt, cnt) = int(addon_top_left_y_buf(addon_number, load_adat_cnt, cnt))
+
+						if instr(addon_direction_summary, 0, "top_left_x") = -1 or instr(addon_direction_summary, 0, "top_left_y") = -1 {
+							error "A11 : アドオンの左上の座標が指定されていません\n"+addon_name(addon_number)+"のアドオンファイル(*.adat)内でtop_left_xまたはtop_left_yが指定されていません。\nアドオン製作者にお問い合わせください。"
+						}
 	
 					//チップの右下の座標を取得（bottom_right_x, bottom_right_y）
 						addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt) = get_chapter(addon_direction_summary, "bottom_right_x", " = \"", "\"")
@@ -1123,6 +1435,10 @@
 										
 						addon_bottom_right_x(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_x_buf(addon_number, load_adat_cnt, cnt))
 						addon_bottom_right_y(addon_number, load_adat_cnt, cnt) = int(addon_bottom_right_y_buf(addon_number, load_adat_cnt, cnt))
+
+						if instr(addon_direction_summary, 0, "bottom_right_x") = -1 or instr(addon_direction_summary, 0, "bottom_right_y") = -1 {
+							error "A12 : アドオンの右下の座標が指定されていません\n"+addon_name(addon_number)+"のアドオンファイル(*.adat)内でbottom_right_xまたはbottom_right_yが指定されていません。\nアドオン製作者にお問い合わせください。"
+						}
 						
 					await 1
 				loop
@@ -1375,6 +1691,11 @@
 
 	if OS = "macOS" {
 		if click_range(82, 25, 82+32, 25+32) = 1 {
+			exist "ReadMe.txt"
+			if strsize = -1 {
+				error "F04 : ReadMe.txtが見つかりません\nReadMe.txtが見つからないため、開くことができません。"
+			}
+			
 			exec "ReadMe.txt", 16
 		}
 	}
@@ -1497,7 +1818,7 @@
 				pos 70, 3 : mes "バグ・ご要望の送信"
 	
 				font SystemFont, 14 : color 255, 255, 255
-				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「13.バグや問題点、今後の予定」をご覧ください。"
+				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「14.バグや問題点、今後の予定」をご覧ください。"
 				pos ((500-64)/2)-16, 100 : gcopy 64, 0, 0, 32, 32
 				pos ((500-64)/2)-16+45, 105 : mes "ReadMe.txtを開く"
 	
@@ -1580,6 +1901,11 @@
 		if menu_setting__page = "bug" {
 			; ReadMe.txtを開く
 				if click_range(((500-64)/2)-16, 100, ((500-64)/2)-16+45+ginfo_tmp__bug_ReadMe, 100+32) = 1{
+					exist "ReadMe.txt"
+					if strsize = -1 {
+						error "F04 : ReadMe.txtが見つかりません\nReadMe.txtが見つからないため、開くことができません。"
+					}
+					
 					exec "ReadMe.txt", 16
 				}
 	
@@ -1595,7 +1921,7 @@
 	exist "Addon_Maker/Cities_Box_Addon_Maker.exe"
 
 	if strsize = -1 {
-		dialog "Cities_Box_Addon_Maker.exeがありません\n別途ダウンロードしてください"
+		error "F05 : Cities_Box_Addon_Maker.exeがありません\n別途ダウンロードしてください"
 	} else {
 		exec "Addon_Maker/Cities_Box_Addon_Maker.exe"
 	}
@@ -1620,12 +1946,16 @@
 		dim sizey, mapsize, mapsize
 	
 		dim map, mapsize, mapsize					//各座標のアドオン番号
+		dim map2, mapsize, mapsize					//各座標のアドオン番号（下地）
 		sdim name, 128, mapsize, mapsize			//各座標のアドオン名
+		sdim name2, 128, mapsize, mapsize			//各座標のアドオン名（下地）
 		sdim category, 128, mapsize, mapsize		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 		sdim category_2, 128, mapsize, mapsize		//アドオンの更に詳細なカテゴリー（公共施設などで使う）
 		sdim category_3, 128, mapsize, mapsize		//アドオンの更に更に詳細なカテゴリー（学校などで使う）
 		dim obj_type, mapsize, mapsize				//座標上にあるオブジェクトのタイプ
+		dim obj_type2, mapsize, mapsize				//座標上にあるオブジェクトのタイプ（下地）
 		dim obj_dire, mapsize, mapsize				//座標上にあるオブジェクトの向き
+		dim obj_dire2, mapsize, mapsize				//座標上にあるオブジェクトの向き（下地）
 		dim obj_serial_num, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
 		dim obj_use_tiles_x, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
 		dim obj_use_tiles_y, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
@@ -1660,13 +1990,17 @@
 		
 		repeat mapsize * mapsize
 			map(ix,iy) = addon_num_buf
+			map2(ix,iy) = -1
 			name(ix,iy) = "tile_greenfield"
+			name2(ix,iy) = ""
 			category(ix,iy) = "tile"
 			category_2(ix,iy) = ""
 			category_3(ix,iy) = ""
 	
 			obj_type(ix,iy) = 0
+			obj_type2(ix,iy) = 0
 			obj_dire(ix,iy) = 0
+			obj_dire2(ix,iy) = 0
 	
 			obj_serial_num(ix,iy) = 0
 			obj_use_tiles_x(ix,iy) = 0
@@ -1822,6 +2156,7 @@
 	
 	if from_new_map = 0 {
 		dim buffer_number, mapsize, mapsize
+		dim buffer_number2, mapsize, mapsize
 		dim atlx, mapsize, mapsize
 		dim atly, mapsize, mapsize
 		dim abrx, mapsize, mapsize
@@ -1830,12 +2165,16 @@
 		dim sizey, mapsize, mapsize
 	
 		dim map, mapsize, mapsize					//各座標のアドオン番号
+		dim map2, mapsize, mapsize					//各座標のアドオン番号（下地）
 		sdim name, 128, mapsize, mapsize			//各座標のアドオン名
+		sdim name2, 128, mapsize, mapsize			//各座標のアドオン名（下地）
 		sdim category, 128, mapsize, mapsize		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
 		sdim category_2, 128, mapsize, mapsize		//アドオンの更に詳細なカテゴリー（公共施設などで使う）
 		sdim category_3, 128, mapsize, mapsize		//アドオンの更に更に詳細なカテゴリー（学校などで使う）
 		dim obj_type, mapsize, mapsize				//座標上にあるオブジェクトのタイプ
+		dim obj_type2, mapsize, mapsize				//座標上にあるオブジェクトのタイプ（下地）
 		dim obj_dire, mapsize, mapsize				//座標上にあるオブジェクトの向き
+		dim obj_dire2, mapsize, mapsize				//座標上にあるオブジェクトの向き（下地）
 		dim obj_serial_num, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
 		dim obj_use_tiles_x, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なx方向のタイル数
 		dim obj_use_tiles_y, mapsize, mapsize		//ひとつのオブジェクトで複数のタイルを要するときの、必要なy方向のタイル数
@@ -2034,6 +2373,10 @@
 		
 			//name(x,y)の読み込み＆name(x,y)をもとにmap(x,y)と都市の収容可能人数も取得
 				name_buf = get_chapter(load_mapdata, "name(x,y)", " {", "}")
+
+				if name_buf = "" {
+					error "M01 : マップデータが故障しています\nセーブファイルにname(x,y)がありません。"
+				}
 			
 				repeat mapsize
 					y = cnt
@@ -2071,9 +2414,69 @@
 					loop
 			
 				loop
+
+			//name2(x,y)の読み込み＆name2(x,y)をもとにmap2(x,y)も取得
+				name2_buf = get_chapter(load_mapdata, "name2(x,y)", " {", "}")
+
+				if instr(load_mapdata, 0, "name2(x,y)") = -1 {
+					repeat mapsize
+						x = cnt
+						repeat mapsize
+							y = cnt
+
+							name2(x,y) = ""
+							map2(x,y) = -1
+						loop
+					loop
+				} else {
+					repeat mapsize
+						y = cnt
+			
+						notesel name2_buf
+						noteget name2_buf_a_line, (y+1)
+			
+						sdim name2_buf_a_tile, mapsize
+						split name2_buf_a_line, ", ", name2_buf_a_tile
+				
+						repeat mapsize
+							x = cnt
+							name2(x,y) = name2_buf_a_tile(x)
+							if name2(x,y) = "" {
+								map2(x,y) = -1
+							} else {
+								map2(x,y) = addon_num(name2_buf_a_tile(x))
+		
+								//各種の地区の収容可能人数に加算
+									if addon_type(map2(x,y)) = "low_density_residential" or addon_type(map2(x,y)) = "high_density_residential" {
+										total_Residential_maximum_capacity += addon_maximum_capacity(map2(x,y))
+									}
+									if addon_type(map2(x,y)) = "low_density_commercial" or addon_type(map2(x,y)) = "high_density_commercial" {
+										total_Commercial_maximum_capacity += addon_maximum_capacity(map2(x,y))
+									}
+									if addon_type(map2(x,y)) = "office" {
+										total_Office_maximum_capacity += addon_maximum_capacity(map2(x,y))
+									}
+									if addon_type(map2(x,y)) = "industrial" {
+										total_Industrial_maximum_capacity += addon_maximum_capacity(map2(x,y))
+									}
+									if addon_type(map2(x,y)) = "farm" {
+										total_Farm_maximum_capacity += addon_maximum_capacity(map2(x,y))
+									}
+									if addon_type(map2(x,y)) = "public" {
+										total_Public_maximum_capacity += addon_maximum_capacity(map2(x,y))
+									}
+							}
+						loop
+				
+					loop
+				}
 			
 			//category(x,y)の読み込み
 				category_buf = get_chapter(load_mapdata, "category(x,y)", " {", "}")
+
+				if category_buf = "" {
+					error "M02 : マップデータが故障しています\nセーブファイルにcategory(x,y)がありません。"
+				}
 			
 				repeat mapsize
 					y = cnt
@@ -2157,6 +2560,9 @@
 		
 			//obj_type(x,y)の読み込み
 				obj_type_buf = get_chapter(load_mapdata, "obj_type(x,y)", " {", "}")
+				if name_buf = "" {
+					error "M03 : マップデータが故障しています\nセーブファイルにobj_type(x,y)がありません。"
+				}
 			
 				repeat mapsize
 					y = cnt
@@ -2173,10 +2579,43 @@
 					loop
 			
 				loop
+
+			//obj_type2(x,y)の読み込み
+				obj_type2_buf = get_chapter(load_mapdata, "obj_type2(x,y)", " {", "}")
+
+				if instr(load_mapdata, 0, "obj_type2(x,y)") = -1 {
+					repeat mapsize
+						x = cnt
+						repeat mapsize
+							y = cnt
+
+							obj_type2(x,y) = 0
+						loop
+					loop
+				} else {
+					repeat mapsize
+						y = cnt
+			
+						notesel obj_type2_buf
+						noteget obj_type2_buf_a_line, (y+1)
+			
+						sdim obj_type2_buf_a_tile, mapsize
+						split obj_type2_buf_a_line, ", ", obj_type2_buf_a_tile
+				
+						repeat mapsize
+							x = cnt
+							obj_type2(x,y) = int(obj_type2_buf_a_tile(x))
+						loop
+				
+					loop
+				}
 		
 			//obj_dire(x,y)の読み込み
 				obj_dire_buf = get_chapter(load_mapdata, "obj_dire(x,y)", " {", "}")
-			
+				if name_buf = "" {
+					error "M04 : マップデータが故障しています\nセーブファイルにobj_dire(x,y)がありません。"
+				}
+				
 				repeat mapsize
 					y = cnt
 		
@@ -2192,6 +2631,36 @@
 					loop
 			
 				loop
+
+			//obj_dire2(x,y)の読み込み
+				obj_dire2_buf = get_chapter(load_mapdata, "obj_dire2(x,y)", " {", "}")
+
+				if instr(load_mapdata, 0, "obj_dire2(x,y)") = -1 {
+					repeat mapsize
+						x = cnt
+						repeat mapsize
+							y = cnt
+
+							obj_dire2(x,y) = 0
+						loop
+					loop
+				} else {
+					repeat mapsize
+						y = cnt
+			
+						notesel obj_dire2_buf
+						noteget obj_dire2_buf_a_line, (y+1)
+			
+						sdim obj_dire2_buf_a_tile, mapsize
+						split obj_dire2_buf_a_line, ", ", obj_dire2_buf_a_tile
+				
+						repeat mapsize
+							x = cnt
+							obj_dire2(x,y) = int(obj_dire2_buf_a_tile(x))
+						loop
+				
+					loop
+				}
 	
 			//obj_serial_num(x,y)の読み込み
 				if instr(load_mapdata, 0, "obj_serial_num(x,y)") != -1 {
@@ -2303,6 +2772,9 @@
 	
 			//residents(x,y)の読み込み
 				residents_buf = get_chapter(load_mapdata, "residents(x,y)", " {", "}")
+				if name_buf = "" {
+					error "M05 : マップデータが故障しています\nセーブファイルにresidents(x,y)がありません。"
+				}
 			
 				repeat mapsize
 					y = cnt
@@ -3037,6 +3509,7 @@
 
 		goto *main
 		
+		
 *main
 	title about_title
 	
@@ -3221,6 +3694,10 @@
 		}
 	
 		//各マスの値を調節
+		if Adjustment_Interval <= 0 {
+			error "S01 : Adjustment_Intervalが0以下になっています\n数値調節等の間隔が0以下になっています。\n必ず1以上に設定してください。"
+		}
+		
 		if cnt \ Adjustment_Interval = 0 {
 			ny = 0
 		
@@ -3278,6 +3755,9 @@
 					if category_buf = "railroad" or category_buf = "station" {
 						gosub *adjustment_railroad
 					}
+					if category_buf = "waterway" {
+						gosub *adjustment_waterway
+					}
 	
 				//幸福度の平均値を取得するための加算
 					if nx = 0 and ny = 0 {
@@ -3285,7 +3765,7 @@
 						happiness_ave_cnt = 0
 					}
 		
-					if category(nx,ny) != "tile" and category(nx,ny) != "road" and category(nx,ny) != "railroad" {	; タイル（更地）や道路、線路などは含めない
+					if category(nx,ny) != "tile" and category(nx,ny) != "road" and category(nx,ny) != "railroad"  and category(nx, ny) != "waterway"{	; タイル（更地）や道路、線路などは含めない
 						happiness_ave_tmp += happiness(nx,ny)
 						happiness_ave_cnt ++
 					}
@@ -3322,6 +3802,10 @@
 						ny = 0
 					}
 			loop
+		}
+
+		if mapsize <= 0 {
+			error "S02 : マップサイズが異常です\nマップサイズが0以下になっています。\n現在のマップサイズ:"+mapsize+"×"+mapsize+""
 		}
 
 		if time_Hour = 0 and time_Minutes = 0 {
@@ -3432,18 +3916,39 @@
 						if Set_Dark_on_Night = 1 {
 							if (time_Hour >= 18 and time_Hour <= 23) or (time_Hour >= 0 and time_Hour <= 5) {
 								buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + 10000 + obj_type(x,y)*100
+
+								if map2(x,y) != -1 {
+									buffer_number2(x,y) = (map2(x,y)+1) * 10 * 100 * 100 + 10000 + obj_type2(x,y)*100
+								}
+									
 							} else : if (time_Hour >= 16 and time_Hour <= 17) or (time_hour = 6) {
 								buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + 20000 + obj_type(x,y)*100
+
+								if map2(x,y) != -1 {
+									buffer_number2(x,y) = (map2(x,y)+1) * 10 * 100 * 100 + 20000 + obj_type2(x,y)*100
+								}
 							} else {
 								buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + obj_type(x,y)*100
+
+								if map2(x,y) != -1 {
+									buffer_number2(x,y) = (map2(x,y)+1) * 10 * 100 * 100 + obj_type2(x,y)*100
+								}
 							}
 						} else {
 							buffer_number(x,y) = (map(x,y)+1) * 10 * 100 * 100 + obj_type(x,y)*100
+
+							if map2(x,y) != -1 {
+								buffer_number2(x,y) = (map2(x,y)+1) * 10 * 100 * 100 + obj_type2(x,y)*100
+							}
 						}
 
 						get_about_addon map(x,y), obj_type(x,y), obj_dire(x,y), atlx, atly, abrx, abry, sizex, sizey, chipx, chipy
 
-						if name(x,y) = "tile_greenfield" {
+						if map2(x,y) != -1 {
+							get_about_addon map2(x,y), obj_type2(x,y), obj_dire2(x,y), atlx2, atly2, abrx2, abry2, sizex2, sizey2, chipx2, chipy2
+						}
+
+						if category(x,y) = "tile" {
 							if time_Month >= 9 and time_Month <= 11 {
 								;buffer_number(x,y) = (10 * map(x,y)) + tile_greenfield_autumn_type_buf
 								tile_type_tmp = tile_greenfield_snow_type_buf
@@ -3460,137 +3965,273 @@
 						}
 	
 						px = 0 : py = 0
-						
-						if chipx > 1 {
-							if obj_dire(x,y) = 0 {
-								atlx += 0
-								px += 32 * obj_tiles_x(x,y)
-								py += 16 * (obj_use_tiles_x(x,y) - 1 - obj_tiles_x(x,y))
-								sizex = 64
-							} else : if obj_dire(x,y) = 1 {
-								atlx += 32 * obj_tiles_x(x,y)
-								px += 32 * obj_tiles_x(x,y)
-								py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
-								sizex = 64
-							} else : if obj_dire(x,y) = 2 {
-								atlx += 32 * obj_tiles_x(x,y)
-								px += 32 * obj_tiles_x(x,y)
-								py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
-								sizex = 64
-							} else : if obj_dire(x,y) = 3 {
-								atlx += 64 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
-								px += 32 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
-								py += ((obj_use_tiles_x(x,y)-1)+(-obj_tiles_x(x,y))) * 16 - 16
-								sizex = 64
-							}
-						}
-	
-						if chipy > 1 {
-							if obj_dire(x,y) = 0 {
-								atlx += 32 * obj_tiles_y(x,y)
-								px += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
-								py += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
-								sizex = 64
-							} else : if obj_dire(x,y) = 1 {
-								atly += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
-								px += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
-								py += 16 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
-								sizex = 64
-							} else : if obj_dire(x,y) = 2 {
-								atly += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
-								px += 32 * abs(obj_tiles_y(x,y))
-								py += 16 * abs(obj_tiles_y(x,y))
-								sizex = 64
-							} else : if obj_dire(x,y) = 3 {
-								atlx += 32 * obj_tiles_y(x,y)
-								px += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
-								py += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
-								sizex = 64
-							}
-						}
+						px2 = 0 : py2 = 0
 							
 					//オブジェクトを表示
-						if (atly*(abry/sizey)) - (sizey*(abry/sizey)) > 0 and (category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "") and chipx = 0 and chipy = 0 {
-							py -= atly
-						}
-
-						if (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "tile") {
-							py -= 32
-						}
-						
-						if abry-atly >= sizey and (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "") {
-							atly -= sizey
-						}
-	
-						if addon_transparent_color_r(map(x,y)) = 0 and addon_transparent_color_g(map(x,y)) = 0 and addon_transparent_color_b(map(x,y)) = 0 {
-							gmode 2
-						} else {
-							color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
-							gmode 4, sizex, sizey, 256
-						}
-	
-						; 2マス以上の大きさのアドオンの場合（道路・線路・駅除く）
-						if ( obj_use_tiles_x(x,y) != 0 or obj_use_tiles_y(x,y) != 0 ) and category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "station" {
-							celnum = 0
-							al = 0
-
-							if obj_tiles_x(x,y) = 0 and obj_dire(x,y) = 3 and ((obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1) or obj_use_tiles_y(x,y) = 0) {
-								celnum = obj_use_tiles_x(x,y) - 1
-							} else : if (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) and obj_use_tiles_x(x,y) <= 1 {
-								celnum = obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
-								al = 1
-							} else : if obj_tiles_x(x,y) < 0 {
-								celnum = obj_tiles_x(x,y) + obj_use_tiles_x(x,y) - 1
-							} else {
-								celnum = obj_tiles_x(x,y)
-							}
-
-							if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and ((obj_tiles_y(x,y) = 1 and obj_dire(x,y) = 3) or (obj_tiles_y(x,y) != 0 and obj_dire(x,y) != 3)) {
-								cm = 1
-
-								if obj_dire(x,y) = 2 {
-									px -= 64
+						//下地のオブジェクトを表示
+						if map2(x,y) != -1 {
+							if chipx2 > 1 {
+								if obj_dire2(x,y) = 0 {
+									atlx2 += 0
+									px2 += 32 * obj_tiles_x(x,y)
+									py2 += 16 * (obj_use_tiles_x(x,y) - 1 - obj_tiles_x(x,y))
+									sizex2 = 64
+								} else : if obj_dire2(x,y) = 1 {
+									atlx2 += 32 * obj_tiles_x(x,y)
+									px2 += 32 * obj_tiles_x(x,y)
+									py2 += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+									sizex2 = 64
+								} else : if obj_dire2(x,y) = 2 {
+									atlx2 += 32 * obj_tiles_x(x,y)
+									px2 += 32 * obj_tiles_x(x,y)
+									py2 += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+									sizex2 = 64
+								} else : if obj_dire2(x,y) = 3 {
+									atlx2 += 64 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
+									px2 += 32 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
+									py2 += ((obj_use_tiles_x(x,y)-1)+(-obj_tiles_x(x,y))) * 16 - 16
+									sizex2 = 64
 								}
+							}
+		
+							if chipy2 > 1 {
+								if obj_dire2(x,y) = 0 {
+									atlx2 += 32 * obj_tiles_y(x,y)
+									px2 += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									py2 += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
+									sizex2 = 64
+								} else : if obj_dire2(x,y) = 1 {
+									atly2 += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
+									px2 += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									py2 += 16 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									sizex2 = 64
+								} else : if obj_dire2(x,y) = 2 {
+									atly2 += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
+									px2 += 32 * abs(obj_tiles_y(x,y))
+									py2 += 16 * abs(obj_tiles_y(x,y))
+									sizex2 = 64
+								} else : if obj_dire2(x,y) = 3 {
+									atlx2 += 32 * obj_tiles_y(x,y)
+									px2 += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									py2 += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
+									sizex2 = 64
+								}
+							}
+							
+							if (atly2*(abry2/sizey2)) - (sizey2*(abry2/sizey2)) > 0 and (category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "waterway" and category(x,y) != "") and chipx2 = 0 and chipy2 = 0 {
+								py2 -= atly2
+							}
+	
+							if (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "waterway" or category(x,y) = "tile") {
+								py2 -= 32
+							}
+							
+							if abry2-atly2 >= sizey2 and (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "waterway" or category(x,y) = "") {
+								atly2 -= sizey2
+							}
+		
+							if addon_transparent_color_r(map2(x,y)) = 0 and addon_transparent_color_g(map2(x,y)) = 0 and addon_transparent_color_b(map2(x,y)) = 0 {
+								gmode 2
 							} else {
-								cm = 0
+								color addon_transparent_color_r(map2(x,y)), addon_transparent_color_g(map2(x,y)), addon_transparent_color_b(map2(x,y))
+								gmode 4, sizex2, sizey2, 256
+							}
+		
+							; 2マス以上の大きさのアドオンの場合（道路・線路・駅除く）
+								if ( obj_use_tiles_x(x,y) != 0 or obj_use_tiles_y(x,y) != 0 ) and category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "station" and category(x,y) != "waterway" {
+									celnum2 = 0
+									al = 0
+		
+									if obj_tiles_x(x,y) = 0 and obj_dire2(x,y) = 3 and ((obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1) or obj_use_tiles_y(x,y) = 0) {
+										celnum2 = obj_use_tiles_x(x,y) - 1
+									} else : if (obj_dire2(x,y) = 0 or obj_dire2(x,y) = 3) and obj_use_tiles_x(x,y) <= 1 {
+										celnum2 = obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
+										al = 1
+									} else : if obj_tiles_x(x,y) < 0 {
+										celnum2 = obj_tiles_x(x,y) + obj_use_tiles_x(x,y) - 1
+									} else {
+										celnum2 = obj_tiles_x(x,y)
+									}
+		
+									if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and ((obj_tiles_y(x,y) = 1 and obj_dire2(x,y) = 3) or (obj_tiles_y(x,y) != 0 and obj_dire2(x,y) != 3)) {
+										cm = 1
+		
+										if obj_dire2(x,y) = 2 {
+											px2 -= 64
+										}
+									} else {
+										cm = 0
+									}
+		
+									if al = 0 {
+										if obj_tiles_y(x,y-cm) = 0 and obj_dire2(x,y-cm) = 1 and obj_use_tiles_x(x,y-cm) = 0 {
+											celnum2 = obj_use_tiles_y(x,y-cm) - 1
+										} else : if obj_tiles_y(x,y-cm) != 0 {
+											if obj_tiles_y(x,y-cm) < 0 {
+												celnum2 = obj_tiles_y(x,y-cm) + obj_use_tiles_y(x,y-cm)
+											} else {
+												if obj_dire2(x,y-cm) = 1 {
+													celnum2 = obj_tiles_y(x,y-cm) - (obj_use_tiles_y(x,y-cm) - 1)
+												} else {
+													celnum2 = obj_tiles_y(x,y-cm)
+												}
+											}
+										}
+									}
+		
+									if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and obj_tiles_y(x,y) = 0 {
+										celnum2 = -1
+									}
+		
+									if celnum2 >= 0 {
+										pos macro1 + px2, macro2 - sizey2 + 1 + py2
+										celput buffer_number2(x,y) + obj_dire2(x,y) + 1, celnum2
+										;pos macro1 + px, macro2-100 : color 0, 162, 232 : font SystemFont, 16, 1 : mes ""+celnum+" / "+cm+" / "+al+""
+									}
+								; 1x1のアドオンの場合
+								} else {
+									pos macro1 + px2, macro2 - sizey2 + 1 + py2
+									
+									if category(x,y) = "tile" {
+										celput buffer_number2(x,y), tile_type_tmp
+									} else {
+										celput buffer_number2(x,y), obj_dire2(x,y)
+									}
+								}
+
 							}
 
-							if al = 0 {
-								if obj_tiles_y(x,y-cm) = 0 and obj_dire(x,y-cm) = 1 and obj_use_tiles_x(x,y-cm) = 0 {
-									celnum = obj_use_tiles_y(x,y-cm) - 1
-								} else : if obj_tiles_y(x,y-cm) != 0 {
-									if obj_tiles_y(x,y-cm) < 0 {
-										celnum = obj_tiles_y(x,y-cm) + obj_use_tiles_y(x,y-cm)
-									} else {
-										if obj_dire(x,y-cm) = 1 {
-											celnum = obj_tiles_y(x,y-cm) - (obj_use_tiles_y(x,y-cm) - 1)
+
+						//上地のオブジェクトを表示
+							if chipx > 1 {
+								if obj_dire(x,y) = 0 {
+									atlx += 0
+									px += 32 * obj_tiles_x(x,y)
+									py += 16 * (obj_use_tiles_x(x,y) - 1 - obj_tiles_x(x,y))
+									sizex = 64
+								} else : if obj_dire(x,y) = 1 {
+									atlx += 32 * obj_tiles_x(x,y)
+									px += 32 * obj_tiles_x(x,y)
+									py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+									sizex = 64
+								} else : if obj_dire(x,y) = 2 {
+									atlx += 32 * obj_tiles_x(x,y)
+									px += 32 * obj_tiles_x(x,y)
+									py += ((obj_use_tiles_x(x,y)-1)-obj_tiles_x(x,y)) * 16
+									sizex = 64
+								} else : if obj_dire(x,y) = 3 {
+									atlx += 64 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
+									px += 32 * ((obj_use_tiles_x(x,y)-1)-(-obj_tiles_x(x,y)))
+									py += ((obj_use_tiles_x(x,y)-1)+(-obj_tiles_x(x,y))) * 16 - 16
+									sizex = 64
+								}
+							}
+		
+							if chipy > 1 {
+								if obj_dire(x,y) = 0 {
+									atlx += 32 * obj_tiles_y(x,y)
+									px += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									py += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
+									sizex = 64
+								} else : if obj_dire(x,y) = 1 {
+									atly += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
+									px += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									py += 16 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									sizex = 64
+								} else : if obj_dire(x,y) = 2 {
+									atly += 32 * ((obj_use_tiles_y(x,y)-1)-(-obj_tiles_y(x,y)))
+									px += 32 * abs(obj_tiles_y(x,y))
+									py += 16 * abs(obj_tiles_y(x,y))
+									sizex = 64
+								} else : if obj_dire(x,y) = 3 {
+									atlx += 32 * obj_tiles_y(x,y)
+									px += 32 * (obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y))
+									py += ((obj_use_tiles_y(x,y)-1)-obj_tiles_y(x,y)) * 16
+									sizex = 64
+								}
+							}
+							
+							if (atly*(abry/sizey)) - (sizey*(abry/sizey)) > 0 and (category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "waterway" and category(x,y) != "") and chipx = 0 and chipy = 0 {
+								py -= atly
+							}
+	
+							if (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "waterway" or category(x,y) = "tile") {
+								py -= 32
+							}
+							
+							if abry-atly >= sizey and (category(x,y) = "road" or category(x,y) = "railroad" or category(x,y) = "waterway" or category(x,y) = "") {
+								atly -= sizey
+							}
+		
+							if addon_transparent_color_r(map(x,y)) = 0 and addon_transparent_color_g(map(x,y)) = 0 and addon_transparent_color_b(map(x,y)) = 0 {
+								gmode 2
+							} else {
+								color addon_transparent_color_r(map(x,y)), addon_transparent_color_g(map(x,y)), addon_transparent_color_b(map(x,y))
+								gmode 4, sizex, sizey, 256
+							}
+		
+							; 2マス以上の大きさのアドオンの場合（道路・線路・駅除く）
+							if ( obj_use_tiles_x(x,y) != 0 or obj_use_tiles_y(x,y) != 0 ) and category(x,y) != "road" and category(x,y) != "railroad" and category(x,y) != "station" and category(x,y) != "waterway" {
+								celnum = 0
+								al = 0
+	
+								if obj_tiles_x(x,y) = 0 and obj_dire(x,y) = 3 and ((obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1) or obj_use_tiles_y(x,y) = 0) {
+									celnum = obj_use_tiles_x(x,y) - 1
+								} else : if (obj_dire(x,y) = 0 or obj_dire(x,y) = 3) and obj_use_tiles_x(x,y) <= 1 {
+									celnum = obj_use_tiles_y(x,y) - 1 - obj_tiles_y(x,y)
+									al = 1
+								} else : if obj_tiles_x(x,y) < 0 {
+									celnum = obj_tiles_x(x,y) + obj_use_tiles_x(x,y) - 1
+								} else {
+									celnum = obj_tiles_x(x,y)
+								}
+	
+								if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and ((obj_tiles_y(x,y) = 1 and obj_dire(x,y) = 3) or (obj_tiles_y(x,y) != 0 and obj_dire(x,y) != 3)) {
+									cm = 1
+	
+									if obj_dire(x,y) = 2 {
+										px -= 64
+									}
+								} else {
+									cm = 0
+								}
+	
+								if al = 0 {
+									if obj_tiles_y(x,y-cm) = 0 and obj_dire(x,y-cm) = 1 and obj_use_tiles_x(x,y-cm) = 0 {
+										celnum = obj_use_tiles_y(x,y-cm) - 1
+									} else : if obj_tiles_y(x,y-cm) != 0 {
+										if obj_tiles_y(x,y-cm) < 0 {
+											celnum = obj_tiles_y(x,y-cm) + obj_use_tiles_y(x,y-cm)
 										} else {
-											celnum = obj_tiles_y(x,y-cm)
+											if obj_dire(x,y-cm) = 1 {
+												celnum = obj_tiles_y(x,y-cm) - (obj_use_tiles_y(x,y-cm) - 1)
+											} else {
+												celnum = obj_tiles_y(x,y-cm)
+											}
 										}
 									}
 								}
-							}
-
-							if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and obj_tiles_y(x,y) = 0 {
-								celnum = -1
-							}
-
-							if celnum >= 0 {
-								pos macro1 + px, macro2 - sizey + 1 + py
-								celput buffer_number(x,y) + obj_dire(x,y) + 1, celnum
-								;pos macro1 + px, macro2-100 : color 0, 162, 232 : font SystemFont, 16, 1 : mes ""+celnum+" / "+cm+" / "+al+""
-							}
 	
-						; 1x1のアドオンの場合
-						} else {
-							pos macro1 + px, macro2 - sizey + 1 + py
-							
-							if category(x,y) = "tile" {
-								celput buffer_number(x,y), tile_type_tmp
+								if obj_use_tiles_x(x,y) > 1 and obj_use_tiles_y(x,y) > 1 and obj_tiles_y(x,y) = 0 {
+									celnum = -1
+								}
+	
+								if celnum >= 0 {
+									pos macro1 + px, macro2 - sizey + 1 + py
+									celput buffer_number(x,y) + obj_dire(x,y) + 1, celnum
+									;pos macro1 + px, macro2-100 : color 0, 162, 232 : font SystemFont, 16, 1 : mes ""+celnum+" / "+cm+" / "+al+""
+								}
+	
+							; 1x1のアドオンの場合
 							} else {
-								celput buffer_number(x,y), obj_dire(x,y)
+								pos macro1 + px, macro2 - sizey + 1 + py
+								
+								if category(x,y) = "tile" {
+									celput buffer_number(x,y), tile_type_tmp
+								} else {
+									celput buffer_number(x,y), obj_dire(x,y)
+								}
 							}
-						}
 
 						/* ;描写する順番
 							color 0, 162, 232 : font SystemFont, 16, 1
@@ -3675,7 +4316,7 @@
 		
 	
 		//メニューを開いているときはstat_mode = "type"にする
-			if cursor_mode != "normal" and cursor_mode != "put_Road" {
+			if cursor_mode != "normal" and cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Waterway" {
 				stat_mode = "type"
 				stat_mode_changed = 1
 			}
@@ -3747,7 +4388,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "waterway" and category_buf != "tile" {
 						
 							qv2 x,y
 							land_price_buf = land_price(x,y)
@@ -3804,7 +4445,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "waterway" and category_buf != "tile" {
 						
 							qv2 x,y
 							crime_rate_buf = crime_rate(x,y)
@@ -3862,7 +4503,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "waterway" and category_buf != "tile" {
 						
 							qv2 x,y
 							education_rate_buf = education_rate(x,y)
@@ -3920,7 +4561,7 @@
 	
 						category_buf = category(x,y)
 	
-						if category_buf != "road" and category_buf != "railroad" and category_buf != "tile" {
+						if category_buf != "road" and category_buf != "railroad" and category_buf != "waterway" and category_buf != "tile" {
 						
 							qv2 x,y
 							happiness_buf = happiness(x,y)
@@ -4199,6 +4840,20 @@
 						color 0, 0, 0
 						pos 316+2, windowy-70-titlebar_h-18+2 : mes "公園"
 					}
+
+				//水路ボタン
+					if cursor_mode = "put_Waterway" {
+						gmode 2
+						pos 348, windowy-70-titlebar_h : gcopy 76, 0, 32, 32, 32
+					} else {
+						gmode 2
+						pos 348, windowy-70-titlebar_h : gcopy 76, 0, 0, 32, 32
+					}
+					if click_range(348, windowy-70-titlebar_h, 348+32, windowy-70-titlebar_h+32) = 1 and opening_addon_menu = 0 {
+						color 255, 255, 255 : sboxf 128, 348, windowy-70-titlebar_h-18, 348+50, windowy-70-titlebar_h
+						color 0, 0, 0
+						pos 348+2, windowy-70-titlebar_h-18+2 : mes "水路"
+					}
 	
 				//情報ボタン
 					gmode 2
@@ -4368,7 +5023,7 @@
 					color 255, 255, 255 : font SystemFont, 11
 					pos 90, windowy-45-titlebar_h+10 : mes ""+time_Year+"年"+time_Month+"月"+time_Date+"日 "+strf("%02d",time_Hour)+":"+strf("%02d",time_Minutes)+"   人口 "+Total_Population+"人   § "+Money+"   気温 "+temperature+"℃"
 	
-				//[一時的に廃止]ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
+				//ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
 					if (time_Hour = 0 and time_Minutes = 0) or (time_Hour = 6 and time_Minutes = 0) or (time_Hour = 12 and time_Minutes = 0) or (time_Hour = 18 and time_Minutes = 0) or first_loop = 1 {
 						gosub *get_news
 					}
@@ -4410,6 +5065,10 @@
 					//F - 農業区画
 						color 185, 122, 87 : boxf windowx-140, windowy-titlebar_h-20-(demand_Farm/3), windowx-140+10, windowy-titlebar_h-20
 						cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10, 1
+
+			if Drow_Interval <= 0 {
+				error "S03 : Drow_Intervalの数値が0以下です\n描写間隔の設定が0以下になっています。\n必ず1以上にしてください。"
+			}
 					
 			redraw 1
 			await Drow_Interval
@@ -4484,6 +5143,7 @@
 				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 	
@@ -4522,6 +5182,7 @@
 				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4529,7 +5190,7 @@
 		//線路ボタン
 			if click_range( 92, windowy-70-titlebar_h, 92+32, windowy-70-titlebar_h+32 ) = 1 {
 					
-				if opening_menu_put_Road = 0 {
+				if opening_menu_put_Railroad = 0 {
 					cursor_mode = "put_Railroad"
 					density = ""
 		
@@ -4557,6 +5218,7 @@
 				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4592,6 +5254,7 @@
 				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4627,6 +5290,7 @@
 				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4661,6 +5325,7 @@
 				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4695,6 +5360,7 @@
 				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4729,6 +5395,7 @@
 				opening_menu_put_Office = 0
 				opening_menu_put_Public = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4763,6 +5430,7 @@
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Farm = 0
 				opening_menu_put_Park = 0
+				opening_menu_put_Waterway = 0
 	
 				open_stat_menu = 0
 			}
@@ -4797,6 +5465,43 @@
 				opening_menu_put_Industrial = 0
 				opening_menu_put_Farm = 0
 				opening_menu_put_Public = 0
+				opening_menu_put_Waterway = 0
+	
+				open_stat_menu = 0
+			}
+
+		//水路建設ボタン
+			if click_range( 348, windowy-70-titlebar_h, 348+32, windowy-70-titlebar_h+32 ) = 1 {
+		
+				if opening_menu_put_Waterway = 0 {
+					cursor_mode = "put_Waterway"
+					density = ""
+		
+					opening_addon_menu = 1
+					opening_menu_put_Waterway = 1
+	
+					//とりあえず一番左にあるアドオンを選択させておく
+						clicked_addon_number = 0
+		
+						//選択されたアドオンのアドオン名を取得
+							notesel type_waterway
+							noteget put_addon_name, clicked_addon_number
+				
+						//選択されたアドオンのアドオン番号を取得
+							notesel type_number_waterway
+							noteget addon_num_waterway, clicked_addon_number
+							addon_num_waterway = int(addon_num_waterway)
+				}
+		
+				opening_menu_put_Road = 0
+				opening_menu_put_Railroad = 0
+				opening_menu_put_Residential = 0
+				opening_menu_put_Commercial = 0
+				opening_menu_put_Office = 0
+				opening_menu_put_Industrial = 0
+				opening_menu_put_Farm = 0
+				opening_menu_put_Public = 0
+				opening_menu_put_Park = 0
 	
 				open_stat_menu = 0
 			}
@@ -4838,6 +5543,8 @@
 					opening_menu_put_Commercial = 0
 					opening_menu_put_Office = 0
 					opening_menu_put_Public = 0
+					opening_menu_put_Park = 0
+					opening_menu_put_waterway = 0
 				}
 			
 			//設定ボタン
@@ -5231,7 +5938,7 @@
 			/*-----------------------------------------------公園-------------------------------------------------*/
 			
 			//公園
-				notesel type_public
+				notesel type_park
 				if opening_menu_put_Park = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
 					cursor_mode = "put_Park"
 		
@@ -5248,6 +5955,27 @@
 	
 					gosub *build_obj
 				}
+
+			/*-----------------------------------------------水路-------------------------------------------------*/
+			
+			//水路
+				notesel type_waterway
+				if opening_menu_put_Waterway = 1 and click_range( 10+35, windowy-70-titlebar_h-32, notemax*35+10+35, windowy-70-titlebar_h ) = 1 {
+					cursor_mode = "put_Waterway"
+		
+					clicked_addon_number = mousex/35 - 1
+		
+					//選択されたアドオンのアドオン名を取得
+						notesel type_Waterway
+						noteget put_addon_name, clicked_addon_number
+						
+					//選択されたアドオンのアドオン番号を取得
+						notesel type_number_Waterway
+						noteget addon_num_waterway, clicked_addon_number
+						addon_num_waterway = int(addon_num_waterway)
+						
+					gosub *build_obj
+				}
 	
 			/*----------------------------------------------------------------------------------------------------*/
 	
@@ -5256,6 +5984,13 @@
 *build_obj
 	dim cannot_build, 4
 	dim direction_check, 4
+
+	if clicked_addon_number <= -1 {
+		error "S04 : clicked_addon_numberが0未満です\n選択されたアドオンの番号が0未満のままアドオンを設置しようとしています。"
+	}
+	if put_addon_name = "" {
+		error "S05 : put_addon_nameが空白です\n選択されたアドオンの名前が空白のままアドオンを設置しようとしています。"
+	}
 	
 *build_obj_2
 	/*-----------------道路・線路・建物の建設・敷設（左クリック）、撤去（右クリック or 撤去モード）---------------------*/
@@ -5277,7 +6012,7 @@
 			}
 			
 		//アドオンに建設可能回数が設定されていて、建物が建設可能回数を超えている場合はreturn
-			if addon_build_limit(addon_num_buf) >= 1 and cursor_mode != "put_Road" and instr(put_addon_name, 0, "Area : ") = -1 {
+			if addon_build_limit(addon_num_buf) >= 1 and cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Waterway" and instr(put_addon_name, 0, "Area : ") = -1 {
 				s = 0
 				
 				repeat mapsize
@@ -5367,10 +6102,15 @@
 						//資金を減らす（§5/1マス）
 							Money -= 5
 	
-						//敷設した地点の情報を書き換え
-							gosub *delete_obj
+						//敷設した地点の情報を書き換え			
+							cetegory_before_put_road = category(mx,my)
 							
-							cetegory_buf = category(mx,my)
+							gosub *delete_obj
+
+							name_before_put_road = name(mx, my)
+							map_before_put_road = map(mx, my)
+							obj_type_before_put_road = obj_type(mx, my)
+							obj_dire_before_put_road = obj_dire(mx, my)
 
 							if road_type = "roadway" {
 								map(mx, my) = addon_num_normal_road
@@ -5397,7 +6137,7 @@
 								category_3(mx, my) = "promenade"
 							}
 							
-							if category_buf = "railroad" {
+							if cetegory_before_put_road = "railroad" {
 								//線路と交差している場合は予め踏切を設置しておく
 									if category(mx-1, my) = "road" or category(mx+1, my) = "road" {
 										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
@@ -5409,6 +6149,24 @@
 									}
 									
 									category_2(mx, my) = "train_crossing"
+
+							} else : if cetegory_before_put_road = "waterway" {
+								//水路と交差している場合は予め橋を設置しておく
+									if category(mx-1, my) = "road" or category(mx+1, my) = "road" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "depth")
+									}
+									if category(mx, my-1) = "road" or category(mx, my+1) = "road" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "width")
+									}
+									
+									name2(mx, my) = name_before_put_road
+									map2(mx, my) = map_before_put_road
+									obj_type2(mx, my) = obj_type_before_put_road
+									obj_dire2(mx, my) = obj_dire_before_put_road
+									
+									category_2(mx, my) = "bridge"
 								
 							} else {
 								//建設中のタイプを指定する
@@ -5595,12 +6353,92 @@
 	
 						return
 					}
+
+				//水路敷設
+					if cursor_mode = "put_Waterway" and map(mx, my) != addon_num_waterway {
+	
+						//資金を減らす（§5/1マス）
+							Money -= 5
+	
+						//敷設した地点の情報を書き換え
+							gosub *delete_obj
+
+							name_tmp = name(mx, my)
+							
+							cetegory_buf = category(mx,my)
+
+							map(mx, my) = addon_num_waterway
+							name(mx, my) = put_addon_name
+							category(mx, my) = "waterway"
+							
+							obj_serial_num(mx, my) = 0
+							obj_use_tiles_x(mx,my) = 0
+							obj_use_tiles_y(mx,my) = 0
+							obj_tiles_x(mx, my) = 0
+							obj_tiles_y(mx, my) = 0
+
+							reservation(mx, my) = "none"
+
+							original_name(mx, my) = ""
+
+							if category_buf = "waterway" {
+								//水路と交差している場合は予め橋を設置しておく
+									if category(mx-1, my) = "road" or category(mx+1, my) = "road" {
+										obj_type(mx, my) = element2( name_tmp, use_type, addon_total_use_types, "bridge")
+										obj_dire(mx, my) = element3( name_tmp, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "width")
+
+										obj_type2(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
+										obj_dire2(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
+									}
+									if category(mx, my-1) = "road" or category(mx, my+1) = "road" {
+										obj_type(mx, my) = element2( name_tmp, use_type, addon_total_use_types, "bridge")
+										obj_dire(mx, my) = element3( name_tmp, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "depth")
+
+										obj_type2(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
+										obj_dire2(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
+									}
+									
+									category_2(mx, my) = "bridge"
+								
+							} else {
+								//建設中のタイプを指定する
+									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
+									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
+			
+									category_2(mx, my) = "under_construction"
+							}
+
+						/*
+							if category_buf = "road" {
+								//線路と交差している場合は予め踏切を設置しておく
+									if category(mx-1, my) = "road" or category(mx+1, my) = "road" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
+									}
+									if category(mx, my-1) = "road" or category(mx, my+1) = "road" {
+										obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
+										obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
+									}
+									
+									category_2(mx, my) = "train_crossing"
+								
+							} else {
+								//建設中のタイプを指定する
+									obj_type(mx, my) = element2( put_addon_name, use_type, addon_total_use_types, "under_construction")
+									obj_dire(mx, my) = element3( put_addon_name, use_type, addon_total_use_types, "under_construction", addon_direction, addon_total_addon_direction, "null")
+			
+									category_2(mx, my) = "under_construction"
+							}
+						*/
+	
+						return
+					}
 					
-				//道路・線路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
-					if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" {
+				//道路・線路・水路敷設以外の場合、選択されたマスの周囲（上下左右）に道路があるかどうか（道路に接続できるか）
+					if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Waterway" {
 	
 						//そもそも建設地に道路がある場合
-							if (category(mx,my) = "road" or category(mx,my) = "railroad") and (cursor_mode != "put_Road" and cursor_mode != "put_Railroad") and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h & ginfo_my<=ginfo_wy2) {
+							if (category(mx,my) = "road" or category(mx,my) = "railroad" or category(mx,my) = "waterway") and (ginfo_mx>=ginfo_wx1 & ginfo_mx<=ginfo_wx2) and (ginfo_my>=ginfo_wy1+titlebar_h & ginfo_my<=ginfo_wy2) {
 								;dialog "この区画は既に占有されています"
 								return
 							}
@@ -6245,12 +7083,16 @@
 							}
 							
 							map(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_addon_num_buf
+							map2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = -1
 							name(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "tile_greenfield"
+							name2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							category(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = "tile"
 							category_2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							category_3(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 							obj_type(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_type_buf
+							obj_type2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 							obj_dire(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = tile_greenfield_null_dire_buf
+							obj_dire2(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = 0
 
 							original_name(mx-obj_tiles_x_buf+rx, my-obj_tiles_y_buf+ry) = ""
 	
@@ -6305,7 +7147,7 @@
 							}
 	
 							//地価の変動
-								if instr(category_buf, 0, "road") = -1 and instr(category_buf, 0, "railroad") = -1 and instr(category_buf, 0, "tile") = -1 {
+								if instr(category_buf, 0, "road") = -1 and instr(category_buf, 0, "railroad") = -1 and instr(category_buf, 0, "waterway") = -1 and instr(category_buf, 0, "tile") = -1 {
 									addon_land_price_influence__tmp = addon_land_price_influence(addon_num_buf)
 		
 									addon_land_price_influence_grid__tmp = addon_land_price_influence_grid(addon_num_buf)
@@ -6488,6 +7330,7 @@
 		return
 		
 *adjustment_road
+	
 	put_addon_name = name(x, y)
 	
 	if category_buf = "road" {
@@ -6495,7 +7338,7 @@
 			gosub *delete_obj
 		}
 	
-		if category_2(x, y) != "train_crossing" {
+		if category_2(x, y) != "train_crossing" and category_2(x, y) != "bridge" {
 			category_2(x, y) = ""
 		}
 		
@@ -6504,13 +7347,20 @@
 	
 		//行き止まり
 			if (left_chip = "road" or left_chip_2 = "train_crossing") and top_chip != "road" and bottom_chip != "road" and right_chip != "road" {
-				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
-				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
-	
 				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
+				} else : if category(x, y) = "waterway" or category_2(x, y) = "bridge" {
+					obj_type2(x, y) = obj_type(x, y)
+					obj_dire2(x, y) = obj_dire(x, y)
+					
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "bridge"
+				} else {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "left")
 				}
 	
 				//マップの端なら直線道路に変更
@@ -6519,14 +7369,21 @@
 						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 					}*/
 			}
-			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and bottom_chip != "road" and right_chip != "road" {
-				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
-				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
-	
+			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and bottom_chip != "road" and right_chip != "road" {	
 				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
+				} else : if category(x, y) = "waterway" or category_2(x, y) = "bridge" {
+					obj_type2(x, y) = obj_type(x, y)
+					obj_dire2(x, y) = obj_dire(x, y)
+					
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "bridge"
+				} else {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "top")
 				}
 	
 				//マップの端なら直線道路に変更
@@ -6536,13 +7393,20 @@
 					}*/
 			}
 			if left_chip != "road" and top_chip != "road" and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and right_chip != "road" {
-				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
-				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
-	
 				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
+				} else : if category(x, y) = "waterway" or category_2(x, y) = "bridge" {
+					obj_type2(x, y) = obj_type(x, y)
+					obj_dire2(x, y) = obj_dire(x, y)
+					
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "bridge"
+				} else {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "bottom")
 				}
 	
 				//マップの端なら直線道路に変更
@@ -6552,13 +7416,20 @@
 					}*/
 			}
 			if left_chip != "road" and top_chip != "road" and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing") {
-				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
-				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
-	
 				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
+				} else : if category(x, y) = "waterway" or category_2(x, y) = "bridge" {
+					obj_type2(x, y) = obj_type(x, y)
+					obj_dire2(x, y) = obj_dire(x, y)
+					
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "beidge"
+				} else {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "dead_end")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "dead_end", addon_direction, addon_total_addon_direction, "right")
 				}
 	
 				//マップの端なら直線道路に変更
@@ -6617,26 +7488,34 @@
 			}
 	
 		//縦向き
-			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing") and (bottom_chip = "road" or bottom_chip_2 = "train_crossing") and right_chip != "road" {
-				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
-				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
-	
+			if left_chip != "road" and (top_chip = "road" or top_chip_2 = "train_crossing" or left_chip_2 = "bridge") and (bottom_chip = "road" or bottom_chip_2 = "train_crossing" or left_chip_2 = "bridge") and right_chip != "road" {
 				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "width")
 					category_2(x, y) = "train_crossing"
+				} else : if category(x, y) = "waterway" or category_2(x, y) = "bridge" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "width")
+					category_2(x, y) = "bridge"
+				} else {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
 				}
 			}
 	
 		//横向き
-			if (left_chip = "road" or left_chip_2 = "train_crossing") and top_chip != "road" and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing") {
-				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
-				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
-	
+			if (left_chip = "road" or left_chip_2 = "train_crossing" or left_chip_2 = "bridge") and top_chip != "road" and bottom_chip != "road" and (right_chip = "road" or right_chip_2 = "train_crossing" or left_chip_2 = "bridge") {
 				if category_buf = "railroad" or category_2(x, y) = "train_crossing" {
 					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "train_crossing")
 					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "train_crossing", addon_direction, addon_total_addon_direction, "depth")
 					category_2(x, y) = "train_crossing"
+				} else : if category(x, y) = "waterway" or category_2(x, y) = "bridge" {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "bridge")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "bridge", addon_direction, addon_total_addon_direction, "depth")
+					category_2(x, y) = "bridge"
+				} else {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
 				}
 			}
 	
@@ -6842,6 +7721,321 @@
 	}
 	
 	return
+
+*adjustment_waterway
+	put_addon_name = name(x, y)
+	
+	if category_buf = "waterway" {
+		if from_delete_obj = 0 {
+			gosub *delete_obj
+		}
+		
+		from_delete_obj = 0
+		from_build_obj = 0
+
+		ltcategory = safesearch_str(category, x-1, y-1, mapsize, mapsize)
+		rtcategory = safesearch_str(category, x+1, y-1, mapsize, mapsize)
+		lbcategory = safesearch_str(category, x-1, y+1, mapsize, mapsize)
+		rbcategory = safesearch_str(category, x+1, y+1, mapsize, mapsize)
+
+		ltcategory_2 = safesearch_str(category_2, x-1, y-1, mapsize, mapsize)
+		rtcategory_2 = safesearch_str(category_2, x+1, y-1, mapsize, mapsize)
+		lbcategory_2 = safesearch_str(category_2, x-1, y+1, mapsize, mapsize)
+		rbcategory_2 = safesearch_str(category_2, x+1, y+1, mapsize, mapsize)
+
+		//1マスだけ孤立した（周りに接続する道路がない）道路の場合はコンクリートタイルを表示
+			if iforandcorrect(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge") = 0 {
+				obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "isolated")
+				obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "isolated", addon_direction, addon_total_addon_direction, "null")
+			}
+
+		//十字型交差点または河口
+			if iforandcorrect(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge") = 4 {
+				if iforand(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+					obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+					obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+				} else {
+					if iforand2(ltcategory, ltcategory_2, lbcatefory, lbcategory_2, "waterway", "bridge", 0, 0) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "estuary")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "estuary", addon_direction, addon_total_addon_direction, "left-top-bottom")
+					} else : if iforand2(rtcategory, rtcategory_2, lbcatefory, lbcategory_2, "waterway", "bridge", 0, 0) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "estuary")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "estuary", addon_direction, addon_total_addon_direction, "left-right-top")
+					} else : if iforand2(lbcategory, lbcategory_2, rbcatefory, rbcategory_2, "waterway", "bridge", 0, 0) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "estuary")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "estuary", addon_direction, addon_total_addon_direction, "left-right-bottom")
+					} else : if iforand2(rtcategory, rtcategory_2, rbcatefory, rbcategory_2, "waterway", "bridge", 0, 0) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "estuary")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "estuary", addon_direction, addon_total_addon_direction, "right-top-bottom")
+					} else {
+						if ltcategory != "waterway" and ltcategory_2 != "bridge" {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner", addon_direction, addon_total_addon_direction, "left-top")
+						} else : if rtcategory != "waterway" and rtcategory_2 != "bridge" {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner", addon_direction, addon_total_addon_direction, "right-top")
+						} else : if lbcategory != "waterway" and lbcategory_2 != "bridge" {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner", addon_direction, addon_total_addon_direction, "left-bottom")
+						} else : if rbcategory != "waterway" and rbcategory_2 != "bridge" {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross_without_one_corner", addon_direction, addon_total_addon_direction, "right-bottom")
+						} else {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_intersection_cross")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_intersection_cross", addon_direction, addon_total_addon_direction, "null")
+						}
+					}
+				}
+			}
+	
+		//行き止まり
+			if iforandcorrect(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge") = 1 {
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 0, 0, 0) = 1 {
+					if category(x, y) = "road" or category_2(x, y) = "bridge" {
+						obj_type2(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire2(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "left")
+						
+						category_2(x, y) = "bridge"
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "left")
+					}
+		
+					//マップの端なら直線道路に変更
+						/*if x = 0 {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+						}*/
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 1, 0, 0) = 1 {
+					if category(x, y) = "road" or category_2(x, y) = "bridge" {
+						obj_type2(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire2(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "top")
+						
+						category_2(x, y) = "bridge"
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "top")
+					}
+		
+					//マップの端なら直線道路に変更
+						/*if y = 0 {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+						}*/
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 0, 1, 0) = 1 {
+					if category(x, y) = "road" or category_2(x, y) = "bridge" {
+						obj_type2(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire2(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "bottom")
+						
+						category_2(x, y) = "bridge"
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "bottom")
+					}
+					
+					//マップの端なら直線道路に変更
+						/*if x = mapsize {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "depth")
+						}*/
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 0, 0, 1) = 1 {
+					if category(x, y) = "road" or category_2(x, y) = "bridge" {
+						obj_type2(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire2(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "right")
+						
+						category_2(x, y) = "bridge"
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_dead_end")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_dead_end", addon_direction, addon_total_addon_direction, "right")
+					}
+		
+					//マップの端なら直線道路に変更
+						/*if y = mapsize {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "default")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "default", addon_direction, addon_total_addon_direction, "width")
+						}*/
+				}
+			}
+
+		//直線
+			if iforandcorrect(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge") = 2 { 
+			//縦向き
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 1, 1, 0) = 1 {
+					if category(x, y) = "road" or category_2(x, y) = "bridge" {
+						obj_type2(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_default")
+						obj_dire2(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_default", addon_direction, addon_total_addon_direction, "width")
+						
+						category_2(x, y) = "bridge"
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_default", addon_direction, addon_total_addon_direction, "width")
+					}
+				}
+		
+			//横向き
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 0, 0, 1) = 1 {
+					if category(x, y) = "road" or category_2(x, y) = "bridge" {
+						obj_type2(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_default")
+						obj_dire2(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_default", addon_direction, addon_total_addon_direction, "depth")
+						
+						category_2(x, y) = "bridge"
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_default")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_default", addon_direction, addon_total_addon_direction, "depth")
+					}
+				}
+			}
+	
+		//T字型交差点
+			if iforandcorrect(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge") = 3 { 
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 1, 1, 0) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
+	
+						; マップの端なら十字型交差に変更
+						if x+1 = mapsize or x = 0 or y+1 = mapsize or y = 0 {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-top-bottom")
+					}
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 1, 0, 1) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
+	
+						; マップの端なら十字型交差に変更
+						if x+1 = mapsize or x = 0 or y+1 = mapsize or y = 0 {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
+					}
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 0, 1, 1) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
+	
+						; マップの端なら十字型交差に変更
+						if x+1 = mapsize or x = 0 or y+1 = mapsize or y = 0 {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
+					}
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 1, 1, 1) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
+	
+						; マップの端なら十字型交差に変更
+						if x+1 = mapsize or x = 0 or y+1 = mapsize or y = 0 {
+							obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+							obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "right-top-bottom")
+					}
+				}
+			}
+
+			//曲がり角
+			if iforandcorrect(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge") = 2 { 
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 1, 0, 0) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-top")
+						
+						if x+1 = mapsize {
+							if y+1 = mapsize {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+							} else {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
+							}
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_turn", addon_direction, addon_total_addon_direction, "left-top")
+					}
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 1, 0, 1) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-top")
+
+						if x = 0 {
+							if y+1 = mapsize {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+							} else {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-top")
+							}
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_turn", addon_direction, addon_total_addon_direction, "right-top")
+					}
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 1, 0, 1, 0) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "left-bottom")
+
+						if x+1 = mapsize {
+							if y = 0 {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+							} else {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
+							}
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_turn", addon_direction, addon_total_addon_direction, "left-bottom")
+					}
+				}
+				if iforand(left_chip, left_chip_2, top_chip, top_chip_2, bottom_chip, bottom_chip_2, right_chip, right_chip_2, "waterway", "bridge", 0, 0, 1, 1) = 1 {
+					if iforor(ltcategory, ltcategory_2, rtcategory, rtcategory_2, lbcategory, lbcategory_2, rbcategory, rbcategory_2, "waterway", "bridge", 1, 1, 1, 1) = 1 {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "turn", addon_direction, addon_total_addon_direction, "right-bottom")
+
+						if x = 0 {
+							if y = 0 {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_cross")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_cross", addon_direction, addon_total_addon_direction, "null")
+							} else {
+								obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "intersection_T")
+								obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "intersection_T", addon_direction, addon_total_addon_direction, "left-right-bottom")
+							}
+						}
+					} else {
+						obj_type(x, y) = element2( put_addon_name, use_type, addon_total_use_types, "river_turn")
+						obj_dire(x, y) = element3( put_addon_name, use_type, addon_total_use_types, "river_turn", addon_direction, addon_total_addon_direction, "right-bottom")
+					}
+				}
+			}
+		}
+	
+	return
+	
 	
 *set_area
 	//地区設定
@@ -7121,8 +8315,11 @@
 	if cursor_mode = "put_Park" {
 		notesel type_number_park
 	}
+	if cursor_mode = "put_Waterway" {
+		notesel type_number_waterway
+	}
 	
-	if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Public" and cursor_mode != "put_Park" {
+	if cursor_mode != "put_Road" and cursor_mode != "put_Railroad" and cursor_mode != "put_Public" and cursor_mode != "put_Park" and cursor_mode != "put_Waterway" {
 		p = 1
 	} else {
 		p = 0
@@ -7374,6 +8571,12 @@
 				}
 	
 			//再生
+				exist ""+directory+"/bgm/"+playing_BGM_file+""
+
+				if strsize = -1 {
+					error "S06 : 再生ファイルが見つかりません\nbgmフォルダ内に"+playing_BGM_file+"が見つかりません。"
+				}
+				
 				mci"open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"	; 開く
 				mci"play Cities-Box"													; 再生
 	
@@ -8064,9 +9267,6 @@
 
 	macro1_sd = macro1 : macro2_sd = macro2
 	
-	color 255, 255, 255
-	line macro1_sd+32, macro2_sd-100, macro1_sd+32, macro2_sd-32
-	
 	//ダイアログの大きさを文字列の長さによって決める
 		if before_clicked_mx_tmp != clicked_mx or before_clicked_my_tmp != clicked_my {
 			;get_str_print_length(name(clicked_mx,clicked_my))		←文字列の表示の長さを求める関数（後日作成予定）
@@ -8139,6 +9339,14 @@
 		}
 			
 	//表示
+		//mes_tmpに何もない場合は表示しない
+			if mes_tmp = "" {
+				return
+			}
+
+		color 255, 255, 255
+		line macro1_sd+32, macro2_sd-100, macro1_sd+32, macro2_sd-32
+		
 		color 0, 0, 0
 		sboxf 128, macro1_sd+32, macro2_sd-100-(diay1+5+diay2+5), macro1_sd+32+15+diax+25, macro2_sd-100
 	
@@ -8191,6 +9399,15 @@
 		//詳細
 			font SystemFont, 10
 			pos macro1_sd+32+15, macro2_sd-100-(diay1+5+diay2+5)+diay1+5 : mes mes_tmp
+
+			/*
+			lc = category(clicked_mx-1,clicked_my) : lc2 = category_2(clicked_mx-1,clicked_my)
+			tc = category(clicked_mx,clicked_my-1) : tc2 = category_2(clicked_mx,clicked_my-1)
+			bc = category(clicked_mx,clicked_my+1) : bc2 = category_2(clicked_mx,clicked_my+1)
+			rc = category(clicked_mx+1,clicked_my) : rc2 = category_2(clicked_mx+1,clicked_my)
+			mte = iforandcorrect(lc, lc2, tc, tc2, bc, bc2, rc, rc2, "waterway", "bridge")
+			mes "Type:"+obj_type(clicked_mx,clicked_my)+" / Dire:"+obj_dire(clicked_mx,clicked_my)+" / iforandcorrect(around chip):"+mte+""
+			*/
 
 		//建物名変更ボタン
 			pos macro1_sd+32+15+diax+25-20, macro2_sd-100-(diay1+5+diay2+5) : gmode 2 : gcopy 71, 0, 0, 20, 20
@@ -8775,6 +9992,11 @@
 		news_content = ""
 	
 		//特殊ニュース
+			exist "data/news/special.news"
+			if strsize = -1 {
+				error "F06 : special.newsが見つかりません\n/data/news/フォルダ内にspecial.newsが見つかりません。"
+			}
+			
 			notesel news_file
 			noteload "data/news/special.news"
 			
@@ -8872,6 +10094,11 @@
 				}
 	
 		//特に報じることがない場合、どうでもいいニュースを表示
+			exist "data/news/others.news"
+			if strsize = -1 {
+				error "F07 : others.newsが見つかりません\n/data/news/フォルダ内にothers.newsが見つかりません。"
+			}
+			
 			notesel news_file
 			noteload "data/news/others.news"
 			
@@ -9415,6 +10642,30 @@
 			loop
 			
 			noteadd "}", -1
+
+		//name2(x,y)
+			noteadd "name2(x,y) {", -1
+			
+			repeat mapsize
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapsize
+					x = cnt
+					
+					if cnt = 0 {
+						map_data_buf = name2(x,y)
+					} else {
+						map_data_buf = ""+map_data_buf+", "+name2(x,y)+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
 			
 		//category(x,y)
 			noteadd "category(x,y) {", -1
@@ -9511,6 +10762,30 @@
 			loop
 			
 			noteadd "}", -1
+
+		//obj_type2(x,y)
+			noteadd "obj_type2(x,y) {", -1
+			
+			repeat mapsize
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapsize
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_type2(x,y))		; 3桁に揃えているのは見やすくするためなので特に意味は無いです。4桁（1000以上）も読み込み可
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_type2(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
 	
 		//obj_dire(x,y)
 			noteadd "obj_dire(x,y) {", -1
@@ -9527,6 +10802,30 @@
 						map_data_buf = strf("%03d", obj_dire(x,y))
 					} else {
 						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_dire(x,y))+""
+					}
+				loop
+			
+				noteadd map_data_buf, -1
+				await 2
+			loop
+			
+			noteadd "}", -1
+
+		//obj_dire2(x,y)
+			noteadd "obj_dire2(x,y) {", -1
+			
+			repeat mapsize
+				y = cnt
+			
+				map_data_buf = ""
+			
+				repeat mapsize
+					x = cnt
+			
+					if cnt = 0 {
+						map_data_buf = strf("%03d", obj_dire2(x,y))
+					} else {
+						map_data_buf = ""+map_data_buf+", "+strf("%03d", obj_dire2(x,y))+""
 					}
 				loop
 			
@@ -10168,6 +11467,7 @@
 			download latest_version__Updater, latest_version__Updater_Name, latest_version__Updater_Name
 	
 			exist latest_version__Updater_Name
+			exe = latest_version__Updater_Name
 		} else : if devUpdate = 1 {
 			Dev_latest_version__Updater = get_chapter(Dev_latest_version, "Updater", " : ", ";")
 			Dev_latest_version__Updater_Name = get_chapter(Dev_latest_version, "Updater_Name", " : ", ";")
@@ -10175,20 +11475,19 @@
 			download Dev_latest_version__Updater, Dev_latest_version__Updater_Name, Dev_latest_version__Updater_Name
 	
 			exist Dev_latest_version__Updater_Name
+			exe = Dev_latest_version__Updater_Name
 		}
 	
 		if strsize = -1 {
-			dialog "アップデートに失敗しました"
-			return
-			
-		} else {
-			if normalUpdate = 1 {
-				exec latest_version__Updater_Name
-			} else {
-				exec Dev_latest_version__Updater_Name
-			}
-			end
+			error "S07 : アップデートに失敗しました\nアップデータ "+exe+"のダウンロードが完了しませんでした。"
 		}
+		
+		if normalUpdate = 1 {
+			exec latest_version__Updater_Name
+		} else {
+			exec Dev_latest_version__Updater_Name
+		}
+		end
 	
 	stop
 			
