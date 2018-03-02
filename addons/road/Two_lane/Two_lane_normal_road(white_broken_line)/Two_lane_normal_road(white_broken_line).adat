@@ -220,23 +220,23 @@ train_crossing {
 	
 	width {
 		size_x = "64"
-		size_y = "64"
+		size_y = "32"
 		chip_x = "1"
 		chip_y = "1"
 		
 		top_left_x = "0"
-		top_left_y = "0"
+		top_left_y = "32"
 		bottom_right_x = "64"
 		bottom_right_y = "64"
 	}
 	depth {
 		size_x = "64"
-		size_y = "64"
+		size_y = "32"
 		chip_x = "1"
 		chip_y = "1"
 		
 		top_left_x = "64"
-		top_left_y = "0"
+		top_left_y = "32"
 		bottom_right_x = "128"
 		bottom_right_y = "64"
 	}
