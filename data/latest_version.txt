@@ -1,8 +1,8 @@
-Release Number : 114;
+Release Number : 1145141919;
 Title : Cities Box;
-Version : 1.2.0;
-About : 水路の作成に対応　ほか;
+Version : 1.3.0;
+About : 作り直しを実行 / パックリマンモード実装;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
-URL : https://github.com/YotioSoft/Cities-Box/raw/master/;/;
+URL : https://github.com/YotioSoft/Cities_Box./raw/master/;
 OS : Windows, macOS;

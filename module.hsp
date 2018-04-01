@@ -1,0 +1,559 @@
+#module
+	
+		//エラー表示
+		#deffunc error str errmes
+			if errmes = "" {
+				errmes = "U01 : 原因を特定できません"
+			}
+			
+			dialog "エラーが発生しました\n"+errmes+"\n処理を中断しますか？", 3, "Cities Box Error"
+		
+			if stat = 6 {
+				goto *exit@
+			} else {
+				return
+			}
+		
+		//指定された範囲内にマウスがあるか確認する関数（使用例：click_range (100, 0, 300, 300) ）
+		#defcfunc click_range int mouse_x, int mouse_y, int mouse_x2, int mouse_y2
+			if ginfo_wx1 <= ginfo_mx and ginfo_wx2 >= ginfo_mx and ginfo_wy1 <= ginfo_my and ginfo_wy2 >= ginfo_my and mouse_x <= mousex and mouse_x2 >= mousex and mouse_y <= mousey and mouse_y2 >= mousey {
+				return 1
+			}
+			return 0
+			
+		//アドオンの番号を取得する関数
+		#defcfunc addon_num str input_addon_name
+			chdir directory@
+			exist "data/temp/"+input_addon_name+".temp"
+			
+			if strsize = -1 {
+				return addon_num@("tile_greenfield")	; 一時ファイルが見つからない場合、とりあえず更地（greenfield）の値を返す
+			}	
+			
+			notesel temp_file
+			noteload "data/temp/"+input_addon_name+".temp"
+			
+			return int(temp_file)
+			
+		//各項目の読み込み（使用例：get_chapter(元の変数, "検索する項目", "始点区切りコード", "終端コード") ）
+		#defcfunc get_chapter var underlying_var, str search_chapter, str punctuate, str end_word
+			value = instr(underlying_var, 0, ""+search_chapter+""+punctuate+"")
+			get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), instr(underlying_var, value + strlen(""+search_chapter+""+punctuate+""), end_word) )
+
+			if instr(underlying_var, 0, ""+search_chapter+""+punctuate+"") = -1 {
+				return ""
+			}
+			
+			return get_chapter_buf
+
+		/*指定された文字列が何番目の要素にあるかを取得（2次配列用）*/
+		#defcfunc element2 int search_addon_number, var notename, str search_word
+			finish = -1
+			
+			repeat sdnsize(notename, search_addon_number)
+				if sdnl(notename, search_addon_number, cnt) = search_word {
+					finish = cnt
+					break
+				}
+			loop
+		
+			if finish = -1 {
+				error@ "Cities Box Error A04 : 要素名が見つかりません\nアドオン番号"+search_addon_number+"のアドオンファイル(*.adat)内のタイプ要素名\n"+search_word+"が、\n規定のタイプ要素と合致しません。\nアドオン製作者にお問い合わせください。" 
+			}
+			
+			return finish
+
+		/*指定された文字列が何番目の要素にあるかを取得（3次配列用）*/
+		#defcfunc element3 int search_addon_number, int search_type_number, var notename, str search_word
+			finish = -1
+			
+			repeat sdnsize(notename, search_addon_number)
+				if sdnl3(notename, search_addon_number, search_type_number, cnt) = search_word {
+					finish = cnt
+					break
+				}
+			loop
+		
+			if finish = -1 {
+				error@ "Cities Box Error A05 : 要素名が見つかりません\nアドオン番号"+search_addon_number+"のアドオンファイル(*.adat)内の向き\n"+search_word+"が、\n規定のタイプ要素と合致しません。\nアドオン製作者にお問い合わせください。" 
+			}
+			
+			return finish
+		
+		//割り算（0で除算する場合はv3の値を返す）
+		#defcfunc avoid_div_in_zero int v1, int v2, int v3
+			if i2 = 0 {
+				return v3
+			} else {
+				return (v1 / v2)
+			}
+
+		/*文字列の取得（マップサイズを超えている場合は空白を返す）*/
+		#defcfunc safesearch_str array buf, int w, int x, int y, int z, int mapsizew, int mapsizex
+			if mapsizex = -1 {		; mapsizeyが-1のときは1次配列とみなす
+				if w < 0 or w > mapsizew-1 {
+					return ""
+				} else {
+					return buf(w)
+				}
+			} else {
+				if w < 0 or x < 0 or w > mapsizew-1 or x > mapsizex-1 {
+					return ""
+				} else {
+					return buf(w,x,y,z)
+				}
+			}
+		
+		/*数値の取得（マップサイズを超えている場合は-1を返す）*/
+		#defcfunc safesearch_int array buf, int x, int y, int mapsizex, int mapsizey
+			if mapsizey = -1 {		; mapsizeyが-1のときは1次配列とみなす
+				if x < 0 or x >= mapsizex {
+					return -1
+				} else {
+					return buf(x)
+				}
+			} else {
+				if x < 0 or y < 0 or x >= mapsizex or y >= mapsizey {
+					return -1
+				} else {
+					return buf(x,y)
+				}
+			}
+			
+		/*文字を中央に表示（使用例：cmes "hogehoge", 0, 640, 0, 480, 0）*/
+		#deffunc cmes str ctext, int cx, int cy, int cx2, int cy2, int redraw_exist
+			RECT = cx, cy, cx2, cy2
+			DrawText@ hdc, ctext, -1, varptr(RECT), $01
+			
+			if redraw_exist = 0 : redraw 1
+			return
+		
+		/*画像をぼかす（hsp/sample/new/gblur.hsp | 使用例：gblur 2）*/
+		#deffunc gblur int p1, int p2
+			gmode 3, ginfo_sx, ginfo_sy, 128
+			if (p2&1)=0 {
+				repeat p1
+				pos 1,0:gcopy ginfo(3)
+				pos 0,0:gcopy ginfo(3),2,0
+				loop
+			}
+			if (p2&2)=0 {
+				repeat p1
+				pos 0,1:gcopy ginfo(3)
+				pos 0,0:gcopy ginfo(3),0,2
+				loop
+			}
+			return
+			
+		/*半透明色表示命令（機能はboxfaと同じ）*/
+		#deffunc sboxf int depth, int ax, int ay, int bx, int by
+			pdx = ax, bx, bx, ax
+			pdy = ay, ay, by, by
+			gmode 3,,,depth
+			gsquare -1,pdx, pdy
+			return
+			
+		/*アドオンの情報を取得*/
+		#deffunc get_about_addon int search_addon_number@, int search_type_number@, int search_direction_number@, var input_top_left_x, var input_top_left_y, var input_bottom_right_x, var input_bottom_right_y,var input_size_x, var input_size_y, var input_chip_x, var input_chip_y
+			//オブジェクトの画像上の座標を取得
+				onerror gosub *er
+
+				chdir drectory@
+				notesel addon_top_left_x@
+				
+				input_top_left_x = sdnl3(addon_top_left_x@, search_addon_number@, search_type_number@, search_direction_number@)
+				input_top_left_y = sdnl3(addon_top_left_y@, search_addon_number@, search_type_number@, search_direction_number@)
+				input_bottom_right_x = sdnl3(addon_bottom_right_x@, search_addon_number@, search_type_number@, search_direction_number@)
+				input_bottom_right_y = sdnl3(addon_bottom_right_y@, search_addon_number@, search_type_number@, search_direction_number@)
+				
+				input_size_x = sdnl3(addon_size_x@, search_addon_number@, search_type_number@, search_direction_number@)
+				input_size_y = sdnl3(addon_size_x@, search_addon_number@, search_type_number@, search_direction_number@)
+			
+				input_chip_x = sdnl3(addon_chip_x@, search_addon_number@, search_type_number@, search_direction_number@)
+				input_chip_y = sdnl3(addon_chip_x@, search_addon_number@, search_type_number@, search_direction_number@)
+			
+			return
+		
+			*er
+				error "A13 : obj_type(x,y)またはobj_dire(x,y)の数値が異常です\nアドオンに存在しないobj_type(x,y)またはobj_dire(x.y)が設定されています。\nアドオン番号:"+search_addon_number+"\nobj_type(x,y):"+search_type_number+"\nobj_dire(x,y):"+obj_dire(x,y)+""
+		
+				return
+			
+		//ダウンロード（要hspinet.dll）
+		#deffunc download str url, str request, str dlname
+			netinit@
+			neturl@ url
+			
+			netdlname@ dlname					;	ダウンロード後のファイル名
+			netrequest@ request					;	ファイル名の指定（ここで指定する）
+			
+			repeat
+				exist dlname
+				netexec@ res
+				if res : break
+				await 50
+			loop
+		
+			netterm@
+			
+			return
+
+		; 条件分岐 if (... = ** or ... = **) ..に当てはまる数を返す関数（条件2つ用）*/
+		#defcfunc iforandcorrect_2 var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2
+			correct = 0
+			
+			if str(a2) = "0" : a2 = ""
+			if a1 = searchword1 or a2 = searchword2 {
+				correct++
+			}
+
+			if str(b2) = "0" : b2 = ""
+			if b1 = searchword1 or b2 = searchword2 {
+				correct++
+			}
+
+			if str(c2) = "0" : c2 = ""
+			if c1 = searchword1 or c2 = searchword2 {
+				correct++
+			}
+
+			if str(d2) = "0" : d2 = ""
+			if d1 = searchword1 or d2 = searchword2 {
+				correct++
+			}
+		
+			return correct
+
+		; 条件分岐 if (... = ** or ... = **) ..に当てはまる数を返す関数（条件3つ用）*/
+		#defcfunc iforandcorrect_3 var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2, str searchword3
+			correct = 0
+			
+			if str(a2) = "0" : a2 = ""
+			if a1 = searchword1 or a2 = searchword2 or a2 = searchword3 {
+				correct++
+			}
+
+			if str(b2) = "0" : b2 = ""
+			if b1 = searchword1 or b2 = searchword2 or b2 = searchword3 {
+				correct++
+			}
+
+			if str(c2) = "0" : c2 = ""
+			if c1 = searchword1 or c2 = searchword2 or c2 = searchword3 {
+				correct++
+			}
+
+			if str(d2) = "0" : d2 = ""
+			if d1 = searchword1 or d2 = searchword2 or d2 = searchword3 {
+				correct++
+			}
+		
+			return correct
+
+		; 条件分岐 if (... = ** or ... = **) ..に当てはまる数を返す関数（条件3つ用2）*/
+		#defcfunc iforandcorrect_3_2 var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2, str searchword3
+			correct = 0
+			
+			if str(a2) = "0" : a2 = ""
+			if a1 = searchword1 or a1 = searchword2 or a2 = searchword3 {
+				correct++
+			}
+
+			if str(b2) = "0" : b2 = ""
+			if b1 = searchword1 or b1 = searchword2 or b2 = searchword3 {
+				correct++
+			}
+
+			if str(c2) = "0" : c2 = ""
+			if c1 = searchword1 or c1 = searchword2 or c2 = searchword3 {
+				correct++
+			}
+
+			if str(d2) = "0" : d2 = ""
+			if d1 = searchword1 or d1 = searchword2 or d2 = searchword3 {
+				correct++
+			}
+		
+			return correct
+
+		; 条件分岐 if (... = ** or ... = **) ..に当てはまる数を返す関数（条件4つ用）*/
+		#defcfunc iforandcorrect_4 var a1, var a2, var b1, var b2, var c1, var c2, var d1, var d2, str searchword1, str searchword2, str searchword3, str searchword4
+			correct = 0
+			
+			if str(a2) = "0" : a2 = ""
+			if a1 = searchword1 or a1 = searchword2 or a2 = searchword3 or a2 = searchword4 {
+				correct++
+			}
+
+			if str(b2) = "0" : b2 = ""
+			if b1 = searchword1 or b1 = searchword2 or b2 = searchword3 or b2 = searchword4 {
+				correct++
+			}
+
+			if str(c2) = "0" : c2 = ""
+			if c1 = searchword1 or c1 = searchword2 or c2 = searchword3 or c2 = searchword4 {
+				correct++
+			}
+
+			if str(d2) = "0" : d2 = ""
+			if d1 = searchword1 or d1 = searchword2 or d2 = searchword3 or d2 = searchword4 {
+				correct++
+			}
+		
+			return correct
+
+		; 疑似配列に変数の内容を保存（2次配列用）
+		#deffunc sdns var notename, int dy, int dx, var inp, int sy, int sx
+			//空白であれば初期化
+				if str(notename) = "" or str(notename) = "0" {
+					notename = ""
+					
+					if sx = 0 {
+						sx_tmp = 128
+					} else {
+						sx_tmp = sx + 1
+					}
+					if sy = 0 {
+						sy_tmp = 128
+					} else {
+						sy_tmp = sy + 1
+					}
+					
+					repeat sy_tmp
+						yc = cnt
+						xtmp = ""
+						
+						repeat sx_tmp
+							xtmp += "< >"
+						loop
+			
+						notename += ""+xtmp+"§"
+					loop
+
+					; 最大数を記録
+					maxsize = "["+(sx_tmp-1)+", "+(sy_tmp-1)+"]"
+					
+				} else {
+					split notename, "[", notuse, sptmp
+					maxsize_tmp = strmid(sptmp, 0, instr(sptmp, 0, "]"))
+					maxsize = "["+maxsize_tmp+"]"
+				}
+		
+				xtmp = ""
+		
+			//所定の位置に書き込み
+				split notename, "§", line_tmp : split_stat = stat - 1
+				xtmp = line_tmp(dy)
+		
+				punc = -1
+				xtmp_2 = ""
+				xtmp_2_strlen = 0
+				
+				i = 0
+				repeat strlen(xtmp)
+					if strmid(xtmp, cnt, 1) = "<" {
+						punc ++
+		
+						if punc = dx {
+							xtmp_2 += "<"+inp+">"
+						}
+					}
+		
+					if punc != dx {
+						xtmp_2 += strmid(xtmp, cnt, 1)
+					}
+				loop
+		
+				notename_tmp = ""
+		
+				repeat split_stat
+					if cnt = dy {
+						notename_tmp += ""+xtmp_2+"§"
+					} else {
+						notename_tmp += ""+line_tmp(cnt)+"§"
+					}
+				loop
+		
+				notename = notename_tmp
+
+				; 最大数を記録
+				notename += maxsize
+					
+			return
+			
+		; 疑似配列の内容を読み込み（2次配列用）
+		#defcfunc sdnl var notename, int ly, int lx
+			split notename, "§", line_tmp
+			xtmp = line_tmp(ly)
+		
+			split xtmp, "<", get_tmps
+		
+			get_tmp = get_tmps(lx+1)
+			ret_tmp = strmid(get_tmp, 0, strlen(get_tmp)-1)
+		
+			return ret_tmp
+
+		; 疑似配列の各行のサイズを取得（2次配列用）
+		#defcfunc sdnsize var notename, int ly
+			split notename, "[", notuse, sptmp
+			split sptmp, ", ", sizex, sizey
+
+			max = int(sizex)+1
+			repeat max + 1
+				search_i = int(sizex) - cnt
+				
+				if sdnl(notename, ly, search_i-1) = " " {
+					max = search_i
+				} else {
+					break
+				}
+			loop
+
+			return max-1
+
+		; 疑似配列内のインデックスを取得（2次配列用）
+		#deffunc sdnsearch var notename, str search_word, var inputy, var inputx
+			split notename, "[", notuse, sptmp
+			maxsize_tmp = strmid(sptmp, 0, instr(sptmp, 0, "]"))
+			split maxsize_tmp, ", ", sizex, sizey
+
+			x = -1
+			y = -1
+
+			searchtmp = ""
+
+			repeat int(sizex)
+				x = cnt
+				repeat int(sizey)
+					y = cnt
+
+					searchtmp = sdnl(notename, y, x)
+					if searchtmp = search_word {
+						inputx = x
+						inputy = y
+
+						break
+					}
+				loop
+			loop
+
+			return
+
+		; 疑似配列に変数の内容を保存（3次配列用）
+		#deffunc sdns3 var notename, int dy, int dx, int dz, var inp, int sy, int sx, int sz
+			punc_word = "\\"
+			
+			//空白であれば初期化
+				if str(notename) = "" or str(notename) = "0" {
+					notename = ""
+					
+					if sx = 0 {
+						sx_tmp = 128
+					} else {
+						sx_tmp = sx + 1
+					}
+					if sy = 0 {
+						sy_tmp = 128
+					} else {
+						sy_tmp = sy + 1
+					}
+					if sz = 0 {
+						sz_tmp = 32
+					} else {
+						sz_tmp = sz + 1
+					}
+					
+					repeat sy_tmp
+						yc = cnt
+						xtmp = ""
+						
+						repeat sx_tmp
+							xtmp += "<"
+
+							repeat sz_tmp-1
+								xtmp += punc_word
+							loop
+
+							xtmp += ">"
+						loop
+			
+						notename += ""+xtmp+"§"
+					loop
+
+					; 最大数を記録
+					maxsize = "["+(sx_tmp-1)+", "+(sy_tmp-1)+", "+(sz_tmp-1)+"]"
+					
+				} else {
+					split notename, "[", notuse, sptmp
+					maxsize_tmp = strmid(sptmp, 0, instr(sptmp, 0, "]"))
+
+					if sx = 0 and sy = 0 and sz = 0 {
+						split maxsize_tmp, ", ", sx_tmp, sy_tmp, sz_tmp
+					}
+					
+					maxsize = "["+maxsize_tmp+"]"
+				}
+		
+				xtmp = ""
+		
+			//所定の位置に書き込み
+				split notename, "§", line_tmp
+				xtmp = line_tmp(dy)
+
+				split xtmp, "<", element_tmp : split_stat_x = stat
+
+				element_xtmp = strmid(element_tmp(dx+1), 0, strlen(element_tmp(dx+1))-1)
+
+				split element_xtmp, punc_word, element_tmp2 : split_stat_z = stat
+
+				element_tmp2(dz) = inp
+
+				element_xtmp = "<"
+				repeat sz_tmp-1
+					element_xtmp += element_tmp2(cnt)
+
+					if cnt < split_stat_z {
+						element_xtmp += punc_word
+					}
+				loop
+				element_xtmp += ">"
+
+				xtmp = ""
+				repeat sx_tmp
+					if cnt = dx {
+						xtmp += element_xtmp
+					} else {
+						xtmp += "<" + element_tmp(cnt+1)
+					}
+				loop
+				xtmp += "§"
+
+				notename = ""
+				repeat sy_tmp
+					if cnt != dy {
+						notename += line_tmp(cnt) + "§"
+					} else {
+						notename += xtmp
+					}
+				loop
+
+				; 最大数を記録
+				notename += maxsize
+					
+			return 
+
+		; 疑似配列の内容を取得（3次配列用）
+		#defcfunc sdnl3 var notename, int ly, int lx, int lz
+			split notename, "§", line_tmp
+			xtmp = line_tmp(ly)
+		
+			split xtmp, "<", get_tmps
+		
+			get_tmp = get_tmps(lx+1)
+			ret_tmp = strmid(get_tmp, 0, strlen(get_tmp)-1)
+
+			split ret_tmp, "\\", ret_tmp_2
+
+			return ret_tmp_2(lz)
+									
+#global
