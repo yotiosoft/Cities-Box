@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-										Cities Box Ver.1.3.0
+										Cities Box Ver.1.3.1
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2018
@@ -783,6 +783,11 @@
 
 	//保存バージョン(Version)を読み込み
 		map_Saved_Version = int(get_chapter(load_mapdata, "Version", " = ", ";"))
+
+	//アドオンセット(Addons_Set)を読み込み
+		map_Addons_Set = get_chapter(load_mapdata, "Addons_Set", " = \"", "\";")
+
+		if map_Addons_Set = "" : map_Addons_Set = "Normal"
 	
 	//都市名(City_Name)を読み込み
 		map_City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
@@ -1337,7 +1342,34 @@
 	dirlist2r filelist
 						
 	notesel filelist
-	total_addons = notemax
+	total_addons_all_addons_sets = notemax
+	total_addons = 0
+
+	dim correct_addons_set, total_addons_all_addons_sets
+	
+	repeat total_addons_all_addons_sets
+		addon_number = cnt
+
+		chdir ""+directory+"\\addons"
+
+		; ファイルリストから読み込むadatファイル名を取得
+		notesel filelist
+		noteget adat_name, addon_number
+		
+		; 読み込むadatファイルの内容をadat_tmpに代入
+		notesel adat_tmp
+		noteload adat_name
+		
+		; belong_addons_set_name（所属するアドオンセットの名前）
+		belong_addons_set_name = get_chapter(adat_tmp, "belong_addons_set_name", " = \"", "\"")
+
+		if (belong_addons_set_name = "" and map_Addons_Set = "Normal") or belong_addons_set_name = map_Addons_Set {
+			total_addons ++
+			correct_addons_set(cnt) = 1
+		} else {
+			correct_addons_set(cnt) = 0
+		}
+	loop
 		
 	addon_number = 0
 		
@@ -1374,14 +1406,16 @@
 
 	next_image_num = BEGIN_ADDON_BUFFER_ID
 
-	repeat total_addons
-		addon_number = cnt
+	repeat total_addons_all_addons_sets
+		if correct_addons_set(cnt) = 0 {
+			continue
+		}
 
 		chdir ""+directory+"\\addons"
 
 		; ファイルリストから読み込むadatファイル名を取得
 		notesel filelist
-		noteget adat_name, addon_number
+		noteget adat_name, cnt
 		
 		; 読み込むadatファイルの内容をadat_tmpに代入
 		notesel adat_tmp
@@ -1392,7 +1426,7 @@
 
 		; ディレクトリ変更（あとで画像を読み込むため）
 		chdir addon_path
-
+		
 		/*-------------------------------adatファイルの内容読み込み-------------------------------*/
 		; addon_name（アドオン名）
 			; 英語名
@@ -1507,9 +1541,9 @@
 			}
 			
 			if ct_done = 0 {
-				error "A01 : アドオンをカテゴリ分けできません\n"+addon_name(cnt)+"を規定のカテゴリーに区別できないため、このアドオンは利用できません。\nアドオンファイル(*.adat)のaddon_type要素をご確認ください。"
+				error "A01 : アドオンをカテゴリ分けできません\n"+addon_name(addon_number)+"を規定のカテゴリーに区別できないため、このアドオンは利用できません。\nアドオンファイル(*.adat)のaddon_type要素をご確認ください。"
 			}
-
+			
 		; addon_maker_version（アドオンを作成したAddon Makerのバージョン）
 			tmp = get_chapter(adat_tmp, "addon_maker_version", " = \"", "\"")
 			sdns addon_maker_version, addon_number, 0, tmp
@@ -1623,7 +1657,6 @@
 					load_night_mask_image = get_chapter(addon_a_type_tmp, "night_mask", " = \"", "\"")
 					sdns3 addon_night_mask_image, addon_number, tcnt, 0, load_image, total_addons, 12, 2
 
-
 				/*-----------------------------アドオン画像の読み込み-----------------------------*/
 				; 通常時
 					exist load_image
@@ -1698,6 +1731,7 @@
 				gsel 0
 				
 			loop
+		addon_number ++
 	loop
 
 	return
@@ -3364,7 +3398,7 @@
 	loop
 
 	; 選択されているアドオンの名前と説明を表示
-	if area_addon_icon != -1 and clicked_addon_number = 0 {
+	if area_addon_icon != -1 and selected_addon_number_on_menu = 0 {
 		color 255,255,255 : font config_SystemFont, 14
 		pos 40, windowy-70-titlebar_h-32-40+5 : mes area_addon_name_JP
 					
