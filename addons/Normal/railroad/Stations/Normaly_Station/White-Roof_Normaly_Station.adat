@@ -1,0 +1,113 @@
+addon_name = "White-Roof_Normaly_Station"
+addon_jp_name = "ïÅí ÇÃâw"
+addon_author = "YotioSoft"
+addon_summary = "ÇÊÇ≠Ç†ÇËÇªÇ§Ç»Ç≤Ç≠ïÅí ÇÃâÆç™ïtÇ´ÇÃâwÅB"
+addon_icon = "icon_White-Roof_Normaly_Station.png"
+
+addon_type = "station"
+
+use_types = "default, dead_end, under_construction"
+
+maximum_capacity = "30"
+land_price_influence = "80"
+land_price_influence_grid = "8"
+
+default {
+	image = "White-Roof_Normaly_Station.png"
+	night_mask = "White-Roof_Normaly_Station__night_mask.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+	
+	width {
+		size_x = "66"
+		size_y = "65"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "66"
+		bottom_right_y = "65"
+	}
+	depth {
+		size_x = "66"
+		size_y = "65"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "66"
+		top_left_y = "0"
+		bottom_right_x = "132"
+		bottom_right_y = "65"
+	}
+};
+
+dead_end {
+	image = "White-Roof_Normaly_Station_dead_end.png"
+	night_mask = "White-Roof_Normaly_Station_dead_end__night_mask.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+	
+	left {
+		size_x = "66"
+		size_y = "65"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "66"
+		bottom_right_y = "65"
+	}
+	top {
+		size_x = "66"
+		size_y = "65"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "66"
+		top_left_y = "0"
+		bottom_right_x = "132"
+		bottom_right_y = "65"
+	}
+	bottom {
+		size_x = "66"
+		size_y = "65"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "66"
+		bottom_right_x = "65"
+		bottom_right_y = "130"
+	}
+	right {
+		size_x = "66"
+		size_y = "65"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "66"
+		top_left_y = "66"
+		bottom_right_x = "132"
+		bottom_right_y = "130"
+	}
+};
+
+under_construction {
+	image = "White-Roof_Normaly_Station_under_construction.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};

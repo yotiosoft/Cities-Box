@@ -1,0 +1,76 @@
+addon_name = "British_Street_Side_Store_A"
+addon_jp_name = "英国風ショッピングビルA"
+addon_author = "YotioSoft"
+addon_summary = "通り沿いにありそうなお店。"
+addon_icon = "icon_British_Street_Side_Store_A.png"
+addon_maker_version = "2"
+belong_addons_set_name = "British"
+ 
+addon_type = "high_density_commercial"
+ 
+use_types = "null"
+ 
+maximum_capacity = "100"
+ 
+land_price_influence = "3"
+land_price_influence_grid = "3"
+ 
+crime_rate_influence = "0"
+crime_rate_influence_grid = "0"
+ 
+education_rate_influence = "0"
+education_rate_influence_grid = "0"
+ 
+addon_crop = ""
+addon_crop_amount = ""
+ 
+null {
+	image = "British_Street_Side_Store_A.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+ 
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};

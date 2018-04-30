@@ -1,7 +1,7 @@
-Release Number : 117;
+Release Number : 121;
 Title : Cities Box Dev;
-Version : 1.2.1.1;
-About : 港を仮実装（表示関連のバグあり）;
+Version : 1.3.1.2;
+About : 角にしか設置できないアドオンを実装;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD_Dev.exe;
 URL : https://github.com/YotioSoft/Cities-Box-Dev/raw/master/;/;

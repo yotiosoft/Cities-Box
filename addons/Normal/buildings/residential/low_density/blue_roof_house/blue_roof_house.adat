@@ -1,0 +1,67 @@
+addon_name = "blue_roof_house"
+addon_jp_name = "青い屋根の家"
+addon_author = "YotioSoft"
+addon_summary = "2階建ての一軒家、3LDKで23年ローンです。"
+addon_icon = "icon_blue_roof_house.png"
+
+addon_type = "low_density_residential"
+
+use_types = "null"
+
+maximum_capacity = "8"
+land_price_influence = "10"
+land_price_influence_grid = "2"
+
+window_color = (195, 195, 195)
+
+null {
+	image = "blue_roof_house.png"
+	night_mask = "blue_roof_house__night_mask.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+	
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};

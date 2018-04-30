@@ -1,0 +1,74 @@
+addon_name = "Cross_Plaza"
+addon_jp_name = "十字広場"
+addon_author = "YotioSoft"
+addon_summary = "十字型の歩道がある広場です。単体で使うことも、複数設置して使うこともでき汎用性が高いです。"
+addon_icon = "icon_Cross_Plaza.png"
+addon_maker_version = "2"
+ 
+addon_type = "park"
+ 
+use_types = "null"
+ 
+land_price_influence = "30"
+land_price_influence_grid = "5"
+ 
+crime_rate_influence = "0"
+crime_rate_influence_grid = "0"
+ 
+education_rate_influence = "0"
+education_rate_influence_grid = "0"
+ 
+addon_crop = "0"
+addon_crop_amount = "0"
+ 
+null {
+	image = "Cross_Plaza.png"
+	night_mask = "Cross_Plaza__night_mask.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+ 
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};

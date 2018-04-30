@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-										Cities Box Ver.1.3.1
+									    Cities Box Ver.1.3.2
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2018
@@ -47,7 +47,7 @@
 	#define BEGIN_ADDON_BUFFER_ID	100
 
 	; アドオン以外の画像のバッファ総数
-	#define BUFFER_IMAGES_TOTAL		76
+	#define BUFFER_IMAGES_TOTAL		77
 
 	; マップサイズ
 	#define MAPSIZE_X				100
@@ -309,6 +309,9 @@
 
 	//建物詳細ダイアログ
 		noteadd "img/show_detail/change_name.png", 71, 1					; 建物名の変更
+
+	//建物の方向を示す矢印
+		noteadd "img/arrows/arrows.png", 77									; 矢印
 
 	; 読み込み
 	a_statbar_block = windowx/2 / BUFFER_IMAGES_TOTAL
@@ -1401,6 +1404,7 @@
 	sdns3 addon_top_left_y, 0, 0, 0, tmp, total_addons, 12, 4			; アドオンの絵が描写されている左上の座標y
 	sdns3 addon_bottom_right_x, 0, 0, 0, tmp, total_addons, 12, 4		; アドオンの絵が描写されている右下の座標x
 	sdns3 addon_bottom_right_y, 0, 0, 0, tmp, total_addons, 12, 4		; アドオンの絵が描写されている右下の座標y
+	//sdns addon_total_directions, 0, 0, tmp, total_addons, 12			; アドオンの各タイプ内の向きの数
 
 	//adat（アドオンデータファイル）と画像ファイル読み込み
 
@@ -1613,7 +1617,8 @@
 
 				; addon_dire_names（アドオンのそれぞれのタイプ内の向きの名前）&各方向の内容を切り抜く
 					addon_direction_tmp = get_chapter(addon_a_type_tmp, "direction", " = \"", "\"")
-					split addon_direction_tmp, ", ", addon_directions : split_stat = stat
+					split addon_direction_tmp, ", ", addon_directions
+					split_stat = stat// : sdns addon_total_directions, addon_number, tcnt, str(split_stat)
 
 					repeat split_stat
 						sdns3 addon_dire_names, addon_number, tcnt, cnt, addon_directions(cnt), total_addons, 12, 4
@@ -1747,6 +1752,48 @@
 	onclick gosub *new_map_setting_onclick
 	
 	color 95, 95, 95 : boxf
+
+	//アドオンセット一覧を取得
+	dirlist2h 1, ','
+	dirlist2 buf_addons, "*.adset*", 1, '\\'
+						
+	sdim filelist, buf_addons
+	dirlist2r filelist
+
+	notesel filelist
+	total_addon_sets = notemax
+
+	sdim addon_sets_EN_name, 64, total_addons_sets
+	sdim addon_sets_JP_name, 64, total_addons_sets
+
+	addon_sets_names = ""
+
+	repeat total_addon_sets
+		notesel filelist
+		noteget about_addon_set, cnt
+
+		notesel addon_set_about_file
+		noteload about_addon_set
+
+		addon_sets_EN_name(cnt) = get_chapter(addon_set_about_file, "EN_Name", " = \"", "\"")
+		addon_sets_JP_name(cnt) = get_chapter(addon_set_about_file, "JP_Name", " = \"", "\"")
+
+		addon_sets_names += addon_sets_JP_name(cnt)
+
+		if cnt < total_addon_sets-1 {
+			addon_sets_names += "\n"
+		}
+
+		if addon_sets_EN_name(cnt) = "Normal" : addon_set_num = cnt
+	loop
+
+	if total_addon_sets = 0 {
+		addon_sets_EN_name(0) = "Normal"
+		addon_sets_JP_name(0) = "標準アドオンセット（デフォルト）"
+		addon_sets_names = addon_sets_EN_name(0)
+		addon_set_num = 0
+	}
+	
 	
 	color 255, 255, 255
 	font config_SystemFont, 16
@@ -1771,6 +1818,11 @@
 		}
 		
 		pos 35, 70 : mes "天候の変化"
+
+	//アドオンセット(Addon_Set)
+		pos 10, 100 : mes "アドオンセット"
+		objsize 260, 20
+		pos 100, 100 : combox addon_set_num, , addon_sets_names
 	
 	//OKボタン
 		color 255, 255, 255 : boxf 150, 260, 250, 290
@@ -1815,6 +1867,8 @@
 *new_map_preparation
 	//マップデータ初期化
 	map_Saved_Version = about_release_number
+
+	map_Addons_Set = addon_sets_EN_name(addon_set_num)
 	
 	map_time_Year = gettime(0)
 	map_time_Month = gettime(1)
@@ -2489,6 +2543,48 @@
 
 		color 0, 0, 0 : gmode 4, CHIP_SIZE, CHIP_SIZE/2, 128
 		pos mx_position, my_position : gcopy cursor_icon, 0, 0, CHIP_SIZE, CHIP_SIZE/2
+
+		; 建設しようとしている建物の向きを矢印で表示＆向きを操作
+		if selected_addon_number >= 0 and (cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park") {
+			; スペースキーで向きを変える
+			onkey gosub *main_onkey
+
+			prebuilding = 1
+			gosub *prebuild
+
+			gmode 2
+			if build_direction_number = 0 {
+				if street_corner_addon = 0 {
+					pos mx_position-32,my_position-48 : gcopy 77, 0, 0, 64, 64
+				} else {
+					pos mx_position,my_position-64 : gcopy 77, 0, 128, 64, 64
+				}
+			}
+			if build_direction_number = 1 {
+				if street_corner_addon = 0 {
+					pos mx_position+32,my_position-48 : gcopy 77, 64, 0, 64, 64 
+				} else {
+					pos mx_position+64,my_position-32 : gcopy 77, 64, 128, 64, 64
+				}
+			}
+			if build_direction_number = 2 {
+				if street_corner_addon = 0 {
+					pos mx_position-32,my_position-16 : gcopy 77, 0, 64, 64, 64
+				} else {
+					pos mx_position-64,my_position-32 : gcopy 77, 0, 128+64, 64, 64
+				}
+			}
+			if build_direction_number = 3 {
+				if street_corner_addon = 0 {
+					pos mx_position+32,my_position-16 : gcopy 77, 64, 64, 64, 64 
+				} else {
+					pos mx_position,my_position : gcopy 77, 64, 128+64, 64, 64
+				}
+			}
+		} else {
+			change_direction = 0
+			onkey 0
+		}
 
 		; 天候の変動
 		gosub *climate
@@ -3225,6 +3321,26 @@
 
 	return
 
+*main_onkey
+	if selected_addon_number >= 0 and (cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park") {
+		getkey space, 32
+		if space = 1 {
+			if build_direction_number = 0 {
+				build_direction_number = 1
+			} else : if build_direction_number = 1 {
+				build_direction_number = 3
+			} else : if build_direction_number = 3 {
+				build_direction_number = 2
+			} else : if build_direction_number = 2 {
+				build_direction_number = 0
+			}
+			
+			change_direction = 1
+		}
+	}
+
+	return
+
 *addon_select_menu
 	/*--------------------------------------アドオン選択メニュー----------------------------------*/
 	if addon_menu_categories = 0 {
@@ -3322,7 +3438,7 @@
 	if cursor_mode = "put_Residential" {
 		area_addon_summary = "市民が住む場所を提供します。住居地区を設定すると住居建築物が建設されます。"
 		area_addon_icon = 40
-		if category_name = "low" {
+		if category_mode = "low" {
 			area_addon_number = -1 :  area_addon_name_JP = "低密度な住居地区"
 		} else {
 			area_addon_number = -2 :  area_addon_name_JP = "高密度な住居地区"
@@ -3331,7 +3447,7 @@
 	if cursor_mode = "put_Commercial" {
 		area_addon_summary = "市民が商業を営む場所を提供します。商業地区を設定すると商業建築物が建設されます。"
 		area_addon_icon = 41
-		if category_name = "low" {
+		if category_mode = "low" {
 			area_addon_number = -3 :  area_addon_name_JP = "低密度な商業地区"
 		} else {
 			area_addon_number = -4 :  area_addon_name_JP = "高密度な商業地区"
@@ -3581,6 +3697,9 @@
 
 	; 住居/商業/オフィス/工業/農業/公共施設/公園
 	if cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park" {
+
+	*prebuild
+
 		; 周囲のアドオンのカテゴリを取得
 		left_chip_category   = safesearch_str(category, mx-1, my, mz, 0, mapsize_x, mapsize_y)
 		top_chip_category    = safesearch_str(category, mx, my-1, mz, 0, mapsize_x, mapsize_y)
@@ -3624,7 +3743,14 @@
 			; 農業地区と公園は除外とし、下向きに設定する
 			if cursor_mode = "put_Farm" or cursor_mode = "put_Park" {
 				build_direction_number = 2
+				
+				if prebuilding = 1 {
+					prebuilding = 0
+					return
+				}
 			} else {
+				build_direction_number = -1
+				change_direction = 0
 				return
 			}
 			
@@ -3633,16 +3759,26 @@
 			done = 0
 			cant_build_left = 0 : cant_build_top = 0 : cant_build_bottom = 0 : cant_build_right = 0
 
-			while (done = 0)
-				if left_chip_category = "road" and cant_build_left = 0 {
+			; 角用のアドオンか、そうでないかを確認
+			tmp = sdnl3(addon_dire_names, selected_addon_number, build_type_number, 0)
+			if instr(tmp, 0, "-") != -1 {
+				street_corner_addon = 1
+			} else {
+				street_corner_addon = 0
+			}
+
+			while (done = 0 and change_direction = 0)
+				if left_chip_category = "road" and (street_corner_addon = 1 and top_chip_category = "road" or street_corner_addon = 0) and cant_build_left = 0 {
 					build_direction_number = 0
-				} else : if top_chip_category = "road" and cant_build_top = 0 {
+				} else : if top_chip_category = "road" and (street_corner_addon = 1 and right_chip_category = "road" or street_corner_addon = 0) and cant_build_top = 0 {
 					build_direction_number = 1
-				} else : if bottom_chip_category = "road" and cant_build_bottom = 0 {
+				} else : if bottom_chip_category = "road" and (street_corner_addon = 1 and left_chip_category = "road" or street_corner_addon = 0) and cant_build_bottom = 0 {
 					build_direction_number = 2
-				} else : if right_chip_category = "road" and cant_build_right = 0 {
+				} else : if right_chip_category = "road" and (street_corner_addon = 1 and bottom_chip_category = "road" or street_corner_addon = 0) and cant_build_right = 0 {
 					build_direction_number = 3
 				} else {
+					build_direction_number = -1
+					change_direction = 0
 					return
 				}
 
@@ -3692,13 +3828,26 @@
 
 				if cant_build = 0 : done = 1
 			wend
+
+			if prebuilding = 1 {
+				prebuilding = 0
+				return
+			}
 		}
 
 		; adatファイル内での向きのIDを取得
-		if build_direction_number = 0  : tmp = "left"
-		if build_direction_number = 1  : tmp = "top"
-		if build_direction_number = 2  : tmp = "bottom"
-		if build_direction_number = 3  : tmp = "right"
+		if build_direction_number = 0  {
+			if street_corner_addon = 0 : tmp = "left" : else : tmp = "left-top"
+		}
+		if build_direction_number = 1  {
+			if street_corner_addon = 0 : tmp = "top" : else : tmp = "right-top"
+		}
+		if build_direction_number = 2  {
+			if street_corner_addon = 0 : tmp = "bottom" : else : tmp = "left-bottom"
+		}
+		if build_direction_number = 3  {
+			if street_corner_addon = 0 : tmp = "right" : else : tmp = "right-bottom"
+		}
 		
 		build_direction_number_ID = element3(selected_addon_number, build_type_number, addon_dire_names, tmp)
 
@@ -3923,6 +4072,8 @@
 			Vacancies += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 		}
 	}
+
+	change_direction = 0
 	
 	return
 
@@ -4106,7 +4257,7 @@
 					if left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge"     : obj_dire_tmp = "left"
 					if top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge"       : obj_dire_tmp = "top"
 					if bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge" : obj_dire_tmp = "bottom"
-					if right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or bottom_chip_category_2 = "bridge"   : obj_dire_tmp = "right"
+					if right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or right_chip_category_2 = "bridge"   : obj_dire_tmp = "right"
 				}
 
 				; 周囲の道路接続が2つ（直線or曲がり角）
@@ -4130,7 +4281,7 @@
 					}
 					
 					; 直線
-					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") {
+					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or right_chip_category_2 = "bridge") {
 						obj_type_tmp = "river_default" : obj_dire_tmp = "depth"
 					}
 					if (top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
@@ -5718,6 +5869,9 @@
 	
 	; 保存したCities Boxのバージョン（リリースナンバー）
 		noteadd "Version = "+about_release_number+";", -1
+
+	; アドオンセット
+		noteadd "Addons_Set = \""+map_Addons_Set+"\";", -1
 		noteadd " ", -1
 		
 	; 次に各マップデータ(*.cbx)の設定を保存

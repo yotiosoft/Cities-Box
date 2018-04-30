@@ -1,0 +1,73 @@
+addon_name = "Woody_Park"
+addon_jp_name = "ñÿÇ™Ç†ÇÈçLèÍ"
+addon_author = "YotioSoft"
+addon_summary = "ëÂÇ´Ç»ñÿÇ™Ç†ÇÈçLèÍÇ≈Ç∑ÅB"
+addon_icon = "icon_Woody_Park.png"
+addon_maker_version = "2"
+ 
+addon_type = "park"
+ 
+use_types = "null"
+ 
+land_price_influence = "10"
+land_price_influence_grid = "5"
+ 
+crime_rate_influence = "0"
+crime_rate_influence_grid = "0"
+ 
+education_rate_influence = "0"
+education_rate_influence_grid = "0"
+ 
+addon_crop = "0"
+addon_crop_amount = "0"
+ 
+null {
+	image = "Woody_Park.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+ 
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+ 
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "128"
+		bottom_right_y = "128"
+	}
+};

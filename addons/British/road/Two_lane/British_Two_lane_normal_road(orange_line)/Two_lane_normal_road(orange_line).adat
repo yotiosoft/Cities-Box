@@ -1,0 +1,292 @@
+addon_name = "British_Two_lane_normal_road(orange_line)"
+addon_jp_name = "âpçëïó2é‘ê¸ìπòHÅiÉIÉåÉìÉWê¸Åj"
+addon_summary = "âpçëïóÇÃïÅí ÇÃ2é‘ê¸ìπòHÇ≈Ç∑ÅB"
+addon_icon = "icon_Two_lane_normal_road(orange_line).png"
+belong_addons_set_name = "British"
+
+addon_type = "Two_lane_road"
+
+use_types = "default, dead_end, turn, intersection_T, intersection_cross, train_crossing, bridge, under_construction"
+
+default {
+	image = "Two_lane_normal_road(orange_line).png"
+	night_mask = "Two_lane_normal_road(orange_line)__night_mask.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+	
+	width {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	depth {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+};
+
+dead_end {
+	image = "Two_lane_normal_road(orange_line)_dead_end.png"
+	night_mask = "Two_lane_normal_road(orange_line)_dead_end__night_mask.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+	
+	left {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+};
+
+turn {
+	image = "Two_lane_normal_road(orange_line)_turn.png"
+	night_mask = "Two_lane_normal_road(orange_line)_turn__night_mask.png"
+	direction = "left-top, right-top, left-bottom, right-bottom"
+	transparent_color = "0, 0, 0"
+	
+	left-top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	right-top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	left-bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right-bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+};
+
+intersection_T {
+	image = "Two_lane_normal_road_intersection_T.png"
+	night_mask = "Two_lane_normal_road_intersection_T__night_mask.png"
+	direction = "left-top-bottom, left-right-top, left-right-bottom, right-top-bottom"
+	transparent_color = "0, 0, 0"
+	
+	left-top-bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	left-right-top {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+	left-right-bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	right-top-bottom {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "64"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+};
+
+intersection_cross {
+	image = "Two_lane_normal_road_intersection_cross.png"
+	night_mask = "Two_lane_normal_road_intersection_cross__night_mask.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};
+
+train_crossing {
+	image = "Two_lane_normal_road_train_crossing.png"
+	night_mask = "Two_lane_normal_road_train_crossing__night_mask.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+	
+	width {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	depth {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+};
+
+bridge {
+	image = "Two_lane_normal_road(orange_line)_bridge.png"
+	night_mask = "Two_lane_normal_road(orange_line)_bridge__night_mask.png"
+	direction = "width, depth"
+	transparent_color = "0, 0, 0"
+	
+	width {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+	depth {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "64"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "64"
+	}
+};
+
+under_construction {
+	image = "Two_lane_normal_road_under_construction.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "64"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};
