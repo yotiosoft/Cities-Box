@@ -1,7 +1,7 @@
 
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.4.0-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.4.1-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 
 # 概要
@@ -99,13 +99,8 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 ・他の都市との交易
 
 # 最終更新
-## Ver.1.4.0 r122
-アドオンセット機能を実装  
-英国風アドオンセットの一部を同梱（製作途中）  
-建物建設時に向きを矢印で表示  
-建物の向きをスペースキーで可変化  
-角にしか設置できないアドオンを実装  
-アドオン選択メニューで、高密度の住居/商業地区の地区設定ができない問題を修正  
-水路の向きが正常に設定されない問題の一部を修正  
+## Ver.1.4.1 r124
+アドオン選択メニューで「この建物は既に建設可能回数を超えています！」と何度も表示される不具合を修正  
+　　アドオンを1つ追加  
   
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

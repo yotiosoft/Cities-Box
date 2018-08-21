@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.4.0
+									    Cities Box Ver.1.4.1
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2018
@@ -3603,7 +3603,7 @@
 	notesel category_addons_number
 	noteget selected_addon_number, rnd(notemax)
 	selected_addon_number = int(selected_addon_number)
-
+	
 	gosub *build
 
 	; 問題なく建設できた場合は予約取り消し
@@ -3618,6 +3618,7 @@
 
 *build
 	/*----------------------------------アドオンの設置--------------------------------------------*/
+	
 	if selected_addon_number = map(mx,my,mz,0) : return
 	
 	; 地区設定
@@ -3712,9 +3713,10 @@
 		right_chip_category_2  = safesearch_str(category, mx+1, my, mz, 1, mapsize_x, mapsize_y)
 
 		; アドオンに建設可能回数が設けられている場合
-		if int(sdnl(addon_build_limit, selected_addon_number, 0)) >= 1 {
+		if int(sdnl(addon_build_limit, selected_addon_number, 0)) >= 1 and prebuilding = 0 {
 			s = 0
 			sz = 0
+			printed_already_built = 1
 			repeat mapsize_x
 				sx = cnt
 				repeat mapsize_y
