@@ -1,7 +1,7 @@
 
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.4.1-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.4.2-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 
 # 概要
