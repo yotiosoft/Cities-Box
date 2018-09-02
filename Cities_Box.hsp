@@ -8,9 +8,9 @@
 --------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------起動準備-------------------------------------------------*/
-*startup	
+*startup
 	directory = dirinfo(0)
-	
+
 	/*------------------------------------packopt登録---------------------------------------------*/
 	#packopt name "Cities_Box"
 	#packopt icon "img/logo.ico"
@@ -20,16 +20,16 @@
 		#func FindWindow "FindWindowA" str, int
 		#func GetWindowRect "GetWindowRect" int, int
 		#func DrawText "DrawTextW" int,wstr,int,int,int
-	
+
 		#func ClientToScreen "ClientToScreen" int, int
-	
+
 		#func GetWindowLong "GetWindowLongA" int,int
 		#func SetWindowLong "SetWindowLongA" int,int,int
-	
+
 		#define WM_SIZE	0x00005	//ウィンドウサイズ変更
 		#define WS_MAXIMIZEBOX	0x10000	//最大化ボタン
 		#define WS_THICKFRAME	0x40000	//サイズ変更可能
-	
+
 		#func SetTimer  "SetTimer"  int,int,int,int
 		#func KillTimer "KillTimer" int,int
 		#define WM_TIMER    0x0113
@@ -62,18 +62,18 @@
 	if strsize = -1 {
 		error "F01 : about.txtが見つかりません\ndataフォルダ内にabout.txtが見つかりません。"
 	}
-		
+
 	notesel about_txt
 	noteload "data/about.txt"
-			
+
 	noteget about_title, 0
 	noteget about_version, 1
 	noteget about_release_number, 2
-		
+
 	split about_title, " : ", not_use, about_title
 	split about_version, " : ", not_use, about_version
 	split about_release_number, " : ", not_use, about_release_number
-		
+
 	title about_title
 
 	/*---------------------------------config.datの読み込み---------------------------------------*/
@@ -81,10 +81,10 @@
 	if strsize = -1 {
 		error "F02 : 設定ファイルが見つかりません\ndataフォルダ内にconfig.datが見つかりません。"
 	}
-		
+
 	notesel config
 	noteload "data/config.dat"
-	
+
 	config_SystemFont = get_chapter(config, "SystemFont", " = \"", "\"")
 	config_Set_Play_BGM = int( get_chapter(config, "Set_Play_BGM", " = ", ";") )
 	config_Ignore_Update = int( get_chapter(config, "Ignore_Update", " = ", ";") )
@@ -94,16 +94,16 @@
 
 	config_Adjustment_Interval = int( get_chapter(config, "Adjustment_Interval", " = ", ";") )
 	config_Drow_Interval = int( get_chapter(config, "Drow_Interval", " = ", ";") )
-	
+
 	config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
 	config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
 
-	
+
 	windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
 
 	/*-------------------------------ウィンドウサイズの可変化-------------------------------------*/
 	screen 0, ginfo_dispx, ginfo_dispy : width windowx, windowy
-		
+
 	GetWindowLong hwnd, -16
 	SetWindowLong hwnd, -16, stat | WS_THICKFRAME | WS_MAXIMIZEBOX
 
@@ -120,7 +120,7 @@
 	if strsize != -1 {
 		delete "Cities_Box_UD_Dev.exe"
 	}
-	
+
 	//アップデート通知を受け取らない設定なら*menuへ
 	if config_Ignore_Update = 1 {
 		goto *buffering
@@ -128,32 +128,32 @@
 
 	//通常のアップデートの確認
 	download "http://joogle.web.fc2.com/datacenter/cities_box/", "datacenter_url.txt", "data/datacenter_url.txt"
-		
+
 	notesel datacenter_url
 	noteload "data/datacenter_url.txt"
-		
+
 	if instr(datacenter_url, 0, "http://") = -1 {
 		datacenter_url = "http://yotiosoft.com/dc/cities_box/"
 	}
-		
+
 	download datacenter_url, "latest_version.txt", "data/latest_version.txt"
-		
+
 	notesel latest_version
 	noteload "data/latest_version.txt"
-	
+
 	if instr(latest_version, 0, "<!DOCTYPE html>") != -1 {
 		goto *buffering
 	}
-		
+
 	latest_version__Release_number = int(get_chapter(latest_version, "Release Number", " : ", ";"))
 	latest_version__Title = get_chapter(latest_version, "Title", " : ", ";")
 	latest_version__Version = get_chapter(latest_version, "Version", " : ", ";")
 	latest_version__About = get_chapter(latest_version, "About", " : ", ";")
 	latest_version__OS = get_chapter(latest_version, "OS", " : ", ";")
-		
+
 	if latest_version__Release_number > about_release_number and instr(latest_version__OS, 0, config_OS) != -1 {
 		normalUpdate = 1
-	
+
 		goto *buffering
 	}
 
@@ -162,25 +162,25 @@
 		if instr(datacenter_url, 0, "http://") = -1 {
 			datacenter_url = "http://yotiosoft.com/dc/cities_box/"
 		}
-			
+
 		download datacenter_url, "Dev_latest_version.txt", "data/Dev_latest_version.txt"
-			
+
 		notesel Dev_latest_version
 		noteload "data/Dev_latest_version.txt"
-			
+
 		if instr(Dev_latest_version, 0, "<!DOCTYPE html>") != -1 {
 			goto *buffering
 		}
-			
+
 		Dev_latest_version__Release_number = int(get_chapter(Dev_latest_version, "Release Number", " : ", ";"))
 		Dev_latest_version__Title = get_chapter(Dev_latest_version, "Title", " : ", ";")
 		Dev_latest_version__Version = get_chapter(Dev_latest_version, "Version", " : ", ";")
 		Dev_latest_version__About = get_chapter(Dev_latest_version, "About", " : ", ";")
 		Dev_latest_version__OS = get_chapter(latest_version, "OS", " : ", ";")
-			
+
 		if Dev_latest_version__Release_number > about_release_number and instr(Dev_latest_version__OS, 0, config_OS) != -1 {
 			devUpdate = 1
-		
+
 			goto *buffering
 		}
 	}
@@ -188,7 +188,7 @@
 *buffering
 	/*------------------------------------使用する画像の読み込み----------------------------------*/
 	color 255, 201, 14 : boxf 0, windowy-5, windowx/2, windowy
-	
+
 	bufferings = ""
 
 	notesel bufferings
@@ -196,7 +196,7 @@
 	repeat BUFFER_IMAGES_TOTAL + 1
 		noteadd " ", cnt
 	loop
-	
+
 	//ロゴ、背景画像（buffer 1は設定ウィンドウで使うため使用不可）
 		if instr(about_title, 0, "Dev") != -1 {
 			noteadd "img/logo_Dev.png", 2, 1								; ロゴ
@@ -205,10 +205,10 @@
 			noteadd "img/logo.png", 2, 1									; ロゴ
 			noteadd "img/logo2.png", 62, 1									; ロゴ2（タイトル）
 		}
-		
+
 		noteadd "img/logo2_Mac.png", 75, 1									; ロゴ2（macOS向け）
 		noteadd "img/title_background.png", 15, 1							; タイトル背景画像
-	
+
 	//メニューのアイコン
 		noteadd "img/menu_icons/menu/cursor.png", 3, 1						; 標準カーソル
 		noteadd "img/menu_icons/menu/road.png", 4, 1						; メニューアイコン（道路敷設）
@@ -221,34 +221,34 @@
 		noteadd "img/menu_icons/menu/public.png", 7, 1						; メニューアイコン（郵便局建設）
 		noteadd "img/menu_icons/menu/park.png", 29, 1						; メニューアイコン（公園建設）
 		noteadd "img/menu_icons/menu/waterway.png", 76, 1					; メニューアイコン（水路建設）
-	
+
 		noteadd "img/menu_icons/menu/bulldozer.png", 10, 1					; 撤去ボタン
 		noteadd "img/menu_icons/save/save.png", 11, 1						; 保存ボタン
 		noteadd "img/menu_icons/setting/setting.png", 13, 1					; 設定ボタン
 		noteadd "img/menu_icons/stat/stat.png", 30, 1						; 統計ボタン
 		noteadd "img/menu_icons/budget/budget.png", 49, 1					; 予算ボタン
 		noteadd "img/menu_icons/information/information.png", 52, 1			; 情報ボタン
-	
+
 	//小サイズのアイコン
 		noteadd "img/menu_icons/mini/low_density_residential.png", 8, 1		; 低密度住居地区
 		noteadd "img/menu_icons/mini/high_density_residential.png", 9, 1	; 高密度住居地区
 		noteadd "img/menu_icons/mini/low_density_commercial.png", 20, 1		; 低密度商業地区
 		noteadd "img/menu_icons/mini/high_density_commercial.png", 21, 1	; 高密度商業地区
-		
+
 		noteadd "img/menu_icons/mini/roadway.png", 66, 1					; 車道
 		noteadd "img/menu_icons/mini/promenade.png", 67, 1					; 歩道 / 自転車道
-	
+
 	//設定で使うアイコン
 		noteadd "img/menu_icons/setting/check.png", 14, 1					; チェックボタン
 		noteadd "img/menu_icons/setting/refer.png", 16, 1					; 参照ボタン
-	
+
 	//統計メニューで使うアイコン
 		noteadd "img/menu_icons/stat/type.png", 31, 1						; 建築物の種類
 		noteadd "img/menu_icons/stat/land_price.png", 32, 1					; 地価
 		noteadd "img/menu_icons/stat/crime_rate.png", 33, 1					; 犯罪率
 		noteadd "img/menu_icons/stat/education_rate.png", 47, 1				; 教育度
 		noteadd "img/menu_icons/stat/happiness.png", 51, 1					; 幸福度
-	
+
 	//犯罪率、地価の統計で使うタイル
 		noteadd "img/quarter/+3.png", 34, 1									; 地価/犯罪率/教育度 : 最良
 		noteadd "img/quarter/+2.png", 35, 1									; 地価/犯罪率/教育度 : 良
@@ -257,18 +257,18 @@
 		noteadd "img/quarter/-1.png", 37, 1									; 地価/犯罪率/教育度 : 少し低い/悪い
 		noteadd "img/quarter/-2.png", 38, 1									; 地価/犯罪率/教育度 : 低い/悪い
 		noteadd "img/quarter/-3.png", 39, 1									; 地価/犯罪率/教育度 : 最低/最悪
-	
+
 	//エリア設定で使うアイコン
 		noteadd "img/area/residential.png", 40, 1							; エリア : 住居地区
 		noteadd "img/area/commercial.png", 41, 1							; エリア : 商業地区
 		noteadd "img/area/office.png", 42, 1								; エリア : オフィス地区
 		noteadd "img/area/industrial.png", 43, 1							; エリア : 工業地区
 		noteadd "img/area/farm.png", 58, 1									; エリア : 農業地区
-	
+
 	//ポインター
 		noteadd "img/pointer/blue.png", 17, 1								; 青いポインター
 		noteadd "img/pointer/red.png", 18, 1								; 赤いポインター
-	
+
 	//地区を示すタイル
 		noteadd "img/quarter/residential.png", 22, 1						; 住居地区
 		noteadd "img/quarter/commercial.png", 23, 1							; 商業地区
@@ -279,21 +279,21 @@
 		noteadd "img/quarter/h_residential.png", 44, 1						; 高密度住居地区
 		noteadd "img/quarter/h_commercial.png", 45, 1						; 高密度商業地区
 		noteadd "img/quarter/h_office.png", 46, 1							; 高密度オフィス地区
-	
+
 	//最初のメニュー画面のボタン
 		noteadd "img/start_menu/new.png", 27, 1								; 新マップ
 		noteadd "img/start_menu/load.png", 28, 1							; 都市
-	
+
 		noteadd "img/start_menu/setting.png", 65, 1							; 設定
 		noteadd "img/start_menu/addon_maker.png", 72, 1						; Addon Maker
-	
+
 	//メニューの設定画面で使うアイコン
 		noteadd "img/menu_setting/general.png", 60, 1						; 一般設定
 		noteadd "img/menu_setting/information.png", 61, 1					; 情報
 		noteadd "img/menu_setting/bug.png", 63, 1							; バグ・ご要望の送信
-	
+
 		noteadd "img/menu_setting/text.png", 64, 1							; テキストファイルアイコン
-	
+
 	//読み込み中アイコン
 		noteadd "img/loading/124856y.png", 53, 1							; 読み込み中アイコン1
 		noteadd "img/loading/124856y-2.png", 54, 1							; 読み込み中アイコン2
@@ -315,7 +315,7 @@
 
 	; 読み込み
 	a_statbar_block = windowx/2 / BUFFER_IMAGES_TOTAL
-	
+
 	repeat BUFFER_IMAGES_TOTAL + 1
 		noteget load_img, cnt
 		exist load_img
@@ -323,7 +323,7 @@
 		if load_img != " " and strsize = -1 {
 			error "F03 : 画像ファイルが見つかりません\n必要な画像ファイル "+load_img+" が欠けています。"
 		}
-		
+
 		if load_img != " " and strsize != -1 {
 			celload load_img, cnt
 		}
@@ -340,29 +340,29 @@
 	onclick gosub *menu_onclick
 
 	return_from_exit = "menu"
-	
+
 	if (devUpdate = 1 or normalUpdate = 1) and update_button = 0 and config_Ignore_Update = 0 {
 		objsize 150, 20
 		pos windowx-150-20, windowy-titlebar_h-65+5 : button gosub "更新する", *update
 		pos windowx-150-20, windowy-titlebar_h-65+30 : button "更新通知を受け取らない", *set_ignore_update
 		update_button = 1
 	}
-	
+
 	now_loading = 0
-	
+
 	repeat
 		redraw 0
 
 		//現在のウィンドウサイズを取得
 		windowx = ginfo_sizex
 		windowy = ginfo_sizey
-	
+
 		//ウィンドウ左枠の横幅とタイトルバーの高さを取得
 		dim rc, 2
 		rc(0) = 0
 		rc(1) = 0
 		ClientToScreen hwnd, varptr(rc)
-			
+
 		window_left_breadth = rc(0) - ginfo_wx1
 		titlebar_h = rc(1) - ginfo_wy1
 
@@ -372,41 +372,41 @@
 		//メニュー画面表示
 		color 0, 0, 0
 		sboxf 128, 0, 0, windowx, windowy
-				
+
 		pos windowx/2-55, double(50./300)*(windowy-titlebar_h) : gmode 0 : gcopy 2, 0, 0, 110, 110
-			
+
 		font config_SystemFont, 14
-			
+
 		color 0, 162, 232
-			
+
 		if click_range(windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
 			sboxf 200, windowx/2-50-20-10, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 		}
 		if click_range(windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
 			sboxf 200, windowx/2+20-10, double(300./483)*(windowy-titlebar_h), windowx/2+20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20
 		}
-	
+
 		if click_range(8, 25, 8+32, 25+32) = 1 {
 			sboxf 200, 8, 25, 8+32, 25+32
 		}
 		if click_range(45, 25, 45+32, 25+32) = 1 {
 			sboxf 200, 45, 25, 45+32, 25+32
 		}
-	
+
 		//マップ作成・読み込みボタン
 			color 255, 255, 255
-			
+
 			gmode 2
 			pos windowx/2-50-20, double(300./483)*(windowy-titlebar_h) : gcopy 27, 0, 0, 50, 50
 				cmes "新しいマップ", windowx/2-50-20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2-50-20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20, 1
-						
+
 			pos windowx/2+20, double(300./483)*(windowy-titlebar_h) : gcopy 28, 0, 0, 50, 50
 				cmes "読み込み", windowx/2+20-50, double(300./483)*(windowy-titlebar_h)+50+2, windowx/2+20+50+50, double(300./483)*(windowy-titlebar_h)+50+2+20, 1
-	
+
 		//左上のメニュー（設定ボタンなど）
 			color 255, 255, 255 : font config_SystemFont, 14
 			pos 8, 5 : mes about_title+" Ver."+about_version+" r"+about_release_number+""
-			
+
 			gmode 2
 			pos 8, 25  : gcopy 65, 0, 0, 32, 32
 			pos 45, 25 : gcopy 72, 0, 0, 32, 32
@@ -417,14 +417,14 @@
 
 			if click_range(8, 25, 8+32, 25+32) = 1 {
 				font config_SystemFont, 10
-				
+
 				color 255, 255, 255 : sboxf 200, 8, 25+32, 8+50, 25+32+18
 				color 0, 0, 0
 				pos 8+2, 25+32+2 : mes "設定"
 			}
 			if click_range(45, 25, 45+32, 25+32) = 1 {
 				font config_SystemFont, 10
-				
+
 				color 255, 255, 255 : sboxf 200, 45, 25+32, 45+70, 25+32+18
 				color 0, 0, 0
 				pos 45+2, 25+32+2 : mes "Addon Maker"
@@ -433,14 +433,14 @@
 			if config_OS = "macOS" {
 				if click_range(82, 25, 82+32, 25+32) = 1 {
 					font config_SystemFont, 10
-					
+
 					color 255, 255, 255 : sboxf 200, 82, 25+32, 82+70, 25+32+18
 					color 0, 0, 0
 					pos 82+2, 25+32+2 : mes "ReadMe.txt"
 				}
 			}
-			
-	
+
+
 		//アップデートがあった場合
 			if (latest_version__Release_number > about_release_number or Dev_latest_version__Release_number > about_release_number) and config_Ignore_Update = 0 {
 				color 0, 162, 232 : sboxf 128, windowx-500-10, windowy-titlebar_h-70+5-10, windowx-10, windowy-titlebar_h-10
@@ -454,11 +454,11 @@
 					font config_SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+"\n"+Dev_latest_version__About+""
 				}
 			}
-		
+
 		wait 10
 		redraw 1
 	loop
-	
+
 *menu_onclick
 	/*-------------------------メニュー画面でクリックされたときの動作-----------------------------*/
 	if click_range(windowx/2-80, double(300./483)*(windowy-titlebar_h), windowx/2-50-20+50+10, double(300./483)*(windowy-titlebar_h)+50+2+20) = 1 {
@@ -469,7 +469,7 @@
 		gosub *map_dimensions
 		goto *load_map
 	}
-	
+
 	if click_range(8, 25, 8+32, 25+32) = 1 {
 		goto *menu_setting
 	}
@@ -483,21 +483,21 @@
 			if strsize = -1 {
 				error "F04 : ReadMe.txtが見つかりません\nReadMe.txtが見つからないため、開くことができません。"
 			}
-			
+
 			exec "ReadMe.txt", 16
 		}
 	}
-	
+
 	return
 
 *set_ignore_update
 	config_Ignore_Update = 1
 	goto *menu
-	
+
 *menu_setting
 	/*-------------------------------------設定画面-----------------------------------------------*/
 	screen 1, 500, 300
-	
+
 	menu_setting__page = "general"
 
 	if config_OS = "macOS" {
@@ -509,33 +509,33 @@
 *menu_setting_2
 	gsel 1, 2
 	title "設定"
-	
+
 	onclick *menu_setting_onclick
-	
+
 	color 50, 50, 50 : boxf 0, 0, 64, 300
 	color 75, 75, 75 : boxf 64, 0, 500, 28
 	color 90, 90, 90 : boxf 64, 28, 500, 300
 
 	from_menu_setting = 1
-	
+
 	//設定メニュー
 		gmode 2
-		
+
 		pos 16, 28 + 0 + 16   : gcopy 60, 0, 0, 48, 48
 		pos 16, 28 + 64 + 16  : gcopy 63, 0, 0, 48, 48
 		pos 16, 28 + 128 + 16 : gcopy 61, 0, 0, 48, 48
-	
+
 	//設定画面
-	
+
 		; 一般設定
 			if menu_setting__page = "general" {
 				color 0, 162, 232 : boxf 60, 0+28, 64, 64+28
-				
+
 				font config_SystemFont, 16 : color 255, 255, 255
 				pos 70, 3 : mes "一般設定"
-	
+
 				font config_SystemFont, 14 : color 255, 255, 255
-	
+
 				; BGMの再生(Set_Play_BGM)
 					pos 90, 40 : mes "BGMを再生する"
 					if config_Set_Play_BGM = 0 {
@@ -543,7 +543,7 @@
 					} else {
 						pos 350, 40 : gcopy 14, 0, 16, 16, 16
 					}
-	
+
 				; アップデート通知のON/OFF（Ignore_Update）
 					pos 90, 70 : mes "アップデートを通知する"
 					if config_Ignore_Update = 1 {
@@ -559,23 +559,23 @@
 					} else {
 						pos 350, 100 : gcopy 14, 0, 16, 16, 16
 					}
-	
+
 				; フォント設定(SystemFont)
 					pos 90, 130 : mes "フォント"
 
 					gtmp = ginfo(14)
-					
+
 					pos 90+gtmp+100, 130 : objsize 150, 20 : input config_SystemFont : SyetmFont__stat = stat
 					pos 90+gtmp+250, 130 : objsize 50, 20  : button gosub "参照", *refer_fonts
 
 				; 動作モード設定(OS)
 					pos 90, 160 : mes "動作モード"
-					
+
 					pos 90+gtmp+200, 160 : objsize 100, 20 : combox os_num, 100, "Windows\nmacOS"
 
 				; 描写間隔（Drow_Interval）
 					pos 90, 190 : mes "描写間隔（数値が低いほど間隔が短い）"
-					
+
 					pos 90+gtmp+250, 190 : objsize 50, 20 : input config_Drow_Interval : DIinpStat = stat
 
 
@@ -585,14 +585,14 @@
 
 						config_Adjustment_Interval = 2
 						config_Drow_Interval = 4
-						
+
 						objprm DIinpStat, config_Drow_Interval
 					} else : if os_num != os_num_before and os_num = 1 {
 						config_OS = "macOS"
 
 						config_Adjustment_Interval = 2
 						config_Drow_Interval = 2
-						
+
 						objprm DIinpStat, config_Drow_Interval
 					}
 
@@ -601,41 +601,41 @@
 					wait 100
 				loop
 			}
-	
+
 		; バグ・ご要望の送信
 			if menu_setting__page = "bug" {
 				clrobj
-	
+
 				color 0, 162, 232 : boxf 60, 64+28, 64, 128+28
-	
+
 				font config_SystemFont, 16 : color 255, 255, 255
 				pos 70, 3 : mes "バグ・ご要望の送信"
-	
+
 				font config_SystemFont, 14 : color 255, 255, 255
 				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「14.バグや問題点、今後の予定」をご覧ください。"
 				pos ((500-64)/2)-16, 100 : gcopy 64, 0, 0, 32, 32
 				pos ((500-64)/2)-16+45, 105 : mes "ReadMe.txtを開く"
-	
+
 				ginfo_tmp__bug_ReadMe = ginfo(14)
-	
+
 				pos 90, 150 : mes "この他にバグやご要望等がございましたら、\nお気軽にYotioSoft コンタクトフォームまでご一報ください。"
 				pos ((500-64)/2)-16-40, 200 : gcopy 63, 0, 0, 32, 32
 				pos ((500-64)/2)-16-40+45, 205 : mes "コンタクトフォームをブラウザで開く"
-	
+
 				ginfo_tmp__bug_Send = ginfo(14)
-	
-				
+
+
 			}
-	
+
 		; 情報
 			if menu_setting__page = "information" {
 				clrobj
-				
+
 				color 0, 162, 232 : boxf 60, 128+28, 64, 192+28
-				
+
 				font config_SystemFont, 16 : color 255, 255, 255
 				pos 70, 3 : mes "情報"
-	
+
 				pos 100, 40     : gcopy 2, 0, 0, 110, 110
 
 				if config_OS = "Windows" {
@@ -643,18 +643,18 @@
 				} else : config_OS = "macOS" {
 					pos 120+110, 40 : gcopy 75, 0, 0, 230, 110
 				}
-	
+
 				font config_SystemFont, 14 : color 255, 255, 255
 				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+about_release_number+"\nDevelopment Language : HSP 3.5"
 				font config_SystemFont, 10 : color 255, 255, 255
 				pos 100, 270 : mes "Copyright(C) YotioSoft 2017-2018 All Rights Reserved."
 			}
-	
+
 	stop
-	
+
 *menu_setting_onclick
 	//設定上でクリックされたときの動作
-	
+
 	//設定メニュー
 		if click_range(0, 28, 64, 28+64) = 1 {
 			menu_setting__page = "general"
@@ -665,7 +665,7 @@
 		if click_range(0, 28+128, 64, 28+172) = 1 {
 			menu_setting__page = "information"
 		}
-	
+
 	//一般設定
 		if menu_setting__page = "general" {
 			if click_range(350, 40, 350+16, 40+16) = 1 {
@@ -690,7 +690,7 @@
 				}
 			}
 		}
-	
+
 	//バグ・ご要望の送信
 		if menu_setting__page = "bug" {
 			; ReadMe.txtを開く
@@ -699,10 +699,10 @@
 					if strsize = -1 {
 						error "F04 : ReadMe.txtが見つかりません\nReadMe.txtが見つからないため、開くことができません。"
 					}
-					
+
 					exec "ReadMe.txt", 16
 				}
-	
+
 			; コンタクトフォームを開く
 				if click_range(((500-64)/2)-16-40, 200, ((500-64)/2)-16-40+45+ginfo_tmp__bug_Send, 200+32) = 1{
 					exec "http://yotiosoft.com/contact-form/", 16
@@ -726,7 +726,7 @@
 /*----------------------------------マップデータの作成・読み込み----------------------------------*/
 *map_dimensions
 	/*-------------------------------マップデータの配列の確保-------------------------------------*/
-	
+
 	dim map, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2					//各座標のアドオン番号
 	sdim name, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2			//各座標のアドオン名
 	sdim category, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 3		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
@@ -735,24 +735,24 @@
 	dim obj_serial_num, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
 	dim obj_use_tiles, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2		//ひとつのオブジェクトで複数のタイルを要するときの、必要なタイル数
 	dim obj_tiles, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からタイルの数
-		
+
 	dim residents, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//各建築物の住民の数（住宅地のみ）
 	dim workers, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//商業地区の従業員数
 	dim students, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//各学校の生徒・学生数
-	
+
 	dim land_price, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//地価（万円/マス）
 	dim crime_rate, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//犯罪率
 	dim education_rate, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//教育度
 	dim happiness, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//幸福度
-	
+
 	sdim crop, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//生産物
 	dim crop_amount, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//生産量
-	
+
 	sdim age, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//住人の年齢
 	sdim gender, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//住人の性別
 	sdim workplace, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//住人が通うの職場の位置
 	sdim school, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//住人が通う学校の位置
-		
+
 	sdim reservation, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z		//地区の予約（地域設定されたがまだ建物が立っていない区域）
 
 	sdim original_name, 64, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z		//建物名（ユーザーがつけた名前）
@@ -772,12 +772,12 @@
 	}
 
 	clrobj
-	
+
 	load_mapdata_name = refstr
 	map_Total_Population = 0
 	map_total_Residential = 0 : map_total_Commercial = 0 : map_total_Office = 0 : map_total_Industrial = 0 : map_total_Farm = 0
 	map_total_Police_Stations = 0 : map_total_Fire_Depertments = 0 : map_total_Post_Offices = 0 : map_total_Education = 0
-		
+
 	chdir directory
 
 	//マップ読み込み開始
@@ -791,20 +791,20 @@
 		map_Addons_Set = get_chapter(load_mapdata, "Addons_Set", " = \"", "\";")
 
 		if map_Addons_Set = "" : map_Addons_Set = "Normal"
-	
+
 	//都市名(City_Name)を読み込み
 		map_City_Name = get_chapter(load_mapdata, "City_Name", " = \"", "\"")
-	
+
 	//市長名(Mayor_Name)を読み込み
 		map_Mayor_Name = get_chapter(load_mapdata, "Mayor_Name", " = \"", "\"")
-	
+
 	//日時
 		map_time_Year = int(get_chapter(load_mapdata, "time_Year", " = ", ";"))			; ゲーム内の時間の年
 		map_time_Month = int(get_chapter(load_mapdata, "time_Month", " = ", ";"))		; ゲーム内の時間の月
 		map_time_Date = int(get_chapter(load_mapdata, "time_Date", " = ", ";"))			; ゲーム内の時間の日
 		map_time_Hour = int(get_chapter(load_mapdata, "time_Hour", " = ", ";"))			; ゲーム内の時間の時
 		map_time_Minutes = int(get_chapter(load_mapdata, "time_Minutes", " = ", ";"))	; ゲーム内の時間の分
-	
+
 		if map_time_Year = 0 {
 			map_time_Year = gettime(0)
 		}
@@ -814,14 +814,14 @@
 		if map_time_Date = 0 {
 			map_time_Date = gettime(3)
 		}
-	
+
 	//需要度(demand_○○)を読み込み
 		map_demand_Residential = int( get_chapter(load_mapdata, "demand_Residential", " = ", ";") )
 		map_demand_Commercial = int( get_chapter(load_mapdata, "demand_Commercial", " = ", ";") )
 		map_demand_Office = int( get_chapter(load_mapdata, "demand_Office", " = ", ";") )
 		map_demand_Industrial = int( get_chapter(load_mapdata, "demand_Industrial", " = ", ";") )
 		map_demand_Farm = int( get_chapter(load_mapdata, "demand_Farm", " = ", ";") )
-	
+
 		if instr(load_mapdata, 0, "demand_Residential") = -1 {
 			map_demand_Residential = 100
 		}
@@ -837,74 +837,74 @@
 		if instr(load_mapdata, 0, "demand_Farm") = -1 {
 			map_demand_Farm = 0
 		}
-			
+
 	//資金(Money)を読み込み
 		map_Money = int( get_chapter(load_mapdata, "Money", " = ", ";") )
-	
+
 		if instr(load_mapdata, 0, "Money") = -1 {
 			map_Money = 50000
 		}
-	
+
 	//設定読み込み
 		//天候の変化(Set_Change_Weather)
 			map_Set_Change_Weather = int( get_chapter(load_mapdata, "Set_Change_Weather", " = ", ";") )
-					
+
 		//気温(temperature)
 			map_temperature = int( get_chapter(load_mapdata, "Temperature", " = ", ";") )
-	
+
 		//夜間は暗くする(Set_Dark_on_Night)
 			map_Set_Dark_on_Night = int( get_chapter(load_mapdata, "Set_Dark_on_Night", " = ", ";") )
-	
+
 		//予算の読み込み
 			if instr(load_mapdata, 0, "budget_of_Police") != -1 {
 				map_budget_of_Police = int( get_chapter(load_mapdata, "budget_of_Police", " = ", ";") )
 			} else {
 				map_budget_of_Police = 100
 			}
-				
+
 			if instr(load_mapdata, 0, "budget_of_Fire_Depertment") != -1 {
 				map_budget_of_Fire_Depertment = int( get_chapter(load_mapdata, "budget_of_Fire_Depertment", " = ", ";") )
 			} else {
 				map_budget_of_Fire_Depertment = 100
 			}
-				
+
 			if instr(load_mapdata, 0, "budget_of_Post_Office") != -1 {
 				map_budget_of_Post_Office = int( get_chapter(load_mapdata, "budget_of_Post_Office", " = ", ";") )
 			} else {
 				map_budget_of_Post_Office = 100
 			}
-				
+
 			if instr(load_mapdata, 0, "budget_of_Education") != -1 {
 				map_budget_of_Education = int( get_chapter(load_mapdata, "budget_of_Education", " = ", ";") )
 			} else {
 				map_budget_of_Education = 100
 			}
-				
-	
+
+
 			if instr(load_mapdata, 0, "tax_of_Residential") != -1 {
 				map_tax_of_Residential = int( get_chapter(load_mapdata, "tax_of_Residential", " = ", ";") )
 			} else {
 				map_tax_of_Residential = 100
 			}
-				
+
 			if instr(load_mapdata, 0, "tax_of_Commercial") != -1 {
 				map_tax_of_Commercial = int( get_chapter(load_mapdata, "tax_of_Commercial", " = ", ";") )
 			} else {
 				map_tax_of_Commercial = 100
 			}
-				
+
 			if instr(load_mapdata, 0, "tax_of_Office") != -1 {
 				map_tax_of_Office = int( get_chapter(load_mapdata, "tax_of_Office", " = ", ";") )
 			} else {
 				map_tax_of_Office = 100
 			}
-				
+
 			if instr(load_mapdata, 0, "tax_of_Industrial") != -1 {
 				map_tax_of_Industrial = int( get_chapter(load_mapdata, "tax_of_Industrial", " = ", ";") )
 			} else {
 				map_tax_of_Industrial = 100
 			}
-	
+
 			if instr(load_mapdata, 0, "tax_of_Farm") != -1 {
 				map_tax_of_Farm = int( get_chapter(load_mapdata, "tax_of_Farm", " = ", ";") )
 			} else {
@@ -915,9 +915,9 @@
 		gosub *load_addons
 
 	//配列を用いるデータの読み込み
-		name_buf				= get_chapter(load_mapdata, "name(x,y)", " {", "}")	
+		name_buf				= get_chapter(load_mapdata, "name(x,y)", " {", "}")
 		name2_buf				= get_chapter(load_mapdata, "name2(x,y)", " {", "}")
-		
+
 		category_buf			= get_chapter(load_mapdata, "category(x,y)", " {", "}")
 		category_2_buf			= get_chapter(load_mapdata, "category_2(x,y)", " {", "}")
 		category_3_buf			= get_chapter(load_mapdata, "category_3(x,y)", " {", "}")
@@ -969,214 +969,214 @@
 
 		z = 0
 		next_obj_serial_num = 0
-			
+
 		repeat MAPSIZE_Y
 			y = cnt
 
 			; name(x,y)
 			notesel name_buf
 			noteget name_buf_a_line, (y+1)
-			
+
 			split name_buf_a_line, ", ", name_buf_a_tile
 
 			; name2(x,y)
 			notesel name2_buf
 			noteget name2_buf_a_line, (y+1)
-			
+
 			split name2_buf_a_line, ", ", name2_buf_a_tile
 
 			; category(x,y)
 			notesel category_buf
 			noteget category_buf_a_line, (y+1)
-			
+
 			split category_buf_a_line, ", ", category_buf_a_tile
 
 			; category_2(x,y)
 			notesel category_2_buf
 			noteget category_2_buf_a_line, (y+1)
-			
+
 			split category_2_buf_a_line, ", ", category_2_buf_a_tile
 
 			; category_3(x,y)
 			notesel category_3_buf
 			noteget category_3_buf_a_line, (y+1)
-			
+
 			split category_3_buf_a_line, ", ", category_3_buf_a_tile
 
 			; obj_type(x,y)
 			notesel obj_type_buf
 			noteget obj_type_buf_a_line, (y+1)
-			
+
 			split obj_type_buf_a_line, ", ", obj_type_buf_a_tile
 
 			; obj_type2(x,y)
 			notesel obj_type2_buf
 			noteget obj_type2_buf_a_line, (y+1)
-			
+
 			split obj_type2_buf_a_line, ", ", obj_type2_buf_a_tile
 
 			; obj_dire(x,y)
 			notesel obj_dire_buf
 			noteget obj_dire_buf_a_line, (y+1)
-			
+
 			split obj_dire_buf_a_line, ", ", obj_dire_buf_a_tile
 
 			; obj_dire2(x,y)
 			notesel obj_dire2_buf
 			noteget obj_dire2_buf_a_line, (y+1)
-			
+
 			split obj_dire2_buf_a_line, ", ", obj_dire2_buf_a_tile
 
 			; obj_serial_num(x,y)
 			notesel obj_serial_num_buf
 			noteget obj_serial_num_buf_a_line, (y+1)
-			
+
 			split obj_serial_num_buf_a_line, ", ", obj_serial_num_buf_a_tile
 
 			; obj_use_tiles_x(x,y)
 			notesel obj_use_tiles_x_buf
 			noteget obj_use_tiles_x_buf_a_line, (y+1)
-			
+
 			split obj_use_tiles_x_buf_a_line, ", ", obj_use_tiles_x_buf_a_tile
 
 			; obj_use_tiles_y(x,y)
 			notesel obj_use_tiles_y_buf
 			noteget obj_use_tiles_y_buf_a_line, (y+1)
-			
+
 			split obj_use_tiles_y_buf_a_line, ", ", obj_use_tiles_y_buf_a_tile
 
 			; obj_tiles_x(x,y)
 			notesel obj_tiles_x_buf
 			noteget obj_tiles_x_buf_a_line, (y+1)
-			
+
 			split obj_tiles_x_buf_a_line, ", ", obj_tiles_x_buf_a_tile
 
 			; obj_tiles_y(x,y)
 			notesel obj_tiles_y_buf
 			noteget obj_tiles_y_buf_a_line, (y+1)
-			
+
 			split obj_tiles_y_buf_a_line, ", ", obj_tiles_y_buf_a_tile
 
 			; residents(x,y)
 			notesel residents_buf
 			noteget residents_buf_a_line, (y+1)
-			
+
 			split residents_buf_a_line, ", ", residents_buf_a_tile
 
 			; workers_Commercial(x,y)
 			notesel workers_Commercial_buf
 			noteget Workers_Commercial_buf_a_line, (y+1)
-			
+
 			split workers_Commercial_buf_a_line, ", ", workers_Commercial_buf_a_tile
 
 			; workers_Office(x,y)
 			notesel workers_Office_buf
 			noteget Workers_Office_buf_a_line, (y+1)
-			
+
 			split workers_Office_buf_a_line, ", ", workers_Office_buf_a_tile
 
 			; workers_Industrial(x,y)
 			notesel workers_Industrial_buf
 			noteget Workers_Industrial_buf_a_line, (y+1)
-			
+
 			split workers_Industrial_buf_a_line, ", ", workers_Industrial_buf_a_tile
 
 			; workers_Farm(x,y)
 			notesel workers_Farm_buf
 			noteget Workers_Farm_buf_a_line, (y+1)
-			
+
 			split workers_Farm_buf_a_line, ", ", workers_Farm_buf_a_tile
 
 			; workers_Public(x,y)
 			notesel workers_Public_buf
 			noteget Workers_Public_buf_a_line, (y+1)
-			
+
 			split workers_Public_buf_a_line, ", ", workers_Public_buf_a_tile
 
 			; students(x,y)
 			notesel students_buf
 			noteget students_buf_a_line, (y+1)
-			
+
 			split students_buf_a_line, ", ", students_buf_a_tile
 
 			; land_price(x,y)
 			notesel land_price_buf
 			noteget land_price_buf_a_line, (y+1)
-			
+
 			split land_price_buf_a_line, ", ", land_price_buf_a_tile
 
 			; crime_rate(x,y)
 			notesel crime_rate_buf
 			noteget crime_rate_buf_a_line, (y+1)
-			
+
 			split crime_rate_buf_a_line, ", ", crime_rate_buf_a_tile
 
 			; education_rate(x,y)
 			notesel education_rate_buf
 			noteget education_rate_buf_a_line, (y+1)
-			
+
 			split education_rate_buf_a_line, ", ", education_rate_buf_a_tile
 
 			; happiness(x,y)
 			notesel happiness_buf
 			noteget happiness_buf_a_line, (y+1)
-			
+
 			split happiness_buf_a_line, ", ", happiness_buf_a_tile
 
 			; crop(x,y)
 			notesel crop_buf
 			noteget crop_buf_a_line, (y+1)
-			
+
 			split crop_buf_a_line, ", ", crop_buf_a_tile
 
 			; crop_amount(x,y)
 			notesel crop_amount_buf
 			noteget crop_amount_buf_a_line, (y+1)
-			
+
 			split crop_amount_buf_a_line, ", ", crop_amount_buf_a_tile
 
 			; students(x,y)
 			notesel students_buf
 			noteget students_buf_a_line, (y+1)
-			
+
 			split students_buf_a_line, ", ", students_buf_a_tile
 
 			; age(x,y)
 			notesel age_buf
 			noteget age_buf_a_line, (y+1)
-			
+
 			split age_buf_a_line, ", ", age_buf_a_tile
 
 			; gender(x,y)
 			notesel gender_buf
 			noteget gender_buf_a_line, (y+1)
-			
+
 			split gender_buf_a_line, ", ", gender_buf_a_tile
 
 			; workplace(x,y)
 			notesel workplace_buf
 			noteget workplace_buf_a_line, (y+1)
-			
+
 			split workplace_buf_a_line, ", ", workplace_buf_a_tile
 
 			; school(x,y)
 			notesel school_buf
 			noteget school_buf_a_line, (y+1)
-			
+
 			split school_buf_a_line, ", ", school_buf_a_tile
 
 			; reservation(x,y)
 			notesel reservation_buf
 			noteget reservation_buf_a_line, (y+1)
-			
+
 			split reservation_buf_a_line, ", ", reservation_buf_a_tile
 
 			; original_name(x,y)
 			notesel original_name_buf
 			noteget original_name_buf_a_line, (y+1)
-			
+
 			split original_name_buf_a_line, ", ", original_name_buf_a_tile
-			
+
 			; 配列に代入
 			repeat MAPSIZE_X
 				x = cnt
@@ -1185,7 +1185,7 @@
 				name(x,y,z,0) = name_buf_a_tile(x)
 				notesel addons_list
 				map(x,y,z,0) = notefind(name(x,y,z,0), 0)
-	
+
 					; 各種の地区の収容可能人数に加算
 					if sdnl(addon_type, map(x,y,z,0), 0) = "low_density_residential" or sdnl(addon_type, map(x,y,z,0), 0) = "high_density_residential" {
 						map_total_Residential_maximum_capacity += int(sdnl(addon_maximum_capacity, map(x,y,z,0), 0))
@@ -1226,7 +1226,7 @@
 					if category(x,y,z,1) = "fire_depertment" : map_total_Fire_Depertments ++
 					if category(x,y,z,1) = "post_office"     : map_total_Post_Offices ++
 					if category(x,y,z,1) = "education"       : map_total_Education ++
-	
+
 					if category(x,y,z,0) = "residential"     : map_total_Residential ++
 					if category(x,y,z,0) = "commercial"      : map_total_Commercial ++
 					if category(x,y,z,0) = "office"          : map_total_Office ++
@@ -1322,9 +1322,9 @@
 
 				; original_name(x,y,z)
 				original_name(x,y,z) = original_name_buf_a_tile(x)
-				
+
 			loop
-			
+
 			await 1
 		loop
 
@@ -1337,19 +1337,19 @@
 *load_addons
 	//アドオンのリストを取得
 	chdir "addons"
-		
+
 	dirlist2h 1, ','
 	dirlist2 buf_addons, "*.adat*", 1, '\\'
-						
+
 	sdim filelist, buf_addons
 	dirlist2r filelist
-						
+
 	notesel filelist
 	total_addons_all_addons_sets = notemax
 	total_addons = 0
 
 	dim correct_addons_set, total_addons_all_addons_sets
-	
+
 	repeat total_addons_all_addons_sets
 		addon_number = cnt
 
@@ -1358,11 +1358,11 @@
 		; ファイルリストから読み込むadatファイル名を取得
 		notesel filelist
 		noteget adat_name, addon_number
-		
+
 		; 読み込むadatファイルの内容をadat_tmpに代入
 		notesel adat_tmp
 		noteload adat_name
-		
+
 		; belong_addons_set_name（所属するアドオンセットの名前）
 		belong_addons_set_name = get_chapter(adat_tmp, "belong_addons_set_name", " = \"", "\"")
 
@@ -1373,12 +1373,12 @@
 			correct_addons_set(cnt) = 0
 		}
 	loop
-		
+
 	addon_number = 0
-		
+
 	//アドオン用の疑似配列の宣言
 	tmp = ""
-	
+
 	sdns addon_name, 0, 0, tmp, total_addons, 2							; アドオン名（英語名(x,0), 日本語名(x,1)）
 	sdns addon_author, 0, 0, tmp, total_addons, 1						; アドオンの作者名
 	sdns addon_summary, 0, 0, tmp, total_addons, 1						; アドオンの説明
@@ -1394,7 +1394,7 @@
 	sdns addon_icon_number, 0, 0, tmp, total_addons, 1					; アドオンのアイコンのバッファ番号
 	sdns3 addon_image, 0, 0, 0,tmp, total_addons, 12, 2					; アドオンで使う画像
 	sdns3 addon_night_mask_image, 0, 0, 0,tmp, total_addons, 12, 2		; アドオンで使う夜間のマスク画像
-	sdns3 addon_image_size, 0, 0, 0, tmp, total_addons, 12, 2			; アドオンで使う画像の全体のサイズ 
+	sdns3 addon_image_size, 0, 0, 0, tmp, total_addons, 12, 2			; アドオンで使う画像の全体のサイズ
 	sdns3 addon_dire_names, 0, 0, 0, tmp, total_addons, 12, 4			; アドオンのそれぞれのタイプ内の向きの名前
 	sdns3 addon_size_x, 0, 0, 0, tmp, total_addons, 12, 4				; アドオンのサイズx
 	sdns3 addon_size_y, 0, 0, 0, tmp, total_addons, 12, 4				; アドオンのサイズy
@@ -1420,7 +1420,7 @@
 		; ファイルリストから読み込むadatファイル名を取得
 		notesel filelist
 		noteget adat_name, cnt
-		
+
 		; 読み込むadatファイルの内容をadat_tmpに代入
 		notesel adat_tmp
 		noteload adat_name
@@ -1430,7 +1430,7 @@
 
 		; ディレクトリ変更（あとで画像を読み込むため）
 		chdir addon_path
-		
+
 		/*-------------------------------adatファイルの内容読み込み-------------------------------*/
 		; addon_name（アドオン名）
 			; 英語名
@@ -1473,7 +1473,7 @@
 
 			; カテゴリ分け
 			ct_done = 0
-			
+
 			if tmp1 = "Two_lane_road" or tmp1 = "Two_lane_Road" {
 				notesel type_Two_lane_road : noteadd addon_name_tmp, -1
 				notesel type_number_Two_lane_road : noteadd str(addon_number), -1
@@ -1543,11 +1543,11 @@
 				tile_addon_number = addon_number
 				ct_done = 1
 			}
-			
+
 			if ct_done = 0 {
 				error "A01 : アドオンをカテゴリ分けできません\n"+addon_name(addon_number)+"を規定のカテゴリーに区別できないため、このアドオンは利用できません。\nアドオンファイル(*.adat)のaddon_type要素をご確認ください。"
 			}
-			
+
 		; addon_maker_version（アドオンを作成したAddon Makerのバージョン）
 			tmp = get_chapter(adat_tmp, "addon_maker_version", " = \"", "\"")
 			sdns addon_maker_version, addon_number, 0, tmp
@@ -1596,7 +1596,7 @@
 
 			repeat stat_tmp
 				sdns addon_use_types_name, addon_number, cnt, tmps(cnt), total_addons, 12
-				
+
 				if i > 12 {
 					break
 				}
@@ -1608,7 +1608,7 @@
 
 		; 各タイプの内容を切り抜く
 			total_types = sdnsize(addon_use_types_name, addon_number)
-			
+
 			repeat total_types
 				searching_type_name = sdnl(addon_use_types_name, addon_number, cnt)
 				addon_a_type_tmp = get_chapter(adat_tmp, searching_type_name, " {", "};")
@@ -1665,11 +1665,11 @@
 				/*-----------------------------アドオン画像の読み込み-----------------------------*/
 				; 通常時
 					exist load_image
-				
+
 					if strsize = -1 {
 						error "A02 : アドオンの画像ファイルが見つかりません\n"+sdnl(addon_name, addon_number, 0)+"で利用する"+load_image+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
 					}
-				
+
 					celload load_image, next_image_num
 					next_image_num_str = str(next_image_num)
 					sdns3 addon_image, addon_number, tcnt, 1, next_image_num_str, total_addons, 12, 2
@@ -1680,61 +1680,61 @@
 
 					imgx_str = str(imgx)
 					imgy_str = str(imgy)
-					
+
 					sdns3 addon_image_size, addon_number, tcnt, 0, imgx_str, total_addons, 12, 2
 					sdns3 addon_image_size, addon_number, tcnt, 1, imgy_str, total_addons, 12, 2
-				
+
 					next_image_num ++
-			
+
 				; 夜間バージョン
 					if load_night_mask_image != "" {
 						exist load_night_mask_image
-				
+
 						if strsize = -1 {
 							error "A03 : アドオンの夜間マスク画像ファイルが見つかりません\n"+sdnl(addon_name, addon_number, 0)+"で利用する"+load_night_mask_image+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
 						}
-				
+
 						celload load_night_mask_image, 99
 					}
-			
+
 					buffer next_image_num, imgx, imgy
 						pos 0, 0 : gcopy next_image_num-1, 0, 0, imgx, imgy
-			
+
 						color 0, 0, 0 : sboxf 200, 0, 0, imgx, imgy
-			
+
 						if load_night_mask_image != "" {
 							gmode 2
 							pos 0, 0 : gcopy 99, 0, 0, imgx, imgy
 						}
-			
+
 					next_image_num_str = str(next_image_num)
 					sdns3 addon_night_mask_image, addon_number, tcnt, 1, next_image_num_str, total_addons, 12, 2
-			
+
 					next_image_num ++
-			
+
 				; 夕方バージョン
 					buffer next_image_num, imgx, imgy
 						pos 0, 0 : gcopy next_image_num-2, 0, 0, imgx, imgy
-			
+
 						color 0, 0, 0 : sboxf 128, 0, 0, imgx, imgy
-			
+
 						if load_night_mask_image != "" and rnd(2) = 1 {
 							gmode 2
 							pos 0, 0 : gcopy 99, 0, 0, imgx, imgy
 						}
-			
+
 					next_image_num ++
-			
+
 				; 停電バージョン
 					buffer next_image_num, imgx, imgy
 						pos 0, 0 : gcopy next_image_num-3, 0, 0, imgx, imgy
-			
+
 						color 0, 0, 0 : sboxf 200, 0, 0, imgx, imgy
-			
+
 					next_image_num ++
-				
+
 				gsel 0
-				
+
 			loop
 		addon_number ++
 	loop
@@ -1745,18 +1745,18 @@
 	/*----------------------------------新しいマップの作成----------------------------------------*/
 	//マップ設定
 	screen 1, 400, 300
-	
+
 	gsel 1
 	title "新規マップ作成"
-	
+
 	onclick gosub *new_map_setting_onclick
-	
+
 	color 95, 95, 95 : boxf
 
 	//アドオンセット一覧を取得
 	dirlist2h 1, ','
 	dirlist2 buf_addons, "*.adset*", 1, '\\'
-						
+
 	sdim filelist, buf_addons
 	dirlist2r filelist
 
@@ -1793,51 +1793,51 @@
 		addon_sets_names = addon_sets_EN_name(0)
 		addon_set_num = 0
 	}
-	
-	
+
+
 	color 255, 255, 255
 	font config_SystemFont, 16
-	
+
 	//都市名(City_Name)
 		pos 10, 10 : mes "都市名"
-		
+
 		objsize 280, 20
 		pos 80, 10 : input map_City_Name
-	
+
 	//市長名(Mayor_Name)
 		pos 10, 40 : mes "市長名"
-		
+
 		objsize 280, 20
 		pos 80, 40 : input map_Mayor_Name
-	
+
 	//天候の変化(Set_Change_Weather)
 		if map_Set_Change_Weather = 0 {
 			pos 10, 73 : gcopy 14, 0, 0, 16, 16
 		} else {
 			pos 10, 73 : gcopy 14, 0, 16, 16, 16
 		}
-		
+
 		pos 35, 70 : mes "天候の変化"
 
 	//アドオンセット(Addon_Set)
 		pos 10, 100 : mes "アドオンセット"
 		objsize 260, 20
 		pos 100, 100 : combox addon_set_num, , addon_sets_names
-	
+
 	//OKボタン
 		color 255, 255, 255 : boxf 150, 260, 250, 290
 		color 95, 95, 95 : boxf 151, 261, 249, 289
-	
+
 		color 255, 255, 255 : font config_SystemFont, 20
 		cmes "OK", 150, 260, 250, 290
-		
+
 	stop
 
 *new_map_setting_onclick
 	gsel 1
-	
+
 	from_setting_onclick = 1
-	
+
 	//天候の変化(Set_Change_Weather)
 		//チェックボックス
 			if click_range(10, 73, 10+16, 73+16) = 1 {
@@ -1847,21 +1847,21 @@
 					map_Set_Change_Weather = 0
 				}
 			}
-	
+
 	//OKボタン
 		if click_range(150, 260, 250, 290) = 1 {
-	
+
 		// マップ作成時の初期設定
 			gsel 1, -1
 			gsel 0
 
 			onclick 0
-			
+
 			goto *new_map_preparation
 		}
-	
+
 	clrobj
-	
+
 	goto *new_map
 
 *new_map_preparation
@@ -1869,24 +1869,24 @@
 	map_Saved_Version = about_release_number
 
 	map_Addons_Set = addon_sets_EN_name(addon_set_num)
-	
+
 	map_time_Year = gettime(0)
 	map_time_Month = gettime(1)
 	map_time_Date = gettime(3)
 	map_time_Hour = 0
 	map_time_Minutes = 0
-	
+
 	map_demand_Residential = 100
 	map_demand_Commercial = 0
 	map_demand_Office = 0
 	map_demand_Industrial = 0
 	map_demand_Farm = 0
-			
+
 	map_Money = 50000
-	
+
 	map_temperature = 0
 	map_Set_Dark_on_Night = 1
-	
+
 	map_budget_of_Police = 100
 	map_budget_of_Fire_Depertment = 100
 	map_budget_of_Post_Office = 100
@@ -1906,7 +1906,7 @@
 
 	notesel addons_list
 	tile_addon_number = notefind ("tile_greenfield", 0)
-	
+
 	repeat MAPSIZE_X
 		x = cnt
 
@@ -1915,7 +1915,7 @@
 
 			name(x,y,z,0) = "tile_greenfield"
 			name(x,y,z,1) = ""
-			
+
 			map(x,y,z,0) = tile_addon_number
 			map(x,y,z,1) = -1
 
@@ -2003,7 +2003,7 @@
 
 *get_coordinates
 	//表示範囲の座標を取得
-			
+
 	; MAPSIZE_X, MAPSIZE_Yのうち大きい方の値
 		if MAPSIZE_X >= MAPSIZE_Y {
 			mapsize_max = MAPSIZE_X
@@ -2016,7 +2016,7 @@
 		y_=(windowy/2)+camy
 		middle_x=(y_+x_/2)/(chip_size/2)
 		middle_y=(-x_+y_*2)/chip_size
-			
+
 	; 画面中央を中心とした描写範囲
 		if windowx != before_windowx or windowy != before_windowy {
 			draw_area = (sqrt(powf(windowx, 2)+powf(windowy, 2))/sqrt(powf(CHIP_SIZE/2, 2)+powf(CHIP_SIZE/4, 2)))
@@ -2054,10 +2054,10 @@
 
 	dim addons_top_left_x, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2
 	dim addons_top_left_y, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2
-	
+
 	dim addons_size_x, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2
 	dim addons_size_y, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2
-	
+
 	sz = 0
 
 	repeat MAPSIZE_X
@@ -2099,13 +2099,13 @@
 				} else {
 					originally_top_of_a_dire_x = 0
 				}
-				
+
 				originally_top_of_a_dire_y = size_y * int(obj_dire(sx,sy,sz,cnt)/2)
 
 				if originally_top_of_a_dire_x >= sdnl3(addon_image_size, map(sx,sy,sz,cnt), obj_type(sx,sy,sz,cnt), 0) or originally_top_of_a_dire_y >= sdnl3(addon_image_size, map(sx,sy,sz,cnt), obj_type(sx,sy,sz,cnt), 1) {
 					originally_top_of_a_dire_y = 0
 				}
-				
+
 				py += top_left_y - originally_top_of_a_dire_y + CHIP_SIZE/4 * (int(sdnl3(addon_chip_x, map(sx,sy,sz,cnt), obj_type(sx,sy,sz,cnt), obj_dire(sx,sy,sz,cnt))) - 1)
 
 				if size_y > 64 {
@@ -2123,10 +2123,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y
 					}
@@ -2136,10 +2136,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
 					}
@@ -2149,10 +2149,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
 					}
@@ -2162,14 +2162,14 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0)))
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/4
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
 					}
-					
+
 				} else : if obj_use_tiles(sx,sy,sz,0) <= 0 and obj_use_tiles(sx,sy,sz,1) > 0 {
 					if obj_dire(sx,sy,sz,cnt) = 0 {
 						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
@@ -2177,10 +2177,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE/2
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE/4
-						
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y
 					}
@@ -2190,10 +2190,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,1) - 1 - obj_tiles(sx,sy,sz,1))
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * (obj_use_tiles(sx,sy,sz,1) - 1 - obj_tiles(sx,sy,sz,1))
-						
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (obj_use_tiles(sx,sy,sz,1) - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4 + obj_use_tiles_from_left_top_y * CHIP_SIZE/4
 					}
@@ -2203,10 +2203,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/2 * abs(obj_tiles(sx,sy,sz,1))
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * abs(obj_tiles(sx,sy,sz,1))
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (obj_use_tiles(sx,sy,sz,1) - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - abs(obj_tiles(sx,sy,sz,1)) * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4 + obj_use_tiles_from_left_top_y * CHIP_SIZE
 					}
@@ -2216,10 +2216,10 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + (obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))) * CHIP_SIZE/2
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + (obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))) * CHIP_SIZE/4
-						
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (obj_use_tiles(sx,sy,sz,1) - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4 + obj_use_tiles_from_left_top_y * CHIP_SIZE/2
 					}
@@ -2232,10 +2232,10 @@
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
 						if obj_use_tiles_from_left_top_y = 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y
 					}
@@ -2246,10 +2246,10 @@
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
 						if obj_use_tiles_from_left_top_y = 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y
 					}
@@ -2260,10 +2260,10 @@
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/2
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4
 						if obj_use_tiles_from_left_top_y = 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-	
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y
 					}
@@ -2274,18 +2274,18 @@
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0)))
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/4
 						if obj_use_tiles_from_left_top_y = 1 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-						
+
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y + obj_use_tiles_from_left_top_y * CHIP_SIZE/2
-	
+
 						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
 					}
-					
+
 				} else {
 					addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 					addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-					
+
 					addons_top_left_x(sx,sy,sz,cnt) = top_left_x
 					addons_top_left_y(sx,sy,sz,cnt) = top_left_y
 
@@ -2316,30 +2316,32 @@
 	gsel 0
 
 	return_from_exit = "main"
-	
+
 	repeat
 		; カメラ操作
-		before_camx = camx
-		before_camy = camy
-		
-		getkey key_left, 37
-		if key_left = 1 {
-			camx -= 20
-		}
-			
-		getkey key_up, 38
-		if key_up = 1 {
-			camy -= 10
-		}
-			
-		getkey key_right, 39
-		if key_right = 1 {
-			camx += 20
-		}
-			
-		getkey key_down, 40
-		if key_down = 1 {
-			camy += 10
+		if ginfo(2) = 0 {
+			before_camx = camx
+			before_camy = camy
+
+			getkey key_left, 37
+			if key_left = 1 {
+				camx -= 20
+			}
+
+			getkey key_up, 38
+			if key_up = 1 {
+				camy -= 10
+			}
+
+			getkey key_right, 39
+			if key_right = 1 {
+				camx += 20
+			}
+
+			getkey key_down, 40
+			if key_down = 1 {
+				camy += 10
+			}
 		}
 
 		; カメラが操作されたら描写範囲の計算をする
@@ -2366,7 +2368,7 @@
 			if my >= MAPSIZE_Y {
 				my = MAPSIZE_Y - 1
 			}
-	
+
 			before_mousex = mousex
 			before_mousey = mousey
 		}
@@ -2390,14 +2392,14 @@
 
 		x = intial_x
 		z = intial_z
-		
+
 		repeat draw_area + 5
 			y = intial_y
 
 			if x >= MAPSIZE_X {
 				break
 			}
-			
+
 			repeat draw_area + 5
 				if y >= MAPSIZE_Y {
 					break
@@ -2414,7 +2416,7 @@
 					pos addons_drow_position_x(x,y,z,0)+intial_camx-camx, addons_drow_position_y(x,y,z,0)+intial_camy-camy
 					gmode 2 : gcopy int(sdnl3(addon_image, map(x,y,z,0), obj_type(x,y,z,0), 1))+night_mask_drow, addons_top_left_x(x,y,z,0), addons_top_left_y(x,y,z,0), addons_size_x(x,y,z,0), addons_size_y(x,y,z,0)
 				}
-				
+
 				; 統計モードが選択されている場合
 				if stat_mode != "" {
 					; 相対的な座標の算出
@@ -2427,7 +2429,7 @@
 						; 建物の種類
 						if stat_mode = "type" {
 							if category(x,y,z,0) = "residential" or instr(reservation(x,y,z), 0, "residential") != -1 {
-								gcopy 22, 0, 0, 64, 32	
+								gcopy 22, 0, 0, 64, 32
 							} else : if category(x,y,z,0) = "commercial" or instr(reservation(x,y,z), 0, "commercial") != -1 {
 								gcopy 23, 0, 0, 64, 32
 							} else : if category(x,y,z,0) = "office" or reservation(x,y,z) = "office" {
@@ -2440,7 +2442,7 @@
 								gcopy 26, 0, 0, 64, 32
 							}
 						}
-	
+
 						; 地価
 						if stat_mode = "land_price" {
 							if land_price(x,y,z) > 200 {
@@ -2459,7 +2461,7 @@
 								gcopy 39, 0, 0, 64, 32
 							}
 						}
-	
+
 						; 犯罪率
 						if stat_mode = "crime_rate" {
 							if crime_rate(x,y,z) <= -100 {
@@ -2478,7 +2480,7 @@
 								gcopy 39, 0, 0, 64, 32
 							}
 						}
-	
+
 						; 教育度
 						if stat_mode = "education_rate" {
 							if education_rate(x,y,z) <= 0 {
@@ -2497,7 +2499,7 @@
 								gcopy 34, 0, 0, 64, 32
 							}
 						}
-	
+
 						; 幸福度
 						if stat_mode = "happiness" {
 							if happiness(x,y,z) <= 15 {
@@ -2562,7 +2564,7 @@
 			}
 			if build_direction_number = 1 {
 				if street_corner_addon = 0 {
-					pos mx_position+32,my_position-48 : gcopy 77, 64, 0, 64, 64 
+					pos mx_position+32,my_position-48 : gcopy 77, 64, 0, 64, 64
 				} else {
 					pos mx_position+64,my_position-32 : gcopy 77, 64, 128, 64, 64
 				}
@@ -2576,7 +2578,7 @@
 			}
 			if build_direction_number = 3 {
 				if street_corner_addon = 0 {
-					pos mx_position+32,my_position-16 : gcopy 77, 64, 64, 64, 64 
+					pos mx_position+32,my_position-16 : gcopy 77, 64, 64, 64, 64
 				} else {
 					pos mx_position,my_position : gcopy 77, 64, 128+64, 64, 64
 				}
@@ -2605,63 +2607,63 @@
 			} else {
 				pos 20, windowy-70-titlebar_h : gcopy 3, 0, 0, 32, 32
 			}
-	
+
 			; 道路ボタン
 			if cursor_mode = "put_Road" {
 				pos 60, windowy-70-titlebar_h : gcopy 4, 0, 32, 32, 32
 			} else {
 				pos 60, windowy-70-titlebar_h : gcopy 4, 0, 0, 32, 32
 			}
-	
+
 			; 線路ボタン
 			if cursor_mode = "put_Railroad" {
 				pos 92, windowy-70-titlebar_h : gcopy 50, 0, 32, 32, 32
 			} else {
 				pos 92, windowy-70-titlebar_h : gcopy 50, 0, 0, 32, 32
 			}
-	
+
 			; 建物（住居地区）ボタン
 			if cursor_mode = "put_Residential" {
 				pos 124, windowy-70-titlebar_h : gcopy 5, 0, 32, 32, 32
 			} else {
 				pos 124, windowy-70-titlebar_h : gcopy 5, 0, 0, 32, 32
 			}
-	
+
 			; 建物（商業地区）ボタン
 			if cursor_mode = "put_Commercial" {
 				pos 156, windowy-70-titlebar_h : gcopy 12, 0, 32, 32, 32
 			} else {
 				pos 156, windowy-70-titlebar_h : gcopy 12, 0, 0, 32, 32
 			}
-	
+
 			; 建物（オフィス）ボタン
 			if cursor_mode = "put_Office" {
 				pos 188, windowy-70-titlebar_h : gcopy 6, 0, 32, 32, 32
 			} else {
 				pos 188, windowy-70-titlebar_h : gcopy 6, 0, 0, 32, 32
 			}
-	
+
 			; 建物（工業地区）ボタン
 			if cursor_mode = "put_Industrial" {
 				pos 220, windowy-70-titlebar_h : gcopy 19, 0, 32, 32, 32
 			} else {
 				pos 220, windowy-70-titlebar_h : gcopy 19, 0, 0, 32, 32
 			}
-	
+
 			; 建物（農業地区）ボタン
 			if cursor_mode = "put_Farm" {
 				pos 252, windowy-70-titlebar_h : gcopy 57, 0, 32, 32, 32
 			} else {
 				pos 252, windowy-70-titlebar_h : gcopy 57, 0, 0, 32, 32
 			}
-	
+
 			; 建物（公共施設）ボタン
 			if cursor_mode = "put_Public" {
 				pos 284, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
 			} else {
 				pos 284, windowy-70-titlebar_h : gcopy 7, 0, 0, 32, 32
 			}
-	
+
 			; 公園ボタン
 			if cursor_mode = "put_Park" {
 				pos 316, windowy-70-titlebar_h : gcopy 29, 0, 32, 32, 32
@@ -2675,29 +2677,29 @@
 			} else {
 				pos 348, windowy-70-titlebar_h : gcopy 76, 0, 0, 32, 32
 			}
-	
+
 			; 情報ボタン
 			pos windowx-54-64, windowy-70-titlebar_h : gcopy 52, 0, 0, 32, 32
-	
+
 			; 予算ボタン
 			pos windowx-54-64, windowy-40-titlebar_h : gcopy 49, 0, 0, 32, 32
-	
+
 			; 撤去ボタン
 			if cursor_mode = "delete" {
 				pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 32, 32, 32
 			} else {
 				pos windowx-54, windowy-70-titlebar_h : gcopy 10, 0, 0, 32, 32
 			}
-	
+
 			; 設定ボタン
 			pos windowx-54-32, windowy-40-titlebar_h : gcopy 13, 0, 0, 32, 32
-	
+
 			; 保存ボタン
 			pos windowx-54, windowy-40-titlebar_h : gcopy 11, 0, 0, 32, 32
-	
+
 			; 統計ボタン
 			pos windowx-54-32, windowy-70-titlebar_h : gcopy 30, 0, 0, 32, 32
-	
+
 			; 統計メニュー（oepn_stat_menu = 1のとき）
 			if open_stat_menu = 1 {
 				sboxf 128, windowx-92-32-1, windowy-70-titlebar_h-20-1, windowx-92-32-1+(20*5)+1, windowy-70-titlebar_h
@@ -2726,7 +2728,7 @@
 				} else {
 					pos windowx-92-32+80, windowy-70-titlebar_h-20 : gcopy 51, 0, 0, 20, 20
 				}
-			}	
+			}
 
 			; 速さ
 			pos 20, windowy-45-titlebar_h+10
@@ -2737,21 +2739,21 @@
 
 			pos 52, windowy-45-titlebar_h+10
 			if pause = 1 : gcopy 70, 0, 32, 32, 32 : else : gcopy 70, 0, 0, 32, 32		; 一時停止ボタン
-	
+
 			; 人口、日付・気温を表示
 			color 255, 255, 255 : font config_SystemFont, 11
 			pos 90, windowy-45-titlebar_h+10 : mes ""+map_time_Year+"年"+map_time_Month+"月"+map_time_Date+"日 "+strf("%02d",map_time_Hour)+":"+strf("%02d",map_time_Minutes)+"   人口 "+map_Total_Population+"人   § "+map_Money+"   気温 "+map_temperature+"℃"
-	
+
 			color 255, 255, 255 : font "Yu Gothic UI", 10
 			pos 90, windowy-30-titlebar_h+10 : mes "News : "+news_content+""
-				
+
 			; RCOI需要メータ
 			if map_demand_Residential < 0 : map_demand_Residential = 1
 			if map_demand_Commercial < 0  : map_demand_Commercial = 1
 			if map_demand_Office < 0      : map_demand_Office = 1
 			if map_demand_Industrial < 0  : map_demand_Industrial = 1
 			if map_demand_Farm < 0        : map_demand_Farm = 1
-					
+
 			font config_SystemFont, 10
 				; R - 住居区画
 				color 34, 177, 76 : boxf windowx-180, windowy-titlebar_h-20-(map_demand_Residential/3), windowx-180+10, windowy-titlebar_h-20
@@ -2769,15 +2771,17 @@
 				color 185, 122, 87 : boxf windowx-140, windowy-titlebar_h-20-(map_demand_Farm/3), windowx-140+10, windowy-titlebar_h-20
 				cmes "F", windowx-140, windowy-titlebar_h-20, windowx-140+10, windowy-titlebar_h-10, 1
 
-		; 左クリックされてるなら*main_mouse_left_clickingへ（*main_onclickとは別で、押し続けているときの処理）
-		getkey mouse_left, 1
-			; 左クリックが離されたときの処理
-				if mouse_left = 0 and before_mouse_left_clicking = 1 : gosub *main_mouse_left_release
-				
-		if mouse_left = 1 : gosub *main_mouse_left_clicking
-		
-		; クリックされたら*main_onclickへ（*main_mouse_left_clickingとは別で、一瞬だけ押されたときの処理）
-		onclick gosub *main_onclick
+		if ginfo(2) = 0 {
+			; 左クリックされてるなら*main_mouse_left_clickingへ（*main_onclickとは別で、押し続けているときの処理）
+			getkey mouse_left, 1
+				; 左クリックが離されたときの処理
+					if mouse_left = 0 and before_mouse_left_clicking = 1 : gosub *main_mouse_left_release
+
+			if mouse_left = 1 : gosub *main_mouse_left_clicking
+
+			; クリックされたら*main_onclickへ（*main_mouse_left_clickingとは別で、一瞬だけ押されたときの処理）
+			onclick gosub *main_onclick
+		}
 
 		; 時間の変動
 			; Speed=2のとき、1回のループで1分とする
@@ -2788,18 +2792,18 @@
 					map_time_Minutes += speed - 1
 				}
 			}
-			
+
 			; map_time_Minutes=60で1時間とする
 			if map_time_Minutes > 59 {
 				map_time_Minutes = 0
 				map_time_Hour ++
 			}
-		
+
 			; map_time_Hour=24で1日とする
 			if map_time_Hour= 24 {
 				map_time_Date ++
 				map_time_Hour = 0 : map_time_Minutes = 0
-		
+
 				if map_time_Date > 28 and map_time_Month = 2 and map_time_Year\4 != 0 {
 					map_time_Date = 1
 					map_time_Month ++
@@ -2823,7 +2827,7 @@
 				}
 			}
 
-		; ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）	
+		; ニュースの表示（0時0分、6時0分、12時0分、18時0分 あるいは マップ読み込み直後に新しいニュースを取得）
 		if (map_time_Hour = 0 and map_time_Minutes = 0) or (map_time_Hour = 6 and map_time_Minutes = 0) or (map_time_Hour = 12 and map_time_Minutes = 0) or (map_time_Hour = 18 and map_time_Minutes = 0) or cnt = 0 {
 			gosub *get_news
 		}
@@ -2831,7 +2835,7 @@
 		; BGMの再生
 		; 現在再生しているBGMの現在の再生位置と曲の長さを取得
 		if cnt \ 10 = 0 {
-			mci"status Cities-Box position" : BGM_Position = stat		; 現在の再生位置	
+			mci"status Cities-Box position" : BGM_Position = stat		; 現在の再生位置
 			mci "status Cities-Box length"  : BGM_Length = stat			; 曲の長さ
 
 			; 現在の再生位置と曲の長さが同じなら次の曲を選曲
@@ -2853,7 +2857,7 @@
 		; 現在のウィンドウサイズを取得
 		windowx = ginfo_sizex
 		windowy = ginfo_sizey
-	
+
 		; ウィンドウ左枠の横幅とタイトルバーの高さを取得
 		dim rc, 2 : rc(0) = 0 : rc(1) = 0
 		ClientToScreen hwnd, varptr(rc)
@@ -2864,14 +2868,14 @@
 		if map_time_Hour = 0 and map_time_Minutes = 0 : gosub *processing_start_of_day
 
 		redraw 1
-		
+
 		await config_Drow_Interval
 	loop
 
 *main_drow_summary
 	/*---------------------------------各種ボタンの説明の表示-------------------------------------*/
 	font config_SystemFont, 10
-	
+
 	; 通常のカーソル
 	if click_range(20, windowy-70-titlebar_h, 20+32, windowy-70-titlebar_h+32) = 1 {
 		color 255, 255, 255 : sboxf 128, 20, windowy-70-titlebar_h-18, 20+60, windowy-70-titlebar_h
@@ -3176,7 +3180,7 @@
 		addon_menu_categories = 0
 		return
 	}
-				
+
 	; 統計
 	if click_range( windowx-54-32, windowy-70-titlebar_h, windowx-54, windowy-70-titlebar_h+32 ) = 1 {
 		if open_stat_menu = 0 {
@@ -3188,26 +3192,26 @@
 		}
 		addon_menu_categories = 0
 	}
-			
+
 	; 撤去
 	if click_range( windowx-54, windowy-70-titlebar_h, windowx-54+32, windowy-70-titlebar_h+32 ) = 1 {
 		cursor_mode = "delete"
 		addon_menu_categories = 0
 		stat_mode = "type"
 	}
-			
+
 	; 設定
 	if click_range( windowx-54-32, windowy-40-titlebar_h, windowx-54, windowy-40-titlebar_h+32 ) = 1 {
 		gosub *setting
 		addon_menu_categories = 0
 	}
-			
+
 	; 保存
 	if click_range( windowx-54, windowy-40-titlebar_h, windowx-54+32, windowy-40-titlebar_h+32 ) = 1 {
 		gosub *save
 		addon_menu_categories = 0
 	}
-			
+
 	; 統計メニュー
 	if open_stat_menu = 1 and click_range( windowx-92-32, windowy-70-titlebar_h-20, windowx-92-32+19, windowy-70-titlebar_h ) = 1 {
 		if stat_mode != "type" {
@@ -3334,7 +3338,7 @@
 			} else : if build_direction_number = 2 {
 				build_direction_number = 0
 			}
-			
+
 			change_direction = 1
 		}
 	}
@@ -3348,7 +3352,7 @@
 	}
 
 	stat_mode = "type"
-	
+
 	; 道路
 	if cursor_mode = "put_Road" {
 		if category_mode = "roadway" {
@@ -3421,7 +3425,7 @@
 	; メニューにタイプが2つ以上ある場合、それぞれのタイプのアイコンを表示（高密度/低密度 など）
 	if addon_menu_categories > 1 {
 		color 127,127,127 : sboxf 200, 0, windowy-70-titlebar_h-32-40, 16, windowy-70-titlebar_h
-		
+
 		repeat addon_menu_categories
 			gmode 2
 			pos 0, windowy-70-titlebar_h-2-32+(16*cnt)
@@ -3496,7 +3500,7 @@
 			notesel category_addons_number
 			noteget cnt_addon_number, cnt
 		}
-		
+
 		if area_addon_icon != -1 and cnt = 0 {
 			addon_icon_number_on_menu = area_addon_icon
 		} else {
@@ -3517,12 +3521,12 @@
 	if area_addon_icon != -1 and selected_addon_number_on_menu = 0 {
 		color 255,255,255 : font config_SystemFont, 14
 		pos 40, windowy-70-titlebar_h-32-40+5 : mes area_addon_name_JP
-					
+
 		color 255,255,255 : font config_SystemFont, 10
 		pos 40, windowy-70-titlebar_h-32-40+22 : mes area_addon_summary
 
 		selected_addon_number = area_addon_number
-		
+
 	} else {
 		if area_addon_icon != -1 and cnt != 0 {
 			notesel category_addons_number
@@ -3531,15 +3535,15 @@
 			notesel category_addons_number
 			noteget selected_addon_number, selected_addon_number_on_menu
 		}
-		
+
 		selected_addon_number = int(selected_addon_number)
-	
+
 		selected_addon_name_jp = sdnl(addon_name, selected_addon_number, 1)
 		selected_addon_summary = sdnl(addon_summary, selected_addon_number, 0)
-	
+
 		color 255, 255, 255 : font config_SystemFont, 14
 		pos 40, windowy-70-titlebar_h-32-40+5 : mes selected_addon_name_jp
-	
+
 		color 255, 255, 255 : font config_SystemFont, 10
 		pos 40, windowy-70-titlebar_h-32-40+22 : mes selected_addon_summary
 	}
@@ -3564,7 +3568,7 @@
 		category_addons_number = type_number_high_density_residential
 		cursor_mode = "put_Residential"
 	}
-	
+
 	; 商業
 	if reservation(mx,my,mz) = "low_density_commercial" {
 		category_addons = type_low_density_commercial
@@ -3576,21 +3580,21 @@
 		category_addons_number = type_number_high_density_commercial
 		cursor_mode = "put_Commercial"
 	}
-	
+
 	; オフィス
 	if reservation(mx,my,mz) = "office" {
 		category_addons = type_office
 		category_addons_number = type_number_office
 		cursor_mode = "put_Office"
 	}
-	
+
 	; 工業
 	if reservation(mx,my,mz) = "industrial" {
 		category_addons = type_industrial
 		category_addons_number = type_number_industrial
 		cursor_mode = "put_Industrial"
 	}
-	
+
 	; 農業
 	if reservation(mx,my,mz) = "farm" {
 		category_addons = type_farm
@@ -3603,7 +3607,7 @@
 	notesel category_addons_number
 	noteget selected_addon_number, rnd(notemax)
 	selected_addon_number = int(selected_addon_number)
-	
+
 	gosub *build
 
 	; 問題なく建設できた場合は予約取り消し
@@ -3618,15 +3622,15 @@
 
 *build
 	/*----------------------------------アドオンの設置--------------------------------------------*/
-	
+
 	if selected_addon_number = map(mx,my,mz,0) : return
-	
+
 	; 地区設定
 	if selected_addon_number < 0 {
 		if category(mx,my,mz,0) = "road" or category(mx,my,mz,0) = "railroad" or category(mx,my,mz) = "station" or category(mx,my,mz) = "waterway" or category(mx,my,mz,0) = "port" {
 			return
 		}
-		
+
 		gosub *delete_obj
 
 		if selected_addon_number = -1 : reservation(mx,my,mz) = "low_density_residential"
@@ -3639,14 +3643,14 @@
 
 		return
 	}
-	
+
 	; 道路/線路/水路
 	if cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway" {
 		; 障害物があれば削除
 		name_before = name(mx,my,mz,0) : map_before = map(mx,my,mz,0)
 		obj_type_before = obj_type(mx,my,mz,0) : obj_dire_before = obj_dire(mx,my,mz,0)
 		category_before = category(mx,my,mz,0)
-		
+
 		if map(mx,my,mz) != tile_addon_number : gosub *delete_obj
 
 		; 線路または水路と交差する場合
@@ -3692,7 +3696,7 @@
 
 		obj_type(mx,my,mz) = element2(selected_addon_number, addon_use_types_name, "under_construction")
 		obj_dire(mx,my,mz) = 0
-		
+
 		return
 	}
 
@@ -3706,7 +3710,7 @@
 		top_chip_category    = safesearch_str(category, mx, my-1, mz, 0, mapsize_x, mapsize_y)
 		bottom_chip_category = safesearch_str(category, mx, my+1, mz, 0, mapsize_x, mapsize_y)
 		right_chip_category  = safesearch_str(category, mx+1, my, mz, 0, mapsize_x, mapsize_y)
-	
+
 		left_chip_category_2   = safesearch_str(category, mx-1, my, mz, 1, mapsize_x, mapsize_y)
 		top_chip_category_2    = safesearch_str(category, mx, my-1, mz, 1, mapsize_x, mapsize_y)
 		bottom_chip_category_2 = safesearch_str(category, mx, my+1, mz, 1, mapsize_x, mapsize_y)
@@ -3725,13 +3729,13 @@
 				loop
 			loop
 			wait 10		; ←waitを入れないと誤作動を起こすため
-			
+
 			if s + 1 > addon_build_limit(addon_num_buf) {
 				dialog "この建物は既に建設可能回数を超えています！"
 				return
 			}
 		}
-		
+
 		; 建設地に道路などの障害物がある場合
 		if (category(mx,my,mz,0) = "road" or category(mx,my,mz,0) = "railroad" or category(mx,my,mz,0) = "waterway") {
 			return
@@ -3745,7 +3749,7 @@
 			; 農業地区と公園は除外とし、下向きに設定する
 			if cursor_mode = "put_Farm" or cursor_mode = "put_Park" {
 				build_direction_number = 2
-				
+
 				if prebuilding = 1 {
 					prebuilding = 0
 					return
@@ -3755,7 +3759,7 @@
 				change_direction = 0
 				return
 			}
-			
+
 		} else {		; 道路に接続されている場合
 			; 向きを決定（左上下右の順）
 			done = 0
@@ -3850,7 +3854,7 @@
 		if build_direction_number = 3  {
 			if street_corner_addon = 0 : tmp = "right" : else : tmp = "right-bottom"
 		}
-		
+
 		build_direction_number_ID = element3(selected_addon_number, build_type_number, addon_dire_names, tmp)
 
 		; アドオンを設置することによって影響される地価、犯罪率、教育度とその影響範囲
@@ -3880,12 +3884,12 @@
 
 		; タイルにアドオンの情報を書き込み
 		sx = mx : sy = my : sz = 0
-		
+
 		repeat repeat_x
 			repeat repeat_y
 				map(sx,sy,sz,0)				= int(selected_addon_number)
 				name(sx,sy,sz,0)			= sdnl(addon_name, selected_addon_number, 0)
-				
+
 				category(sx,sy,sz,0)		= category_tmp
 				category(sx,sy,sz,1)		= sdnl(addon_type, selected_addon_number, 1)
 				category(sx,sy,sz,2)		= sdnl(addon_type, selected_addon_number, 2)
@@ -3905,7 +3909,7 @@
 				} else {
 					obj_use_tiles(sx,sy,sz,1)	= 0
 				}
-				
+
 				obj_tiles(sx,sy,sz,0)		= sx-mx
 				obj_tiles(sx,sy,sz,1)		= sy-my
 
@@ -3917,7 +3921,7 @@
 				original_name(sx,sy,sz)		= ""
 
 				from_build = 1 : gosub *get_addon_drow_position_new
-				
+
 				if repeat_x > 1 and repeat_y > 1 and (build_direction_number = 0 or build_direction_number = 3) {
 					if cnt = repeat_y-1 {
 						sy = my
@@ -3952,14 +3956,14 @@
 			} else : if addon_land_price_influence_grid__tmp = 0 {
 				add_value = 0
 			}
-									
-			round = 0						
-			for round, 1, addon_land_price_influence_grid__tmp+1, 1							
+
+			round = 0
+			for round, 1, addon_land_price_influence_grid__tmp+1, 1
 				repeat (round*2-1)
 					if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my+round-1>0 and my+round-1<mapsize_y {
 						land_price(mx+cnt-(round-1),my+round-1,mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 					}
-				loop			
+				loop
 				repeat (round*2-1)
 					if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my-round+1>0 and my-round+1<mapsize_y {
 						land_price(mx+cnt-(round-1),my-round+1,mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
@@ -3977,12 +3981,12 @@
 				loop
 			next
 		}
-	
+
 		; 犯罪率の変動
 		if addon_crime_rate_influence__tmp != 0 {
 			add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp * p
-				
-			round = 0	
+
+			round = 0
 			for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 				repeat (round*2-1)
 					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my+round-1) >= 0 and (my+round-1) <= mapsize_y {
@@ -4014,7 +4018,7 @@
 				loop
 			next
 		}
-	
+
 		; 教育度の変動
 		if addon_education_rate_influence__tmp != 0 {
 			add_value = addon_education_rate_influence__tmp / addon_education_rate_influence_grid__tmp * p
@@ -4076,7 +4080,7 @@
 	}
 
 	change_direction = 0
-	
+
 	return
 
 *build_roadtypes
@@ -4085,26 +4089,30 @@
 		new_roadtype_x(under_construction_tiles) = mx : new_roadtype_y(under_construction_tiles) = my
 		under_construction_tiles ++
 	}
-	
+
 	repeat under_construction_tiles
 		sx = new_roadtype_x(cnt) : sy = new_roadtype_y(cnt) : sz = 0
 		center_x = sx : center_y = sy
 
-		repeat 5
+		repeat 9
 			if from_Delete_obj = 1 { from_Delete_obj = 0 : continue }
 			if cnt = 1 { sx = center_x - 1 : sy = center_y }
 			if cnt = 2 { sx = center_x     : sy = center_y - 1 }
 			if cnt = 3 { sx = center_x     : sy = center_y + 1 }
 			if cnt = 4 { sx = center_x + 1 : sy = center_y }
-			
+			if cnt = 5 { sx = center_x - 1 : sy = center_y - 1 }
+			if cnt = 6 { sx = center_x + 1 : sy = center_y - 1 }
+			if cnt = 7 { sx = center_x + 1 : sy = center_y + 1 }
+			if cnt = 8 { sx = center_x - 1 : sy = center_y + 1 }
+
 			obj_type_tmp  = "" : obj_dire_tmp = ""
-	
+
 			; 周囲のアドオンのカテゴリを取得
 			left_chip_category   = safesearch_str(category, sx-1, sy, sz, 0, mapsize_x, mapsize_y)
 			top_chip_category    = safesearch_str(category, sx, sy-1, sz, 0, mapsize_x, mapsize_y)
 			bottom_chip_category = safesearch_str(category, sx, sy+1, sz, 0, mapsize_x, mapsize_y)
 			right_chip_category  = safesearch_str(category, sx+1, sy, sz, 0, mapsize_x, mapsize_y)
-			
+
 			left_chip_category_2   = safesearch_str(category, sx-1, sy, sz, 1, mapsize_x, mapsize_y)
 			top_chip_category_2    = safesearch_str(category, sx, sy-1, sz, 1, mapsize_x, mapsize_y)
 			bottom_chip_category_2 = safesearch_str(category, sx, sy+1, sz, 1, mapsize_x, mapsize_y)
@@ -4113,11 +4121,11 @@
 			if sx < 0 or sx >= mapsize_x or sy < 0 or sy >= mapsize_y {
 				continue
 			}
-				
+
 			; 道路
 			if category(sx,sy,sz,0) = "road" {
 				correct = iforandcorrect_3(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "road", "bridge", "train_crossing")
-				
+
 				; 周囲の道路接続が1つ（行き止まり）
 				if correct = 1 {
 					obj_type_tmp = "dead_end"
@@ -4126,7 +4134,7 @@
 					if bottom_chip_category = "road" or bottom_chip_category_2 = "bridge" or bottom_chip_category_2 = "train_crossing" : obj_dire_tmp = "bottom"
 					if right_chip_category = "road" or right_chip_category_2 = "bridge" or right_chip_category_2 = "train_crossing"    : obj_dire_tmp = "right"
 				}
-	
+
 				; 周囲の道路接続が1つ（曲がり角or直線）
 				if correct = 2 {
 					; 曲がり角
@@ -4142,7 +4150,7 @@
 					if (bottom_chip_category = "road" or bottom_chip_category_2 = "bridge" or bottom_chip_category_2 = "train_crossing") and (right_chip_category = "road" or right_chip_category_2 = "bridge" or right_chip_category_2 = "train_crossing") {
 						obj_type_tmp = "turn" : obj_dire_tmp = "right-bottom"
 					}
-	
+
 					; 直線
 					if (left_chip_category = "road" or left_chip_category_2 = "bridge" or left_chip_category_2 = "train_crossing") and (right_chip_category = "road" or right_chip_category_2 = "bridge" or right_chip_category_2 = "train_crossing") {
 						obj_type_tmp = "default" : obj_dire_tmp = "depth"
@@ -4178,7 +4186,7 @@
 			; 線路/駅
 			if category(sx,sy,sz,0) = "railroad" or category(sx,sy,sz,0) = "station" {
 				correct = iforandcorrect_4(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "railroad", "station", "bridge", "train_crossing")
-				
+
 				; 周囲の道路接続が1つ（行き止まり）
 				if correct = 1 {
 					obj_type_tmp = "dead_end"
@@ -4187,7 +4195,7 @@
 					if bottom_chip_category = "railroad" or bottom_chip_category = "station" or bottom_chip_category_2 = "bridge" or bottom_chip_category_2 = "train_crossing" : obj_dire_tmp = "bottom"
 					if right_chip_category = "railroad" or right_chip_category = "station" or right_chip_category_2 = "bridge" or right_chip_category_2 = "train_crossing"     : obj_dire_tmp = "right"
 				}
-	
+
 				; 周囲の道路接続が1つ（曲がり角or直線）
 				if correct = 2 {
 					; 曲がり角（線路のみ）
@@ -4205,7 +4213,7 @@
 							obj_type_tmp = "turn" : obj_dire_tmp = "right-bottom"
 						}
 					}
-	
+
 					; 直線
 					if (left_chip_category = "railroad" or left_chip_category = "station" or left_chip_category_2 = "bridge" or left_chip_category_2 = "train_crossing") and (right_chip_category = "railroad" or right_chip_category = "station" or right_chip_category_2 = "bridge" or right_chip_category_2 = "train_crossing") {
 						obj_type_tmp = "default" : obj_dire_tmp = "depth"
@@ -4250,7 +4258,7 @@
 				right_top_chip_category_2    = safesearch_str(category, sx+1, sy-1, sz, 1, mapsize_x, mapsize_y)
 				left_bottom_chip_category_2  = safesearch_str(category, sx-1, sy+1, sz, 1, mapsize_x, mapsize_y)
 				right_bottom_chip_category_2 = safesearch_str(category, sx+1, sy+1, sz, 1, mapsize_x, mapsize_y)
-				
+
 				correct = iforandcorrect_2(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "waterway", "bridge")
 
 				; 周囲の道路接続が1つ（行き止まり）
@@ -4281,7 +4289,7 @@
 						if right_bottom_chip_category = "waterway" or right_bottom_chip_category = "port" or right_bottom_chip_category_2 = "bridge" : obj_type_tmp = "turn" :  else : obj_type_tmp = "river_turn"
 						obj_dire_tmp = "right-bottom"
 					}
-					
+
 					; 直線
 					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or right_chip_category_2 = "bridge") {
 						obj_type_tmp = "river_default" : obj_dire_tmp = "depth"
@@ -4289,7 +4297,7 @@
 					if (top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
 						obj_type_tmp = "river_default" : obj_dire_tmp = "width"
 					}
-					
+
 				}
 
 				; 周囲の道路接続が3つ（T字型交差点）
@@ -4363,7 +4371,7 @@
 					obj_type_tmp = "isolated" : obj_dire_tmp = "null"
 				}
 			}
-	
+
 			; タイプと向きを指定
 			if obj_type_tmp != "" and obj_dire_tmp != "" and obj_type_tmp != obj_type(sx,sy,sz) and obj_dire_tmp != obj_dire(sx,sy,sz) {
 				; 踏切または橋を設置する必要がある場合
@@ -4404,7 +4412,7 @@
 				; 設定
 				obj_type(sx,sy,sz,0) = element2(map(sx,sy,sz,0), addon_use_types_name, obj_type_tmp)
 				obj_dire(sx,sy,sz,0) = element3(map(sx,sy,sz,0), obj_type(sx,sy,sz,0), addon_dire_names, obj_dire_tmp)
-				
+
 				from_build = 1 : gosub *get_addon_drow_position_new
 			}
 		loop
@@ -4421,7 +4429,7 @@
 
 	addon_crime_rate_influence__tmp = int(sdnl(addon_crime_rate_influence, map(mx,my,mz,0), 0))
 	addon_crime_rate_influence_grid__tmp = int(sdnl(addon_crime_rate_influence, map(mx,my,mz,0), 1))
-		
+
 	addon_education_rate_influence__tmp = int(sdnl(addon_education_rate_influence, map(mx,my,mz,0), 0))
 	addon_education_rate_influence_grid__tmp = int(sdnl(addon_education_rate_influence, map(mx,my,mz,0), 1))
 
@@ -4445,7 +4453,7 @@
 		repeat repeat_y
 			map(sx,sy,sz,0)				= tile_addon_number
 			name(sx,sy,sz,0)			= sdnl(addon_name, tile_addon_number, 0)
-				
+
 			category(sx,sy,sz,0)		= sdnl(addon_type, tile_addon_number, 0)
 			category(sx,sy,sz,1)		= ""
 			category(sx,sy,sz,2)		= ""
@@ -4454,10 +4462,10 @@
 			obj_dire(sx,sy,sz,0)		= 0
 
 			obj_serial_num(sx,sy,sz)	= 0
-			
+
 			obj_use_tiles(sx,sy,sz,0)	= 0
 			obj_use_tiles(sx,sy,sz,1)	= 0
-			
+
 			obj_tiles(sx,sy,sz,0)		= 0
 			obj_tiles(sx,sy,sz,1)		= 0
 
@@ -4491,14 +4499,14 @@
 		} else : if addon_land_price_influence_grid__tmp = 0 {
 			add_value = 0
 		}
-									
-		round = 0						
-		for round, 1, addon_land_price_influence_grid__tmp+1, 1							
+
+		round = 0
+		for round, 1, addon_land_price_influence_grid__tmp+1, 1
 			repeat (round*2-1)
 				if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my+round-1>0 and my+round-1<mapsize_y {
 					land_price(mx+cnt-(round-1),my+round-1,mz) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 				}
-			loop			
+			loop
 			repeat (round*2-1)
 				if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my-round+1>0 and my-round+1<mapsize_y {
 					land_price(mx+cnt-(round-1),my-round+1,mz) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
@@ -4516,12 +4524,12 @@
 			loop
 		next
 	}
-	
+
 	; 犯罪率の変動
 	if addon_crime_rate_influence__tmp != 0 {
 		add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp * p
-				
-		round = 0	
+
+		round = 0
 		for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 			repeat (round*2-1)
 				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my+round-1) >= 0 and (my+round-1) <= mapsize_y {
@@ -4553,7 +4561,7 @@
 			loop
 		next
 	}
-	
+
 	; 教育度の変動
 	if addon_education_rate_influence__tmp != 0 {
 		add_value = addon_education_rate_influence__tmp / addon_education_rate_influence_grid__tmp * p
@@ -4587,29 +4595,29 @@
 *get_news
 	/*-------------------------------------ニュースの取得-----------------------------------------*/
 	news_content = ""
-	
+
 	; 特殊ニュース
 	exist "data/news/special.news"
 	if strsize = -1 : error "F06 : special.newsが見つかりません\n/data/news/フォルダ内にspecial.newsがありません。"
-			
+
 	notesel news_file : noteload "data/news/special.news"
-			
+
 	; マップ作成直後のニュース
 	if not_displayed_news_new_map = 1 {
 		not_displayed_news_new_map = 0
 		same_news = 0
-	
+
 		; 同じ内容のニュースを複数読み込む
 		repeat notemax
 			noteget news_tmp, cnt
-	
+
 			if instr(news_tmp, 0, "case=\"new_map\"") != -1 {
 				split news_tmp, ", ", tmp, news_content_candidate_tmp
 				news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; 表示するニュースの候補
 				same_news ++	; 同じ内容のニュースの数
 			}
 		loop
-					
+
 		if same_news > 0 : news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
 	}
 
@@ -4633,9 +4641,9 @@
 		if before_map_Total_Population < 800000 and Total_map_Population >= 800000   : show_news_population = "over_800000"
 		if before_map_Total_Population < 900000 and Total_map_Population >= 900000   : show_news_population = "over_900000"
 		if before_map_Total_Population < 1000000 and Total_map_Population >= 1000000 : show_news_population = "over_1000000"
-					
+
 		same_news = 0
-	
+
 		; 同じ内容のニュースを複数読み込む
 		repeat notemax
 			noteget news_tmp, cnt
@@ -4647,17 +4655,17 @@
 		loop
 		if same_news > 0 : news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
 	}
-	
+
 	; 特に報じることがない場合、どうでもいいニュースを表示
 	exist "data/news/others.news"
 	if strsize = -1 : error "F07 : others.newsが見つかりません\n/data/news/フォルダ内にothers.newsがありません。"
-			
+
 	notesel news_file : noteload "data/news/others.news"
-			
+
 	if news_content = "" {
 		not_displayed_news_new_map = 0
 		same_news = 0
-	
+
 		; 同じ内容のニュースを複数読み込む
 		repeat notemax
 			noteget news_tmp, cnt
@@ -4666,12 +4674,12 @@
 				news_content_candidate(same_news) = strmid(news_content_candidate_tmp, 0, instr(news_content_candidate_tmp, 0, "}"))	; 表示するニュースの候補
 				same_news ++	; 同じ内容のニュースの数
 			}
-		loop	
+		loop
 		if same_news > 0 : news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
 	}
 
 	before_map_Total_Population = map_Total_Population
-	
+
 	return
 
 *play_BGM
@@ -4679,36 +4687,36 @@
 	; 次のBGMをランダムに選出
 	chdir ""+directory+"\\bgm"
 	mci "close Cities-Box"
-				
+
 	; パス名を含めたファイル一覧を取得
 	dirlist2h 1, ',' : dirlist2 buf_BGMs, "*.mp3", 1, '\\'
 	sdim BGM_filelist, buf_BGMs : dirlist2r BGM_filelist
 	notesel BGM_filelist : total_BGMs = notemax
-			
+
 	chdir directory
-			
+
 	; ランダムに選出
 	repeat
 		BGM_rnd = rnd(total_BGMs)
-	
+
 		; 現在再生しているBGMと同じ曲でないことと、特定の条件下のみで流れるBGM（ファイル名に[Sp]がある）でないことを確認
 		notesel BGM_filelist : noteget next_BGM_file, BGM_rnd
-						
+
 		if next_BGM_file != playing_BGM_file {
 			if instr(next_BGM_file, 0, "[less_") != -1 {			; 人口○人以下の場合のみ流れるBGM
-				less_var = int(strmid(next_BGM_file, 6, instr(next_BGM_file, 0, "]")))	
+				less_var = int(strmid(next_BGM_file, 6, instr(next_BGM_file, 0, "]")))
 				if map_Total_Population <= less_var {
 					playing_BGM_file = next_BGM_file
 					break
 				}
 			} else : if instr(next_BGM_file, 0, "[more_") != -1 {	; 人口○人以上の場合のみ流れるBGM
-				more_var = int(strmid(next_BGM_file, 6, instr(next_BGM_file, 0, "]")))		
+				more_var = int(strmid(next_BGM_file, 6, instr(next_BGM_file, 0, "]")))
 				if map_Total_Population >= more_var {
 					playing_BGM_file = next_BGM_file
 					break
 				}
 			} else : if instr(next_BGM_file, 0, "[m_") != -1 {	; ○月のみ流れる曲
-				month_var = int(strmid(next_BGM_file, 3, instr(next_BGM_file, 0, "]")))	
+				month_var = int(strmid(next_BGM_file, 3, instr(next_BGM_file, 0, "]")))
 				if month_var = map_time_month {
 					playing_BGM_file = next_BGM_file
 					break
@@ -4720,23 +4728,23 @@
 		}
 		await 1
 	loop
-	
+
 	; 天気が雨なら、1/5の確率でランダムで雨っぽい曲を流す
 	if add_rain > 0 and rnd(5) = 2 : playing_BGM_file = "[Sp]Satie-Jeteveux.mp3"
-	
+
 	; 再生
 	exist ""+directory+"/bgm/"+playing_BGM_file+""
 	if strsize = -1 : error "S06 : 再生ファイルが見つかりません\nbgmフォルダ内に"+playing_BGM_file+"が見つかりません。"
-				
+
 	mci "open \""+directory+"\\bgm\\"+playing_BGM_file+"\" alias Cities-Box"	; 開く
 	mci "play Cities-Box"													    ; 再生
 	mci "setaudio Cities-Box volume to 1000"
-	
+
 	changed_BGM = 1
-	
+
 	; ボリューム
 	if config_Set_Play_BGM = 0 : mci "setaudio Cities-Box volume to 0"
-	
+
 	return
 
 *climate
@@ -4746,57 +4754,57 @@
 	if change_temperature = 0 and pause = 0 {
 		; 日中は気温が上がりやすく、夜間は下がりやすくする
 		temperature_increase_or_decrease = rnd(8)
-			
+
 		; 日中
 		if 8 <= map_time_Hour and 14 >= map_time_Hour {
 			if 0 <= temperature_increase_or_decrease and 5 >= temperature_increase_or_decrease { temperature_increase = 1 : temperature_decrease = 0 }
 			if 6 <= temperature_increase_or_decrease and 7 >= temperature_increase_or_decrease { temperature_increase = 0 : temperature_decrease = 1 }
-			
+
 		; 夜間
 		} else {
 			if 0 <= temperature_increase_or_decrease and 1 >= temperature_increase_or_decrease { temperature_increase = 1 : temperature_decrease = 0 }
 			if 2 <= temperature_increase_or_decrease and 7 >= temperature_increase_or_decrease { temperature_increase = 0 : temperature_decrease = 1 }
 		}
-				
+
 		; 12月～2月：-10℃～15℃の範囲で気温を変動
-		if map_time_Month = 12 or (1 <= map_time_Month and 2 >= map_time_Month) {				
+		if map_time_Month = 12 or (1 <= map_time_Month and 2 >= map_time_Month) {
 			if temperature_increase = 1 and map_temperature < 15  : map_temperature ++
 			if temperature_decrease = 1 and map_temperature > -10 : map_temperature --
 		}
-			
+
 		; 3月～5月：10℃～25℃の範囲で気温を変動
 		if 3 <= map_time_Month and 5 >= map_time_Month {
 			if temperature_increase = 1 and map_temperature < 25 : map_temperature ++
 			if temperature_decrease = 1 and map_temperature > 10 : map_temperature --
 		}
-			
+
 		; 6月～8月：20℃～35℃の範囲で気温を変動
 		if 6 <= map_time_Month and 8 >= map_time_Month {
 			if temperature_increase = 1 and map_temperature < 35 : map_temperature ++
 			if temperature_decrease = 1 and map_temperature > 20 : map_temperature --
 		}
-			
+
 		; 9月～11月：10℃～25℃の範囲で気温を変動
-		if 9 <= map_time_Month and 11 >= map_time_Month {			
+		if 9 <= map_time_Month and 11 >= map_time_Month {
 			if temperature_increase = 1 and map_temperature < 25 : map_temperature ++
 			if temperature_decrease = 1 and map_temperature > 10 : map_temperature --
 		}
 	}
-	
+
 	; 天気の変動
 	; 雨・雪の表示、気温の変動
-	if map_Set_Change_Weather = 1 {		
-		add_rain_increase_or_decrease = rnd(2)	
+	if map_Set_Change_Weather = 1 {
+		add_rain_increase_or_decrease = rnd(2)
 		if add_rain_increase_or_decrease = 0 {
 			add_rain --
 		} else : if add_rain_increase_or_decrease = 1 {
 			add_rain ++
 		}
-						
+
 		repeat 50
 			if rain_y(cnt) >= windowy or rain(cnt) = 0 {
 				rain_increase_or_decrease = rnd(2)
-									
+
 				if rain_increase_or_decrease = 0 and add_rain >= 0 {
 					rain(cnt) = 1
 					rain_x(cnt) = rnd(windowx)
@@ -4809,25 +4817,25 @@
 					snow_size(cnt) = 0
 				}
 			}
-			
+
 			if rain(cnt) = 1 {
 				color 255, 255, 255
 				if map_temperature >= 3 {	; 気温が3℃以上なら雨
 					if pause = 0 {
 						rain_y(cnt) += 5 * speed
 					}
-					line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+20				
+					line rain_x(cnt), rain_y(cnt), rain_x(cnt), rain_y(cnt)+20
 				} else {				; 気温が2℃以下なら雪
 					if pause = 0 {
 						rain_x(cnt) += (rnd(3)-1)*2
 						rain_y(cnt) += 1 * speed
 					}
-					circle rain_x(cnt), rain_y(cnt), rain_x(cnt)+snow_size(cnt), rain_y(cnt)+snow_size(cnt)				
+					circle rain_x(cnt), rain_y(cnt), rain_x(cnt)+snow_size(cnt), rain_y(cnt)+snow_size(cnt)
 				}
 			}
 		loop
 	}
-		
+
 	return
 
 *show_detail
@@ -4840,7 +4848,7 @@
 		} else {
 			mes original_name(clicked_mx, clicked_my, clicked_mz)
 		}
-		
+
 		diax = ginfo(14) + 5 : diay1 = ginfo(15) + 2
 		if diax < 100 : diax = 100
 
@@ -4853,7 +4861,7 @@
 	; 詳細
 	dia_lines = 0
 	mes_tmp = ""
-	
+
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "residential" {
 		mes_tmp = "住宅地区\n住民 : "+residents(clicked_mx, clicked_my, clicked_mz)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my, clicked_mz)+"\n教育度 : "+education_rate(clicked_mx, clicked_my, clicked_mz)+"\n地価 : §"+land_price(clicked_mx, clicked_my, clicked_mz)+"0000"
 		dia_lines = 5
@@ -4882,21 +4890,21 @@
 		mes_tmp = "公園\n地価 : §"+land_price(clicked_mx, clicked_my, clicked_mz)+"0000"
 		dia_lines = 2
 	}
-	
+
 	; 詳細の表示にかかるサイズを取得
 	buffer 999
 		font config_SystemFont, 10
 		pos 0, 0 : mes mes_tmp
 		diay2 = ginfo(15) * dia_lines
 	gsel 0
-			
+
 	; 表示
 	color 255, 255, 255
 	line show_detail_position_x+32, show_detail_position_y-100, show_detail_position_x+32, show_detail_position_y-32
-		
+
 	color 0, 0, 0
 	sboxf 128, show_detail_position_x+32, show_detail_position_y-100-(diay1+5+diay2+5), show_detail_position_x+32+15+diax+25, show_detail_position_y-100
-	
+
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "residential" : color 34, 177, 76
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "commercial"  : color 63, 72, 204
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "office"      : color 0, 162, 232
@@ -4911,7 +4919,7 @@
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "port"        : color 255, 0, 0
 
 	boxf show_detail_position_x+32, show_detail_position_y-100-(diay1+5+diay2+5), show_detail_position_x+32+10, show_detail_position_y-100
-	
+
 	color 255, 255, 255
 	; 建物名（アドオン名）
 	font config_SystemFont, 14
@@ -4926,25 +4934,25 @@
 	font config_SystemFont, 10
 	pos show_detail_position_x+32+15, show_detail_position_y-100-(diay1+5+diay2+5)+diay1+5 : mes mes_tmp
 	//mes "Category:"+category(clicked_mx,clicked_my)+"\nType:"+obj_type(clicked_mx,clicked_my)+" / Dire:"+obj_dire(clicked_mx,clicked_my)+""	; category, obj_type, obj_direの情報
-	
+
 	; 建物名変更ボタン
 	pos show_detail_position_x+32+15+diax+25-20, show_detail_position_y-100-(diay1+5+diay2+5) : gmode 2 : gcopy 71, 0, 0, 20, 20
-			
+
 	return
 
 *fix_new_name
 	/*-----------------------------------建物名を変更---------------------------------------------*/
 	original_name(clicked_mx, clicked_my, clicked_mz) = new_name
-	
+
 	clrobj new_name_stat
 	showing_new_name_input = 0
-					
+
 	return
 
 *processing_start_of_day
 	/*---------------------一日の始まりの処理（住民の変動、予算の支出など）-----------------------*/
 	gosub *processing_get_first
-	
+
 	sx = 0 : sy = 0 : sz = 0
 	happiness_tmp = 0
 
@@ -4952,26 +4960,26 @@
 
 	map_total_Residential = 0 : map_total_Commercial = 0 : map_total_Office = 0 : map_total_Industrial = 0 : map_total_Farm = 0
 	map_total_Police_Stations = 0 : map_total_Fire_Depertments = 0 : map_total_Post_Offices = 0 : map_total_Education = 0
-		
+
 	repeat mapsize_x
 		sx = cnt
 		repeat mapsize_y
 			sy = cnt
-			
+
 			; 人口・労働人口・需要度などを増減
 			if category(sx,sy,sz,0) = "residential" {
 				; 住民数を変更するかどうか決める（住民数0なら高確率）
 				if residents(sx,sy,sz) = 0 : rtmp = rnd(10) : else : rtmp = rnd(100)
-		
+
 				; 住民数の増減
 				if rtmp = 9 {
 					if map_demand_Residential < 0 : map_demand_Residential = 0
 
 					rndv = rnd(2)
-		
+
 					; 変更前の住民数
 					before_residents = residents(sx,sy,sz)
-		
+
 					; 変更前の住民の年齢と性別
 					sdim age_in_Residential_tmp, 16, before_residents + 10
 					split age(sx,sy,sz), "]", age_in_Residential_tmp
@@ -4988,7 +4996,7 @@
 						split gender_in_Residential_tmp(cnt), "[", cut, gender_in_Residential_tmp(cnt)
 						gender_in_Residential(cnt) = int(gender_in_Residential_tmp(cnt))
 					loop
-		
+
 					; 住民数の増減処理
 					; 住民の増加
 					if rndv = 0 {
@@ -4996,7 +5004,7 @@
 							add_residents = rnd(int(sdnl(addon_maximum_capacity, map(sx,sy,sz,0), 0)) - before_residents)
 							residents(sx,sy,sz) = before_residents + add_residents
 							map_demand_Residential -= add_residents
-										
+
 							repeat add_residents
 								new_age_tmp = rnd(120)
 								if new_age_tmp <= 40 {
@@ -5004,7 +5012,7 @@
 								} else {
 									new_age_tmp -= 40		; new_age_tmp > 40の場合、new_age_tmpから40引いた歳を新しい住民の年齢とする
 								}
-											
+
 								age(sx,sy,sz) += "["+new_age_tmp+"]"
 
 								gender_rnd = rnd(2)
@@ -5013,7 +5021,7 @@
 							loop
 						}
 					}
-		
+
 					; 住民の減少
 					if rndv = 1 {
 						if before_residents > 0 {
@@ -5033,9 +5041,9 @@
 							}
 						}
 					}
-		
+
 					if residents(sx,sy,sz) < 0 : residents(sx,sy,sz) = 0
-					
+
 					; 総人口数にも反映
 					map_Total_Population = map_Total_Population - before_residents + residents(sx,sy,sz)
 				}
@@ -5047,11 +5055,11 @@
 					repeat residents(sx,sy,sz)
 						; 120歳を寿命として、drop = 0なら住人一人が死亡
 						drop = rnd(121-age_in_Residential(cnt))
-							
+
 						if drop = 0 {
 							age_in_Residential(cnt) = -1
 							map_Total_Population -= 1
-						} else {	
+						} else {
 							age_in_Residential(cnt) ++
 						}
 						age(sx,sy,sz) = ""
@@ -5084,7 +5092,7 @@
 			; 男女別人口を算出
 			if gender(sx,sy,sz) != "" and residents(sx,sy,sz) > 0 {
 				split gender(sx,sy,sz), "]", gender_tmp
-	
+
 				repeat residents(sx,sy,sz)
 					if instr(gender_tmp(cnt), 0, "m") != -1 {
 						gender_M ++
@@ -5111,7 +5119,7 @@
 				if category(sx,sy,sz,0) = "industrial"      : map_total_Industrial ++
 				if category(sx,sy,sz,0) = "farm"            : map_total_Farm ++
 			}
-				
+
 		loop
 		await 1
 	loop
@@ -5143,13 +5151,13 @@
 	; 総求人数を取得
 	before_Vacancies = Vacancies
 	Vacancies = (map_total_Commercial_maximum_capacity-map_Total_workers_Commercial) + (map_total_Office_maximum_capacity-map_Total_workers_Office) + (map_total_Industrial_maximum_capacity-map_Total_workers_Industrial) + (map_total_Public_maximum_capacity-map_Total_workers_Public)
-				
+
 	; 非労働者（学生含む）数を取得
 	before_Vagrants = Vagrants
 	map_Total_Vagrants = map_Total_Population - map_Total_workers_Commercial - map_Total_workers_Office - map_Total_workers_Industrial - map_Total_workers_Public
-	
+
 	if map_Total_Vagrants < 0 : map_Total_Vagrants = 0
-				
+
 	; RCOIF需要メーターを変動
 	; Residential（住居）
 	if map_Total_Population > 0 {
@@ -5199,9 +5207,9 @@
 	dim all_workplace_x, next_obj_serial_num
 	dim all_workplace_y, next_obj_serial_num
 	dim all_workplace_z, next_obj_serial_num
-	
+
 	gx = 0 : gy = 0 : gz = 0 : gi = 0
-			
+
 	repeat mapsize_x
 		gx = cnt
 		repeat mapsize_y
@@ -5212,16 +5220,16 @@
 			}
 		loop
 	loop
-	
+
 	; 学校
 	dim all_elementary_schools_x, next_obj_serial_num : dim all_elementary_schools_y, next_obj_serial_num : dim all_elementary_schools_z, next_obj_serial_num
 	dim all_junior_high_schools_x, next_obj_serial_num : dim all_junior_high_schools_y, next_obj_serial_num : dim all_junior_high_schools_z, next_obj_serial_num
 	dim all_high_schools_x, next_obj_serial_num : dim all_high_schools_y, next_obj_serial_num : dim all_high_schools_z, next_obj_serial_num
 	dim all_universities_x, next_obj_serial_num : dim all_universities_y, next_obj_serial_num : dim all_universities_z, next_obj_serial_num
-	
+
 	gx = 0 : gy = 0 : gz = 0
 	gi_e = 0 : gi_j = 0 : gi_h = 0 : gi_u = 0
-			
+
 	repeat mapsize_x
 		gx = cnt
 		repeat mapsize_y
@@ -5244,7 +5252,7 @@
 			}
 		loop
 	loop
-		
+
 	return
 
 *fix_workplace
@@ -5255,7 +5263,7 @@
 	repeat residents(sx,sy,sz)
 		if instr(workplace_tmp(cnt), 0, "[") != -1 : split workplace_tmp(cnt), "[", cut, workplace_tmp(cnt)
 		if instr(workplace_tmp(cnt), 0, "]") != -1 : split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
-	
+
 		; 労働者が居るのに総労働者数が0の場合（バグ対策）
 		if workers_zero = 1 {
 			if instr(workplace(sx,sy,sz), 0, "c") != -1 : map_Total_workers_Commercial += 1
@@ -5263,14 +5271,14 @@
 			if instr(workplace(sx,sy,sz), 0, "i") != -1 : map_Total_workers_Industrial += 1
 			if instr(workplace(sx,sy,sz), 0, "f") != -1 : map_Total_workers_Farm += 1
 			if instr(workplace(sx,sy,sz), 0, "p") != -1 : map_Total_workers_Public += 1
-			
+
 			if sx = mapsize_x and sy = mapsize_y and sz = mapsize_z : workers_zero = 0
 		}
-		
+
 		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 18 and age_in_Residential(cnt) <= 60 {
 			; 就職先が決まっておらず、かつ18歳以上60歳以下なら(年齢/10)分の1の確率で就職先を決める
 			dr = rnd((age_in_Residential(cnt)/10))
-				
+
 			if dr = 0 {
 				new_workplace_rnd = rnd(gi-1)	; 職場はランダムに決める
 				new_workplace_x = all_workplace_x(new_workplace_rnd)
@@ -5282,10 +5290,10 @@
 					if int(sdnl(addon_maximum_capacity, map(new_workplace_x, new_workplace_y, new_workplace_z), 0)) >= workers(new_workplace_x, new_workplace_y, new_workplace_z) + 1 {
 						workers(new_workplace_x, new_workplace_y, new_workplace_z) ++
 						workplace_tmp(cnt) = "c"+str(obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z))+""
-	
+
 						map_Total_workers_Commercial ++
 						map_demand_Commercial --
-	
+
 						repeat gi
 							if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z) {
 								workers(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) ++
@@ -5297,26 +5305,26 @@
 					if int(sdnl(addon_maximum_capacity, map(new_workplace_x, new_workplace_y, new_workplace_z), 0)) >= workers(new_workplace_x, new_workplace_y, new_workplace_z) + 1 {
 						workers(new_workplace_x, new_workplace_y, new_workplace_z) ++
 						workplace_tmp(cnt) = "o"+str(obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z))+""
-	
+
 						map_Total_workers_Office ++
 						map_demand_Office --
-	
+
 						repeat gi
 							if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z) {
 								workers(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) ++
 							}
-						loop 
+						loop
 					}
 				}
 				if category(new_workplace_x, new_workplace_y, new_workplace_z, 0) = "industrial" {
 					if int(sdnl(addon_maximum_capacity, map(new_workplace_x, new_workplace_y, new_workplace_z), 0)) >= workers(new_workplace_x, new_workplace_y, new_workplace_z) + 1 {
 						workers(new_workplace_x, new_workplace_y, new_workplace_z) ++
 						workplace_tmp(cnt) = "i"+str(obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z))+""
-	
+
 						map_Total_workers_Industrial ++
 						map_demand_Industrial --
 					}
-	
+
 					repeat gi
 						if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z) {
 							workers(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) ++
@@ -5327,10 +5335,10 @@
 					if int(sdnl(addon_maximum_capacity, map(new_workplace_x, new_workplace_y, new_workplace_z), 0)) >= workers(new_workplace_x, new_workplace_y, new_workplace_z) + 1 {
 						workers(new_workplace_x, new_workplace_y, new_workplace_z) ++
 						workplace_tmp(cnt) = "f"+str(obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z))+""
-	
+
 						map_Total_workers_Farm ++
 						map_demand_Farm --
-	
+
 						repeat gi
 							if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z) {
 								workers(all_workplace_x(cnt), all_workplace_y(cnt)) ++
@@ -5342,10 +5350,10 @@
 					if int(sdnl(addon_maximum_capacity, map(new_workplace_x, new_workplace_y, new_workplace_z), 0)) >= workers(new_workplace_x, new_workplace_y, new_workplace_z) + 1 {
 						workers(new_workplace_x, new_workplace_y, new_workplace_z) ++
 						workplace_tmp(cnt) = "p"+str(obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z))+""
-	
+
 						map_Total_workers_Public ++
 						map_demand_Public --
-	
+
 						repeat gi
 							if obj_serial_num(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) = obj_serial_num(new_workplace_x, new_workplace_y, new_workplace_z) {
 								workers(all_workplace_x(cnt), all_workplace_y(cnt), all_workplace_z(cnt)) ++
@@ -5355,28 +5363,28 @@
 				}
 			}
 		}
-	
+
 		workplace(sx,sy,sz) += "["+workplace_tmp(cnt)+"]"
 	loop
-	
+
 	return
 
 *fix_school
 	/*------------------------------------住民が通う学校を決定------------------------------------*/
 	sdim school_tmp, 8, residents(sx,sy,sz)
 	split school(sx,sy,sz), "][", school_tmp
-	
+
 	sdim workplace_tmp, 8, residents(sx,sy,sz)
 	split workplace(sx,sy,sz), "][", workplace_tmp
-	
+
 	school(sx,sy,sz) = ""
 	repeat residents(sx,sy,sz)
 		if instr(school_tmp(cnt), 0, "[") != -1 : split school_tmp(cnt), "[", cut, school_tmp(cnt)
 		if instr(school_tmp(cnt), 0, "]") != -1 : split school_tmp(cnt), "]", school_tmp(cnt), cut
-		
+
 		if instr(workplace_tmp(cnt), 0, "[") != -1 : split workplace_tmp(cnt), "[", cut, workplace_tmp(cnt)
 		if instr(workplace_tmp(cnt), 0, "]") != -1 : split workplace_tmp(cnt), "]", workplace_tmp(cnt), cut
-		
+
 		; 就学先を年齢別で決める
 		if school_tmp(cnt) = "" {
 			; 小学校（6～12歳）
@@ -5385,11 +5393,11 @@
 				new_school_x = all_elementary_schools_x(new_school_rnd)
 				new_school_y = all_elementary_schools_y(new_school_rnd)
 				new_school_z = all_elementary_schools_z(new_school_rnd)
-	
+
 				if int(sdnl(addon_maximum_capacity, map(new_school_x, new_school_y, new_school_z), 0)) >= students(new_school_x, new_school_y, new_school_z) + 1 {
 					school_tmp(cnt) = "e"+str(obj_serial_num(new_school_x, new_school_y, new_school_z))+""
 					students(new_school_x, new_school_y, new_school_z) += 1
-	
+
 					; １つで2マス以上の学校の場合、学校内で同じ生徒数にする
 					repeat gi_e
 						if obj_serial_num(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementary_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
@@ -5404,11 +5412,11 @@
 				new_school_x = all_junior_high_schools_x(new_school_rnd)
 				new_school_y = all_junior_high_schools_y(new_school_rnd)
 				new_school_z = all_junior_high_schools_z(new_school_rnd)
-	
+
 				if int(sdnl(addon_maximum_capacity, map(new_school_x, new_school_y, new_school_z), 0)) >= students(new_school_x, new_school_y, new_school_z) + 1 {
 					school_tmp(cnt) = "j"+str(obj_serial_num(new_school_x, new_school_y, new_school_z))+""
 					students(new_school_x, new_school_y, new_school_z) += 1
-	
+
 					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
 					repeat gi_j
 						if obj_serial_num(all_junior_high_schools_x(cnt), all_junior_high_schools_y(cnt), all_junior_high_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
@@ -5421,17 +5429,17 @@
 		if school_tmp(cnt) = "" and workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 16 and age_in_Residential(cnt) <= 50 {
 			//高校（16～18歳）
 			dr_h = rnd(3)	; 高校は 1/3の確率で入る
-	
+
 			if dr_h = 0 and age_in_Residential(cnt) >= 16 and age_in_Residential(cnt) <= 18 and gi_h >= 1 {
 				new_school_rnd = rnd(gi_h-1)	; 学校はランダムに決める
 				new_school_x = all_high_schools_x(new_school_rnd)
 				new_school_y = all_high_schools_y(new_school_rnd)
 				new_school_z = all_high_schools_z(new_school_rnd)
-	
+
 				if int(sdnl(addon_maximum_capacity, map(new_school_x, new_school_y, new_school_z), 0)) >= students(new_school_x, new_school_y, new_school_z) + 1 {
 					school_tmp(cnt) = "h"+str(obj_serial_num(new_school_x, new_school_y, new_school_z))+""
 					students(new_school_x, new_school_y, new_school_z) += 1
-	
+
 					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
 					repeat gi_h
 						if obj_serial_num(all_high_schools_x(cnt), all_high_schools_y(cnt), all_high_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
@@ -5440,20 +5448,20 @@
 					loop
 				}
 			}
-	
+
 			//大学（19～50歳）
 			dr_u = rnd(age_in_Residential(cnt))	; 大学は1/年齢の確率で入る
-			
+
 			if dr_u = 0 and age_in_Residential(cnt) >= 19 and age_in_Residential(cnt) <= 50 and gi_u >= 1 {
 				new_school_rnd = rnd(gi_u-1)	; 学校はランダムに決める
 				new_school_x = all_universities_x(new_school_rnd)
 				new_school_y = all_universities_y(new_school_rnd)
 				new_school_z = all_universities_z(new_school_rnd)
-	
+
 				if int(sdnl(addon_maximum_capacity, map(new_school_x, new_school_y, new_school_z), 0)) >= students(new_school_x, new_school_y, new_school_z) + 1 {
 					school_tmp(cnt) = "u"+str(obj_serial_num(new_school_x, new_school_y, new_school_z))+""
 					students(new_school_x, new_school_y, new_school_z) += 1
-	
+
 					//１つで2マス以上の学校の場合、学校内で同じ生徒数にする
 					repeat gi_j
 						if obj_serial_num(all_universities_x(cnt), all_universities_y(cnt), all_universities_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
@@ -5463,80 +5471,80 @@
 				}
 			}
 		}
-	
+
 		school(sx,sy,sz) += "["+school_tmp(cnt)+"]"
 	loop
-		
+
 	return
-		
+
 
 *information_panel
 	/*------------------------------------情報パネル----------------------------------------------*/
 	screen 1, 400, 300
 	gsel 1, 2 : title "情報パネル"
-	
+
 	color 128, 128, 128 : boxf
-	
+
 	mci "stop Cities-Box"
 	mci "set Cities-Box_2 time format milliseconds"
-	
+
 	if map_approval_rate > 50 : mci "open \""+directory+"\\bgm\\[Sp]Satie-Jeteveux.mp3\" alias Cities-Box_2" : else : mci "open \""+directory+"\\bgm\\[Sp]Tchikovsky-Serenade-1st.mp3\" alias Cities-Box_2"
 	if config_Set_Play_BGM = 1 : mci "play Cities-Box_2"
-	
+
 	pos 10, 10 : gmode 2 : gcopy 52, 0, 0, 32, 32
-	
+
 	font config_SystemFont, 16 : color 255, 255, 255
 	pos 50, 15 : mes "都市の情報"
-	
+
 	color 255, 255, 255 : boxf 10, 45, 390, 95
 	color 128, 128, 128 : boxf 11, 46, 389, 94
-	
+
 	color 255, 255, 255 : font config_SystemFont, 14
 	pos 15, 50  : mes "都市名 "+map_city_name+"\n市長　 "+map_mayor_name+""
 	pos 200, 50 : mes "資金　 § "+map_Money+"\n支持率 "+map_approval_rate+"%"
-	
+
 	color 255, 255, 255 : boxf 10, 100, 390, 200
 	color 128, 128, 128 : boxf 11, 101, 389, 199
-	
+
 	color 255, 255, 255 : font config_SystemFont, 14
 	pos 15, 105  : mes "商業地区の労働者数 　　"+map_Total_workers_Commercial+"人\nオフィス地区の労働者数　　"+map_Total_workers_Office+"人\n工業地区の労働者数 　　"+map_Total_workers_Industrial+"人\n農業地区の労働者数　　"+map_Total_workers_Farm+"人\n公務員の労働者数　　　"+map_Total_workers_Public+"人"
 	//pos 230, 105  : mes "非労働者数 　　"+map_Total_Vagrants+"人"
-	
+
 	color 255, 255, 255 : boxf 10, 205, 390, 245
 	color 128, 128, 128 : boxf 11, 206, 389, 244
-	
+
 	color 255, 255, 255 : font config_SystemFont, 14
 	pos 15, 210 : mes "人口 "+map_Total_Population+"人"
 	pos 200, 210 : mes "男性人口 "+map_gender_M+"人\n女性人口 "+map_gender_F+"人"
-	
+
 	stop
 
 *budget_panel
 	/*------------------------------------予算パネル----------------------------------------------*/
 	screen 1, 300, 380
 	gsel 1, 2 : title "予算パネル"
-	
+
 	color 128, 128, 128 : boxf
-	
+
 	mci "stop Cities-Box"
 	mci "set Cities-Box_2 time format milliseconds"
-	
+
 	if map_Money > 0 : mci"open \""+directory+"\\bgm\\[Sp]Satie-Jeteveux.mp3\" alias Cities-Box_2" : else : mci"open \""+directory+"\\bgm\\[Sp]Tchikovsky-Serenade-1st.mp3\" alias Cities-Box_2"
 	if config_Set_Play_BGM = 1 : mci "play Cities-Box_2"
-	
+
 	objsize 50, 20
 	font config_SystemFont, 14 : color 255, 255, 255
-	
+
 	; 支出率
 	pos 200, 70  : input map_budget_of_Police : input_stat__map_budget_of_Police = stat
-	pos 280, 70  : mes "%"	
+	pos 280, 70  : mes "%"
 	pos 200, 90  : input map_budget_of_Fire_Depertment : input_stat__map_budget_of_Fire_Depertment = stat
 	pos 280, 90  : mes "%"
 	pos 200, 110 : input map_budget_of_Post_Office : input_stat__map_budget_of_Post_Office = stat
 	pos 280, 110 : mes "%"
 	pos 200, 130 : input map_budget_of_Education : input_stat__map_budget_of_Education = stat
 	pos 280, 130 : mes "%"
-	
+
 	; 税率
 	pos 200, 190 : input map_tax_of_Residential : input_stat__map_tax_of_Residential = stat
 	pos 290, 190 : mes "%"
@@ -5548,97 +5556,97 @@
 	pos 290, 250 : mes "%"
 	pos 200, 280 : input map_tax_of_Farm : input_stat__map_tax_of_Farm = stat
 	pos 290, 280 : mes "%"
-	
+
 	objsize 50, 20
 	pos 240, 350 : button "OK", *fix_budget
-	
+
 	repeat
 		redraw 0
-	
+
 		color 128, 128, 128 : boxf
-	
+
 		font config_SystemFont, 16 : color 255, 255, 255
 		pos 10, 10 : mes "今月の予算"
-	
+
 		; 支出率のパーセンテージを上限・下限に合わせる
 		if map_budget_of_Police < 0 { map_budget_of_Police = 0 : objprm input_stat__map_budget_of_Police, map_budget_of_Police }
 		if map_budget_of_Fire_Depertment < 0 { map_budget_of_Fire_Depertment = 0 : objprm input_stat__map_budget_of_Fire_Depertment, map_budget_of_Fire_Depertment }
 		if map_budget_of_Post_Office < 0 { map_budget_of_Post_Office = 0 : objprm input_stat__map_budget_of_Post_Office, map_budget_of_Post_Office }
 		if map_budget_of_Education < 0 { map_budget_of_Education = 0 : objprm input_stat__map_budget_of_Education, map_budget_of_Education }
-	
+
 		; 税率のパーセンテージを上限・下限に合わせる
 		if map_tax_of_Residential < 0 { map_tax_of_Residential = 0 : objprm input_stat__map_tax_of_Residential, map_tax_of_Residential }
 		if map_tax_of_Commercial < 0 { map_tax_of_Commercial = 0 : objprm input_stat__map_tax_of_Commercial, map_tax_of_Commercial }
 		if map_tax_of_Office < 0 { map_tax_of_Office = 0 : objprm input_stat__map_tax_of_Office, map_tax_of_Office }
 		if map_tax_of_Industrial < 0 { map_tax_of_Industrial = 0 : objprm input_stat__map_tax_of_Industrial, map_tax_of_Industrial }
 		if map_tax_of_Farm < 0 { map_tax_of_Farm = 0 : objprm input_stat__map_tax_of_Farm, map_tax_of_Farm }
-	
+
 		; 支出の具体的な金額を算出
 		if map_total_Police_Stations = 0  : take_map_budget_of_Police = 0          : else : take_map_budget_of_Police = map_total_Police_Stations * map_budget_of_Police * 10
 		if map_total_Fire_Depertments = 0 : take_map_budget_of_Fire_Depertment = 0 : else : take_map_budget_of_Fire_Depertment = map_total_Fire_Depertments * map_budget_of_Fire_Depertment * 10
 		if map_total_Post_Offices = 0     : take_map_budget_of_Post_Office = 0     : else : take_map_budget_of_Post_Office = map_total_Post_Offices * map_budget_of_Post_Office * 10
 		if map_total_Education = 0        : take_map_budget_of_Education = 0       : else : take_map_budget_of_Education = map_total_Education * map_budget_of_Education * 10
-	
+
 		; 収入の具体的な金額を算出
 		if map_total_Residential = 0 : take_map_tax_of_Residential = 0 : else : take_map_tax_of_Residential = map_total_Residential * map_tax_of_Residential
 		if map_total_Commercial = 0  : take_map_tax_of_Commercial = 0  : else : take_map_tax_of_Commercial = map_total_Commercial * map_tax_of_Commercial
 		if map_total_Office = 0      : take_map_tax_of_Office = 0      : else : take_map_tax_of_Office = map_total_Office * map_tax_of_Office
 		if map_total_Industrial = 0  : take_map_tax_of_Industrial = 0  : else : take_map_tax_of_Industrial = map_total_Industrial * map_tax_of_Industrial
 		if map_total_Farm = 0        : take_map_tax_of_Farm = 0        : else : take_map_tax_of_Farm = map_total_Farm * map_tax_of_Farm
-	
+
 		font config_SystemFont, 14
-		
+
 		color 255, 127, 39
 		pos 10, 30 : mes "繰越金 §"+map_Money+""
-	
+
 		color 255, 255, 255
-	
+
 		pos 8, 50  : mes "支出"
 		pos 10, 70  : mes "警察署　 　　§-"+take_map_budget_of_Police+""
 		pos 10, 90  : mes "消防署　　　 §-"+take_map_budget_of_Fire_Depertment+""
 		pos 10, 110  : mes "郵便事業 　　§-"+take_map_budget_of_Post_Office+""
 		pos 10, 130 : mes "教育事業　　 §-"+take_map_budget_of_Education+""
-	
+
 		pos 8, 170  : mes "収入"
 		pos 10, 190 : mes "住居地区　　 §+"+take_map_tax_of_Residential+""
 		pos 10, 210 : mes "商業地区　　 §+"+take_map_tax_of_Commercial+""
 		pos 10, 230 : mes "オフィス地区 　§+"+take_map_tax_of_Office+""
 		pos 10, 250 : mes "工業地区 　　§+"+take_map_tax_of_Industrial+""
 		pos 10, 270 : mes "農業地区 　　§+"+take_map_tax_of_Farm+""
-	
+
 		repeat 4
 			pos 250, 70+(cnt*20)  : mes "%"
 		loop
-	
+
 		repeat 4
 			pos 250, 190+(cnt*20) : mes "%"
 		loop
-	
+
 		expenses = take_map_budget_of_Police + take_map_budget_of_Fire_Depertment + take_map_budget_of_Post_Office + take_map_budget_of_Education
 		color 255, 0, 0
 		pos 10, 290 : mes "今月の支出　 §-"+expenses+""
-	
+
 		income = take_map_tax_of_Residential + take_map_tax_of_Commercial + take_map_tax_of_Office + take_map_tax_of_Industrial + take_map_tax_of_Farm
 		color 0, 255, 0
 		pos 10, 310 : mes "今月の収入　 §+"+income+""
-	
+
 		color 0, 162, 232
 		pos 10, 330 : mes "月末の資金　 §"+(map_Money - expenses + income)+""
-	
+
 		redraw 1
 		wait 10
 	loop
-	
+
 	stop
 
 *fix_budget
 	gsel ginfo_act, -1
-	
+
 	if Set_Play_BGM = 1 {
 		mci "stop Cities-Box_2"
 		mci "play Cities-Box"
 	}
-	
+
 	gsel 0
 	goto *main
 
@@ -5648,22 +5656,22 @@
 	gsel 1 : title "マップ設定"
 	*setting_2
 	onclick *setting_onclick
-	
+
 	color 95, 95, 95 : boxf
-	
+
 	color 255, 255, 255
 	font config_SystemFont, 16
-	
+
 	; 都市名(map_City_Name)
 	pos 10, 10 : mes "都市名"
 	objsize 210, 20
 	pos 80, 10 : input map_City_Name
-	
+
 	; 市長名(map_Mayor_Name)
 	pos 10, 40 : mes "市長名"
 	objsize 210, 20
 	pos 80, 40 : input map_Mayor_Name
-	
+
 	; 天候の変化(map_Set_Change_Weather)
 	if map_Set_Change_Weather = 0 {
 		pos 10, 73 : gcopy 14, 0, 0, 16, 16
@@ -5671,7 +5679,7 @@
 		pos 10, 73 : gcopy 14, 0, 16, 16, 16
 	}
 	pos 35, 70 : mes "天候の変化"
-	
+
 	; 夜間は暗くする(map_Set_Dark_on_Night)
 	if map_Set_Dark_on_Night = 0 {
 		pos 10, 103 : gcopy 14, 0, 0, 16, 16
@@ -5679,7 +5687,7 @@
 		pos 10, 103 : gcopy 14, 0, 16, 16, 16
 	}
 	pos 35, 100 : mes "夜間は暗くする"
-	
+
 	; BGMの再生の有無(config_Set_Play_BGM)
 	if config_Set_Play_BGM = 0 {
 		pos 10, 133 : gcopy 14, 0, 0, 16, 16
@@ -5687,19 +5695,19 @@
 		pos 10, 133 : gcopy 14, 0, 16, 16, 16
 	}
 	pos 35, 130 : mes "BGMの再生"
-	
+
 	; フォント(config_SystemFont)
 	pos 10, 160 : mes "フォント"
 	objsize 194, 20
 	pos 80, 160 : input config_SystemFont
-	
+
 	gmode 2 : pos 274, 160 : gcopy 16, 0, 0, 16, 16
-		
+
 	stop
 
 *setting_onclick
 	gsel 1
-	
+
 	; 天候の変化(map_Set_Change_Weather)
 	if click_range(10, 73, 10+16, 73+16) = 1 {
 		if map_Set_Change_Weather = 0 {
@@ -5708,7 +5716,7 @@
 			map_Set_Change_Weather = 0
 		}
 	}
-	
+
 	; 夜間は暗くする(map_Set_Dark_on_Night)
 	if click_range(10, 103, 10+16, 103+16) = 1 {
 		if map_Set_Dark_on_Night = 0 {
@@ -5717,7 +5725,7 @@
 			map_Set_Dark_on_Night = 0
 		}
 	}
-	
+
 	; BGMの再生の有無(config_Set_Play_BGM)
 	if click_range(10, 133, 10+16, 133+16) = 1 {
 		if config_Set_Play_BGM = 0 {
@@ -5726,7 +5734,7 @@
 			config_Set_Play_BGM = 0
 		}
 	}
-	
+
 	; フォント(SystemFont)
 	; 参照ボタン
 		if click_range(274, 160, 274+16, 160+16) = 1 : gosub *refer_fonts
@@ -5736,56 +5744,56 @@
 *refer_fonts
 	#uselib "comdlg32.dll"
 	#func ChooseFont "ChooseFontA" int
-	
+
 	mref bmscr, 67
 	dim chfont,16
 	dim logfont,16
 	sdim setting_SystemFont,32
-	
-	chfont.0 = 60 
+
+	chfont.0 = 60
 	chfont.1 = bmscr.13
 	chfont.3=varptr(logfont)
 	chfont.5 = 0x01000141
-	
+
 	pm=varptr(chfont)
 	ChooseFont pm
-	
+
 	if stat = 0 {
 		return
 	}
-	
+
 	style=0
 	if (chfont.12 & 0x0100):style=style+1
-	if (chfont.12 & 0x0200):style=style+2 
-	if (logfont.5 & 0x0000FF00):style=style+4 
+	if (chfont.12 & 0x0200):style=style+2
+	if (logfont.5 & 0x0000FF00):style=style+4
 	if (logfont.5 & 0x00FF0000):style=style+8
 	size=chfont.4/10
 	memcpy config_SystemFont,logfont,32,0,28
 
 	if from_menu_setting = 1 : goto *menu_setting_2
-	
+
 	return
 
 *save
 	/*------------------------------------マップデータの保存--------------------------------------*/
 	save_mapdata = ""
-	
+
 	; 誤反応防止
 	if click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 : return
-	
+
 	; 保存先ファイルの選択
 	dialog "cbd", 17, "Cities Box マップデータ"
-			
+
 	save_mapdata_name = refstr
 	if instr(save_mapdata_name, 0, ".cbd") = -1 : save_mapdata_name = ""+save_mapdata_name+".cbd"
-			
+
 	if stat = 0 : return
-	
+
 	; 保存中表示
 	color : sboxf 128, 0, 0, windowx, windowy
 	color 255, 255, 255 : font config_SystemFont, 26
 	cmes "保存中...", 0, (windowy/2)-18, windowx, (windowy/2)+18
-	
+
 	; マップ保存
 	title "保存中..."
 
@@ -5866,16 +5874,16 @@
 			save_original_name   += original_name(sx,sy,sz)+comma
 		loop
 	loop
-		
+
 	notesel save_mapdata
-	
+
 	; 保存したCities Boxのバージョン（リリースナンバー）
 		noteadd "Version = "+about_release_number+";", -1
 
 	; アドオンセット
 		noteadd "Addons_Set = \""+map_Addons_Set+"\";", -1
 		noteadd " ", -1
-		
+
 	; 次に各マップデータ(*.cbx)の設定を保存
 		noteadd "City_Name = \""+map_City_Name+"\";", -1
 		noteadd "Mayor_Name = \""+map_Mayor_Name+"\";", -1
@@ -5884,12 +5892,12 @@
 		noteadd "Temperature = "+map_temperature+";", -1
 		noteadd "Set_Dark_on_Night = "+map_Set_Dark_on_Night+";", -1
 		noteadd " ", -1
-	
+
 	; マップサイズ
 		noteadd "mapsize_x = "+mapsize_x+";", -1
 		noteadd "mapsize_y = "+mapsize_y+";", -1
 		noteadd " ", -1
-	
+
 	; 日時
 		noteadd "time_Year = "+map_time_Year+";", -1
 		noteadd "time_Month = "+map_time_Month+";", -1
@@ -5897,30 +5905,30 @@
 		noteadd "time_Hour = "+map_time_Hour+";", -1
 		noteadd "time_Minutes = "+map_time_Minutes+";", -1
 		noteadd " ", -1
-	
+
 	; 需要度
 		noteadd "demand_Residential = "+map_demand_Residential+";", -1
 		noteadd "demand_Commercial = "+map_demand_Commercial+";", -1
 		noteadd "demand_Office = "+map_demand_Office+";", -1
 		noteadd "demand_Industrial = "+map_demand_Industrial+";", -1
 		noteadd "demand_Farm = "+map_demand_Farm+";", -1
-	
+
 	; 資金
 		noteadd "Money = "+map_Money+";", -1
 		noteadd " ", -1
-	
+
 	; 予算
 		noteadd "budget_of_Police = "+map_budget_of_Police+";", -1
 		noteadd "budget_of_Fire_Depertment = "+map_budget_of_Fire_Depertment+";", -1
 		noteadd "budget_of_Post_Office = "+map_budget_of_Post_Office+";", -1
 		noteadd "budget_of_Education = "+map_budget_of_Education+";", -1
-	
+
 		noteadd "tax_of_Residential = "+map_tax_of_Residential+";", -1
 		noteadd "tax_of_Commercial = "+map_tax_of_Commercial+";", -1
 		noteadd "tax_of_Office = "+map_tax_of_Office+";", -1
 		noteadd "tax_of_Industrial = "+map_tax_of_Industrial+";", -1
 		noteadd "tax_of_Farm = "+map_tax_of_Farm+";", -1
-		
+
 		noteadd " ", -1
 		noteadd " \n", -1
 
@@ -5958,43 +5966,43 @@
 	save_mapdata += save_school+"}\n"
 	save_mapdata += save_reservation+"}\n"
 	save_mapdata += save_original_name+"}\n"
-	
+
 	; 保存
 	notesel save_mapdata
 	notesave save_mapdata_name
-			
+
 	title about_title
-	
+
 	return
 
 *update
 	/*----------------------------------アップデーターダウンロード＆起動--------------------------*/
 	color 0, 0, 0
 	sboxf 128, 0, 0, windowx, windowy
-		
+
 	font config_SystemFont, 14
 	color 255, 255, 255 : cmes "アップデータをダウンロード中です\nしばらくお待ち下さい...", 0, windowy/2-20, windowx, windowy/2+20
 
 	if normalUpdate = 1 {
 		latest_version__Updater = get_chapter(latest_version, "Updater", " : ", ";")
 		latest_version__Updater_Name = get_chapter(latest_version, "Updater_Name", " : ", ";")
-	
+
 		download latest_version__Updater, latest_version__Updater_Name, latest_version__Updater_Name
-	
+
 		exist latest_version__Updater_Name
 		exe = latest_version__Updater_Name
 	} else : if devUpdate = 1 {
 		Dev_latest_version__Updater = get_chapter(Dev_latest_version, "Updater", " : ", ";")
 		Dev_latest_version__Updater_Name = get_chapter(Dev_latest_version, "Updater_Name", " : ", ";")
-	
+
 		download Dev_latest_version__Updater, Dev_latest_version__Updater_Name, Dev_latest_version__Updater_Name
 
 		exist Dev_latest_version__Updater_Name
 		exe = Dev_latest_version__Updater_Name
 	}
-	
+
 	if strsize = -1 : error "S07 : アップデートに失敗しました\nアップデータ "+exe+"のダウンロードが完了しませんでした。"
-		
+
 	if normalUpdate = 1 {
 		exec latest_version__Updater_Name
 	} else {
@@ -6006,20 +6014,20 @@
 	if ginfo_act = 0 {
 		gsel 0
 		end
-		
+
 	} else {
 		gsel ginfo_act, -1
-		
+
 		gsel 0
-	
+
 		mci "close Cities-Box_2"
 		mci "play Cities-Box"
 
 		; 設定を保存
 		chdir directory
-	
+
 		config = ""
-		
+
 		notesel config
 		noteadd "SystemFont = \""+config_SystemFont+"\"", -1
 		noteadd "Set_Play_BGM = "+config_Set_Play_BGM+";", -1
@@ -6033,7 +6041,7 @@
 		notesave "data/config.dat"
 
 		from_menu_setting = 0
-		
+
 		if return_from_exit = "menu" : goto *menu
 		if return_from_exit = "main" : goto *main
 

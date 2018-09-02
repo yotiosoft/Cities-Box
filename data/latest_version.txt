@@ -1,7 +1,7 @@
-Release Number : 119;
+Release Number : 124;
 Title : Cities Box;
-Version : 1.3.1;
-About : アドオン選択メニューで正しいアドオン名と説明が表示されない問題を修正;
+Version : 1.4.1;
+About : バグ修正;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;/;
