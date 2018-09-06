@@ -1,8 +1,8 @@
 Release Number : 126;
 Title : Cities Box;
 Version : 1.5.0;
-About : `‚ðÄŽÀ‘• / ƒAƒbƒvƒf[ƒg•ûŽ®‚ð•ÏX;
+About : æ¸¯ã‚’å†å®Ÿè£… / ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆæ–¹å¼ã‚’å¤‰æ›´;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
-OS : Windows, macOS
+OS : Windows, macOS;
