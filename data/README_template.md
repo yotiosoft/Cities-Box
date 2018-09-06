@@ -1,7 +1,3 @@
-Cities Box
-=====================
-![Version](https://img.shields.io/badge/Version-1.5.0-brightgreen.svg)
-![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
 
@@ -97,10 +93,3 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 ・他の都市との交易
 
 # 最終更新
-## Ver.1.5.0 r126  
-港を再実装  
-アップデート方式を変更  
-エラーログを実装  
-何らかの理由で建物を建設できないときに、警告を表示せずに自動で建設前の状態に戻すように変更  
-    
-※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

@@ -1,8 +1,0 @@
-Release Number : 123;
-Title : Cities Box Dev;
-Version : 1.4.0.1;
-About : マップ上に車の複数台表示（不可動）;
-Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
-Updater_Name : Cities_Box_UD_Dev.exe;
-URL : https://github.com/YotioSoft/Cities-Box-Dev/raw/master/;/;
-OS : Windows, macOS;

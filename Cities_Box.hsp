@@ -47,7 +47,7 @@
 	#define BEGIN_ADDON_BUFFER_ID	100
 
 	; アドオン以外の画像のバッファ総数
-	#define BUFFER_IMAGES_TOTAL		77
+	#define BUFFER_IMAGES_TOTAL		78
 
 	; マップサイズ
 	#define MAPSIZE_X				100
@@ -287,13 +287,6 @@
 		noteadd "img/start_menu/setting.png", 65, 1							; 設定
 		noteadd "img/start_menu/addon_maker.png", 72, 1						; Addon Maker
 
-	//メニューの設定画面で使うアイコン
-		noteadd "img/menu_setting/general.png", 60, 1						; 一般設定
-		noteadd "img/menu_setting/information.png", 61, 1					; 情報
-		noteadd "img/menu_setting/bug.png", 63, 1							; バグ・ご要望の送信
-
-		noteadd "img/menu_setting/text.png", 64, 1							; テキストファイルアイコン
-
 	//読み込み中アイコン
 		noteadd "img/loading/124856y.png", 53, 1							; 読み込み中アイコン1
 		noteadd "img/loading/124856y-2.png", 54, 1							; 読み込み中アイコン2
@@ -312,6 +305,14 @@
 
 	//建物の方向を示す矢印
 		noteadd "img/arrows/arrows.png", 77									; 矢印
+
+	//メニューの設定画面で使うアイコン
+		noteadd "img/menu_setting/general.png", 60, 1						; 一般設定
+		noteadd "img/menu_setting/information.png", 61, 1					; 情報
+		noteadd "img/menu_setting/bug.png", 63, 1							; バグ・ご要望の送信
+		noteadd "img/menu_setting/update.png", 78, 1						; 更新
+
+		noteadd "img/menu_setting/text.png", 64, 1							; テキストファイルアイコン
 
 	; 読み込み
 	a_statbar_block = windowx/2 / BUFFER_IMAGES_TOTAL
@@ -523,7 +524,8 @@
 
 		pos 16, 28 + 0 + 16   : gcopy 60, 0, 0, 48, 48
 		pos 16, 28 + 64 + 16  : gcopy 63, 0, 0, 48, 48
-		pos 16, 28 + 128 + 16 : gcopy 61, 0, 0, 48, 48
+		pos 16, 28 + 128 + 16 : gcopy 78, 0, 0, 48, 48
+		pos 16, 28 + 192 + 16 : gcopy 61, 0, 0, 48, 48
 
 	//設定画面
 
@@ -627,11 +629,117 @@
 
 			}
 
+		; 更新
+			if menu_setting__page = "update" {
+				clrobj
+
+				color 0, 162, 232 : boxf 60, 128+28, 64, 192+28
+
+				font config_SystemFont, 16 : color 255, 255, 255
+				pos 70, 3 : mes "更新"
+
+				if devUpdate = 1 and normalUpdate = 0 and config_Get_Dev_Version = 1 {
+					pos 100, 40 : mes "開発版に更新があります！"
+					font config_SystemFont, 14, 1
+					color 163, 73, 164
+					pos 110, 65 : mes "Ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+""
+
+					Dev_latest_version__About_tmp = Dev_latest_version__About
+					strrep Dev_latest_version__About_tmp, " / ", "\n"
+					pos 110, 90 : mesbox Dev_latest_version__About_tmp, 340, 150
+
+					objsize 100, 20
+					pos 350, 250 : button "更新する", *update
+					//pos 350, 250 : button "バージョンの選択", *choose_version
+
+				} else : if normalUpdate = 1 {
+					pos 100, 40 : mes "更新があります！"
+					font config_SystemFont, 14, 1
+					color 255, 127, 39
+					pos 110, 65 : mes "Ver."+latest_version__Version+" r"+latest_version__Release_number+""
+
+					latest_version__About_tmp = latest_version__About
+					strrep latest_version__About_tmp, " / ", "\n"
+					pos 110, 90 : mesbox latest_version__About_tmp, 340, 150
+
+					objsize 100, 20
+					pos 350, 250 : button "更新する", *update
+					//pos 350, 250 : button "バージョンの選択", *choose_version
+
+				} else {
+					pos 100, 40 : mes "お使いのバージョンは最新版です"
+				}
+			}
+			/*
+			if menu_setting__page = "choose_version" {
+				clrobj
+
+				color 0, 162, 232 : boxf 60, 128+28, 64, 192+28
+
+				font config_SystemFont, 16 : color 255, 255, 255
+				pos 70, 3 : mes "お待ち下さい..."
+
+				//一覧をダウンロード
+				download datacenter_url, "release_files_log.dat", "data/release_files_log.dat"
+
+				exist "data/release_files_log.dat"
+				if strsize = -1 {
+					pos 100, 40 : mes "更新可能バージョン一覧の取得に失敗しました。"
+					stop
+				}
+				notesel files
+				noteload "data/release_files_log.dat"
+
+				if instr(files, 0, "<!DOCTYPE html>") != -1 {
+					pos 100, 40 : mes "更新可能バージョン一覧の取得に失敗しました。"
+					stop
+				}
+
+				//更新可能バージョン一覧を取得
+				notesel files
+				sdim versions, 8, notemax/4
+				dim release_numbers, notemax/4
+				next_number = 0
+
+				repeat notemax
+					noteget a_line, cnt
+					if instr(a_line, 0, "{") != -1 {
+						split a_line, "]", a_version, a_release_number
+
+						if int(a_release_number) > about_release_number {
+							versions(next_number) = a_version
+							release_numbers(next_number) = int(a_release_number)
+							next_number ++
+						}
+					}
+				loop
+
+				versions_list = ""
+				notesel versions_list
+				repeat next_number
+					noteadd ""+strmid(versions(cnt), 1, strlen(versions(cnt)))+" r"+release_numbers(cnt)+""
+				loop
+
+				version_number_in_list = 0
+
+				color 75, 75, 75 : boxf 64, 0, 500, 28
+				font config_SystemFont, 16 : color 255, 255, 255
+				pos 70, 3 : mes "更新するバージョンの選択"
+
+				pos 100, 40 : mes "更新を適用するバージョンを選択してください。"
+
+				objsize 340, 100
+				pos 110, 65 : listbox version_number_in_list, 100, versions_list
+
+				objsize 150, 20
+				pos 300, 250 : button "このバージョンに更新", *update_selected_version
+			}*/
+
 		; 情報
 			if menu_setting__page = "information" {
 				clrobj
 
-				color 0, 162, 232 : boxf 60, 128+28, 64, 192+28
+				color 0, 162, 232 : boxf 60, 192+28, 64, 256+28
 
 				font config_SystemFont, 16 : color 255, 255, 255
 				pos 70, 3 : mes "情報"
@@ -662,7 +770,10 @@
 		if click_range(0, 28+64, 64, 28+128) = 1 {
 			menu_setting__page = "bug"
 		}
-		if click_range(0, 28+128, 64, 28+172) = 1 {
+		if click_range(0, 28+128, 64, 28+192) = 1 {
+			menu_setting__page = "update"
+		}
+		if click_range(0, 28+192, 64, 28+256) = 1 {
 			menu_setting__page = "information"
 		}
 
@@ -711,7 +822,18 @@
 
 	clrobj
 	goto *menu_setting_2
+/*
+*choose_version
+	menu_setting__page = "choose_version"
+	goto *menu_setting_2
 
+*update_selected_version
+	tmp = str(int(release_numbers(version_number_in_list)))
+	notesel tmp
+	notesave "data/set_update_release_number.txt"
+	gsel 0
+	goto *update
+*/
 *menu_addon_maker
 	/*-------------------------------------Addon Makerを開く--------------------------------------*/
 	exist "Addon_Maker/Cities_Box_Addon_Maker.exe"
@@ -727,14 +849,14 @@
 *map_dimensions
 	/*-------------------------------マップデータの配列の確保-------------------------------------*/
 
-	dim map, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2					//各座標のアドオン番号
-	sdim name, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2			//各座標のアドオン名
-	sdim category, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 3		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
-	dim obj_type, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2			//座標上にあるオブジェクトのタイプ
-	dim obj_dire, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2			//座標上にあるオブジェクトの向き
+	dim map, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 4					//各座標のアドオン番号
+	sdim name, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 4			//各座標のアドオン名
+	sdim category, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 6		//各マスに置かれているアドオンのカテゴリー（road, residentialなど）
+	dim obj_type, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 4			//座標上にあるオブジェクトのタイプ
+	dim obj_dire, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 4			//座標上にあるオブジェクトの向き
 	dim obj_serial_num, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトの通し番号（1マスの場合は0）
-	dim obj_use_tiles, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2		//ひとつのオブジェクトで複数のタイルを要するときの、必要なタイル数
-	dim obj_tiles, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 2			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からタイルの数
+	dim obj_use_tiles, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 4		//ひとつのオブジェクトで複数のタイルを要するときの、必要なタイル数
+	dim obj_tiles, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z, 4			//ひとつのオブジェクトで複数のタイルを要するときの、オブジェクトを設置した場所からタイルの数
 
 	dim residents, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//各建築物の住民の数（住宅地のみ）
 	dim workers, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//商業地区の従業員数
@@ -1183,8 +1305,10 @@
 
 				; name(x,y)＆map(x,y)
 				name(x,y,z,0) = name_buf_a_tile(x)
+				name(x,y,z,2) = name(x,y,z,0)
 				notesel addons_list
 				map(x,y,z,0) = notefind(name(x,y,z,0), 0)
+				map(x,y,z,2) = map(x,y,z,0)
 
 					; 各種の地区の収容可能人数に加算
 					if sdnl(addon_type, map(x,y,z,0), 0) = "low_density_residential" or sdnl(addon_type, map(x,y,z,0), 0) = "high_density_residential" {
@@ -1211,15 +1335,19 @@
 				if name(x,y,z,1) != "" {
 					sdnsearch addon_name, ""+name2_buf_a_tile(x)+"", search_addon_number, tmp
 					map(x,y,z,1) = notefind(name(x,y,z,1), 0)
+					map(x,y,z,3) = map(x,y,z,1)
 				} else {
 					map(x,y,z,1) = -1
+					map(x,y,z,3) = -1
 				}
 
 				; category(x,y)
 				category(x,y,z,0) = category_buf_a_tile(x)
+				category(x,y,z,3) = category(x,y,z,0)
 
 				; category_2(x,y)
 				category(x,y,z,1) = category_2_buf_a_tile(x)
+				category(x,y,z,4) = category(x,y,z,0)
 
 					; 建物の総数を取得
 					if category(x,y,z,1) = "police_station"  : map_total_Police_Stations ++
@@ -1235,18 +1363,27 @@
 
 				; category_3(x,y)
 				category(x,y,z,2) = category_3_buf_a_tile(x)
+				category(x,y,z,5) = category(x,y,z,2)
 
 				; obj_type(x,y)
 				obj_type(x,y,z,0) = int(obj_type_buf_a_tile(x))
+				obj_type(x,y,z,2) = obj_type(x,y,z,0)
 
 				; obj_type2(x,y)
-				if obj_type2_buf_a_tile(x) != "" : obj_type(x,y,z,1) = int(obj_type2_buf_a_tile(x))
+				if obj_type2_buf_a_tile(x) != "" {
+					obj_type(x,y,z,1) = int(obj_type2_buf_a_tile(x))
+					obj_type(x,y,z,3) = obj_type(x,y,z,1)
+				}
 
 				; obj_dire(x,y)
 				obj_dire(x,y,z,0) = int(obj_dire_buf_a_tile(x))
+				obj_dire(x,y,z,2) = obj_dire(x,y,z,0)
 
 				; obj_dire2(x,y)
-				if obj_dire2_buf_a_tile(x) != "" : obj_dire(x,y,z,1) = int(obj_dire2_buf_a_tile(x))
+				if obj_dire2_buf_a_tile(x) != "" {
+					obj_dire(x,y,z,1) = int(obj_dire2_buf_a_tile(x))
+					obj_dire(x,y,z,3) = obj_dire(x,y,z,1)
+				}
 
 				; obj_serial_num(x,y)
 				obj_serial_num(x,y,z) = int(obj_serial_num_buf_a_tile(x))
@@ -1256,15 +1393,19 @@
 
 				; obj_use_tiles_x(x,y)
 				obj_use_tiles(x,y,z,0) = int(obj_use_tiles_x_buf_a_tile(x))
+				obj_use_tiles(x,y,z,2) = obj_use_tiles(x,y,z,0)
 
 				; obj_use_tiles_y(x,y)
 				obj_use_tiles(x,y,z,1) = int(obj_use_tiles_y_buf_a_tile(x))
+				obj_use_tiles(x,y,z,3) = obj_use_tiles(x,y,z,1)
 
 				; obj_tiles_x(x,y)
 				obj_tiles(x,y,z,0) = int(obj_tiles_x_buf_a_tile(x))
+				obj_tiles(x,y,z,2) = obj_tiles(x,y,z,0)
 
 				; obj_tiles_y(x,y)
 				obj_tiles(x,y,z,1) = int(obj_tiles_y_buf_a_tile(x))
+				obj_tiles(x,y,z,3) = obj_tiles(x,y,z,1)
 
 				; residents(x,y)
 				residents(x,y,z) = int(residents_buf_a_tile(x)) : map_Total_Population += residents(x,y,z)
@@ -3075,7 +3216,8 @@
 *main_mouse_left_release
 	/*----------------------------画面上で左クリックから離されたの処理----------------------------*/
 	; アドオンの車道/線路/水路のタイプと向きを指定（*build_roadtypes）
-	if (cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway") and under_construction_tiles >= 1 {
+	getkey is_mouse_left_pushing, 1
+	if (cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway") and under_construction_tiles >= 1 and is_mouse_left_pushing = 0 {
 		gosub *build_roadtypes
 	}
 
@@ -3622,8 +3764,11 @@
 
 *build
 	/*----------------------------------アドオンの設置--------------------------------------------*/
-
 	if selected_addon_number = map(mx,my,mz,0) : return
+
+	name_before = name(mx,my,mz,0) : map_before = map(mx,my,mz,0)
+	obj_type_before = obj_type(mx,my,mz,0) : obj_dire_before = obj_dire(mx,my,mz,0)
+	category_before = category(mx,my,mz,0)
 
 	; 地区設定
 	if selected_addon_number < 0 {
@@ -3647,11 +3792,10 @@
 	; 道路/線路/水路
 	if cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway" {
 		; 障害物があれば削除
-		name_before = name(mx,my,mz,0) : map_before = map(mx,my,mz,0)
-		obj_type_before = obj_type(mx,my,mz,0) : obj_dire_before = obj_dire(mx,my,mz,0)
-		category_before = category(mx,my,mz,0)
-
-		if map(mx,my,mz) != tile_addon_number : gosub *delete_obj
+		if map(mx,my,mz) != tile_addon_number {
+			from_build_roadtype = 1
+			gosub *delete_obj
+		}
 
 		; 線路または水路と交差する場合
 		if category_before = "railroad" and cursor_mode = "put_Road" {
@@ -3683,6 +3827,13 @@
 		if cursor_mode = "put_Waterway" {
 			if sdnl(addon_type, selected_addon_number, 0) = "port" {
 				category(mx,my,mz,0) = "port"
+				if category_before = "waterway" {
+					name(mx,my,mz,1) = name_before
+					map(mx,my,mz,1) = map_before
+					obj_type(mx,my,mz,1) = obj_type_before
+					obj_dire(mx,my,mz,1) = obj_dire_before
+					category(mx,my,mz,1) = "port"
+				}
 			} else {
 				category(mx,my,mz,0) = "waterway"
 			}
@@ -3743,6 +3894,7 @@
 
 		; adatファイル内でのタイプのIDを取得
 		build_type_number = element2(selected_addon_number, addon_use_types_name, "null")
+		if build_type_number = -1 : return
 
 		; 道路に接続されていない場所に建設しようとしている場合
 		if left_chip_category != "road" and top_chip_category != "road" and bottom_chip_category != "road" and right_chip_category != "road" {
@@ -4122,6 +4274,9 @@
 				continue
 			}
 
+			obj_type_tmp = ""
+			obj_dire_tmp = ""
+
 			; 道路
 			if category(sx,sy,sz,0) = "road" {
 				correct = iforandcorrect_3(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "road", "bridge", "train_crossing")
@@ -4259,13 +4414,14 @@
 				left_bottom_chip_category_2  = safesearch_str(category, sx-1, sy+1, sz, 1, mapsize_x, mapsize_y)
 				right_bottom_chip_category_2 = safesearch_str(category, sx+1, sy+1, sz, 1, mapsize_x, mapsize_y)
 
-				correct = iforandcorrect_2(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "waterway", "bridge")
+				correct = iforandcorrect_3_2(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "waterway", "port", "bridge")
 
-				; 周囲の道路接続が1つ（行き止まり）
+				; 周囲の水路が1つ（行き止まり）
 				if correct = 1 {
 					obj_type_tmp = "river_dead_end"
-					if left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge"     : obj_dire_tmp = "left"
-					if top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge"       : obj_dire_tmp = "top"
+
+					if left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge"    	 	: obj_dire_tmp = "left"
+					if top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge"     		  : obj_dire_tmp = "top"
 					if bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge" : obj_dire_tmp = "bottom"
 					if right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or right_chip_category_2 = "bridge"   : obj_dire_tmp = "right"
 				}
@@ -4291,41 +4447,88 @@
 					}
 
 					; 直線
-					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or right_chip_category_2 = "bridge") {
-						obj_type_tmp = "river_default" : obj_dire_tmp = "depth"
+					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category_2 = "bridge") {
+						if category(sx, sy, sz, 0) = "port" {
+							if left_chip_category = "port" {
+								obj_type_tmp = "dead_end"
+								if (top_chip_category = "waterway") { obj_dire_tmp = "bottom"	} else { obj_dire_tmp = "top" }
+							} else : if right_chip_category = "port" {
+								obj_type_tmp = "dead_end"
+								if (top_chip_category = "waterway") { obj_dire_tmp = "bottom"	} else { obj_dire_tmp = "top" }
+							}
+
+						} else {
+							obj_type_tmp = "river_default"
+							obj_dire_tmp = "depth"
+						}
 					}
-					if (top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
-						obj_type_tmp = "river_default" : obj_dire_tmp = "width"
+					if (top_chip_category = "waterway" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
+						if category(sx, sy, sz, 0) = "port" {
+							if top_chip_category = "port" {
+								obj_type_tmp = "dead_end"
+								if (left_chip_category = "waterway") { obj_dire_tmp = "right"	} else { obj_dire_tmp = "left" }
+							} else : if bottom_chip_category = "port" {
+								obj_type_tmp = "dead_end"
+								if (left_chip_category = "waterway") { obj_dire_tmp = "right"	} else { obj_dire_tmp = "left" }
+							}
+
+						} else {
+							obj_type_tmp = "river_default"
+							obj_dire_tmp = "width"
+						}
 					}
 
 				}
 
-				; 周囲の道路接続が3つ（T字型交差点）
+				; 周囲の道路接続が3つ（T字型交差点, 港の場合は直線or終端）
 				if correct = 3 {
-					obj_type_tmp = "intersection_T"
-					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
-						if (left_top_chip_category = "waterway" or left_top_chip_category = "port" or left_top_chip_category_2 = "bridge") or (left_bottom_chip_category = "waterway" or left_bottom_chip_category = "port" or left_bottom_chip_category_2 = "bridge") {
-							obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+					if category(sx, sy, sz, 0) = "port" {
+						if left_chip_category = "port" and right_chip_category = "port" {
+							obj_type_tmp = "default"
+							if (bottom_chip_category != "waterway" and bottom_chip_category != "port") { obj_dire_tmp = "bottom"	} else { obj_dire_tmp = "top" }
+						} else : if top_chip_category = "port" and bottom_chip_category = "port" {
+							obj_type_tmp = "default"
+							if (right_chip_category != "waterway" and right_chip_category != "port") { obj_dire_tmp = "right"	} else { obj_dire_tmp = "left" }
+						} else : if left_chip_category = "port" and right_chip_category = "waterway" {
+							obj_type_tmp = "dead_end"
+							if (bottom_chip_category != "waterway" and bottom_chip_category != "port") { obj_dire_tmp = "bottom"	} else { obj_dire_tmp = "top" }
+						} else : if top_chip_category = "port" and bottom_chip_category = "waterway" {
+							obj_type_tmp = "dead_end"
+							if (right_chip_category != "waterway" and right_chip_category != "port") { obj_dire_tmp = "right"	} else { obj_dire_tmp = "left" }
+						} else : if bottom_chip_category = "port" and top_chip_category = "waterway" {
+							obj_type_tmp = "dead_end"
+							if (right_chip_category != "waterway" and right_chip_category != "port") { obj_dire_tmp = "right"	} else { obj_dire_tmp = "left" }
+						} else : if right_chip_category = "port" and left_chip_category = "waterway" {
+							obj_type_tmp = "dead_end"
+							if (bottom_chip_category != "waterway" and bottom_chip_category != "port") { obj_dire_tmp = "bottom"	} else { obj_dire_tmp = "top" }
 						}
-						obj_dire_tmp = "left-top-bottom"
-					}
-					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") and (top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge") {
-						if (left_top_chip_category = "waterway" or left_top_chip_category = "port" or left_top_chip_category_2 = "bridge") or (right_top_chip_category = "waterway" or right_top_chip_category = "port" or right_top_chip_category_2 = "bridge") {
-							obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+
+					} else {
+						obj_type_tmp = "intersection_T"
+						if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (top_chip_category = "waterway" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
+							if (left_top_chip_category = "waterway" or left_top_chip_category = "port" or left_top_chip_category_2 = "bridge") or (left_bottom_chip_category = "waterway" or left_bottom_chip_category = "port" or left_bottom_chip_category_2 = "bridge") {
+								obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+							}
+							obj_dire_tmp = "left-top-bottom"
 						}
-						obj_dire_tmp = "left-right-top"
-					}
-					if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
-						if (left_bottom_chip_category = "waterway" or left_bottom_chip_category = "port" or left_bottom_chip_category_2 = "bridge") or (right_bottom_chip_category = "waterway" or right_bottom_chip_category = "port" or right_bottom_chip_category_2 = "bridge") {
-							obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+						if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") and (top_chip_category = "waterway" or top_chip_category = "port" or top_chip_category_2 = "bridge") {
+							if (left_top_chip_category = "waterway" or left_top_chip_category = "port" or left_top_chip_category_2 = "bridge") or (right_top_chip_category = "waterway" or right_top_chip_category = "port" or right_top_chip_category_2 = "bridge") {
+								obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+							}
+							obj_dire_tmp = "left-right-top"
 						}
-						obj_dire_tmp = "left-right-bottom"
-					}
-					if (right_chip_category = "waterway" or right_chip_category = "port" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") and (top_chip_category = "waterway" or left_chip_category = "port" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or left_chip_category = "port" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
-						if (right_top_chip_category = "waterway" or right_top_chip_category = "port" or right_top_chip_category_2 = "bridge") or (right_bottom_chip_category = "waterway" or right_bottom_chip_category = "port" or right_bottom_chip_category_2 = "bridge") {
-							obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+						if (left_chip_category = "waterway" or left_chip_category = "port" or left_chip_category_2 = "bridge") and (right_chip_category = "waterway" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
+							if (left_bottom_chip_category = "waterway" or left_bottom_chip_category = "port" or left_bottom_chip_category_2 = "bridge") or (right_bottom_chip_category = "waterway" or right_bottom_chip_category = "port" or right_bottom_chip_category_2 = "bridge") {
+								obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+							}
+							obj_dire_tmp = "left-right-bottom"
 						}
-						obj_dire_tmp = "right-top-bottom"
+						if (right_chip_category = "waterway" or right_chip_category = "port" or bottom_chip_category_2 = "bridge") and (top_chip_category = "waterway" or top_chip_category = "port" or top_chip_category_2 = "bridge") and (bottom_chip_category = "waterway" or bottom_chip_category = "port" or bottom_chip_category_2 = "bridge") {
+							if (right_top_chip_category = "waterway" or right_top_chip_category = "port" or right_top_chip_category_2 = "bridge") or (right_bottom_chip_category = "waterway" or right_bottom_chip_category = "port" or right_bottom_chip_category_2 = "bridge") {
+								obj_type_tmp = "intersection_T" } else { obj_type_tmp = "river_intersection_T"
+							}
+							obj_dire_tmp = "right-top-bottom"
+						}
 					}
 				}
 
@@ -4410,11 +4613,43 @@
 				}
 
 				; 設定
-				obj_type(sx,sy,sz,0) = element2(map(sx,sy,sz,0), addon_use_types_name, obj_type_tmp)
-				obj_dire(sx,sy,sz,0) = element3(map(sx,sy,sz,0), obj_type(sx,sy,sz,0), addon_dire_names, obj_dire_tmp)
+				obj_type_t = element2(map(sx,sy,sz,0), addon_use_types_name, obj_type_tmp)
+				obj_dire_t = element3(map(sx,sy,sz,0), obj_type_t, addon_dire_names, obj_dire_tmp)
+				if obj_type_t = -1 or obj_dire_t = -1 or obj_type_tmp = "" {
+					//建設に失敗すれば、バッファから建設する前の状態に戻す
+					name_t = name(sx,sy,sz,0)
+					repeat 2
+						map(sx,sy,sz,cnt) = map(sx,sy,sz,cnt+2)
+						name(sx,sy,sz,cnt) = name(sx,sy,sz,cnt+2)
+						obj_type(sx,sy,sz,cnt) = obj_type(sx,sy,sz,cnt+2)
+						obj_dire(sx,sy,sz,cnt) = obj_dire(sx,sy,sz,cnt+2)
+					loop
+					repeat 3
+						category(sx,sy,sz,cnt) = category(sx,sy,sz,cnt+3)
+					loop
+
+					continue
+				}
+
+				obj_type(sx,sy,sz,0) = obj_type_t
+				obj_dire(sx,sy,sz,0) = obj_dire_t
 
 				from_build = 1 : gosub *get_addon_drow_position_new
 			}
+		loop
+	loop
+
+	//それぞれのマップデータのバッファを更新
+	repeat under_construction_tiles
+		sx = new_roadtype_x(cnt) : sy = new_roadtype_y(cnt) : sz = 0
+		repeat 2
+			map(sx,sy,sz,cnt+2) = map(sx,sy,sz,cnt)
+			name(sx,sy,sz,cnt+2) = name(sx,sy,sz,cnt)
+			obj_type(sx,sy,sz,cnt+2) = obj_type(sx,sy,sz,cnt)
+			obj_dire(sx,sy,sz,cnt+2) = obj_dire(sx,sy,sz,cnt)
+		loop
+		repeat 3
+			category(sx,sy,sz,cnt+3) = category(sx,sy,sz,cnt)
 		loop
 	loop
 
@@ -4490,7 +4725,11 @@
 	loop
 
 	; 周囲の道路/線路/水路に反映
-	from_Delete_obj = 1 : gosub *build_roadtypes
+	from_Delete_obj = 1
+	if from_build_roadtype != 1{
+		gosub *build_roadtypes
+	}
+	from_build_roadtype = 0
 
 	; 地価の変動
 	if addon_land_price_influence__tmp != 0 {

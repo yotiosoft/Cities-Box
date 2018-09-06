@@ -1,8 +1,8 @@
-Release Number : 124;
+Release Number : 126;
 Title : Cities Box;
-Version : 1.4.1;
-About : バグ修正;
+Version : 1.5.0;
+About : 港を再実装 / アップデート方式を変更;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
-URL : https://github.com/YotioSoft/Cities-Box/raw/master/;/;
-OS : Windows, macOS;
+URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
+OS : Windows, macOS
