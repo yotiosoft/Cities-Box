@@ -443,7 +443,7 @@
 
 
 		//ƒAƒbƒvƒf[ƒg‚ª‚ ‚Á‚½ê‡
-			if (latest_version__Release_number > about_release_number or Dev_latest_version__Release_number > about_release_number) and config_Ignore_Update = 0 {
+			if (devUpdate = 1 or normalUpdate = 1) and config_Ignore_Update = 0 {
 				color 0, 162, 232 : sboxf 128, windowx-500-10, windowy-titlebar_h-70+5-10, windowx-10, windowy-titlebar_h-10
 				color 255, 255, 255
 
@@ -3797,7 +3797,7 @@
 			gosub *delete_obj
 		}
 
-		; ü˜H‚Ü‚½‚Í…˜H‚ÆŒğ·‚·‚éê‡
+		; “¹˜HAü˜HA…˜H‚ÆŒğ·‚·‚éê‡
 		if category_before = "railroad" and cursor_mode = "put_Road" {
 			category(mx,my,mz,1) = "train_crossing"
 		}
@@ -4604,10 +4604,19 @@
 				if category(sx,sy,sz,1) = "bridge" {
 					obj_type_tmp = "bridge"
 					if obj_dire_tmp != "width" and obj_dire_tmp != "depth" {
-						if top_chip_category = "road" or bottom_chip_category = "road" {
-							obj_dire_tmp = "width"
-						} else {
-							obj_dire_tmp = "depth"
+						if category(sx,sy,sz,0) = "road" {
+							if top_chip_category = "road" or bottom_chip_category = "road" {
+								obj_dire_tmp = "width"
+							} else : if left_chip_category = "road" or right_chip_category = "road" {
+								obj_dire_tmp = "depth"
+							}
+						}
+						if category(sx,sy,sz,0) = "railroad" {
+							if top_chip_category = "railroad" or top_chip_category = "station" or bottom_chip_category = "railroad" or bottom_chip_category = "station" {
+								obj_dire_tmp = "width"
+							} else : if left_chip_category = "railroad" or left_chip_category = "station" or right_chip_category = "railroad" or right_chip_category = "station" {
+								obj_dire_tmp = "depth"
+							}
 						}
 					}
 				}
@@ -5640,7 +5649,7 @@
 					; ‚P‚Â‚Å2ƒ}ƒXˆÈã‚ÌŠwZ‚Ìê‡AŠwZ“à‚Å“¯‚¶¶“k”‚É‚·‚é
 					repeat gi_e
 						if obj_serial_num(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementary_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
-							students(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementrary_schools_z(cnt)) = students(new_school_x, new_school_y, new_school_z)
+							students(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementrary_schools_z(cnt)) = students(new_school_x, new_school_y, new_school_z)		//—vC³
 						}
 					loop
 				}

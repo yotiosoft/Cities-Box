@@ -1,7 +1,7 @@
-Release Number : 125;
+Release Number : 127;
 Title : Cities Box;
-Version : 1.5.0;
-About : æ¸¯ã‚’å†å®Ÿè£… / ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆæ–¹å¼ã‚’å¤‰æ›´;
+Version : 1.5.1;
+About : ‹´‚ÌŒšİ‚ÉŠÖ˜A‚·‚é–â‘è‚ğC³;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
