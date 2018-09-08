@@ -897,6 +897,7 @@ M	module.hsp
 }
 [Ver.1.5.1]127{
 M	Cities_Box.ax
+M	Cities_Box.exe
 M	Cities_Box.hsp
 M	README.md
 M	ReadMe.txt
@@ -904,5 +905,6 @@ M	Sample_City.cbd
 M	data/about.txt
 M	data/error_log.txt
 M	data/latest_version.txt
+M	data/release_files_log.dat
 
 }
