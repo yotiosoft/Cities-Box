@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.5.1
+									    Cities Box Ver.1.5.2
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2018
@@ -5647,8 +5647,9 @@
 					students(new_school_x, new_school_y, new_school_z) += 1
 
 					; ÇPÇ¬Ç≈2É}ÉXà»è„ÇÃäwçZÇÃèÍçáÅAäwçZì‡Ç≈ìØÇ∂ê∂ìkêîÇ…Ç∑ÇÈ
+					redraw 1
 					repeat gi_e
-						if obj_serial_num(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementary_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
+						if obj_serial_num(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementary_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) and all_elementary_schools_x(cnt) != new_school_x and all_elementary_schools_y(cnt) != new_school_y and all_elementary_schools_z(cnt) != new_school_z {
 							students(all_elementary_schools_x(cnt), all_elementary_schools_y(cnt), all_elementrary_schools_z(cnt)) = students(new_school_x, new_school_y, new_school_z)		//óvèCê≥
 						}
 					loop
@@ -5667,7 +5668,7 @@
 
 					//ÇPÇ¬Ç≈2É}ÉXà»è„ÇÃäwçZÇÃèÍçáÅAäwçZì‡Ç≈ìØÇ∂ê∂ìkêîÇ…Ç∑ÇÈ
 					repeat gi_j
-						if obj_serial_num(all_junior_high_schools_x(cnt), all_junior_high_schools_y(cnt), all_junior_high_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
+						if obj_serial_num(all_junior_high_schools_x(cnt), all_junior_high_schools_y(cnt), all_junior_high_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) and all_junior_high_schools_x(cnt) != new_school_x and all_junior_high_schools_y(cnt) != new_school_y and all_junior_high_schools_z(cnt) != new_school_z {
 							students(all_junior_high_schools_x(cnt), all_junior_high_schools_y(cnt), all_junior_high_schools_z(cnt)) = students(new_school_x, new_school_y, new_school_z)
 						}
 					loop
@@ -5690,7 +5691,7 @@
 
 					//ÇPÇ¬Ç≈2É}ÉXà»è„ÇÃäwçZÇÃèÍçáÅAäwçZì‡Ç≈ìØÇ∂ê∂ìkêîÇ…Ç∑ÇÈ
 					repeat gi_h
-						if obj_serial_num(all_high_schools_x(cnt), all_high_schools_y(cnt), all_high_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
+						if obj_serial_num(all_high_schools_x(cnt), all_high_schools_y(cnt), all_high_schools_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) and all_high_schools_x(cnt) != new_school_x and all_high_schools_y(cnt) != new_school_y and all_high_schools_z(cnt) != new_school_z {
 							students(all_high_schools_x(cnt), all_high_schools_y(cnt), all_high_schools_z(cnt)) = students(new_school_x, new_school_y, new_school_z)
 						}
 					loop
@@ -5712,7 +5713,7 @@
 
 					//ÇPÇ¬Ç≈2É}ÉXà»è„ÇÃäwçZÇÃèÍçáÅAäwçZì‡Ç≈ìØÇ∂ê∂ìkêîÇ…Ç∑ÇÈ
 					repeat gi_j
-						if obj_serial_num(all_universities_x(cnt), all_universities_y(cnt), all_universities_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) {
+						if obj_serial_num(all_universities_x(cnt), all_universities_y(cnt), all_universities_z(cnt)) = obj_serial_num(new_school_x, new_school_y, new_school_z) and all_universities_x(cnt) != new_school_x and all_universities_y(cnt) != new_school_y and all_universities_z(cnt) != new_school_z {
 							students(all_universities_x(cnt), all_universities_y(cnt), all_universities_z(cnt)) = students(new_school_x, new_school_y, new_school_z)
 						}
 					loop
