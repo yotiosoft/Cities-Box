@@ -7,3 +7,4 @@ Adjustment_Interval = 2;
 Drow_Interval = 4;
 Config_WindowSize_X = 640;
 Config_WindowSize_Y = 480;
+Auto_Save = 1;

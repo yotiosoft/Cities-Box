@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.5.2
+									    Cities Box Ver.1.6.0
 									 	  (2018.03 Recode)
 
-									  (C) YotioSoft 2017-2018
+									  (C) YotioSoft 2017-2019
 
 --------------------------------------------------------------------------------------------------*/
 
@@ -97,6 +97,8 @@
 
 	config_WindowSize_X = int( get_chapter(config, "Config_WindowSize_X", " = ", ";") )
 	config_WindowSize_Y = int( get_chapter(config, "Config_WindowSize_Y", " = ", ";") )
+
+	config_Auto_Save = int( get_chapter(config, "Auto_Save", " = ", ";") )
 
 
 	windowx=Config_WindowSize_X : windowy=Config_WindowSize_Y
@@ -562,23 +564,31 @@
 						pos 350, 100 : gcopy 14, 0, 16, 16, 16
 					}
 
+				; オートセーブのON/OFF（config_Auto_Save）
+					pos 90, 130 : mes "オートセーブ"
+					if config_Auto_Save = 0 {
+						pos 350, 130 : gcopy 14, 0, 0, 16, 16
+					} else {
+						pos 350, 130 : gcopy 14, 0, 16, 16, 16
+					}
+
 				; フォント設定(SystemFont)
-					pos 90, 130 : mes "フォント"
+					pos 90, 160 : mes "フォント"
 
 					gtmp = ginfo(14)
 
-					pos 90+gtmp+100, 130 : objsize 150, 20 : input config_SystemFont : SyetmFont__stat = stat
-					pos 90+gtmp+250, 130 : objsize 50, 20  : button gosub "参照", *refer_fonts
+					pos 90+gtmp+100, 160 : objsize 150, 20 : input config_SystemFont : SyetmFont__stat = stat
+					pos 90+gtmp+250, 160 : objsize 50, 20  : button gosub "参照", *refer_fonts
 
 				; 動作モード設定(OS)
-					pos 90, 160 : mes "動作モード"
+					pos 90, 190 : mes "動作モード"
 
-					pos 90+gtmp+200, 160 : objsize 100, 20 : combox os_num, 100, "Windows\nmacOS"
+					pos 90+gtmp+200, 190 : objsize 100, 20 : combox os_num, 100, "Windows\nmacOS"
 
 				; 描写間隔（Drow_Interval）
-					pos 90, 190 : mes "描写間隔（数値が低いほど間隔が短い）"
+					pos 90, 220 : mes "描写間隔（数値が低いほど間隔が短い）"
 
-					pos 90+gtmp+250, 190 : objsize 50, 20 : input config_Drow_Interval : DIinpStat = stat
+					pos 90+gtmp+250, 220 : objsize 50, 20 : input config_Drow_Interval : DIinpStat = stat
 
 
 				repeat
@@ -755,7 +765,7 @@
 				font config_SystemFont, 14 : color 255, 255, 255
 				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+about_release_number+"\nDevelopment Language : HSP 3.5"
 				font config_SystemFont, 10 : color 255, 255, 255
-				pos 100, 270 : mes "Copyright(C) YotioSoft 2017-2018 All Rights Reserved."
+				pos 100, 270 : mes "Copyright(C) YotioSoft 2017-2019 All Rights Reserved."
 			}
 
 	stop
@@ -798,6 +808,13 @@
 					config_Get_Dev_Version = 1
 				} else {
 					config_Get_Dev_Version = 0
+				}
+			}
+			if click_range(350, 130, 350+16, 130+16) = 1 {
+				if config_Auto_Save = 0 {
+					config_Auto_Save = 1
+				} else {
+					config_Auto_Save = 0
 				}
 			}
 		}
@@ -1274,6 +1291,10 @@
 			noteget gender_buf_a_line, (y+1)
 
 			split gender_buf_a_line, ", ", gender_buf_a_tile
+
+				; 男女別人口の取得
+				split gender_buf_a_line, "m", tmp : map_gender_M += stat - 1
+				split gender_buf_a_line, "f", tmp : map_gender_F += stat - 1
 
 			; workplace(x,y)
 			notesel workplace_buf
@@ -3848,6 +3869,9 @@
 		obj_type(mx,my,mz) = element2(selected_addon_number, addon_use_types_name, "under_construction")
 		obj_dire(mx,my,mz) = 0
 
+		sx = mx : sy = my : sz = mz
+		from_build = 1 : gosub *get_addon_drow_position_new
+
 		return
 	}
 
@@ -3880,8 +3904,8 @@
 				loop
 			loop
 			wait 10		; ←waitを入れないと誤作動を起こすため
-
-			if s + 1 > addon_build_limit(addon_num_buf) {
+			
+			if s >= int(sdnl(addon_build_limit, selected_addon_number, 0)) {
 				dialog "この建物は既に建設可能回数を超えています！"
 				return
 			}
@@ -4923,7 +4947,11 @@
 				same_news ++	; 同じ内容のニュースの数
 			}
 		loop
-		if same_news > 0 : news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
+
+		news_content = ""
+		while news_content = ""
+			if same_news > 0 : news_content = news_content_candidate(rnd(same_news))		; 候補の中からひとつランダムに選ぶ
+		wend
 	}
 
 	before_map_Total_Population = map_Total_Population
@@ -5088,6 +5116,11 @@
 
 *show_detail
 	/*---------------------------------タイルの詳細を表示-----------------------------------------*/
+	; 更地ならreturn
+	if category(clicked_mx, clicked_my, clicked_mz, 0) = "tile" {
+		return
+	}
+	
 	; ダイアログの大きさを文字列の長さによって決める
 	buffer 999
 		font config_SystemFont, 14
@@ -5209,6 +5242,9 @@
 	map_total_Residential = 0 : map_total_Commercial = 0 : map_total_Office = 0 : map_total_Industrial = 0 : map_total_Farm = 0
 	map_total_Police_Stations = 0 : map_total_Fire_Depertments = 0 : map_total_Post_Offices = 0 : map_total_Education = 0
 
+	map_Total_Population = 0
+	map_gender_M = 0 : map_gender_F = 0
+
 	repeat mapsize_x
 		sx = cnt
 		repeat mapsize_y
@@ -5250,15 +5286,15 @@
 					if rndv = 0 {
 						if int(sdnl(addon_maximum_capacity, map(sx,sy,sz,0), 0)) - before_residents > 0 {
 							add_residents = rnd(int(sdnl(addon_maximum_capacity, map(sx,sy,sz,0), 0)) - before_residents)
-							residents(sx,sy,sz) = before_residents + add_residents
+							residents(sx,sy,sz) += add_residents
 							map_demand_Residential -= add_residents
 
 							repeat add_residents
 								new_age_tmp = rnd(120)
-								if new_age_tmp <= 40 {
-									new_age_tmp = 0			; 1/3の確率で0歳児
+								if new_age_tmp <= 4 {
+									new_age_tmp = 0			; 1/30の確率で0歳児
 								} else {
-									new_age_tmp -= 40		; new_age_tmp > 40の場合、new_age_tmpから40引いた歳を新しい住民の年齢とする
+									new_age_tmp -= 4		; new_age_tmp > 4の場合、new_age_tmpから4引いた歳を新しい住民の年齢とする
 								}
 
 								age(sx,sy,sz) += "["+new_age_tmp+"]"
@@ -5282,7 +5318,7 @@
 							age(sx,sy,sz) = ""
 							gender(sx,sy,sz) = ""
 							if residents(sx,sy,sz) > 0 {
-								repeat (before_residents-cut_residents)
+								repeat residents(sx,sy,sz)
 									age(sx,sy,sz) += "["+age_in_Residential(cnt)+"]"
 									gender(sx,sy,sz) += "["+gender_in_Residential(cnt)+"]"
 								loop
@@ -5291,15 +5327,15 @@
 					}
 
 					if residents(sx,sy,sz) < 0 : residents(sx,sy,sz) = 0
-
-					; 総人口数にも反映
-					map_Total_Population = map_Total_Population - before_residents + residents(sx,sy,sz)
 				}
+
+				; 総人口数にも反映
+					map_Total_Population += residents(sx,sy,sz)
 
 				; 毎年1月1日に、住民の年齢に1を足す
 				if map_Time_Month = 1 and map_Time_Date = 1 and residents(sx,sy,sz) > 0 {
 					; 年齢に1を足す
-					dim age_in_Residential, residents(sx,sy,sz)
+					//dim age_in_Residential, residents(sx,sy,sz)
 					repeat residents(sx,sy,sz)
 						; 120歳を寿命として、drop = 0なら住人一人が死亡
 						drop = rnd(121-age_in_Residential(cnt))
@@ -5311,8 +5347,12 @@
 							age_in_Residential(cnt) ++
 						}
 						age(sx,sy,sz) = ""
+						gender(sx,sy,sz) = ""
 						repeat residents(sx,sy,sz)
-							if age_in_Residential(cnt) >= 0 : age(sx,sy,sz) += "["+age_in_Residential(cnt)+"]"
+							if age_in_Residential(cnt) >= 0 {
+								gender(sx,sy,sz) += "["+gender_in_Residential(cnt)+"]"
+								age(sx,sy,sz) += "["+age_in_Residential(cnt)+"]"
+							}
 						loop
 					loop
 				}
@@ -5344,9 +5384,11 @@
 				repeat residents(sx,sy,sz)
 					if instr(gender_tmp(cnt), 0, "m") != -1 {
 						gender_M ++
+						map_gender_M ++
 					}
 					if instr(gender_tmp(cnt), 0, "f") != -1 {
 						gender_F ++
+						map_gender_F ++
 					}
 				loop
 			}
@@ -5379,7 +5421,10 @@
 	map_approval_rate = happiness_ave
 
 	; 税金の支出＆徴収（毎月1日のみ）
+	; および月ごとの統計データの出力
+	; さらにオートセーブも行う
 	if map_time_Date = 1 {
+		; 税金の支出＆徴収
 		if map_total_Police_Stations = 0  : take_budget_of_Police = 0          : else : take_budget_of_Police = map_total_Police_Stations * map_budget_of_Police*10
 		if map_total_Fire_Depertments = 0 : take_budget_of_Fire_Depertment = 0 : else : take_budget_of_Fire_Depertment = map_total_Fire_Depertments * map_budget_of_Police*10
 		if map_total_Post_Offices = 0     : take_budget_of_Post_Office = 0     : else : take_budget_of_Post_Office = map_total_Post_Offices * map_budget_of_Post_Office*10
@@ -5393,6 +5438,17 @@
 
 		map_Money -= take_budget_of_Police + take_budget_of_Fire_Depertment + take_budget_of_Post_Office + take_budget_of_Education
 		map_Money += take_tax_of_Residential + take_tax_of_Commercial + take_tax_of_Office + take_tax_of_Industrial + take_tax_of_Farm
+
+		; 統計データの出力
+		notesel statistics
+		noteadd "date : "+map_time_Year+"."+map_time_Month+".1, population total : "+map_Total_Population+", population man : "+map_gender_M+", population female : "+map_gender_F+", money : "+map_Money+", approval rate : "+map_approval_rate+", workers commercial : "+map_Total_workers_Commercial+", workers office : "+map_Total_workers_Office+", workers industrial : "+map_Total_workers_Industrial+", workers farm : "+map_Total_workers_Farm+""
+		notesave "data/statistics.dat"
+
+		; オートセーブ（config_Auto_Save = 1のとき）
+		if config_Auto_Save = 1 {
+			from_autosave = 1
+			gosub *save
+		}
 	}
 
 	; 需要度を増減
@@ -5945,12 +6001,20 @@
 	}
 	pos 35, 130 : mes "BGMの再生"
 
-	; フォント(config_SystemFont)
-	pos 10, 160 : mes "フォント"
-	objsize 194, 20
-	pos 80, 160 : input config_SystemFont
+	; オートセーブ（config_Auto_Save）
+	if config_Auto_Save = 0 {
+		pos 10, 163 : gcopy 14, 0, 0, 16, 16
+	} else {
+		pos 10, 163 : gcopy 14, 0, 16, 16, 16
+	}
+	pos 35, 160 : mes "オートセーブ"
 
-	gmode 2 : pos 274, 160 : gcopy 16, 0, 0, 16, 16
+	; フォント(config_SystemFont)
+	pos 10, 190 : mes "フォント"
+	objsize 194, 20
+	pos 80, 190 : input config_SystemFont
+
+	gmode 2 : pos 274, 190 : gcopy 16, 0, 0, 16, 16
 
 	stop
 
@@ -5981,6 +6045,15 @@
 			config_Set_Play_BGM = 1
 		} else {
 			config_Set_Play_BGM = 0
+		}
+	}
+
+	; オートセーブ(config_Auto_Save)
+	if click_range(10, 163, 10+16, 163+16) = 1 {
+		if config_Auto_Save = 0 {
+			config_Auto_Save = 1
+		} else {
+			config_Auto_Save = 0
 		}
 	}
 
@@ -6028,15 +6101,19 @@
 	save_mapdata = ""
 
 	; 誤反応防止
-	if click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 : return
+	if from_autosave = 0 and click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 : return
 
 	; 保存先ファイルの選択
-	dialog "cbd", 17, "Cities Box マップデータ"
-
-	save_mapdata_name = refstr
+	if from_autosave = 0 {
+		dialog "cbd", 17, "Cities Box マップデータ"
+		save_mapdata_name = refstr
+		if stat = 0 : return
+	} else {
+		from_autosave = 0
+		save_mapdata_name = "auto_save/"+map_City_Name+"_autosave.cbd"
+	}
+	
 	if instr(save_mapdata_name, 0, ".cbd") = -1 : save_mapdata_name = ""+save_mapdata_name+".cbd"
-
-	if stat = 0 : return
 
 	; 保存中表示
 	color : sboxf 128, 0, 0, windowx, windowy
@@ -6287,6 +6364,7 @@
 		noteadd "Drow_Interval = "+config_Drow_Interval+";", -1
 		noteadd "Config_WindowSize_X = "+Config_WindowSize_X+";", -1
 		noteadd "Config_WindowSize_Y = "+Config_WindowSize_Y+";", -1
+		noteadd "Auto_Save = "+config_Auto_Save+";", -1
 		notesave "data/config.dat"
 
 		from_menu_setting = 0

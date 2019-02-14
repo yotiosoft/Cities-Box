@@ -1,6 +1,6 @@
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.5.2-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.6.0-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
@@ -97,8 +97,16 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 ・他の都市との交易
 
 # 最終更新
-## Ver.1.5.2 r128  
-特定の条件下で学校を設置するとエラーが発生する問題を修正  
-一部のアドオンの画像を修正  
+## Ver.1.6.0 r129  
+オートセーブ機能を実装  
+人口など都市データの履歴の保存を実装  
+更地では詳細ダイアログを表示しないように修正  
+情報パネルで、男性人口と女性人口が0人になる問題を修正  
+住民が死亡した際に、性別データにも反映されるように修正  
+0歳児の出現率を低下  
+住民データ関連の問題を修正  
+ニュースがときどき空白になる問題を修正  
+建設回数制限付きのアドオンが上限に達していないのに建設できない問題を修正  
+道路を引いた直後に、工事中の道路が描画されない問題を修正  
     
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。
