@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.6.0
+									    Cities Box Ver.1.6.1
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -1050,6 +1050,19 @@
 				map_tax_of_Farm = 100
 			}
 
+	// 都市データ履歴の読み込み
+		if instr(load_mapdata, 0, "statistics") != -1 {
+			statisticsTemp = get_chapter(load_mapdata, "statistics", " {", "}")
+
+			notesel statisticsTemp : statisticsLines = notemax
+			repeat statisticsLines - 1
+				notesel statisticsTemp	: noteget statisticsTempALine, cnt+1
+				notesel statistics		: noteadd statisticsTempALine, cnt
+			loop
+		} else {
+			statistics = ""
+		}
+
 	//ここでアドオンを読み込む
 		gosub *load_addons
 
@@ -1485,12 +1498,18 @@
 				; original_name(x,y,z)
 				original_name(x,y,z) = original_name_buf_a_tile(x)
 
+				; 幸福度の平均値を出すため、happiness_tmpにhappiness(x,y,z)を加算
+				happiness_tmp += happiness(x,y,z)
+
 			loop
 
 			await 1
 		loop
 
 		before_map_Total_Population = map_Total_Population
+
+		happiness_ave = happiness_tmp / (mapsize_x*mapsize_y)
+		map_approval_rate = happiness_ave
 
 	chdir directory
 	goto *initialization
@@ -1500,30 +1519,72 @@
 	//アドオンのリストを取得
 	chdir "addons"
 
+	//adatファイルのリストを取得
 	dirlist2h 1, ','
-	dirlist2 buf_addons, "*.adat*", 1, '\\'
+	dirlist2 countOfAddonFiles, "*.adat*", 1, '\\'
 
-	sdim filelist, buf_addons
-	dirlist2r filelist
+	sdim addonFileslist, countOfAddonFiles
+	dirlist2r addonFilesList
 
-	notesel filelist
-	total_addons_all_addons_sets = notemax
-	total_addons = 0
+	notesel addonFilesList
+	countOfTotalAddonFiles = notemax
+	loadedAddonFiles = 0
 
-	dim correct_addons_set, total_addons_all_addons_sets
+	//adonファイルのリストを取得
+	dirlist2 countOfAdonFiles, "*.adon*", 1, '\\'
 
-	repeat total_addons_all_addons_sets
+	sdim adonFileslist, countOfAdonFiles
+	dirlist2r adonFilesList
+
+	notesel adonFilesList
+	countOfTotalAdonFiles = notemax
+	sdim adonAdatFiles, 512, countOfTotalAdonFiles
+	sdim adonImageFiles, 512, countOfTotalAdonFiles, 10
+	sdim adonImageFilesName, 128, countOfTotalAdonFiles, 10
+	sdim adonIconFiles, 512, countOfTotalAdonFiles
+	dim  countOfAdonImageFiles, countOfTotalAdonFiles
+
+	notesel addonFilesList
+	addonFilesList += adonFilesList
+	notesave "filelist.txt"
+	countOfTotalAddonFiles += countOfTotalAdonFiles
+
+	//配列などを初期化
+	dim correct_addons_set, countOfTotalAddonFiles + countOfTotalAdonFiles
+	dim fromAdonFile, countOfAddonFiles
+
+	maxCountOfImages = 0
+
+	//adonファイル以外のアドオンの読み込み
+	countOfAdonFiles = 0
+	repeat countOfTotalAddonFiles
 		addon_number = cnt
 
 		chdir ""+directory+"\\addons"
 
 		; ファイルリストから読み込むadatファイル名を取得
-		notesel filelist
-		noteget adat_name, addon_number
+		notesel addonFilesList
+		noteget addonFileName, addon_number
+
+		; addonFileNameの拡張子が.adonなら展開
+		loadingAdatFile = 1
+		if getpath(addonFileName, 2) = ".adon" {
+			loadingAdatFile = 0
+			gosub *getAddonDataFromAdonFile
+		}
 
 		; 読み込むadatファイルの内容をadat_tmpに代入
-		notesel adat_tmp
-		noteload adat_name
+		if loadingAdatFile = 1 {
+			notesel adat_tmp
+			noteload addonFileName
+			fromAdonFile(addon_number) = 0
+		} else {
+			adat_tmp = adonAdatFiles(countOfAdonFiles)
+			
+			fromAdonFile(addon_number) = 1
+
+			countOfAdonFiles ++
+		}
 
 		; belong_addons_set_name（所属するアドオンセットの名前）
 		belong_addons_set_name = get_chapter(adat_tmp, "belong_addons_set_name", " = \"", "\"")
@@ -1537,6 +1598,7 @@
 	loop
 
 	addon_number = 0
+	countOfLoadedAdonFiles = 0
 
 	//アドオン用の疑似配列の宣言
 	tmp = ""
@@ -1572,23 +1634,29 @@
 
 	next_image_num = BEGIN_ADDON_BUFFER_ID
 
-	repeat total_addons_all_addons_sets
+	repeat countOfTotalAddonFiles
 		if correct_addons_set(cnt) = 0 {
 			continue
 		}
 
+		totalAddonNumber = cnt
+
 		chdir ""+directory+"\\addons"
 
 		; ファイルリストから読み込むadatファイル名を取得
-		notesel filelist
-		noteget adat_name, cnt
+		notesel addonFilesList
+		noteget addonFileName, cnt
 
 		; 読み込むadatファイルの内容をadat_tmpに代入
-		notesel adat_tmp
-		noteload adat_name
+		if fromAdonFile(cnt) = 1 {
+			adat_tmp = adonAdatFiles(countOfLoadedAdonFiles)
+		} else {
+			notesel adat_tmp
+			noteload addonFileName
+		}
 
 		; adatファイル（アドオンの画像ファイル含む）があるディレクトリを取得
-		addon_path = getpath(adat_name, 32)
+		addon_path = getpath(addonFileName, 32)
 
 		; ディレクトリ変更（あとで画像を読み込むため）
 		chdir addon_path
@@ -1619,7 +1687,14 @@
 			tmp = get_chapter(adat_tmp, "addon_icon", " = \"", "\"")
 
 			; アイコン画像読み込み
-				celload tmp, next_image_num
+				if fromAdonFile(cnt) = 1 {
+					buffer next_image_num
+						memfile adonIconFiles(countOfLoadedAdonFiles)
+						picload "MEM:.png"
+					gsel 0
+				} else {
+					celload tmp, next_image_num
+				}
 				next_image_icon_num_str = str(next_image_num)
 				sdns addon_icon_number, addon_number, 0, next_image_icon_num_str
 
@@ -1828,11 +1903,25 @@
 				; 通常時
 					exist load_image
 
-					if strsize = -1 {
-						error "A02 : アドオンの画像ファイルが見つかりません\n"+sdnl(addon_name, addon_number, 0)+"で利用する"+load_image+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
+					if strsize = -1 and fromAdonFile(totalAddonNumber) = 0 {
+						error "A02 : アドオンの画像ファイルが見つかりません\n"+fromAdonFile(cnt) = 0+" "+sdnl(addon_name, addon_number, 0)+"で利用する"+load_image+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
 					}
 
-					celload load_image, next_image_num
+					if fromAdonFile(totalAddonNumber) = 1 {
+						repeat countOfAdonImageFiles(countOfLoadedAdonFiles)
+							if adonImageFilesName(countOfLoadedAdonFiles, cnt) = load_image {
+								buffer next_image_num
+									memfile adonImageFiles(countOfLoadedAdonFiles, cnt)
+									picload "MEM:.png"
+								gsel 0
+
+								break
+							}
+						loop
+					} else {
+						celload load_image, next_image_num
+					}
+					
 					next_image_num_str = str(next_image_num)
 					sdns3 addon_image, addon_number, tcnt, 1, next_image_num_str, total_addons, 12, 2
 
@@ -1852,11 +1941,28 @@
 					if load_night_mask_image != "" {
 						exist load_night_mask_image
 
-						if strsize = -1 {
+						if strsize = -1 and fromAdonFile(totalAddonNumber) = 0 {
 							error "A03 : アドオンの夜間マスク画像ファイルが見つかりません\n"+sdnl(addon_name, addon_number, 0)+"で利用する"+load_night_mask_image+"が見つかりません。\nアドオンファイル(*.adat)と同じ場所に画像があることをご確認ください。"
 						}
 
-						celload load_night_mask_image, 99
+						if fromAdonFile(totalAddonNumber) = 1 {
+							repeat countOfAdonImageFiles(countOfLoadedAdonFiles)
+								if adonImageFilesName(countOfLoadedAdonFiles, cnt) = load_night_mask_image {
+									buffer 99
+										memfile adonImageFiles(countOfLoadedAdonFiles, cnt)
+										if getpath(adonImageFilesName(countOfLoadedAdonFiles, cnt), 2) = ".png" {
+											picload "MEM:.png"
+										} else {
+											picload "MEM:"
+										}
+									gsel 0
+	
+									break
+								}
+							loop
+						} else {
+							celload load_night_mask_image, 99
+						}
 					}
 
 					buffer next_image_num, imgx, imgy
@@ -1898,7 +2004,191 @@
 				gsel 0
 
 			loop
+
+		; adonファイルならcountOfLoadedAdonFiles ++
+		if fromAdonFile(cnt) = 1 {
+			countOfLoadedAdonFiles ++
+		}
+		
 		addon_number ++
+	loop
+
+	return
+
+*getAddonDataFromAdonFile	// adonファイルから読み込む
+	; カレントディレクトリ指定
+	currentDirectory = getpath(addonFileName, 32)
+
+	; ファイル名指定
+	addonFilePath = getpath(addonFileName, 8)
+
+	; unpacker.hsp内の*unpackingでadonファイル展開
+	gosub *unpacking
+
+	if maxCountOfImages > countOfImages {
+		maxCountOfImages = countOfImages
+	}
+
+	countOfAdonImageFiles(countOfAdonFiles) = countOfImages
+	
+	; 展開したバイナリデータを各変数に代入
+	/*
+	adatFlieData = adatFileBinary
+
+	sdim imageFilesData, countOfImages
+	repeat countOfImages
+		imageFilesData = imageFilesBinary(cnt)
+	loop
+
+	iconFileData = iconFileBinary
+
+	total_addons ++
+
+	dialog ""+adatFileData+""
+	*/
+	return
+
+*unpacking		// adonファイルの分割
+	/*-------------------------------読み込み---------------------------------*/
+	// アドオンファイル読み込み
+	chdir currentDirectory
+	exist addonFilePath : addonFileSize = strsize
+
+	if addonFileSize = -1 {
+		error "A04 : adonファイルが見つかりません\n\n"+dirinfo(0)+"/"+addonFileName+""
+	}
+
+	sdim blAddonFile, addonFileSize
+	bload addonFilePath, blAddonFile
+	
+	// アドオンファイルかどうか確認
+	if instr(blAddonFile, 0, ".ADON") = -1 {
+		error "A05 : 拡張子adonのファイルがアドオンファイルではありません\n\n"+dirinfo(0)+"/"+addonFileName+""
+	}
+
+	// 始点/終端タグを設定
+	countOfImagesTagStart = "<i|"
+	countOfImagesTagEnd = ">"
+	
+	adatFileStartTag = "<f|a:"
+	adatFileEndTag = ">"
+
+	imageFileStartTag = "<f|im:"
+	imageFileEndTag = ">"
+
+	iconFileStartTag = "<f|ic:"
+	iconFileEndTag = ">"
+
+	endOfFileTag = "<ENDADON>"
+
+	// アドオンに使う画像ファイルを取得
+	countOfImages = 0
+
+	countOfImagesTagIndex = binarySearch(blAddonFile, 0, countOfImagesTagStart, addonFileSize)
+	countOfImages = int(binaryCut(blAddonFile, (countOfImagesTagIndex+strlen(countOfImagesTagStart)), binarySearch(blAddonFile, countOfImagesTagIndex, countOfImagesTagEnd, addonFileSize), addonFileSize))
+
+	mes countOfImages
+
+	// それぞれのファイルの始点インデックスとファイル名を取得
+	searchedImages = 0
+	dim endOfTagForImageFileIndex, countOfImages, 8
+	//sdim imageFilesName, 32, countOfImages
+	dim startOfImageFilesIndex, countOfImages
+
+	startOfAdatFileIndex = -1
+	repeat countOfImages
+		startOfImageFilesIndex(cnt) = -1
+	loop
+	startOfIconFileIndex = -1
+	
+	repeat addonFileSize
+		// adatファイル
+		if startOfAdatFileIndex = -1 {
+			temp = binaryCut(blAddonFile, cnt, cnt+strlen(adatFileStartTag), addonFileSize)
+			if instr(temp, 0, adatFileStartTag) = 0 {
+				endOfTagForAdatFileIndex = binarySearch(blAddonFile, cnt, adatFileEndTag, addonFileSize)
+				//adatFileName = binaryCut(blAddonFile, cnt+strlen(adatFileStartTag), endOfTagForAdatFileIndex, addonFileSize)
+	
+				startOfAdatFileIndex = endOfTagForAdatFileIndex+strlen(adatFileEndTag)
+			}
+		}
+
+		// 画像ファイル
+		if countOfImages > searchedImages {
+			temp = binaryCut(blAddonFile, cnt, cnt+strlen(imageFileStartTag), addonFileSize)
+			if instr(temp, 0, imageFileStartTag) = 0 {
+				endOfTagForImageFileIndex(searchedImages) = binarySearch(blAddonFile, cnt, imageFileEndTag, addonFileSize)
+				adonImageFilesName(countOfAdonFiles, searchedImages) = binaryCut(blAddonFile, cnt+strlen(imageFileStartTag), endOfTagForImageFileIndex(searchedImages), addonFileSize)
+
+				startOfImageFilesIndex(searchedImages) = endOfTagForImageFileIndex(searchedImages)+strlen(imageFileEndTag)
+				
+				searchedImages ++
+			}
+		}
+
+		// アイコンファイル
+		if startOfIconFileIndex = -1 {
+			temp = binaryCut(blAddonFile, cnt, cnt+strlen(iconFileStartTag), addonFileSize)
+			if instr(temp, 0, iconFileStartTag) = 0 {
+				endOfTagForIconFileIndex = binarySearch(blAddonFile, cnt, iconFileEndTag, addonFileSize)
+				//iconFileName = binaryCut(blAddonFile, cnt+strlen(iconFileStartTag), endOfTagForIconFileIndex, addonFileSize)
+	
+				startOfIconFileIndex = endOfTagForIconFileIndex+strlen(iconFileEndTag)
+				
+				mes iconFileName
+			}
+		}
+		
+	loop
+
+	// それぞれのファイルの終端インデックスを取得
+	// adatファイル
+	endOfAdatFileIndex = binarySearch(blAddonFile, startOfAdatFileIndex, imageFileStartTag, addonFileSize) - 1
+
+	// 画像ファイル
+	dim endOfImageFilesIndex, countOfImages
+	
+	repeat countOfImages
+		if cnt = countOfImages - 1 {
+			endOfImageFilesIndex(cnt) = binarySearch(blAddonFile, startOfImageFilesIndex(cnt), iconFileStartTag, addonFileSize) - 1
+		} else {
+			endOfImageFilesIndex(cnt) = binarySearch(blAddonFile, startOfImageFilesIndex(cnt), imageFileStartTag, addonFileSize) - 1
+		}
+	loop
+
+	// アイコンファイル
+	endOfIconFileIndex = binarySearch(blAddonFile, startOfIconFileIndex, endOfFileTag, addonFileSize) - 1
+
+	// ファイル分割
+	// adatファイル
+	adonAdatFiles(countOfAdonFiles) = binaryCut(blAddonFile, startOfAdatFileIndex, endOfAdatFileIndex+1, addonFileSize)
+
+	// 画像ファイル
+	sdim imageFilesBinary, countOfImages, 128
+	repeat countOfImages
+		imageNum = cnt
+		adonImageFiles(countOfAdonFiles, imageNum) = binaryCut(blAddonFile, startOfImageFilesIndex(cnt), endOfImageFilesIndex(cnt)+1, addonFileSize)
+		repeat endOfImageFilesIndex(cnt)-startOfImageFilesIndex(imageNum)
+			oldBinaryPeekTemp = peek(blAddonFile, startOfImageFilesIndex(imageNum)+cnt)
+			newBinaryPeekTemp = peek(adonImageFiles(countOfAdonFiles, imageNum), cnt)
+			
+			if oldBinaryPeekTemp = 0 and newBinaryPeekTemp = 1 {
+				poke adonImageFiles(countOfAdonFiles, imageNum), cnt, 0
+			}
+		loop
+	loop
+
+	// アイコンファイル
+	sdim iconFileBinary, endOfIconFileIndex-startOfIconFileIndex
+	adonIconFiles(countOfAdonFiles) = binaryCut(blAddonFile, startOfIconFileIndex, endOfIconFileIndex+1, addonFileSize)
+
+	repeat endOfIconFileIndex-startOfIconFileIndex
+		oldBinaryPeekTemp = peek(blAddonFile, startOfIconFileIndex+cnt)
+		newBinaryPeekTemp = peek(adonIconFiles(countOfAdonFiles), cnt)
+		
+		if oldBinaryPeekTemp = 0 and newBinaryPeekTemp = 1 {
+			poke adonIconFiles(countOfAdonFiles), cnt, 0
+		}
 	loop
 
 	return
@@ -1917,9 +2207,9 @@
 
 	//アドオンセット一覧を取得
 	dirlist2h 1, ','
-	dirlist2 buf_addons, "*.adset*", 1, '\\'
+	dirlist2 tempAdatFiles, "*.adset*", 1, '\\'
 
-	sdim filelist, buf_addons
+	sdim filelist, tempAdatFiles
 	dirlist2r filelist
 
 	notesel filelist
@@ -5442,7 +5732,6 @@
 		; 統計データの出力
 		notesel statistics
 		noteadd "date : "+map_time_Year+"."+map_time_Month+".1, population total : "+map_Total_Population+", population man : "+map_gender_M+", population female : "+map_gender_F+", money : "+map_Money+", approval rate : "+map_approval_rate+", workers commercial : "+map_Total_workers_Commercial+", workers office : "+map_Total_workers_Office+", workers industrial : "+map_Total_workers_Industrial+", workers farm : "+map_Total_workers_Farm+""
-		notesave "data/statistics.dat"
 
 		; オートセーブ（config_Auto_Save = 1のとき）
 		if config_Auto_Save = 1 {
@@ -5470,6 +5759,7 @@
 		map_demand_Residential 	= 100
 	}
 	if map_demand_Residential < 0 : map_demand_Residential = 1
+	if map_demand_Residential > 100 : map_demand_Residential = 100
 
 	; Commercial（商業）
 	if map_Total_Commercial_maximum_capacity > 0 {
@@ -5478,6 +5768,7 @@
 		map_demand_Commercial 	= 100
 	}
 	if map_demand_Commercial < 0 : map_demand_Commercial = 1
+	if map_demand_Commercial > 100 : map_demand_Commercial = 100
 
 	; Office（オフィス）
 	if map_Total_Office_maximum_capacity > 0 {
@@ -5486,6 +5777,7 @@
 		map_demand_Office 		= 100
 	}
 	if map_demand_Office < 0 : map_demand_Office = 1
+	if map_demand_Office > 100 : map_demand_Office = 100
 
 	; Industrial（工業）
 	if map_Total_Industrial_maximum_capacity > 0 {
@@ -5494,6 +5786,7 @@
 		map_demand_Industrial 	= 100
 	}
 	if map_demand_Industrial < 0 : map_demand_Industrial = 1
+	if map_demand_Industrial > 100 : map_demand_Industrial = 100
 
 	; Farm（農業）
 	if map_Total_Farm_maximum_capacity > 0 {
@@ -5502,6 +5795,7 @@
 		map_demand_Farm 	= 100
 	}
 	if map_demand_Farm < 0 : map_demand_Farm = 1
+	if map_demand_Farm > 100 : map_demand_Farm = 100
 
 	return
 
@@ -5693,7 +5987,7 @@
 		if school_tmp(cnt) = "" {
 			; 小学校（6～12歳）
 			if age_in_Residential(cnt) >= 6 and age_in_Residential(cnt) <= 12 and gi_e >= 1 {
-				new_school_rnd = rnd(gi_e-1)	; 学校はランダムに決める
+				new_school_rnd = rnd(gi_e)	; 学校はランダムに決める
 				new_school_x = all_elementary_schools_x(new_school_rnd)
 				new_school_y = all_elementary_schools_y(new_school_rnd)
 				new_school_z = all_elementary_schools_z(new_school_rnd)
@@ -5713,7 +6007,7 @@
 			}
 			//中学校（13～15歳）
 			if age_in_Residential(cnt) >= 13 and age_in_Residential(cnt) <= 15 and gi_j >= 1 {
-				new_school_rnd = rnd(gi_j-1)	; 学校はランダムに決める
+				new_school_rnd = rnd(gi_j)	; 学校はランダムに決める
 				new_school_x = all_junior_high_schools_x(new_school_rnd)
 				new_school_y = all_junior_high_schools_y(new_school_rnd)
 				new_school_z = all_junior_high_schools_z(new_school_rnd)
@@ -5736,7 +6030,7 @@
 			dr_h = rnd(3)	; 高校は 1/3の確率で入る
 
 			if dr_h = 0 and age_in_Residential(cnt) >= 16 and age_in_Residential(cnt) <= 18 and gi_h >= 1 {
-				new_school_rnd = rnd(gi_h-1)	; 学校はランダムに決める
+				new_school_rnd = rnd(gi_h)	; 学校はランダムに決める
 				new_school_x = all_high_schools_x(new_school_rnd)
 				new_school_y = all_high_schools_y(new_school_rnd)
 				new_school_z = all_high_schools_z(new_school_rnd)
@@ -5758,7 +6052,7 @@
 			dr_u = rnd(age_in_Residential(cnt))	; 大学は1/年齢の確率で入る
 
 			if dr_u = 0 and age_in_Residential(cnt) >= 19 and age_in_Residential(cnt) <= 50 and gi_u >= 1 {
-				new_school_rnd = rnd(gi_u-1)	; 学校はランダムに決める
+				new_school_rnd = rnd(gi_u)	; 学校はランダムに決める
 				new_school_x = all_universities_x(new_school_rnd)
 				new_school_y = all_universities_y(new_school_rnd)
 				new_school_z = all_universities_z(new_school_rnd)
@@ -5785,9 +6079,16 @@
 
 *information_panel
 	/*------------------------------------情報パネル----------------------------------------------*/
-	screen 1, 400, 300
+	screen 1, 675, 250
 	gsel 1, 2 : title "情報パネル"
 
+	statistics_mode = "population total"
+
+*information_panel_2
+	gosub *getStatistics
+
+	redraw 0
+	
 	color 128, 128, 128 : boxf
 
 	mci "stop Cities-Box"
@@ -5801,28 +6102,211 @@
 	font config_SystemFont, 16 : color 255, 255, 255
 	pos 50, 15 : mes "都市の情報"
 
-	color 255, 255, 255 : boxf 10, 45, 390, 95
-	color 128, 128, 128 : boxf 11, 46, 389, 94
+	color 255, 255, 255 : boxf 10, 45, 340, 95
+	color 128, 128, 128 : boxf 11, 46, 339, 94
 
 	color 255, 255, 255 : font config_SystemFont, 14
 	pos 15, 50  : mes "都市名 "+map_city_name+"\n市長　 "+map_mayor_name+""
 	pos 200, 50 : mes "資金　 § "+map_Money+"\n支持率 "+map_approval_rate+"%"
 
-	color 255, 255, 255 : boxf 10, 100, 390, 200
-	color 128, 128, 128 : boxf 11, 101, 389, 199
+	color 255, 255, 255 : boxf 10, 100, 340, 200
+	color 128, 128, 128 : boxf 11, 101, 339, 199
 
 	color 255, 255, 255 : font config_SystemFont, 14
 	pos 15, 105  : mes "商業地区の労働者数 　　"+map_Total_workers_Commercial+"人\nオフィス地区の労働者数　　"+map_Total_workers_Office+"人\n工業地区の労働者数 　　"+map_Total_workers_Industrial+"人\n農業地区の労働者数　　"+map_Total_workers_Farm+"人\n公務員の労働者数　　　"+map_Total_workers_Public+"人"
 	//pos 230, 105  : mes "非労働者数 　　"+map_Total_Vagrants+"人"
 
-	color 255, 255, 255 : boxf 10, 205, 390, 245
-	color 128, 128, 128 : boxf 11, 206, 389, 244
+	color 255, 255, 255 : boxf 10, 205, 340, 245
+	color 128, 128, 128 : boxf 11, 206, 339, 244
 
 	color 255, 255, 255 : font config_SystemFont, 14
 	pos 15, 210 : mes "人口 "+map_Total_Population+"人"
 	pos 200, 210 : mes "男性人口 "+map_gender_M+"人\n女性人口 "+map_gender_F+"人"
 
+	// グラフの表示
+	color 255, 255, 255 : boxf 345, 45, 665, 245
+	color 128, 128, 128 : boxf 346, 46, 664, 244
+
+	color 255, 255, 255 : font config_SystemFont, 14
+
+	pos 350, 50
+	if statistics_mode = "population total"		: mes "人口の推移"
+	if statistics_mode = "population man"		: mes "男性人口の推移"
+	if statistics_mode = "population female"	: mes "女性人口の推移"
+	if statistics_mode = "population money"		: mes "資金の推移"
+	if statistics_mode = "approval rate"		: mes "支持率の推移"
+	if statistics_mode = "workers commercial"	: mes "商業地区労働者数の推移"
+	if statistics_mode = "workers office"		: mes "オフィス地区労働者数の推移"
+	if statistics_mode = "workers industrial"	: mes "工業地区労働者数の推移"
+	if statistics_mode = "workers farm"			: mes "農業地区労働者数の推移"
+
+	line 390, 70, 390, 230 : line 390, 230, 534, 230 : graph_high = 230-70
+
+	font config_SystemFont, 10
+
+	// 縦軸
+	repeat graph_high/25+1
+		pos 355, 230-10-cnt*25 : mes str(int(1.0*(max-min)/graph_high*cnt*25))
+	loop
+
+	// 横軸
+	repeat count_of_statistics
+		pos leftmost_plot_point+(12*cnt-4), 232 : mes statistics_date_month(cnt)
+	loop
+
+	// プロットとグラフ描画
+	repeat count_of_statistics
+		statistics_temp_before = statistics_temp
+		if statistics_mode = "population total" 	: statistics_temp = statistics_population_total(cnt)
+		if statistics_mode = "population man"		: statistics_temp = statistics_population_man(cnt)
+		if statistics_mode = "population female"	: statistics_temp = statistics_population_female(cnt)
+		if statistics_mode = "money"				: statistics_temp = statistics_money(cnt)
+		if statistics_mode = "approval rate"		: statistics_temp = statistics_approval_rate(cnt)
+		if statistics_mode = "workers commercial"	: statistics_temp = statistics_workers_commercial(cnt)
+		if statistics_mode = "workers office"		: statistics_temp = statistics_workers_office(cnt)
+		if statistics_mode = "workers industrial"	: statistics_temp = statistics_workers_industrial(cnt)
+		if statistics_mode = "workers farm"			: statistics_temp = statistics_workers_farm(cnt)
+
+		if cnt >= 1 {
+			line leftmost_plot_point+(12*(cnt-1)), 230-1.0*graph_high/(max-min)*statistics_temp_before, leftmost_plot_point+(12*cnt), 230-1.0*graph_high/(max-min)*statistics_temp
+		}
+		
+		circle leftmost_plot_point+(12*cnt-2), 230-1.0*graph_high/(max-min)*statistics_temp-2, leftmost_plot_point+(12*cnt+2), 230-1.0*graph_high/(max-min)*statistics_temp+2
+	loop
+
+	// グラフモード選択ボタンを配置
+	objsize 100, 20
+	pos 550, 60+20*0	: button "人口",			*information_panel__graph_set_population_total
+	pos 550, 60+20*1	: button "男性人口",		*information_panel__graph_set_population_man
+	pos 550, 60+20*2	: button "女性人口",		*information_panel__graph_set_population_female
+	pos 550, 60+20*3	: button "資金", 			*information_panel__graph_set_money
+	pos 550, 60+20*4	: button "支持率",			*information_panel__graph_set_approval_rate
+	pos 550, 60+20*5	: button "商業労働者数",	*information_panel__graph_set_workers_commercial
+	pos 550, 60+20*6	: button "オフィス労働者数",*information_panel__graph_set_workers_office
+	pos 550, 60+20*7	: button "工業労働者数",	*information_panel__graph_set_workers_industrial
+	pos 550, 60+20*8	: button "農業労働者数",	*information_panel__graph_set_workers_farm
+
+	redraw 1
+
 	stop
+
+*information_panel__graph_set_population_total
+	statistics_mode = "population total"
+	goto *information_panel_2
+
+*information_panel__graph_set_population_man
+	statistics_mode = "population man"
+	goto *information_panel_2
+
+*information_panel__graph_set_population_female
+	statistics_mode = "population female"
+	goto *information_panel_2
+
+*information_panel__graph_set_money
+	statistics_mode = "money"
+	goto *information_panel_2
+
+*information_panel__graph_set_approval_rate
+	statistics_mode = "approval rate"
+	goto *information_panel_2
+
+*information_panel__graph_set_workers_commercial
+	statistics_mode = "workers commercial"
+	goto *information_panel_2
+
+*information_panel__graph_set_workers_office
+	statistics_mode = "workers office"
+	goto *information_panel_2
+
+*information_panel__graph_set_workers_industrial
+	statistics_mode = "workers industrial"
+	goto *information_panel_2
+
+*information_panel__graph_set_workers_farm
+	statistics_mode = "workers farm"
+	goto *information_panel_2
+
+*getStatistics
+	notesel statistics
+	count_of_statistics = notemax
+	leftmost_plot_point = 390+12*(12+1)-12*(count_of_statistics)
+
+	sdim	statistics_date,				16, count_of_statistics		// データを保存した日付
+	dim		statistics_population_total,		count_of_statistics		// 人口の推移
+	dim		statistics_population_man,			count_of_statistics		// 男性人口の推移
+	dim		statistics_population_female,		count_of_statistics		// 女性人口の推移
+	dim		statistics_money,					count_of_statistics		// 資金の推移
+	dim		statistics_approval_rate,			count_of_statistics		// 支持率の推移
+	dim		statistics_workers_commercial,		count_of_statistics		// 商業地区労働者数の推移
+	dim		statistics_workers_office,			count_of_statistics		// オフィス地区労働者数の推移
+	dim		statistics_workers_industrial,		count_of_statistics		// 工業地区労働者数の推移
+	dim		statistics_workers_farm,			count_of_statistics		// 農業地区労働者数の推移
+
+	dim		statistics_date_month,				count_of_statistics		// データを保存した日付のうち月
+
+	min = 0
+	max = 0
+
+	repeat count_of_statistics
+		if count_of_statistics > 12 {
+			noteget a_line_of_statistics, count_of_statistics-12+cnt
+		} else {
+			noteget a_line_of_statistics, cnt
+		}
+
+		split a_line_of_statistics, ", ", statistics_date_temp, statistics_population_total_temp, statistics_population_man_temp, statistics_population_female_temp, statistics_money_temp, statistics_approval_rate_temp, statistics_workers_commercial_temp, statistics_workers_office_temp, statistics_workers_industrial_temp, statistics_workers_farm_temp
+
+		statistics_date(cnt)				= get_chapter(statistics_date_temp, "date", " : ", "")
+		statistics_population_total(cnt)	= int(get_chapter(statistics_population_total_temp, "population total", " : ", ""))
+		statistics_population_man(cnt)		= int(get_chapter(statistics_population_man_temp, "population man", " : ", ""))
+		statistics_population_female(cnt)	= int(get_chapter(statistics_population_female_temp, "population female", " : ", ""))
+		statistics_money(cnt)				= int(get_chapter(statistics_money_temp, "money", " : ", ""))
+		statistics_approval_rate(cnt)		= int(get_chapter(statistics_approval_rate_temp, "approval rate", " : ", ""))
+		statistics_workers_commercial(cnt)	= int(get_chapter(statistics_workers_commercial_temp, "workers commercial", " : ", ""))
+		statistics_workers_office(cnt)		= int(get_chapter(statistics_workers_office_temp, "workers office", " : ", ""))
+		statistics_workers_industrial(cnt)	= int(get_chapter(statistics_workers_industrial_temp, "workers industrial", " : ", ""))
+		statistics_workers_farm(cnt)		= int(get_chapter(statistics_workers_farm_temp, "workers farm", " : ", ""))
+
+		split statistics_date(cnt), ".", not_use, statistics_date_month(cnt), not_use
+
+		if statistics_mode = "population total" {
+			if statistics_population_total(cnt) > max : max = statistics_population_total(cnt)
+		}
+		if statistics_mode = "population man" {
+			if statistics_population_man(cnt) > max : max = statistics_population_man(cnt)
+		}
+		if statistics_mode = "population female" {
+			if statistics_population_female(cnt) > max : max = statistics_population_female(cnt)
+		}
+		if statistics_mode = "money" {
+			if statistics_money(cnt) > max : max = statistics_money(cnt)
+		}
+		if statistics_mode = "approval rate" {
+			if statistics_approval_rate(cnt) > max : max = statistics_approval_rate(cnt)
+		}
+		if statistics_mode = "workers commercial" {
+			if statistics_workers_commercial(cnt) > max : max = statistics_workers_commercial(cnt)
+		}
+		if statistics_mode = "workers office" {
+			if statistics_workers_office(cnt) > max : max = statistics_workers_office(cnt)
+		}
+		if statistics_mode = "workers industrial" {
+			if statistics_workers_industrial(cnt) > max : max = statistics_workers_industrial(cnt)
+		}
+		if statistics_mode = "workers farm" {
+			if statistics_workers_farm(cnt) > max : max = statistics_workers_farm(cnt)
+		}
+	loop
+
+	if count_of_statistics > 12 {
+		count_of_statistics = 12
+	}
+
+	if max = 0 {
+		max = 1
+	}
+
+	return
 
 *budget_panel
 	/*------------------------------------予算パネル----------------------------------------------*/
@@ -6156,6 +6640,7 @@
 	save_school = "school(x,y) {\n"
 	save_reservation = "reservation(x,y) {\n"
 	save_original_name = "original_name(x,y) {\n"
+	save_statistics = "statistics {\n" + statistics + "}"
 
 	sz = 0
 	repeat mapsize_x
@@ -6292,6 +6777,7 @@
 	save_mapdata += save_school+"}\n"
 	save_mapdata += save_reservation+"}\n"
 	save_mapdata += save_original_name+"}\n"
+	save_mapdata += save_statistics
 
 	; 保存
 	notesel save_mapdata

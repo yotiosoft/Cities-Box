@@ -1,5 +1,4 @@
 #module
-
 		//エラー表示
 		#deffunc error str errmes, int mode
 			if errmes = "" {
@@ -45,8 +44,13 @@
 		//各項目の読み込み（使用例：get_chapter(元の変数, "検索する項目", "始点区切りコード", "終端コード") ）
 		#defcfunc get_chapter var underlying_var, str search_chapter, str punctuate, str end_word
 			value = instr(underlying_var, 0, ""+search_chapter+""+punctuate+"")
-			get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), instr(underlying_var, value + strlen(""+search_chapter+""+punctuate+""), end_word) )
 
+			if end_word = "" {
+				get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), strlen(underlying_var) )
+			} else {
+				get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), instr(underlying_var, value + strlen(""+search_chapter+""+punctuate+""), end_word) )
+			}
+			
 			if instr(underlying_var, 0, ""+search_chapter+""+punctuate+"") = -1 {
 				return ""
 			}
@@ -570,5 +574,68 @@
 			}
 
 			return ret_tmp_2(lz)
+
+
+		// 以下はバイナリ操作用
+		#defcfunc binaryCut var binaryVar, int startIndex, int endIndex, int size
+			sdim returnBinary, endIndex-startIndex+1
+		
+			/*
+			cutSize = endIndex-startIndex
+			if endIndex > size : cutSize = size-startIndex
+		
+			memcpy returnBinary, binaryVar, cutSize, 0, startIndex
+		
+			//if startIndex > 8000 : dialog ""+returnBinary+""
+		
+			if endIndex-startIndex > 100 : dialog ""+cutSize+"\n\n"+yreturnBinary+""
+			*/
+		
+			sdim peekTemp, 8
+			repeat endIndex-startIndex
+				if startIndex+cnt >= size {
+					break
+				}
+				
+				peekTemp = peek(binaryVar, startIndex+cnt)
+		
+				if peekTemp = 0 {
+					poke returnBinary, cnt, 1
+				} else {
+					poke returnBinary, cnt, peekTemp
+				}
+			loop
+		
+			return returnBinary
+		
+		#defcfunc binarySearch var binaryVar, int startIndex, str searchWord, int size
+			returnIndex = -1
+			searchSize = strlen(searchWord)
+		
+			sdim searchingBinaryVar, searchSize
+		
+			index = startIndex
+		
+			repeat
+				repeat searchSize
+					if index+cnt >= size {
+						break
+					}
+					poke searchingBinaryVar, cnt, peek(binaryVar, index+cnt)
+				loop
+		
+				if searchingBinaryVar = searchWord {
+					returnIndex = index
+					break
+				}
+		
+				index ++
+		
+				if index >= size {
+					break
+				}
+			loop
+		
+			return returnIndex
 
 #global

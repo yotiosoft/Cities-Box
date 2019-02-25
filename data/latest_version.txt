@@ -1,7 +1,7 @@
-Release Number : 129;
+Release Number : 130;
 Title : Cities Box;
-Version : 1.6.0;
-About : オートセーブ機能を実装、多数のバグ修正;
+Version : 1.6.1;
+About : 結合アドオンファイルを実装 / 都市データ履歴のグラフを実装;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

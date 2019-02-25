@@ -1,0 +1,366 @@
+/*--------------------------------------------------------------------
+
+							Addon Packer
+							  Ver.0.1
+
+						(C) YotioSoft 2019
+
+--------------------------------------------------------------------*/
+
+#include "hspext.as"
+
+#module
+//各項目の読み込み（使用例：get_chapter(元の変数, "検索する項目", "始点区切りコード", "終端コード") ）
+#defcfunc get_chapter var underlying_var, str search_chapter, str punctuate, str end_word
+	value = instr(underlying_var, 0, ""+search_chapter+""+punctuate+"")
+
+	if end_word = "" {
+		get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), strlen(underlying_var) )
+	} else {
+		get_chapter_buf = strmid ( underlying_var, value + strlen(""+search_chapter+""+punctuate+""), instr(underlying_var, value + strlen(""+search_chapter+""+punctuate+""), end_word) )
+	}
+			
+	if instr(underlying_var, 0, ""+search_chapter+""+punctuate+"") = -1 {
+		return ""
+	}
+
+	return get_chapter_buf
+#global
+
+*start
+	screen 0, 400, 160
+	title "Cities Box Addon Packer"
+	
+*menu
+	color 50, 50, 50 : boxf
+	
+	color 255, 255, 255
+	font "Meiryo", 16
+	pos 10, 10 : mes "Cities Box Addon Packer"
+
+	font "Meiryo", 14
+	pos 10, 40 : mes "Folder Path : "
+	objsize 190, 20
+		sdim folderPath, 512
+		folderPath = ""
+		pos 140, 40 : input folderPath : folderPathInputStat = stat
+	objsize 50, 20
+		pos 140+190, 40 : button gosub "Search...", *loadFolderPath
+
+	pos 10, 80 : mes "Adon File Name : "
+	objsize 190, 20
+		sdim adonFileName, 128
+		adonFileName = ""
+		pos 140, 80 : input adonFileName : addonFileNameInputStat = stat
+		pos 140+190+5, 80 : mes ".adon"
+
+	objsize 60, 20
+		pos 400-80, 120 : button "OK", *cheking
+
+	repeat
+		if folderPath != "" and folderPath != beforeFolderPath {
+			split folderPath, "\\", folderPathSplit : folderPathSplitStat = stat
+			adonFileName = folderPathSplit(folderPathSplitStat-1)
+			objprm addonFileNameInputStat, adonFileName
+		}
+		beforeFolderPath = folderPath
+		wait 50
+	loop
+			
+
+	stop
+
+*loadFolderPath
+	selfolder folderPath, "アドオン用ファイルがすべて置かれているフォルダを選んでください。"
+	if stat = 1 : return
+	objprm folderPathInputStat, folderPath
+	return
+
+*cheking
+	if folderPath = "" {
+		dialog "アドオン用ファイルがすべて置かれているフォルダを Folder Path の Search で選んでください", 1, "Error"
+		stop
+	}
+
+	if adonFileName = "" {
+		dialog "adonファイルにつけたい名前を Adon File Name に入力してください", 1, "Error"
+		stop
+	}
+
+*pre
+	chdir folderPath
+
+	// adatファイル名取得
+	dirlist adatFilesList ,"*.adat"
+
+	notesel adatFilesList
+	if notemax > 1 {
+		dialog "選択したフォルダに複数のadatファイルがあります\n必ず使用するadatファイルのみを設置してください", 1, "Error"
+		stop
+	}
+	if notemax = 0 {
+		dialog "選択したフォルダにadatファイルがありません", 1, "Error"
+		stop
+	}
+	noteget adatFile, 0
+
+	// adatファイルの内容からアイコンファイル名を取得
+	notesel adatFileTemp
+	noteload adatFile
+
+	iconFile = get_chapter(adatFileTemp, "addon_icon", " = \"", "\"")
+	exist iconFile
+	if strsize = -1 {
+		dialog "アイコンファイルが見つかりません : "+iconFile+"", 1, "Error"
+	}
+
+	// 画像ファイル名を取得
+	addonTypesTemp = get_chapter(adatFileTemp, "use_types", " = \"", "\"")
+
+	sdim addonTypes, 32, 12
+	split addonTypesTemp, ", ", addonTypes : addonTotalTypes = stat
+
+	sdim imagesPath, 128, addonTotalTypes*2
+
+	countOfImages = 0
+
+	repeat addonTotalTypes
+		typeNumber = cnt
+
+		sdim typeElementTemp, 512
+		typeElementTemp = get_chapter(adatFileTemp, addonTypes(typeNumber), " {", "};")
+
+		typeDirectionsTemp = get_chapter(adatFileTemp, "direction", " = \"", "\"")
+
+		imagePathTemp = get_chapter(typeElementTemp, "image", " = \"", "\"")
+		exist imagePathTemp
+		if strsize = -1 {
+			dialog "画像ファイルが見つかりません : "+imagePathTemp+"", 1, "Error"
+			continue
+		}
+		imagesPath(countOfImages) = imagePathTemp
+		countOfImages ++
+
+		nightMaskImagePathTemp = get_chapter(typeElementTemp, "night_mask", " = \"", "\"")
+		if nightMaskImagePathTemp != "" {
+			exist nightMaskImagePathTemp
+			if strsize = -1 {
+				dialog "画像ファイルが見つかりません : "+nightMaskImagePathTemp+"", 1, "Error"
+				continue
+			}
+
+			imagesPath(countOfImages) = nightMaskImagePathTemp
+			countOfImages ++
+		}
+		
+	loop
+
+*packing
+	/*----------------------------ファイル読み込み---------------------------*/
+	// adatファイル
+	exist adatFile : adatFileSize = strsize
+	sdim blAdatFile, adatFileSize+1, 8
+	bload adatFile, blAdatFile, adatFileSize
+
+	// 画像ファイル
+	dim imageFileSize, countOfImages
+	maxImageFilesSize = 0
+	maxImageFilesPath = 0
+	repeat countOfImages
+		exist imagesPath(cnt) : imageFilesSize(cnt) = strsize
+		
+		if imageFilesSize(cnt) > maxImageFileSize : maxImageFileSize = imageFilesSize(cnt)
+		if strlen(imagesPath(cnt)) > maxImageFilesPath : maxImageFilesPath = strlen(imagesPath(cnt))
+	loop
+
+	sdim blImageFiles, maxImageFileSize+1, countOfImages
+	repeat countOfImages
+		bload imagesPath(cnt), blImageFiles(cnt), imageFilesSize(cnt)
+	loop
+
+	// アイコンファイル
+	exist iconFile : iconFileSize = strsize
+	sdim blIconFile, iconFileSize+1, 8
+	bload iconFile, blIconFile, iconFileSize
+
+
+	/*-----------------------------パッキング開始----------------------------*/
+	/* adonファイルの様式
+		[ここから]
+		.ADON
+		<i|[画像の総数（アイコン画像除く）]>
+		<f|a:[adatFile]>
+		--adatファイルの内容--
+		<f|im:[imagesPath(n)]>
+		--画像ファイルの内容--
+		--画像ファイル分（countOfImages）同じ内容を繰り返す
+		<f|<ic:[iconFile]>
+		--アイコンファイルの内容--
+		<ENDADON>
+		[ここまで]
+	*/
+	// adonファイルのサイズを決める
+	addonFileSize = 0
+
+	headTag = ".ADON"
+	addonFileSize += strlen(headTag)
+
+	countOfImagesTag = "<i|"+countOfImages+">
+	addonFileSize += strlen(countOfImagesTag)
+
+	adatFileTag = "<f|a:"+adatFile+">"
+	addonFileSize += strlen(adatFileTag)
+	addonFileSize += adatFileSize
+
+	sdim imageFileTags, countOfImages, maxImageFilesPath+strlen("<f|<im:>")
+	repeat countOfImages
+		imageFileTags(cnt) = "<f|im:"+imagesPath(cnt)+">"
+		addonFileSize += strlen(imageFileTags(cnt))
+		addonFileSize += imageFilesSize(cnt)
+	loop
+
+	iconFileTag = "<f|ic:"+iconFile+">"
+	addonFileSize += strlen(iconFileTag)
+	addonFileSize += iconFileSize
+
+	endTag = "<ENDADON>"
+	addonFileSize += strlen(endTag)
+
+	// 文字コード"0"(Null)を"1"に置き換え
+	// もともと1の文字コードには別の配列にてマーキングする
+	dim adatFileMark1, adatFileSize
+	repeat adatFileSize
+		adatFileMark1(cnt) = 0
+		
+		if peek(blAdatFile, cnt) = 1 {
+			adatFileMark1(cnt) = 1
+		} else : if peek(blAdatFile, cnt) = 0 {
+			poke blAdatFile, cnt, 1
+		}
+	loop
+
+	dim imageFilesMark1, countOfImages, maxImageFileSize
+	repeat countOfImages
+		imageNum = cnt
+		repeat imageFilesSize(cnt)
+			imageFilesMark1(imageNum, cnt) = 0
+			if peek(blImageFiles(imageNum), cnt) = 1 {
+				imageFilesMark1(imageNum, cnt) = 1
+			} else : if peek(blImageFiles(imageNum), cnt) = 0 {
+				poke blImageFiles(imageNum), cnt, 1
+			}
+		loop
+	loop
+
+	dim iconFileMark1, iconFileSize
+	repeat iconFileSize
+		iconFileMark1(cnt) = 0
+		
+		if peek(blIconFile, cnt) = 1 {
+			iconFileMark1(cnt) = 1
+		} else : if peek(blIconFile, cnt) = 0 {
+			poke blIconFile, cnt, 1
+		}
+	loop
+
+	// パッキング（結合）処理
+	sdim addonFile, addonFileSize, 8
+	sdim bsAddonFile, addonFileSize, 8
+
+	addonFile += headTag
+	startOfHeadTag = 0
+
+	addonFile += countOfImagesTag
+	startOfCountOfImagesTag = startOfHeadTag + strlen(headTag)
+
+	addonFile += adatFileTag + blAdatFile
+	startOfAdat = startOfCountOfImagesTag + strlen(countOfImagesTag)
+
+	dim startOfImages, countOfImages
+	repeat countOfImages
+		addonFile += imageFileTags(cnt) + blImageFiles(cnt)
+
+		if cnt = 0 {
+			startOfImages(cnt) = startOfAdat + strlen(adatFileTag) + adatFileSize
+		} else {
+			startOfImages(cnt) = startOfImages(cnt-1) + strlen(imageFileTags(cnt-1)) + imageFilesSize(cnt-1)
+		}
+	loop
+
+	addonFile += iconFileTag + blIconFile
+	startOfIcon = startOfImages(countOfImages-1) + strlen(imageFileTags(countOfImages-1)) + imageFilesSize(countOfImages-1)
+
+	addonFile += endTag
+	startOfEndTag = startOfIcon + strlen(iconFileTag) + iconFileSize
+
+	// 文字コード"1"を"0"(Null)に戻す
+	// 文字コード"1"の箇所のうち、マーキングされている箇所は"0"にしない
+
+	index = 0
+	repeat addonFileSize
+		peekTemp = peek(addonFile, cnt)
+		poke bsAddonFile, cnt, peekTemp
+
+		// adatファイル
+		if cnt = startOfAdat+strlen(adatFileTag) {
+			index = 0
+		}
+		if cnt >= startOfAdat+strlen(adatFileTag) and cnt < startOfImages(0) {
+			if peekTemp = 1 and adatFileMark1(index) = 0 {
+				poke bsAddonFile, cnt, 0
+			}
+			index ++
+		}
+
+		// 画像ファイル
+		if cnt >= startOfImages(0) and cnt < startOfIcon {
+			i = cnt
+			
+			repeat countOfImages
+				if i = startOfImages(cnt)+strlen(imageFileTags(cnt)) {
+					index = 0
+				}
+				if cnt + 1 = countOfImages {
+					endIndex = startOfIcon
+				} else {
+					endIndex = startOfImages(cnt+1)
+				}
+				
+				if i >= startOfImages(cnt)+strlen(imageFileTags(cnt)) and i < endIndex {
+					if peekTemp = 1 and imageFilesMark1(cnt, index) = 0 {
+						poke bsAddonFile, i, 0
+					}
+					index ++
+				}
+			loop
+		}
+
+		// アイコンファイル
+		if cnt = startOfIcon+strlen(iconFileTag) {
+			index = 0
+		}
+		if cnt >= startOfIcon+strlen(iconFileTag) and cnt < startOfEndTag {
+			if peekTemp = 1 and iconFileMark1(index) = 0 {
+				poke bsAddonFile, cnt, 0
+			}
+			index ++
+		}
+	loop
+		
+	
+	// 出力
+	dialog "元のadatファイルと画像ファイルを削除しますか？\n（削除しない場合、同じアドオンが重複する場合があります）", 2
+	if stat = 6 {
+		delete adatFile
+		repeat countOfImages
+			delete imagesPath(cnt)
+		loop
+		delete iconFile
+	}
+	
+	bsave ""+adonFileName+".adon", bsAddonFile
+
+	dialog "出力が完了しました : "+dirinfo(0)+"\\"+adonFileName+".adon", 0, "Success"
+
+	clrobj
+	goto *menu
