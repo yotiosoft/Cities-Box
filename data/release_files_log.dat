@@ -946,7 +946,6 @@ A	Addon_Packer/packer.hsp
 A	Addon_Packer/start.ax
 M	Cities_Box.exe
 M	Cities_Box.hsp
-A	Difference_File.sh
 M	README.md
 M	ReadMe.txt
 M	Sample_City.cbd
@@ -1092,6 +1091,17 @@ M	data/release_files_log.dat
 D	data/statistics.dat
 A	difference_file.txt
 M	module.hsp
+M	start.ax
+
+}
+[Ver.1.6.2]131{
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	README.md
+M	ReadMe.txt
+M	data/about.txt
+M	data/latest_version.txt
+M	data/release_files_log.dat
 M	start.ax
 
 }

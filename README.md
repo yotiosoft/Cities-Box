@@ -1,6 +1,6 @@
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.6.1-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.6.2-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
@@ -111,15 +111,7 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 
 # 最終更新
 
-## Ver.1.6.1 r130  
-結合アドオンファイル（.adon）に対応  
-一部アドオンファイルを結合アドオンファイルに置き換え  
-結合アドオンファイル作成プログラム（Addon Packer）を同梱  
-都市データの履歴のグラフ描画に対応（情報パネル）  
-都市データの履歴の保存先を各マップデータに変更  
-「L字デパート」が設置できない問題を修正  
-RCOIFメーターが100％を超える問題を修正  
-一部の道路の曲がり角が夜間にずれて表示される問題を修正  
-マップ読み込み直後に市長支持率が0％になる問題を修正  
+## Ver.1.6.2 r131  
+結合アドオンファイルでpng以外の画像形式にも対応  
     
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

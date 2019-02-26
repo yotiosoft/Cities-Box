@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.6.1
+									    Cities Box Ver.1.6.2
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -1542,6 +1542,7 @@
 	sdim adonImageFiles, 512, countOfTotalAdonFiles, 10
 	sdim adonImageFilesName, 128, countOfTotalAdonFiles, 10
 	sdim adonIconFiles, 512, countOfTotalAdonFiles
+	sdim adonIconFilesName, 128, countOfTotalAdonFiles
 	dim  countOfAdonImageFiles, countOfTotalAdonFiles
 
 	notesel addonFilesList
@@ -1690,7 +1691,11 @@
 				if fromAdonFile(cnt) = 1 {
 					buffer next_image_num
 						memfile adonIconFiles(countOfLoadedAdonFiles)
-						picload "MEM:.png"
+						if getpath(adonIconFilesName(countOfLoadedAdonFiles), 2) = ".png" {
+							picload "MEM:.png"
+						} else {
+							picload "MEM:"
+						}
 					gsel 0
 				} else {
 					celload tmp, next_image_num
@@ -1912,7 +1917,11 @@
 							if adonImageFilesName(countOfLoadedAdonFiles, cnt) = load_image {
 								buffer next_image_num
 									memfile adonImageFiles(countOfLoadedAdonFiles, cnt)
-									picload "MEM:.png"
+									if getpath(adonImageFilesName(countOfLoadedAdonFiles, cnt), 2) = ".png" {
+										picload "MEM:.png"
+									} else {
+										picload "MEM:"
+									}
 								gsel 0
 
 								break
@@ -2058,7 +2067,7 @@
 		error "A04 : adonファイルが見つかりません\n\n"+dirinfo(0)+"/"+addonFileName+""
 	}
 
-	sdim blAddonFile, addonFileSize
+	sdim blAddonFile, addonFileSize+(addonFileSize/4*4+4)
 	bload addonFilePath, blAddonFile
 	
 	// アドオンファイルかどうか確認
@@ -2086,8 +2095,6 @@
 
 	countOfImagesTagIndex = binarySearch(blAddonFile, 0, countOfImagesTagStart, addonFileSize)
 	countOfImages = int(binaryCut(blAddonFile, (countOfImagesTagIndex+strlen(countOfImagesTagStart)), binarySearch(blAddonFile, countOfImagesTagIndex, countOfImagesTagEnd, addonFileSize), addonFileSize))
-
-	mes countOfImages
 
 	// それぞれのファイルの始点インデックスとファイル名を取得
 	searchedImages = 0
@@ -2131,14 +2138,14 @@
 			temp = binaryCut(blAddonFile, cnt, cnt+strlen(iconFileStartTag), addonFileSize)
 			if instr(temp, 0, iconFileStartTag) = 0 {
 				endOfTagForIconFileIndex = binarySearch(blAddonFile, cnt, iconFileEndTag, addonFileSize)
-				//iconFileName = binaryCut(blAddonFile, cnt+strlen(iconFileStartTag), endOfTagForIconFileIndex, addonFileSize)
+				adonIconFilesName(countOfAdonFiles) = binaryCut(blAddonFile, cnt+strlen(iconFileStartTag), endOfTagForIconFileIndex, addonFileSize)
 	
 				startOfIconFileIndex = endOfTagForIconFileIndex+strlen(iconFileEndTag)
-				
-				mes iconFileName
+				break
 			}
 		}
-		
+
+		await 0.1
 	loop
 
 	// それぞれのファイルの終端インデックスを取得
@@ -2164,7 +2171,7 @@
 	adonAdatFiles(countOfAdonFiles) = binaryCut(blAddonFile, startOfAdatFileIndex, endOfAdatFileIndex+1, addonFileSize)
 
 	// 画像ファイル
-	sdim imageFilesBinary, countOfImages, 128
+	sdim imageFilesBinary, 128, countOfImages
 	repeat countOfImages
 		imageNum = cnt
 		adonImageFiles(countOfAdonFiles, imageNum) = binaryCut(blAddonFile, startOfImageFilesIndex(cnt), endOfImageFilesIndex(cnt)+1, addonFileSize)
