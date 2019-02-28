@@ -1,6 +1,6 @@
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.6.2-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.6.3-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
@@ -111,7 +111,9 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 
 # 最終更新
 
-## Ver.1.6.2 r131  
-結合アドオンファイルでpng以外の画像形式にも対応  
+## Ver.1.6.3 r132  
+結合アドオンファイルを仕様変更（各データのインデックスをファイル冒頭に記述）  
+結合アドオンファイルの読み込みの高速化  
+ほぼすべてのアドオンの結合化  
     
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

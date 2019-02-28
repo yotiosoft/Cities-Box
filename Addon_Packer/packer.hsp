@@ -188,8 +188,10 @@
 	/* adonファイルの様式
 		[ここから]
 		.ADON
+		<v|2>
 		<i|[画像の総数（アイコン画像除く）]>
 		<f|a:[adatFile]>
+		<id|a:[adatファイルのインデックス]/[adatファイルのサイズ],im:[各画像ファイルのインデックス]/[各画像ファイルのサイズ],ic:[アイコンファイルのインデックス]/[アイコンファイルのサイズ]>
 		--adatファイルの内容--
 		<f|im:[imagesPath(n)]>
 		--画像ファイルの内容--
@@ -205,26 +207,56 @@
 	headTag = ".ADON"
 	addonFileSize += strlen(headTag)
 
-	countOfImagesTag = "<i|"+countOfImages+">
+	countOfImagesTag = "<i|"+countOfImages+">"
 	addonFileSize += strlen(countOfImagesTag)
 
+	versionTag = "<v|2>"
+	addonFileSize += strlen(versionTag)
+
 	adatFileTag = "<f|a:"+adatFile+">"
+	adatFileIndex = addonFileSize
 	addonFileSize += strlen(adatFileTag)
 	addonFileSize += adatFileSize
 
 	sdim imageFileTags, countOfImages, maxImageFilesPath+strlen("<f|<im:>")
+	dim imageFilesIndex, countOfImages
 	repeat countOfImages
 		imageFileTags(cnt) = "<f|im:"+imagesPath(cnt)+">"
+		imageFilesIndex(cnt) = addonFileSize
 		addonFileSize += strlen(imageFileTags(cnt))
 		addonFileSize += imageFilesSize(cnt)
 	loop
 
 	iconFileTag = "<f|ic:"+iconFile+">"
+	iconFileIndex = addonFileSize
 	addonFileSize += strlen(iconFileTag)
 	addonFileSize += iconFileSize
 
 	endTag = "<ENDADON>"
 	addonFileSize += strlen(endTag)
+
+	// インデックスタグを作成
+	indexTagSize = 0
+
+	repeat 3
+		beforeIndexTagSize = indexTagSize
+		
+		indexTag = "<id|a:"+(adatFileIndex+indexTagSize)+"/"+(adatFileSize+strlen(adatFileTag))+","
+	
+		repeat countOfImages
+			indexTag += "im:"+(imageFilesIndex(cnt)+indexTagSize)+"/"+(imageFilesSize(cnt)+strlen(imageFileTags(cnt)))+","
+		loop
+	
+		indexTag += "ic:"+(iconFileIndex+indexTagSize)+"/"+(iconFileSize+strlen(iconFileTag))+">"
+	
+		indexTagSize = strlen(indexTag)
+
+		if cnt > 0 and indexTagSize = beforeIndexTagSize {
+			break
+		}
+	loop
+
+	addonFileSize += indexTagSize
 
 	// 文字コード"0"(Null)を"1"に置き換え
 	// もともと1の文字コードには別の配列にてマーキングする
@@ -273,8 +305,14 @@
 	addonFile += countOfImagesTag
 	startOfCountOfImagesTag = startOfHeadTag + strlen(headTag)
 
+	addonFile += versionTag
+	startOfVersionTag = startOfCountOfImagesTag + strlen(countOfImagesTag)
+
+	addonFile += indexTag
+	startOfIndexTag = startOfVersionTag + strlen(versionTag)
+
 	addonFile += adatFileTag + blAdatFile
-	startOfAdat = startOfCountOfImagesTag + strlen(countOfImagesTag)
+	startOfAdat = startOfIndexTag + indexTagSize
 
 	dim startOfImages, countOfImages
 	repeat countOfImages
