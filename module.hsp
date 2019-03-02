@@ -13,6 +13,7 @@
 
 			notesel error_log@
 			noteadd "\n"+gettime(0)+"/"+strf("%02d",gettime(3))+"/"+strf("%02d",gettime(3))+" "+strf("%02d",gettime(4))+":"+strf("%02d",gettime(5))+"."+strf("%02d",gettime(6))+"\n"+errmes+"\n"
+			chdir ""+directory@+""
 			notesave "data/error_log.txt"
 
 			if dstat = 6 {

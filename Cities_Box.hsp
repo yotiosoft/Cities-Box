@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.6.2
+									    Cities Box Ver.1.6.4
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -1556,7 +1556,28 @@
 
 	maxCountOfImages = 0
 
-	//adonファイル以外のアドオンの読み込み
+	//adonファイルの始点/終端タグを設定
+	countOfImagesTagStart = "<i|"
+	countOfImagesTagEnd = ">"
+
+	versionTagStart = "<v|"
+	versionTagEnd = ">"
+
+	indexTagStart = "<id|"
+	indexTagEnd = ">"
+	
+	adatFileStartTag = "<f|a:"
+	adatFileEndTag = ">"
+
+	imageFileStartTag = "<f|im:"
+	imageFileEndTag = ">"
+
+	iconFileStartTag = "<f|ic:"
+	iconFileEndTag = ">"
+
+	endOfFileTag = "<ENDADON>"
+
+	//アドオンファイルの読み込み
 	countOfAdonFiles = 0
 	repeat countOfTotalAddonFiles
 		addon_number = cnt
@@ -1566,6 +1587,8 @@
 		; ファイルリストから読み込むadatファイル名を取得
 		notesel addonFilesList
 		noteget addonFileName, addon_number
+
+		addon_path = getpath(addonFileName, 32)
 
 		; addonFileNameの拡張子が.adonなら展開
 		loadingAdatFile = 1
@@ -2025,9 +2048,6 @@
 	return
 
 *getAddonDataFromAdonFile	// adonファイルから読み込む
-	; カレントディレクトリ指定
-	currentDirectory = getpath(addonFileName, 32)
-
 	; ファイル名指定
 	addonFilePath = getpath(addonFileName, 8)
 
@@ -2060,7 +2080,7 @@
 *unpacking		// adonファイルの分割
 	/*-------------------------------読み込み---------------------------------*/
 	// アドオンファイル読み込み
-	chdir currentDirectory
+	chdir addon_path
 	exist addonFilePath : addonFileSize = strsize
 
 	if addonFileSize = -1 {
@@ -2075,27 +2095,6 @@
 		error "A05 : 拡張子adonのファイルがアドオンファイルではありません\n\n"+dirinfo(0)+"/"+addonFileName+""
 	}
 
-	// 始点/終端タグを設定
-	countOfImagesTagStart = "<i|"
-	countOfImagesTagEnd = ">"
-
-	versionTagStart = "<v|"
-	versionTagEnd = ">"
-
-	indexTagStart = "<id|"
-	indexTagEnd = ">"
-	
-	adatFileStartTag = "<f|a:"
-	adatFileEndTag = ">"
-
-	imageFileStartTag = "<f|im:"
-	imageFileEndTag = ">"
-
-	iconFileStartTag = "<f|ic:"
-	iconFileEndTag = ">"
-
-	endOfFileTag = "<ENDADON>"
-
 	// アドオンに使う画像ファイルを取得
 	countOfImages = 0
 
@@ -2104,9 +2103,9 @@
 
 	// バージョンを取得
 	if instr(blAddonFile, 0, "<v|2>") != -1 {
-		adatFileVersion = 2
+		adonFileVersion = 2
 	} else {
-		adatFileVersion = 1
+		adonFileVersion = 1
 	}
 	
 	// それぞれのファイルの始点インデックスとファイル名を取得
@@ -2121,7 +2120,7 @@
 	loop
 	startOfIconFileIndex = -1
 
-	if adatFileVersion = 1 {
+	if adonFileVersion = 1 {
 		repeat addonFileSize
 			// adatファイル
 			if startOfAdatFileIndex = -1 {
@@ -2162,34 +2161,37 @@
 			await 0.1
 		loop
 	}
-	if adatFileVersion = 2 {
+	if adonFileVersion = 2 {
 		indexTagIndex = binarySearch(blAddonFile, 0, indexTagStart, addonFileSize)
 		indexTag = binaryCut(blAddonFile, indexTagIndex+strlen(indexTagStart), binarySearch(blAddonFile, indexTagIndex, indexTagEnd, addonFileSize), addonFileSize)
 
 		sdim splitIndexTags, 8, countOfImages+2
 		split indexTag, ",", splitIndexTags : splitStat = stat
 
+		dim imageFilesSize,					countOfImages
+		dim startOfTagForImageFilesIndex,	countOfImages
+
 		repeat splitStat
 			if strmid(splitIndexTags(cnt), 0, 2) = "a:" {
 				temp = strmid(splitIndexTags(cnt), 2, strlen(splitIndexTags(cnt)))
 				split temp, "/", startOfTagForAdatFileIndexStr, adatFileSizeStr
 				
-				startOfTagForAdatFileIndex = int(startOfTagForAdatFileIndexStr)
-				adatFileSize = int(adatFileSizeStr)
+				startOfTagForAdatFileIndex	= int(startOfTagForAdatFileIndexStr)
+				adatFileSize				= int(adatFileSizeStr)
 
-				endOfTagForAdatFileIndex = int(binarySearch(blAddonFile, startOfTagForAdatFileIndex, adatFileEndTag, addonFileSize))
-				startOfAdatFileIndex = endOfTagForAdatFileIndex + strlen(adatFileEndTag)
+				endOfTagForAdatFileIndex	= int(binarySearch(blAddonFile, startOfTagForAdatFileIndex, adatFileEndTag, addonFileSize))
+				startOfAdatFileIndex		= endOfTagForAdatFileIndex + strlen(adatFileEndTag)
 			}
 
 			if strmid(splitIndexTags(cnt), 0, 3) = "im:" {
 				temp = strmid(splitIndexTags(cnt), 3, strlen(splitIndexTags(cnt)))
 				split temp, "/", startOfTagForImageFileIndexStr, imageFileSizeStr
 				
-				startOfTagForImageFileIndex = int(startOfTagForImageFileIndexStr)
-				imageFileSize = int(imageFileSizeStr)
+				startOfTagForImageFilesIndex(searchedImages)	= int(startOfTagForImageFileIndexStr)
+				imageFilesSize(searchedImages)					= int(imageFileSizeStr)
 
-				endOfTagForImageFileIndex(searchedImages) = binarySearch(blAddonFile, startOfTagForImageFileIndex, imageFileEndTag, addonFileSize)
-				adonImageFilesName(countOfAdonFiles, searchedImages) = binaryCut(blAddonFile, startOfTagForImageFileIndex+strlen(imageFileStartTag), endOfTagForImageFileIndex(searchedImages), addonFileSize)
+				endOfTagForImageFileIndex(searchedImages)				= binarySearch(blAddonFile, startOfTagForImageFilesIndex(searchedImages), imageFileEndTag, addonFileSize)
+				adonImageFilesName(countOfAdonFiles, searchedImages)	= binaryCut(blAddonFile, startOfTagForImageFilesIndex(searchedImages)+strlen(imageFileStartTag), endOfTagForImageFileIndex(searchedImages), addonFileSize)
 
 				startOfImageFilesIndex(searchedImages) = endOfTagForImageFileIndex(searchedImages) + strlen(imageFileEndTag)
 
@@ -2213,21 +2215,36 @@
 
 	// それぞれのファイルの終端インデックスを取得
 	// adatファイル
-	endOfAdatFileIndex = binarySearch(blAddonFile, startOfAdatFileIndex, imageFileStartTag, addonFileSize) - 1
+	if adonFileVersion = 1 {
+		endOfAdatFileIndex = binarySearch(blAddonFile, startOfAdatFileIndex, imageFileStartTag, addonFileSize) - 1
+	}
+	if adonFileVersion = 2 {
+		endOfAdatFileIndex = startOfTagForAdatFileIndex+adatFileSize-1
+	}
 
 	// 画像ファイル
 	dim endOfImageFilesIndex, countOfImages
-	
+
 	repeat countOfImages
-		if cnt = countOfImages - 1 {
-			endOfImageFilesIndex(cnt) = binarySearch(blAddonFile, startOfImageFilesIndex(cnt), iconFileStartTag, addonFileSize) - 1
-		} else {
-			endOfImageFilesIndex(cnt) = binarySearch(blAddonFile, startOfImageFilesIndex(cnt), imageFileStartTag, addonFileSize) - 1
+		if adonFileVersion = 1 {
+			if cnt = countOfImages - 1 {
+				endOfImageFilesIndex(cnt) = binarySearch(blAddonFile, startOfImageFilesIndex(cnt), iconFileStartTag, addonFileSize) - 1
+			} else {
+				endOfImageFilesIndex(cnt) = binarySearch(blAddonFile, startOfImageFilesIndex(cnt), imageFileStartTag, addonFileSize) - 1
+			}
+		}
+		if adonFileVersion = 2 {
+			endOfImageFilesIndex(cnt) = startOfTagForImageFilesIndex(cnt)+imageFilesSize(cnt)-1
 		}
 	loop
 
 	// アイコンファイル
-	endOfIconFileIndex = binarySearch(blAddonFile, startOfIconFileIndex, endOfFileTag, addonFileSize) - 1
+	if adonFileVersion = 1 {
+		endOfIconFileIndex = binarySearch(blAddonFile, startOfIconFileIndex, endOfFileTag, addonFileSize) - 1
+	}
+	if adonFileVersion = 2 {
+		endOfIconFileIndex = startOfTagForIconFileIndex+iconFileSize-1
+	}
 
 	// ファイル分割
 	// adatファイル

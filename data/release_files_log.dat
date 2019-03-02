@@ -1117,7 +1117,8 @@ M	addons/Normal/buildings/commercial/high_density/L-Department_Store/L-Departmen
 M	addons/Normal/buildings/commercial/high_density/Reasonable_Multi-tenant_Building/Reasonable_Multi-tenant_Building.adon
 M	addons/Normal/buildings/commercial/high_density/Street_Corner_Depertment/Street_Corner_Depertment.adon
 D	addons/Normal/buildings/commercial/low_density/Channel's_Boutique/Channel's_Boutique.adat
-R052	addons/Normal/buildings/commercial/low_density/Channel's_Boutique/Channel's_Boutique.png	addons/Normal/buildings/commercial/low_density/Channel's_Boutique/Channel's_Boutique.adon
+D	addons/Normal/buildings/commercial/low_density/Channel's_Boutique/Channel's_Boutique.png
+A	addons/Normal/buildings/commercial/low_density/Channel's_Boutique/Channel's_Boutique.adon
 D	addons/Normal/buildings/commercial/low_density/Channel's_Boutique/icon_Channel's_Boutique.png
 D	addons/Normal/buildings/commercial/low_density/Family_Mate/Family_Mate.adat
 A	addons/Normal/buildings/commercial/low_density/Family_Mate/Family_Mate.adon
@@ -1169,7 +1170,8 @@ A	addons/Normal/buildings/industrial/Black_proof_Warehouse/Black_proof_Warehouse
 D	addons/Normal/buildings/industrial/Black_proof_Warehouse/Black_proof_Warehouse.png
 D	addons/Normal/buildings/industrial/Black_proof_Warehouse/icon_Black_proof_Warehouse.png
 D	addons/Normal/buildings/industrial/Charlie's_chocolate_factory/Charlie's_chocolate_factory.adat
-R057	addons/Normal/buildings/industrial/Charlie's_chocolate_factory/Charlie's_chocolate_factory.png	addons/Normal/buildings/industrial/Charlie's_chocolate_factory/Charlie's_chocolate_factory.adon
+A	addons/Normal/buildings/industrial/Charlie's_chocolate_factory/Charlie's_chocolate_factory.adon
+D	addons/Normal/buildings/industrial/Charlie's_chocolate_factory/Charlie's_chocolate_factory.png
 D	addons/Normal/buildings/industrial/Charlie's_chocolate_factory/icon_Charlie's_chocolate_factory.png
 D	addons/Normal/buildings/industrial/Electronics_Factory/Electronics_Factory.adat
 A	addons/Normal/buildings/industrial/Electronics_Factory/Electronics_Factory.adon
@@ -1182,7 +1184,8 @@ D	addons/Normal/buildings/office/24-storied_Office/24-storied_Office.png
 D	addons/Normal/buildings/office/24-storied_Office/24-storied_Office__night_mask.png
 D	addons/Normal/buildings/office/24-storied_Office/icon_24-storied_Office.png
 D	addons/Normal/buildings/office/Central_Woody_Building/Central_Woody_Building.adat
-R051	addons/Normal/buildings/office/Central_Woody_Building/Central_Woody_Building.png	addons/Normal/buildings/office/Central_Woody_Building/Central_Woody_Building.adon
+A	addons/Normal/buildings/office/Central_Woody_Building/Central_Woody_Building.adon
+D	addons/Normal/buildings/office/Central_Woody_Building/Central_Woody_Building.png
 D	addons/Normal/buildings/office/Central_Woody_Building/Central_Woody_Building__night_mask.png
 D	addons/Normal/buildings/office/Central_Woody_Building/icon_Central_Woody_Building.png
 D	addons/Normal/buildings/office/Glazed_Office/Glazed_Office.adat
@@ -1210,19 +1213,24 @@ D	addons/Normal/buildings/public/Modern_Library/Modern_Library.png
 D	addons/Normal/buildings/public/Modern_Library/Modern_Library__night_mask.png
 D	addons/Normal/buildings/public/Modern_Library/icon_Modern_Library.png
 D	addons/Normal/buildings/public/Normaly_Elementary-School/Normaly_Elementary-School.adat
-R057	addons/Normal/buildings/public/Normaly_Elementary-School/Normaly_Elementary-School.png	addons/Normal/buildings/public/Normaly_Elementary-School/Normaly_Elementary-School.adon
+A	addons/Normal/buildings/public/Normaly_Elementary-School/Normaly_Elementary-School.adon
+D	addons/Normal/buildings/public/Normaly_Elementary-School/Normaly_Elementary-School.png
 D	addons/Normal/buildings/public/Normaly_Elementary-School/icon_Normaly_Elementary-School.png
 D	addons/Normal/buildings/public/Normaly_High-School/Normaly_High-School.adat
-R066	addons/Normal/buildings/public/Normaly_High-School/Normaly_High-School.png	addons/Normal/buildings/public/Normaly_High-School/Normaly_High-School.adon
+A	addons/Normal/buildings/public/Normaly_High-School/Normaly_High-School.adon
+D	addons/Normal/buildings/public/Normaly_High-School/Normaly_High-School.png
 D	addons/Normal/buildings/public/Normaly_High-School/icon_Normaly_High-School.png
 D	addons/Normal/buildings/public/Normaly_Junior-High-School/Normaly_Junior-High-School.adat
-R068	addons/Normal/buildings/public/Normaly_Junior-High-School/Normaly_Junior-High-School.png	addons/Normal/buildings/public/Normaly_Junior-High-School/Normaly_Junior-High-School.adon
+A	addons/Normal/buildings/public/Normaly_Junior-High-School/Normaly_Junior-High-School.adon
+D	addons/Normal/buildings/public/Normaly_Junior-High-School/Normaly_Junior-High-School.png
 D	addons/Normal/buildings/public/Normaly_Junior-High-School/icon_Normaly_Junior-High-School.png
 D	addons/Normal/buildings/public/Normaly_Urban_University/Normaly_Urban_University.adat
-R060	addons/Normal/buildings/public/Normaly_Urban_University/Normaly_Urban_University.png	addons/Normal/buildings/public/Normaly_Urban_University/Normaly_Urban_University.adon
+A	addons/Normal/buildings/public/Normaly_Urban_University/Normaly_Urban_University.adon
+D	addons/Normal/buildings/public/Normaly_Urban_University/Normaly_Urban_University.png
 D	addons/Normal/buildings/public/Normaly_Urban_University/icon_Normaly_Urban_University.png
 D	addons/Normal/buildings/public/Public_Hall/Public_Hall.adat
-R055	addons/Normal/buildings/public/Public_Hall/Public_Hall.png	addons/Normal/buildings/public/Public_Hall/Public_Hall.adon
+A	addons/Normal/buildings/public/Public_Hall/Public_Hall.adon
+D	addons/Normal/buildings/public/Public_Hall/Public_Hall.png
 D	addons/Normal/buildings/public/Public_Hall/Public_Hall__night_mask.png
 D	addons/Normal/buildings/public/Public_Hall/icon_Public_Hall.png
 D	addons/Normal/buildings/public/post_office/icon_post_office.png
@@ -1251,15 +1259,18 @@ D	addons/Normal/buildings/residential/high_density/White_Apartment_Complex/White
 D	addons/Normal/buildings/residential/high_density/White_Apartment_Complex/White_Apartment_Complex__night_mask.png
 D	addons/Normal/buildings/residential/high_density/White_Apartment_Complex/icon_White_Apartment_Complex.png
 D	addons/Normal/buildings/residential/high_density/Wood_Apartment/Wood_Apartment.adat
-R050	addons/Normal/buildings/residential/high_density/Wood_Apartment/Wood_Apartment.png	addons/Normal/buildings/residential/high_density/Wood_Apartment/Wood_Apartment.adon
+A	addons/Normal/buildings/residential/high_density/Wood_Apartment/Wood_Apartment.adon
+D	addons/Normal/buildings/residential/high_density/Wood_Apartment/Wood_Apartment.png
 D	addons/Normal/buildings/residential/high_density/Wood_Apartment/Wood_Apartment__night_mask.png
 D	addons/Normal/buildings/residential/high_density/Wood_Apartment/icon_Wood_Apartment.png
 D	addons/Normal/buildings/residential/high_density/five-story_apartment/five-story_apartment.adat
-R050	addons/Normal/buildings/residential/high_density/five-story_apartment/five-story_apartment.png	addons/Normal/buildings/residential/high_density/five-story_apartment/five-story_apartment.adon
+A	addons/Normal/buildings/residential/high_density/five-story_apartment/five-story_apartment.adon
+D	addons/Normal/buildings/residential/high_density/five-story_apartment/five-story_apartment.png
 D	addons/Normal/buildings/residential/high_density/five-story_apartment/five-story_apartment__night_mask.png
 D	addons/Normal/buildings/residential/high_density/five-story_apartment/icon_five-story_apartment.png
 D	addons/Normal/buildings/residential/low_density/Glazed_House/Glazed_House.adat
-R057	addons/Normal/buildings/residential/low_density/Glazed_House/Glazed_House.png	addons/Normal/buildings/residential/low_density/Glazed_House/Glazed_House.adon
+A	addons/Normal/buildings/residential/low_density/Glazed_House/Glazed_House.adon
+D	addons/Normal/buildings/residential/low_density/Glazed_House/Glazed_House.png
 D	addons/Normal/buildings/residential/low_density/Glazed_House/icon_Glazed_House.png
 D	addons/Normal/buildings/residential/low_density/Modern_House/Modern_House.adat
 A	addons/Normal/buildings/residential/low_density/Modern_House/Modern_House.adon
@@ -1267,7 +1278,8 @@ D	addons/Normal/buildings/residential/low_density/Modern_House/Modern_House.png
 D	addons/Normal/buildings/residential/low_density/Modern_House/Modern_House__night_mask.png
 D	addons/Normal/buildings/residential/low_density/Modern_House/icon_Modern_House.png
 D	addons/Normal/buildings/residential/low_density/North-American_House/North-American_House.adat
-R053	addons/Normal/buildings/residential/low_density/North-American_House/North-American_House.png	addons/Normal/buildings/residential/low_density/North-American_House/North-American_House.adon
+A	addons/Normal/buildings/residential/low_density/North-American_House/North-American_House.adon
+D	addons/Normal/buildings/residential/low_density/North-American_House/North-American_House.png
 D	addons/Normal/buildings/residential/low_density/North-American_House/North-American_House__night_mask.png
 D	addons/Normal/buildings/residential/low_density/North-American_House/icon_North-American_House.png
 D	addons/Normal/buildings/residential/low_density/Simple_House/Simple_House.adat
@@ -1299,13 +1311,16 @@ A	addons/Normal/parks/Cross_Plaza_with_Trees/Cross_Plaza_with_Trees.adon
 D	addons/Normal/parks/Cross_Plaza_with_Trees/Cross_Plaza_with_Trees.png
 D	addons/Normal/parks/Cross_Plaza_with_Trees/icon_Cross_Plaza_with_Trees.png
 D	addons/Normal/parks/Pond_Park/Pond_Park.adat
-R060	addons/Normal/parks/Pond_Park/Pond_Park.png	addons/Normal/parks/Pond_Park/Pond_Park.adon
+A	addons/Normal/parks/Pond_Park/Pond_Park.adon
+D	addons/Normal/parks/Pond_Park/Pond_Park.png
 D	addons/Normal/parks/Pond_Park/icon_Pond_Park.png
 D	addons/Normal/parks/Small_Park/Small_Park.adat
-R054	addons/Normal/parks/Small_Park/Small_Park.png	addons/Normal/parks/Small_Park/Small_Park.adon
+A	addons/Normal/parks/Small_Park/Small_Park.adon
+D	addons/Normal/parks/Small_Park/Small_Park.png
 D	addons/Normal/parks/Small_Park/icon_Small_Park.png
 D	addons/Normal/parks/Small_Shrine/Small_Shrine.adat
-R078	addons/Normal/parks/Small_Shrine/Small_Shrine.png	addons/Normal/parks/Small_Shrine/Small_Shrine.adon
+A	addons/Normal/parks/Small_Shrine/Small_Shrine.adon
+D	addons/Normal/parks/Small_Shrine/Small_Shrine.png
 D	addons/Normal/parks/Small_Shrine/icon_Small_Shrine.png
 D	addons/Normal/parks/Statue_of_Mayor/Statue_of_Mayor.adat
 A	addons/Normal/parks/Statue_of_Mayor/Statue_of_Mayor.adon
@@ -1346,6 +1361,17 @@ M	addons/Normal/road/Two_lane/Two_lane_normal_road(white_broken_line)/Two_lane_n
 M	addons/Normal/road/Two_lane/Two_lane_normal_road(white_line)/Two_lane_normal_road(white_line).adon
 M	addons/filelist.txt
 M	data/about.txt
+M	start.ax
+
+}
+[Ver.1.6.4]133{
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	README.md
+M	ReadMe.txt
+M	data/about.txt
+M	data/release_files_log.dat
+M	module.hsp
 M	start.ax
 
 }

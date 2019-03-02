@@ -1,7 +1,7 @@
-Release Number : 132;
+Release Number : 133;
 Title : Cities Box;
-Version : 1.6.3;
-About : 結合アドオンファイルの仕様変更および読み込みの高速化;
+Version : 1.6.4;
+About : 結合アドオンファイルの読み込み速度を更に向上;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
