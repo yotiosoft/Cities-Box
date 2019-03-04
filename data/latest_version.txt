@@ -1,7 +1,7 @@
-Release Number : 133;
+Release Number : 134;
 Title : Cities Box;
-Version : 1.6.4;
-About : 結合アドオンファイルの読み込み速度を更に向上;
+Version : 1.6.5;
+About : 2x3（横向き）のアドオンに対応;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;

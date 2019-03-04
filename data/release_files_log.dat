@@ -1375,3 +1375,29 @@ M	module.hsp
 M	start.ax
 
 }
+[Ver.1.6.5]134{
+M	Addon_Maker/Cities_Box_Addon_Maker.exe
+M	Addon_Maker/Cities_Box_Addon_Maker.hsp
+D	Addon_Maker/hsptmp
+D	Addon_Maker/obj
+D	Addon_Maker/packfile
+A	Addon_Maker/start.ax
+D	Addon_Packer/hspext.as
+M	Addon_Packer/packer.hsp
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	README.md
+M	ReadMe.txt
+M	Sample_City.cbd
+A	addons/Normal/buildings/commercial/high_density/Station-front_Department-Store/Station-front_Department-Store.adon
+M	addons/Normal/road/Two_lane/Two_lane_normal_road(orange_line)/Two_lane_normal_road(orange_line).adon
+M	addons/Normal/road/Two_lane/Two_lane_normal_road(white_broken_line)/Two_lane_normal_road(white_broken_line).adon
+M	addons/Normal/road/Two_lane/Two_lane_normal_road(white_line)/Two_lane_normal_road(white_line).adon
+M	addons/filelist.txt
+A	addons/template/template_2x3(long).png
+A	addons/template/template_2x3(wide).png
+M	data/about.txt
+A	difference_file.txt
+M	start.ax
+
+}
