@@ -11,6 +11,7 @@ Normal\tiles\water\normal\Normal_Waterway.adat
 Normal\buildings\commercial\high_density\Buy-Buy_Building\Buy-Buy_Building.adon
 Normal\buildings\commercial\high_density\L-Department_Store\L-Department_Store.adon
 Normal\buildings\commercial\high_density\Reasonable_Multi-tenant_Building\Reasonable_Multi-tenant_Building.adon
+Normal\buildings\commercial\high_density\Station-front_Department-Store\Station-front_Department-Store.adon
 Normal\buildings\commercial\high_density\Street_Corner_Depertment\Street_Corner_Depertment.adon
 Normal\buildings\commercial\low_density\Channel's_Boutique\Channel's_Boutique.adon
 Normal\buildings\commercial\low_density\Family_Mate\Family_Mate.adon

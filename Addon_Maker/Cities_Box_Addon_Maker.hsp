@@ -182,27 +182,27 @@
 	
 *make_building__residential
 	Addon_Type_tmp = "residential" : Addon_Type_JP = "住居"
-	output = dir2+"addons/buildings/residential/"
+	output = dir2+"addons/Normal/buildings/residential/"
 	goto *make_building_first
 	
 *make_building__commercial
 	Addon_Type_tmp = "commercial" : Addon_Type_JP = "商業施設"
-	output = dir2+"addons/buildings/commercial/"
+	output = dir2+"addons/Normal/buildings/commercial/"
 	goto *make_building_first
 	
 *make_building__office
 	Addon_Type_tmp = "office" : Addon_Type_JP = "オフィス"
-	output = dir2+"addons/buildings/office/"
+	output = dir2+"addons/Normal/buildings/office/"
 	goto *make_building_first
 	
 *make_building__industrial
 	Addon_Type_tmp = "industrial" : Addon_Type_JP = "工場"
-	output = dir2+"addons/buildings/industrial/"
+	output = dir2+"addons/Normal/buildings/industrial/"
 	goto *make_building_first
 
 *make_building__farm
 	Addon_Type_tmp = "farm" : Addon_Type_JP = "農業"
-	output = dir2+"addons/farms/"
+	output = dir2+"addons/Normal/farms/"
 	goto *make_building_first
 
 *make_building_first
@@ -793,7 +793,7 @@
 
 *make_public__park
 	Addon_Type_tmp = "park" : Addon_Type_JP = "公園"
-	output = dir2+"addons/parks/"
+	output = dir2+"addons/Normal/parks/"
 	goto *make_public_first
 
 *make_public_select
@@ -859,7 +859,7 @@
 		Addon_Type_3 = "city_hall"
 	}
 
-	output = dir2+"addons/buildings/public/"
+	output = dir2+"addons/Normal/buildings/public/"
 
 	goto *make_public_first
 
@@ -1817,12 +1817,12 @@
 
 *make_road__road
 	Addon_Type_tmp = "road" : Addon_Type_JP = "道路"
-	output = dir2+"addons/road/"
+	output = dir2+"addons/Normal/road/"
 	goto *make_road_2
 	
 *make_road__railroad
 	Addon_Type_tmp = "railroad" : Addon_Type_JP = "線路"
-	output = dir2+"addons/railroad/"
+	output = dir2+"addons/Normal/railroad/"
 	goto *make_road_2
 
 *make_road__station
@@ -3704,7 +3704,7 @@
 		pos (640/2)-(520/2), 60 : gcopy 1, 0, 0, 520, 110
 	
 		font "Yu Gothic", 14
-		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.3.1\nリリース : 2017年12月31日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
+		pos 180, 230 : mes "Cities Box Addon Maker\n\nバージョン : 0.3.2\nリリース : 2019年3月3日\n\nアドオンのバージョン : 2\n対応保証バージョン : Cities Box Ver.0.8.0 以降"
 	
 		font "Yu Gothic", 10
 		cmes "Copyright (C) YotioSoft 2017 All Rights Reserved.", 0, 450, 640, 470

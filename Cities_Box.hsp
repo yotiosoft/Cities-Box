@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.6.4
+									    Cities Box Ver.1.6.5
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -2770,7 +2770,8 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-						if obj_use_tiles_from_left_top_y = 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
+
+						if obj_use_tiles_from_left_top_y != obj_use_tiles(sx,sy,sz,1)-1 : addons_drow_position_y(sx,sy,sz,cnt) = -100
 
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
@@ -2812,7 +2813,7 @@
 
 						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0)))
 						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/4
-						if obj_use_tiles_from_left_top_y = 1 : addons_drow_position_y(sx,sy,sz,cnt) = -100
+						if obj_use_tiles_from_left_top_y != 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
 
 						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
 						addons_top_left_y(sx,sy,sz,cnt) = top_left_y + obj_use_tiles_from_left_top_y * CHIP_SIZE/2
@@ -2839,9 +2840,28 @@
 					}
 				}
 
-				if addons_size_x(sx,sy,sz,cnt) > 64 {
-					addons_size_x(sx,sy,sz,cnt) = 64
+				/*	どのサイズでも対応可能な処理（現在開発中につき使用不可）
+				addons_drow_position_x(sx,sy,sz,cnt) = position_x + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
+				addons_drow_position_y(sx,sy,sz,cnt) = position_y + (bottom_right_y-size_y)
+
+				if size_y - CHIP_SIZE > 0 {
+					addons_drow_position_y(sx,sy,sz,cnt) -= size_y - CHIP_SIZE
 				}
+
+				addons_top_left_x(sx,sy,sz,cnt) = top_left_x
+				addons_top_left_y(sx,sy,sz,cnt) = top_left_y
+
+				addons_size_x(sx,sy,sz,cnt) = size_x// - obj_use_tiles_from_left_top_x * CHIP_SIZE
+				addons_size_y(sx,sy,sz,cnt) = size_y// - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
+
+				; タイルのときだけ例外処理
+				if category(sx,sy,sz,cnt) = "tile" {
+					if map_time_Month = 12 or (map_time_Month >= 1 and map_time_Month <= 2) : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"snow"), 0))
+					if map_time_Month >= 3 and map_time_Month <= 9 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"null"), 0))
+					if map_time_Month >= 10 and map_time_Month <= 11 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"autumn"), 0))
+				}
+				*/
+				
 			loop
 			if from_build = 1 {
 				from_build = 0
