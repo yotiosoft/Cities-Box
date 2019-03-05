@@ -1401,3 +1401,19 @@ A	difference_file.txt
 M	start.ax
 
 }
+[Ver.1.6.6]135{
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	README.md
+M	ReadMe.txt
+M	Sample_City.cbd
+A	addons/Normal/buildings/office/Deep_Office-Building/Deep_Office-Building.adon
+A	addons/Normal/buildings/public/Big_Museum/Big_Museum.adon
+A	addons/Normal/ports/Mini_Port/Mini_Port.adon
+M	addons/filelist.txt
+A	addons/template/template_1x3(long).png
+A	addons/template/template_3x3.png
+M	data/about.txt
+M	start.ax
+
+}

@@ -1,6 +1,6 @@
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.6.5-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.6.6-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
@@ -111,10 +111,12 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 
 # 最終更新
 
-## Ver.1.6.5 r134  
-2x3（横向き）のアドオンに対応  
-アドオン「駅前百貨店」を追加  
-道路の曲がり角の中央線が夜間にずれて表示される問題を修正  
-Addon Makerでアドオンを生成できない問題を修正  
+## Ver.1.6.6 r135  
+全てのサイズのアドオンに対応  
+1x3のオフィスビルと3x3の博物館アドオンを追加  
+農業地区設定のアイコンが工業地区と同じになっていたため修正  
+港のアドオンが削除されていたため再び追加  
+建設時に資金が引かれていないため修正（地区設定時は除く）  
+予算の支出が0になる問題を修正  
     
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

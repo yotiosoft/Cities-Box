@@ -28,9 +28,11 @@ Normal\buildings\industrial\Charlie's_chocolate_factory\Charlie's_chocolate_fact
 Normal\buildings\industrial\Electronics_Factory\Electronics_Factory.adon
 Normal\buildings\office\24-storied_Office\24-storied_Office.adon
 Normal\buildings\office\Central_Woody_Building\Central_Woody_Building.adon
+Normal\buildings\office\Deep_Office-Building\Deep_Office-Building.adon
 Normal\buildings\office\Glazed_Office\Glazed_Office.adon
 Normal\buildings\office\Tall_Office\Tall_Office.adon
 Normal\buildings\office\white_office\white_office.adon
+Normal\buildings\public\Big_Museum\Big_Museum.adon
 Normal\buildings\public\Modern_City_Hall\Modern_City_Hall.adon
 Normal\buildings\public\Modern_Library\Modern_Library.adon
 Normal\buildings\public\Normaly_Elementary-School\Normaly_Elementary-School.adon
@@ -60,6 +62,7 @@ Normal\parks\Small_Park\Small_Park.adon
 Normal\parks\Small_Shrine\Small_Shrine.adon
 Normal\parks\Statue_of_Mayor\Statue_of_Mayor.adon
 Normal\parks\Woody_Park\Woody_Park.adon
+Normal\ports\Mini_Port\Mini_Port.adon
 Normal\railroad\Stations\Normaly_Station\Normaly_Station.adon
 Normal\railroad\Two_lane\Normal_Railroad\Normal_Railroad.adon
 Normal\road\Promenade\Wooden_Promenade\Wooden_Promenade.adon

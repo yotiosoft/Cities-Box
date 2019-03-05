@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.6.5
+									    Cities Box Ver.1.6.6
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -408,7 +408,7 @@
 
 		//左上のメニュー（設定ボタンなど）
 			color 255, 255, 255 : font config_SystemFont, 14
-			pos 8, 5 : mes about_title+" Ver."+about_version+" r"+about_release_number+""
+			pos 8, 5 : mes about_title+" ver."+about_version+" r"+about_release_number+""
 
 			gmode 2
 			pos 8, 25  : gcopy 65, 0, 0, 32, 32
@@ -451,10 +451,10 @@
 
 				if latest_version__Release_number > about_release_number {
 					font config_SystemFont, 14 : pos windowx-500, windowy-titlebar_h-70+3 : mes "アップデートがあります！更新しますか？"
-					font config_SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+latest_version__Version+" r"+latest_version__Release_number+"\n"+latest_version__About+""
+					font config_SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "ver."+latest_version__Version+" r"+latest_version__Release_number+"\n"+latest_version__About+""
 				} else : if Dev_latest_version__Release_number > about_release_number {
 					font config_SystemFont, 14 : pos windowx-500, windowy-titlebar_h-70+3 : mes "開発版にアップデートがあります！更新しますか？"
-					font config_SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "Ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+"\n"+Dev_latest_version__About+""
+					font config_SystemFont, 11 : pos windowx-500, windowy-titlebar_h-50+3 : mes "ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+"\n"+Dev_latest_version__About+""
 				}
 			}
 
@@ -624,7 +624,7 @@
 				pos 70, 3 : mes "バグ・ご要望の送信"
 
 				font config_SystemFont, 14 : color 255, 255, 255
-				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「14.バグや問題点、今後の予定」をご覧ください。"
+				pos 90, 50 : mes "現在確認されているバグについては、\nReadMe.txtの「15.バグや問題点、今後の予定」をご覧ください。"
 				pos ((500-64)/2)-16, 100 : gcopy 64, 0, 0, 32, 32
 				pos ((500-64)/2)-16+45, 105 : mes "ReadMe.txtを開く"
 
@@ -652,7 +652,7 @@
 					pos 100, 40 : mes "開発版に更新があります！"
 					font config_SystemFont, 14, 1
 					color 163, 73, 164
-					pos 110, 65 : mes "Ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+""
+					pos 110, 65 : mes "ver."+Dev_latest_version__Version+"(Dev) r"+Dev_latest_version__Release_number+""
 
 					Dev_latest_version__About_tmp = Dev_latest_version__About
 					strrep Dev_latest_version__About_tmp, " / ", "\n"
@@ -666,7 +666,7 @@
 					pos 100, 40 : mes "更新があります！"
 					font config_SystemFont, 14, 1
 					color 255, 127, 39
-					pos 110, 65 : mes "Ver."+latest_version__Version+" r"+latest_version__Release_number+""
+					pos 110, 65 : mes "ver."+latest_version__Version+" r"+latest_version__Release_number+""
 
 					latest_version__About_tmp = latest_version__About
 					strrep latest_version__About_tmp, " / ", "\n"
@@ -2629,230 +2629,39 @@
 				position_x = sx * CHIP_SIZE/2 - sy * CHIP_SIZE/2 - intial_camx
 				position_y = sy * CHIP_SIZE/4 + sx * CHIP_SIZE/4 - intial_camy
 
-				; アドオンごとの例外的な座標のズレを算出
-				px = 0
-				py = 0
-
-				if obj_dire(sx,sy,sz,cnt) = 1 or obj_dire(sx,sy,sz,cnt) = 3 {
-					originally_top_of_a_dire_x = size_x / 2
-				} else {
-					originally_top_of_a_dire_x = 0
+				; アドオンを表示する座標やサイズなどを算出
+				obj_tiles_x = obj_tiles(sx,sy,sz,0)
+				obj_tiles_y = obj_tiles(sx,sy,sz,1)
+				if (chip_x > 1 or chip_y > 1) and obj_dire(sx,sy,sz,cnt) = 2 {
+					obj_tiles_y += obj_use_tiles(sx,sy,sz,1) - 1
+					if obj_use_tiles(sx,sy,sz,1) = 0 : obj_tiles_y += 1
 				}
-
-				originally_top_of_a_dire_y = size_y * int(obj_dire(sx,sy,sz,cnt)/2)
-
-				if originally_top_of_a_dire_x >= sdnl3(addon_image_size, map(sx,sy,sz,cnt), obj_type(sx,sy,sz,cnt), 0) or originally_top_of_a_dire_y >= sdnl3(addon_image_size, map(sx,sy,sz,cnt), obj_type(sx,sy,sz,cnt), 1) {
-					originally_top_of_a_dire_y = 0
+				if (chip_x > 1 or chip_y > 1) and obj_dire(sx,sy,sz,cnt) = 3 {
+					obj_tiles_x += obj_use_tiles(sx,sy,sz,0) - 1
+					if obj_use_tiles(sx,sy,sz,0) = 0 : obj_tiles_x += 1
 				}
-
-				py += top_left_y - originally_top_of_a_dire_y + CHIP_SIZE/4 * (int(sdnl3(addon_chip_x, map(sx,sy,sz,cnt), obj_type(sx,sy,sz,cnt), obj_dire(sx,sy,sz,cnt))) - 1)
-
-				if size_y > 64 {
-					py -= size_y - CHIP_SIZE
-				}
-
-				; 左上からの占有するマスの数
-				obj_use_tiles_from_left_top_x = 0
-				obj_use_tiles_from_left_top_y = 0
-
-				if obj_use_tiles(sx,sy,sz,0) > 0 and obj_use_tiles(sx,sy,sz,1) <= 0 {
-					if obj_dire(sx,sy,sz,cnt) = 0 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y
-					}
-					if obj_dire(sx,sy,sz,cnt) = 0 or obj_dire(sx,sy,sz,cnt) = 1 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
-					}
-					if obj_dire(sx,sy,sz,cnt) = 2 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
-					}
-					if obj_dire(sx,sy,sz,cnt) = 3 {
-						obj_use_tiles_from_left_top_x = obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0))
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0)))
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/4
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
-					}
-
-				} else : if obj_use_tiles(sx,sy,sz,0) <= 0 and obj_use_tiles(sx,sy,sz,1) > 0 {
-					if obj_dire(sx,sy,sz,cnt) = 0 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE/2
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE/4
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - (chip_y - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y
-					}
-					if obj_dire(sx,sy,sz,cnt) = 1 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,1) - 1 - obj_tiles(sx,sy,sz,1))
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * (obj_use_tiles(sx,sy,sz,1) - 1 - obj_tiles(sx,sy,sz,1))
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (obj_use_tiles(sx,sy,sz,1) - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4 + obj_use_tiles_from_left_top_y * CHIP_SIZE/4
-					}
-					if obj_dire(sx,sy,sz,cnt) = 2 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/2 * abs(obj_tiles(sx,sy,sz,1))
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * abs(obj_tiles(sx,sy,sz,1))
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (obj_use_tiles(sx,sy,sz,1) - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - abs(obj_tiles(sx,sy,sz,1)) * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4 + obj_use_tiles_from_left_top_y * CHIP_SIZE
-					}
-					if obj_dire(sx,sy,sz,cnt) = 3 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + (obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))) * CHIP_SIZE/2
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + (obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))) * CHIP_SIZE/4
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + (obj_use_tiles(sx,sy,sz,1) - 1 - obj_use_tiles_from_left_top_y) * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4 + obj_use_tiles_from_left_top_y * CHIP_SIZE/2
-					}
-
-				} else : if obj_use_tiles(sx,sy,sz,0) > 0 and obj_use_tiles(sx,sy,sz,1) > 0 {
-					if obj_dire(sx,sy,sz,cnt) = 0 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-
-						if obj_use_tiles_from_left_top_y != obj_use_tiles(sx,sy,sz,1)-1 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y
-					}
-					if obj_dire(sx,sy,sz,cnt) = 1 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-						if obj_use_tiles_from_left_top_y = 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y
-					}
-					if obj_dire(sx,sy,sz,cnt) = 2 {
-						obj_use_tiles_from_left_top_x = obj_tiles(sx,sy,sz,0)
-						obj_use_tiles_from_left_top_y = obj_tiles(sx,sy,sz,1)
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/2
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4
-						if obj_use_tiles_from_left_top_y = 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y
-					}
-					if obj_dire(sx,sy,sz,cnt) = 3 {
-						obj_use_tiles_from_left_top_x = obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0))
-						obj_use_tiles_from_left_top_y = obj_use_tiles(sx,sy,sz,1) - 1 - abs(obj_tiles(sx,sy,sz,1))
-
-						addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * (obj_use_tiles(sx,sy,sz,0) - 1 - abs(obj_tiles(sx,sy,sz,0)))
-						addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0) - CHIP_SIZE/4
-						if obj_use_tiles_from_left_top_y != 0 : addons_drow_position_y(sx,sy,sz,cnt) = -100
-
-						addons_top_left_x(sx,sy,sz,cnt) = top_left_x + obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_top_left_y(sx,sy,sz,cnt) = top_left_y + obj_use_tiles_from_left_top_y * CHIP_SIZE/2
-
-						addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-						addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
-					}
-
-				} else {
-					addons_drow_position_x(sx,sy,sz,cnt) = position_x + px + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-					addons_drow_position_y(sx,sy,sz,cnt) = position_y + py - CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0) + CHIP_SIZE/4 * obj_tiles(sx,sy,sz,0)
-
-					addons_top_left_x(sx,sy,sz,cnt) = top_left_x
-					addons_top_left_y(sx,sy,sz,cnt) = top_left_y
-
-					addons_size_x(sx,sy,sz,cnt) = size_x - obj_use_tiles_from_left_top_x * CHIP_SIZE
-					addons_size_y(sx,sy,sz,cnt) = size_y - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
-
-					; タイルのときだけ例外処理
-					if category(sx,sy,sz,cnt) = "tile" {
-						if map_time_Month = 12 or (map_time_Month >= 1 and map_time_Month <= 2) : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"snow"), 0))
-						if map_time_Month >= 3 and map_time_Month <= 9 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"null"), 0))
-						if map_time_Month >= 10 and map_time_Month <= 11 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"autumn"), 0))
-					}
-				}
-
-				/*	どのサイズでも対応可能な処理（現在開発中につき使用不可）
-				addons_drow_position_x(sx,sy,sz,cnt) = position_x + CHIP_SIZE/2 * obj_tiles(sx,sy,sz,0)
-				addons_drow_position_y(sx,sy,sz,cnt) = position_y + (bottom_right_y-size_y)
-
-				if size_y - CHIP_SIZE > 0 {
-					addons_drow_position_y(sx,sy,sz,cnt) -= size_y - CHIP_SIZE
-				}
+				
+				addons_drow_position_x(sx,sy,sz,cnt) = position_x
+				addons_drow_position_y(sx,sy,sz,cnt) = position_y - (size_y-CHIP_SIZE/2) + (chip_x-1)*CHIP_SIZE/4 - obj_tiles_x * CHIP_SIZE/4 + CHIP_SIZE/2
 
 				addons_top_left_x(sx,sy,sz,cnt) = top_left_x
 				addons_top_left_y(sx,sy,sz,cnt) = top_left_y
 
-				addons_size_x(sx,sy,sz,cnt) = size_x// - obj_use_tiles_from_left_top_x * CHIP_SIZE
-				addons_size_y(sx,sy,sz,cnt) = size_y// - obj_use_tiles_from_left_top_y * CHIP_SIZE/4
+				if chip_x > 1 or chip_y > 1 {
+					addons_top_left_x(sx,sy,sz,cnt) += obj_tiles_x * CHIP_SIZE/2
+
+					if obj_use_tiles(sx,sy,sz,1) != 0 and obj_tiles_y != obj_use_tiles(sx,sy,sz,1)-1 {
+						addons_drow_position_x(sx,sy,sz,cnt) = -100
+						addons_drow_position_y(sx,sy,sz,cnt) = -100
+					}
+				}
+
+				addons_size_x(sx,sy,sz,cnt) = size_x
+				addons_size_y(sx,sy,sz,cnt) = size_y
+
+				if chip_x > 1 or chip_y > 1 {
+					addons_size_x(sx,sy,sz,cnt) = size_x - CHIP_SIZE/2 * obj_tiles_x
+				}
 
 				; タイルのときだけ例外処理
 				if category(sx,sy,sz,cnt) = "tile" {
@@ -2860,7 +2669,6 @@
 					if map_time_Month >= 3 and map_time_Month <= 9 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"null"), 0))
 					if map_time_Month >= 10 and map_time_Month <= 11 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"autumn"), 0))
 				}
-				*/
 				
 			loop
 			if from_build = 1 {
@@ -4029,7 +3837,7 @@
 	}
 	if cursor_mode = "put_Farm" {
 		area_addon_summary = "市民が農作物を生産する場を提供します。農業地区を設定すると畑や田、牧場が建設されます。"
-		area_addon_icon = 43
+		area_addon_icon = 58
 		area_addon_number = -7 :  area_addon_name_JP = "農業地区"
 	}
 
@@ -4168,6 +3976,7 @@
 	noteget selected_addon_number, rnd(notemax)
 	selected_addon_number = int(selected_addon_number)
 
+	from_build_on_reserved_area = 1
 	gosub *build
 
 	; 問題なく建設できた場合は予約取り消し
@@ -4268,6 +4077,8 @@
 
 		sx = mx : sy = my : sz = mz
 		from_build = 1 : gosub *get_addon_drow_position_new
+
+		map_Money -= 5
 
 		return
 	}
@@ -4649,6 +4460,12 @@
 		if category(mx,my,mz,0) = "public" {
 			map_total_Public_maximum_capacity += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 			Vacancies += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
+		}
+
+		if from_build_on_reserved_area = 0 {
+			map_Money -= 5
+		} else {
+			from_build_on_reserved_area = 0
 		}
 	}
 
@@ -5794,18 +5611,16 @@
 			if map_time_Date = 1 { from_Build = 1 : gosub *get_addon_drow_position_new }
 
 			; 税金を支出＆徴収するためにそれぞれの建物の総数を取得（毎月1日のみ）
-			if map_time_Date = 1 {
-				if category(sx,sy,sz,1) = "police_station"  : map_total_Police_Stations ++
-				if category(sx,sy,sz,1) = "fire_depertment" : map_total_Fire_Depertments ++
-				if category(sx,sy,sz,1) = "post_office"     : map_total_Post_Offices ++
-				if category(sx,sy,sz,1) = "education"       : map_total_Education ++
+			if category(sx,sy,sz,1) = "police_station"  : map_total_Police_Stations ++
+			if category(sx,sy,sz,1) = "fire_depertment" : map_total_Fire_Depertments ++
+			if category(sx,sy,sz,1) = "post_office"     : map_total_Post_Offices ++
+			if category(sx,sy,sz,1) = "education"       : map_total_Education ++
 
-				if category(sx,sy,sz,0) = "residential"     : map_total_Residential ++
-				if category(sx,sy,sz,0) = "commercial"      : map_total_Commercial ++
-				if category(sx,sy,sz,0) = "office"          : map_total_Office ++
-				if category(sx,sy,sz,0) = "industrial"      : map_total_Industrial ++
-				if category(sx,sy,sz,0) = "farm"            : map_total_Farm ++
-			}
+			if category(sx,sy,sz,0) = "residential"     : map_total_Residential ++
+			if category(sx,sy,sz,0) = "commercial"      : map_total_Commercial ++
+			if category(sx,sy,sz,0) = "office"          : map_total_Office ++
+			if category(sx,sy,sz,0) = "industrial"      : map_total_Industrial ++
+			if category(sx,sy,sz,0) = "farm"            : map_total_Farm ++
 
 		loop
 		await 1

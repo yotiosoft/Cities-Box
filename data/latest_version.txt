@@ -1,7 +1,7 @@
-Release Number : 134;
+Release Number : 135;
 Title : Cities Box;
-Version : 1.6.5;
-About : 2x3（横向き）のアドオンに対応;
+Version : 1.6.6;
+About : 全てのサイズのアドオンに対応;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
