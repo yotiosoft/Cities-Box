@@ -1,6 +1,6 @@
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.6.6-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.7.0-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
@@ -111,12 +111,13 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 
 # 最終更新
 
-## Ver.1.6.6 r135  
-全てのサイズのアドオンに対応  
-1x3のオフィスビルと3x3の博物館アドオンを追加  
-農業地区設定のアイコンが工業地区と同じになっていたため修正  
-港のアドオンが削除されていたため再び追加  
-建設時に資金が引かれていないため修正（地区設定時は除く）  
-予算の支出が0になる問題を修正  
+## Ver.1.7.0 r136  
+空港（滑走路、誘導路、ターミナルビル）の建設に対応  
+タイルの敷設に対応  
+騒音の概念を導入  
+道路、線路、水路、空路による地価・教育度・犯罪率・騒音への影響力の設定に対応  
+統計メニューのアイコンを変更  
+統計メニューを開いているときに、一部のアイコンが半透明になる問題を修正  
+マップ右端に建物などを建てると、たまにエラーが発生する問題を修正  
     
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

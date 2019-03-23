@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.6.6
+									    Cities Box Ver.1.7.0
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -47,7 +47,7 @@
 	#define BEGIN_ADDON_BUFFER_ID	100
 
 	; アドオン以外の画像のバッファ総数
-	#define BUFFER_IMAGES_TOTAL		78
+	#define BUFFER_IMAGES_TOTAL		80
 
 	; マップサイズ
 	#define MAPSIZE_X				100
@@ -191,11 +191,9 @@
 	/*------------------------------------使用する画像の読み込み----------------------------------*/
 	color 255, 201, 14 : boxf 0, windowy-5, windowx/2, windowy
 
-	bufferings = ""
-
 	notesel bufferings
 
-	repeat BUFFER_IMAGES_TOTAL + 1
+	repeat BUFFER_IMAGES_TOTAL+1
 		noteadd " ", cnt
 	loop
 
@@ -210,35 +208,6 @@
 
 		noteadd "img/logo2_Mac.png", 75, 1									; ロゴ2（macOS向け）
 		noteadd "img/title_background.png", 15, 1							; タイトル背景画像
-
-	//メニューのアイコン
-		noteadd "img/menu_icons/menu/cursor.png", 3, 1						; 標準カーソル
-		noteadd "img/menu_icons/menu/road.png", 4, 1						; メニューアイコン（道路敷設）
-		noteadd "img/menu_icons/menu/railroad.png", 50, 1					; メニューアイコン（線路建設）
-		noteadd "img/menu_icons/menu/low_density_residential.png", 5, 1		; メニューアイコン（住居地区建設）
-		noteadd "img/menu_icons/menu/commercial.png", 12, 1					; メニューアイコン（商業地区建設）
-		noteadd "img/menu_icons/menu/office.png", 6, 1						; メニューアイコン（オフィス建設）
-		noteadd "img/menu_icons/menu/industrial.png", 19, 1					; メニューアイコン（工業地区建設）
-		noteadd "img/menu_icons/menu/farm.png", 57, 1						; メニューアイコン（農業地区建設）
-		noteadd "img/menu_icons/menu/public.png", 7, 1						; メニューアイコン（郵便局建設）
-		noteadd "img/menu_icons/menu/park.png", 29, 1						; メニューアイコン（公園建設）
-		noteadd "img/menu_icons/menu/waterway.png", 76, 1					; メニューアイコン（水路建設）
-
-		noteadd "img/menu_icons/menu/bulldozer.png", 10, 1					; 撤去ボタン
-		noteadd "img/menu_icons/save/save.png", 11, 1						; 保存ボタン
-		noteadd "img/menu_icons/setting/setting.png", 13, 1					; 設定ボタン
-		noteadd "img/menu_icons/stat/stat.png", 30, 1						; 統計ボタン
-		noteadd "img/menu_icons/budget/budget.png", 49, 1					; 予算ボタン
-		noteadd "img/menu_icons/information/information.png", 52, 1			; 情報ボタン
-
-	//小サイズのアイコン
-		noteadd "img/menu_icons/mini/low_density_residential.png", 8, 1		; 低密度住居地区
-		noteadd "img/menu_icons/mini/high_density_residential.png", 9, 1	; 高密度住居地区
-		noteadd "img/menu_icons/mini/low_density_commercial.png", 20, 1		; 低密度商業地区
-		noteadd "img/menu_icons/mini/high_density_commercial.png", 21, 1	; 高密度商業地区
-
-		noteadd "img/menu_icons/mini/roadway.png", 66, 1					; 車道
-		noteadd "img/menu_icons/mini/promenade.png", 67, 1					; 歩道 / 自転車道
 
 	//設定で使うアイコン
 		noteadd "img/menu_icons/setting/check.png", 14, 1					; チェックボタン
@@ -316,23 +285,56 @@
 
 		noteadd "img/menu_setting/text.png", 64, 1							; テキストファイルアイコン
 
+	//メニューのアイコン
+		noteadd "img/menu_icons/menu/cursor.png", 3, 1						; 標準カーソル
+		noteadd "img/menu_icons/menu/road.png", 4, 1						; メニューアイコン（道路敷設）
+		noteadd "img/menu_icons/menu/railroad.png", 50, 1					; メニューアイコン（線路建設）
+		noteadd "img/menu_icons/menu/low_density_residential.png", 5, 1		; メニューアイコン（住居地区建設）
+		noteadd "img/menu_icons/menu/commercial.png", 12, 1					; メニューアイコン（商業地区建設）
+		noteadd "img/menu_icons/menu/office.png", 6, 1						; メニューアイコン（オフィス建設）
+		noteadd "img/menu_icons/menu/industrial.png", 19, 1					; メニューアイコン（工業地区建設）
+		noteadd "img/menu_icons/menu/farm.png", 57, 1						; メニューアイコン（農業地区建設）
+		noteadd "img/menu_icons/menu/public.png", 7, 1						; メニューアイコン（郵便局建設）
+		noteadd "img/menu_icons/menu/park.png", 29, 1						; メニューアイコン（公園建設）
+		noteadd "img/menu_icons/menu/waterway.png", 76, 1					; メニューアイコン（水路建設）
+		noteadd "img/menu_icons/menu/airport.png", 79, 1					; メニューアイコン（空港建設）
+		noteadd "img/menu_icons/menu/tile.png", 80, 1						; メニューアイコン（タイル敷設）
+
+		noteadd "img/menu_icons/menu/bulldozer.png", 10, 1					; 撤去ボタン
+		noteadd "img/menu_icons/save/save.png", 11, 1						; 保存ボタン
+		noteadd "img/menu_icons/setting/setting.png", 13, 1					; 設定ボタン
+		noteadd "img/menu_icons/stat/stat.png", 30, 1						; 統計ボタン
+		noteadd "img/menu_icons/budget/budget.png", 49, 1					; 予算ボタン
+		noteadd "img/menu_icons/information/information.png", 52, 1			; 情報ボタン
+
+	//小サイズのアイコン
+		noteadd "img/menu_icons/mini/low_density_residential.png", 8, 1		; 低密度住居地区
+		noteadd "img/menu_icons/mini/high_density_residential.png", 9, 1	; 高密度住居地区
+		noteadd "img/menu_icons/mini/low_density_commercial.png", 20, 1		; 低密度商業地区
+		noteadd "img/menu_icons/mini/high_density_commercial.png", 21, 1	; 高密度商業地区
+
+		noteadd "img/menu_icons/mini/roadway.png", 66, 1					; 車道
+		noteadd "img/menu_icons/mini/promenade.png", 67, 1					; 歩道 / 自転車道
+
 	; 読み込み
 	a_statbar_block = windowx/2 / BUFFER_IMAGES_TOTAL
 
-	repeat BUFFER_IMAGES_TOTAL + 1
+	repeat BUFFER_IMAGES_TOTAL+1
 		noteget load_img, cnt
 		exist load_img
 
-		if load_img != " " and strsize = -1 {
-			error "F03 : 画像ファイルが見つかりません\n必要な画像ファイル "+load_img+" が欠けています。"
-		}
-
-		if load_img != " " and strsize != -1 {
+		if load_img != " " {
+			if strsize = -1 {
+				error "F03 : 画像ファイルが見つかりません\n必要な画像ファイル "+load_img+" が欠けています。"
+			}
+			
 			celload load_img, cnt
 		}
 
 		color 255, 201, 14 : boxf 0, windowy-5, windowx/2+(a_statbar_block*(cnt+3)), windowy
 	loop
+
+	bsave "test.txt", bufferings
 
 	bufferings = ""
 
@@ -879,10 +881,11 @@
 	dim workers, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//商業地区の従業員数
 	dim students, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//各学校の生徒・学生数
 
-	dim land_price, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//地価（万円/マス）
+	dim land_price, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//地価（万§/マス）
 	dim crime_rate, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//犯罪率
 	dim education_rate, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//教育度
 	dim happiness, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//幸福度
+	dim noise, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z					//騒音
 
 	sdim crop, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//生産物
 	dim crop_amount, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//生産量
@@ -1101,6 +1104,7 @@
 		crime_rate_buf			= get_chapter(load_mapdata, "crime_rate(x,y)", " {", "}")
 		education_rate_buf		= get_chapter(load_mapdata, "education_rate(x,y)", " {", "}")
 		happiness_buf			= get_chapter(load_mapdata, "happiness(x,y)", " {", "}")
+		noise_buf				= get_chapter(load_mapdata, "noise(x,y)", " {", "}")
 
 		crop_buf				= get_chapter(load_mapdata, "crop(x,y)", " {", "}")
 		crop_amount_buf			= get_chapter(load_mapdata, "crop_amount(x,y)", " {", "}")
@@ -1274,6 +1278,12 @@
 			noteget happiness_buf_a_line, (y+1)
 
 			split happiness_buf_a_line, ", ", happiness_buf_a_tile
+
+			; noise(x,y)
+			notesel noise_buf
+			noteget noise_buf_a_line, (y+1)
+
+			split noise_buf_a_line, ", ", noise_buf_a_tile
 
 			; crop(x,y)
 			notesel crop_buf
@@ -1474,6 +1484,13 @@
 				; happiness(x,y,z)
 				happiness(x,y,z) = int(happiness_buf_a_tile(x))
 
+				; noise(x,y,z)
+				if noise_buf != "" {
+					noise(x,y,z) = int(noise_buf_a_tile(x))
+				} else {
+					noise(x,y,z) = 0		; セーブデータにnoise配列がなければnoiseは0に設定
+				}
+
 				; crop(x,y,z)
 				crop(x,y,z) = crop_buf_a_tile(x)
 
@@ -1508,7 +1525,7 @@
 
 		before_map_Total_Population = map_Total_Population
 
-		happiness_ave = happiness_tmp / (mapsize_x*mapsize_y)
+		happiness_ave = happiness_tmp / (mapsize_x*MAPSIZE_Y)
 		map_approval_rate = happiness_ave
 
 	chdir directory
@@ -1636,12 +1653,13 @@
 	sdns addon_land_price_influence, 0, 0, tmp, total_addons, 2			; アドオンが地価に及ぼす影響
 	sdns addon_crime_rate_influence, 0, 0, tmp, total_addons, 2			; アドオンの犯罪率に及ぼす影響
 	sdns addon_education_rate_influence, 0, 0, tmp, total_addons, 2		; アドオンの教育度に及ぼす影響
+	sdns addon_noise_influence, 0, 0, tmp, total_addons, 2				; アドオンが出す騒音の影響
 	sdns addon_crop, 0, 0, tmp, total_addons, 2							; アドオンが生産する生産物
 	sdns addon_use_type_names, 0, 0, tmp, total_addons, 12				; アドオン内のタイプの名前
 	sdns addon_build_limit, 0, 0, tmp, total_addons, 0					; アドオンの建設可能回数
 	sdns addon_icon_number, 0, 0, tmp, total_addons, 1					; アドオンのアイコンのバッファ番号
 	sdns3 addon_image, 0, 0, 0,tmp, total_addons, 12, 2					; アドオンで使う画像
-	sdns3 addon_night_mask_image, 0, 0, 0,tmp, total_addons, 12, 2		; アドオンで使う夜間のマスク画像
+	sdns3 addon_night_mask_image, 0, 0, 0, tmp, total_addons, 12, 2		; アドオンで使う夜間のマスク画像
 	sdns3 addon_image_size, 0, 0, 0, tmp, total_addons, 12, 2			; アドオンで使う画像の全体のサイズ
 	sdns3 addon_dire_names, 0, 0, 0, tmp, total_addons, 12, 4			; アドオンのそれぞれのタイプ内の向きの名前
 	sdns3 addon_size_x, 0, 0, 0, tmp, total_addons, 12, 4				; アドオンのサイズx
@@ -1652,6 +1670,7 @@
 	sdns3 addon_top_left_y, 0, 0, 0, tmp, total_addons, 12, 4			; アドオンの絵が描写されている左上の座標y
 	sdns3 addon_bottom_right_x, 0, 0, 0, tmp, total_addons, 12, 4		; アドオンの絵が描写されている右下の座標x
 	sdns3 addon_bottom_right_y, 0, 0, 0, tmp, total_addons, 12, 4		; アドオンの絵が描写されている右下の座標y
+	sdns3 addon_base, 0, 0, 0, tmp, total_addons, 12, 4					; アドオンの下地に用いるアドオン名
 	//sdns addon_total_directions, 0, 0, tmp, total_addons, 12			; アドオンの各タイプ内の向きの数
 
 	//adat（アドオンデータファイル）と画像ファイル読み込み
@@ -1696,8 +1715,8 @@
 			noteadd addon_name_tmp, addon_number, 1
 
 			; 日本語名
-			tmp = get_chapter(adat_tmp, "addon_jp_name", " = \"", "\"")
-			sdns addon_name, addon_number, 1, tmp
+			addon_name_jp_tmp = get_chapter(adat_tmp, "addon_jp_name", " = \"", "\"")
+			sdns addon_name, addon_number, 1, addon_name_jp_tmp
 
 		; addon_author（アドオンの作者名）
 			tmp = get_chapter(adat_tmp, "addon_author", " = \"", "\"")
@@ -1804,8 +1823,18 @@
 				notesel type_number_waterway : noteadd str(addon_number), -1
 				ct_done = 1
 			}
+			if tmp1 = "airport" or tmp1 = "Airport" {
+				notesel type_airport : noteadd addon_name_tmp, -1
+				notesel type_number_airport : noteadd str(addon_number), -1
+				ct_done = 1
+			}
 			if tmp1 = "tile" or tmp1 = "Tile" {
-				tile_addon_number = addon_number
+				notesel type_tile : noteadd addon_name_tmp, -1
+				notesel type_number_tile : noteadd str(addon_number), -1
+
+				if addon_name_tmp = "tile_greenfield" {
+					tile_addon_number = addon_number
+				}
 				ct_done = 1
 			}
 
@@ -1844,6 +1873,14 @@
 		; addon_education_rate_influence_grid（アドオンの設置により教育度が影響する範囲）
 			tmp = get_chapter(adat_tmp, "education_rate_influence_grid", " = \"", "\"")
 			sdns addon_education_rate_influence, addon_number, 1, tmp
+
+		; addon_noise_influence（アドオンが出す騒音）
+			tmp = get_chapter(adat_tmp, "noise_influence", " = \"", "\"")
+			sdns addon_noise_influence, addon_number, 0, tmp
+
+		; addon_education_rate_influence_grid（アドオンが出す騒音が影響する範囲）
+			tmp = get_chapter(adat_tmp, "noise_influence_grid", " = \"", "\"")
+			sdns addon_noise_influence, addon_number, 1, tmp
 
 		; addon_crop（アドオンが生産する生産物名）
 			tmp = get_chapter(adat_tmp, "addon_crop", " = \"", "\"")
@@ -1927,6 +1964,13 @@
 					load_night_mask_image = get_chapter(addon_a_type_tmp, "night_mask", " = \"", "\"")
 					sdns3 addon_night_mask_image, addon_number, tcnt, 0, load_image, total_addons, 12, 2
 
+				; addon_base（アドオンの下地に用いるアドオン名）
+					load_base = get_chapter(addon_a_type_tmp, "base", " = \"", "\"")
+					split load_base, ", ", load_base_addon_name, load_base_addon_type, load_base_addon_dire
+					sdns3 addon_base, addon_number, tcnt, 0, load_base_addon_name, total_addons, 12, 3
+					sdns3 addon_base, addon_number, tcnt, 1, load_base_addon_type, total_addons, 12, 3
+					sdns3 addon_base, addon_number, tcnt, 2, load_base_addon_dire, total_addons, 12, 3
+					
 				/*-----------------------------アドオン画像の読み込み-----------------------------*/
 				; 通常時
 					exist load_image
@@ -2484,6 +2528,7 @@
 			crime_rate(x,y,z) = 0
 			education_rate(x,y,z) = 0
 			happiness(x,y,z) = 0
+			noise(x,y,z) = 0
 
 			crop(x,y,z) = ""
 			crop_amount(x,y,z) = 0
@@ -2665,9 +2710,9 @@
 
 				; タイルのときだけ例外処理
 				if category(sx,sy,sz,cnt) = "tile" {
-					if map_time_Month = 12 or (map_time_Month >= 1 and map_time_Month <= 2) : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"snow"), 0))
-					if map_time_Month >= 3 and map_time_Month <= 9 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"null"), 0))
-					if map_time_Month >= 10 and map_time_Month <= 11 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(tile_addon_number,addon_use_types_name,"autumn"), 0))
+					if map_time_Month = 12 or (map_time_Month >= 1 and map_time_Month <= 2) : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(map(sx,sy,sz,cnt),addon_use_types_name,"snow"), 0))
+					if map_time_Month >= 3 and map_time_Month <= 9 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(map(sx,sy,sz,cnt),addon_use_types_name,"null"), 0))
+					if map_time_Month >= 10 and map_time_Month <= 11 : addons_top_left_y(sx,sy,sz,cnt) = int(sdnl3(addon_top_left_y, map(sx,sy,sz,cnt), element2(map(sx,sy,sz,cnt),addon_use_types_name,"autumn"), 0))
 				}
 				
 			loop
@@ -2914,7 +2959,7 @@
 		pos mx_position, my_position : gcopy cursor_icon, 0, 0, CHIP_SIZE, CHIP_SIZE/2
 
 		; 建設しようとしている建物の向きを矢印で表示＆向きを操作
-		if selected_addon_number >= 0 and (cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park") {
+		if selected_addon_number >= 0 and (cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park" or cursor_mode = "put_Airport") {
 			; スペースキーで向きを変える
 			onkey gosub *main_onkey
 
@@ -3045,6 +3090,20 @@
 				pos 348, windowy-70-titlebar_h : gcopy 76, 0, 0, 32, 32
 			}
 
+			; 空港ボタン
+			if cursor_mode = "put_Airport" {
+				pos 380, windowy-70-titlebar_h : gcopy 79, 0, 32, 32, 32
+			} else {
+				pos 380, windowy-70-titlebar_h : gcopy 79, 0, 0, 32, 32
+			}
+
+			; タイルボタン
+			if cursor_mode = "put_Tile" {
+				pos 412, windowy-70-titlebar_h : gcopy 80, 0, 32, 32, 32
+			} else {
+				pos 412, windowy-70-titlebar_h : gcopy 80, 0, 0, 32, 32
+			}
+
 			; 情報ボタン
 			pos windowx-54-64, windowy-70-titlebar_h : gcopy 52, 0, 0, 32, 32
 
@@ -3070,6 +3129,7 @@
 			; 統計メニュー（oepn_stat_menu = 1のとき）
 			if open_stat_menu = 1 {
 				sboxf 128, windowx-92-32-1, windowy-70-titlebar_h-20-1, windowx-92-32-1+(20*5)+1, windowy-70-titlebar_h
+				gmode 2
 				if stat_mode = "type" {
 					pos windowx-92-32, windowy-70-titlebar_h-20 : gcopy 31, 0, 20, 20, 20
 				} else {
@@ -3098,6 +3158,7 @@
 			}
 
 			; 速さ
+			gmode 2
 			pos 20, windowy-45-titlebar_h+10
 			if speed = 1 : gcopy 73, 0, 0, 32, 32	; 遅い
 			if speed = 2 : gcopy 68, 0, 0, 32, 32	; 普通
@@ -3333,6 +3394,18 @@
 		color 0, 0, 0 : pos 348+2, windowy-70-titlebar_h-18+2 : mes "水路"
 	}
 
+	; 空港
+	if click_range(380, windowy-70-titlebar_h, 380+32, windowy-70-titlebar_h+32) = 1 {
+		color 255, 255, 255 : sboxf 128, 380, windowy-70-titlebar_h-18, 380+50, windowy-70-titlebar_h
+		color 0, 0, 0 : pos 380+2, windowy-70-titlebar_h-18+2 : mes "空港"
+	}
+
+	; 空港
+	if click_range(412, windowy-70-titlebar_h, 412+32, windowy-70-titlebar_h+32) = 1 {
+		color 255, 255, 255 : sboxf 128, 412, windowy-70-titlebar_h-18, 412+50, windowy-70-titlebar_h
+		color 0, 0, 0 : pos 412+2, windowy-70-titlebar_h-18+2 : mes "タイル"
+	}
+
 	; 情報
 	if click_range(windowx-54-64, windowy-70-titlebar_h, windowx-54-64+32, windowy-70-titlebar_h+32) = 1 {
 		color 255, 255, 255 : sboxf 128, windowx-54-64, windowy-70-titlebar_h-18, windowx-54-64+50, windowy-70-titlebar_h
@@ -3441,9 +3514,9 @@
 
 *main_mouse_left_release
 	/*----------------------------画面上で左クリックから離されたの処理----------------------------*/
-	; アドオンの車道/線路/水路のタイプと向きを指定（*build_roadtypes）
+	; アドオンの車道/線路/水路/滑走路・誘導路のタイプと向きを指定（*build_roadtypes）
 	getkey is_mouse_left_pushing, 1
-	if (cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway") and under_construction_tiles >= 1 and is_mouse_left_pushing = 0 {
+	if (cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway" or cursor_mode = "put_Airport") and under_construction_tiles >= 1 and is_mouse_left_pushing = 0 {
 		gosub *build_roadtypes
 	}
 
@@ -3532,6 +3605,18 @@
 	; 水路
 	if click_range( 348, windowy-70-titlebar_h, 348+32, windowy-70-titlebar_h+32 ) = 1 {
 		cursor_mode = "put_Waterway"
+		addon_menu_categories = 1
+	}
+
+	; 空港
+	if click_range( 380, windowy-70-titlebar_h, 380+32, windowy-70-titlebar_h+32 ) = 1 {
+		cursor_mode = "put_Airport"
+		addon_menu_categories = 1
+	}
+
+	; 空港
+	if click_range( 412, windowy-70-titlebar_h, 412+32, windowy-70-titlebar_h+32 ) = 1 {
+		cursor_mode = "put_Tile"
 		addon_menu_categories = 1
 	}
 
@@ -3789,6 +3874,16 @@
 		category_addons = type_Waterway
 		category_addons_number = type_number_Waterway
 	}
+	; 空港
+	if cursor_mode = "put_Airport" {
+		category_addons = type_Airport
+		category_addons_number = type_number_Airport
+	}
+	; タイル
+	if cursor_mode = "put_Tile" {
+		category_addons = type_Tile
+		category_addons_number = type_number_Tile
+	}
 
 	; メニューにタイプが2つ以上ある場合、それぞれのタイプのアイコンを表示（高密度/低密度 など）
 	if addon_menu_categories > 1 {
@@ -4016,8 +4111,150 @@
 		return
 	}
 
+	; 地価、犯罪率、教育度、騒音の影響を反映
+		; アドオンを設置することによって影響される地価、犯罪率、教育度、騒音とその影響範囲
+		addon_land_price_influence__tmp = int(sdnl(addon_land_price_influence, selected_addon_number, 0))
+		addon_land_price_influence_grid__tmp = int(sdnl(addon_land_price_influence, selected_addon_number, 1))
+
+		addon_crime_rate_influence__tmp = int(sdnl(addon_crime_rate_influence, selected_addon_number, 0))
+		addon_crime_rate_influence_grid__tmp = int(sdnl(addon_crime_rate_influence, selected_addon_number, 1))
+
+		addon_education_rate_influence__tmp = int(sdnl(addon_education_rate_influence, selected_addon_number, 0))
+		addon_education_rate_influence_grid__tmp = int(sdnl(addon_education_rate_influence, selected_addon_number, 1))
+
+		addon_noise_influence__tmp = int(sdnl(addon_noise_influence, selected_addon_number, 0))
+		addon_noise_influence_grid__tmp = int(sdnl(addon_noise_influence, selected_addon_number, 1))
+
+		p = 1
+
+		; 地価の変動
+		if addon_land_price_influence__tmp != 0 {
+			if addon_land_price_influence_grid__tmp != 0 {
+				add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp * p
+			} else : if addon_land_price_influence_grid__tmp = 0 {
+				add_value = 0
+			}
+
+			round = 0
+			for round, 1, addon_land_price_influence_grid__tmp+1, 1
+				repeat (round*2-1)
+					if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<MAPSIZE_X and my+round-1>0 and my+round-1<MAPSIZE_Y {
+						land_price(mx+cnt-(round-1),my+round-1,mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<MAPSIZE_X and my-round+1>0 and my-round+1<MAPSIZE_Y {
+						land_price(mx+cnt-(round-1),my-round+1,mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if mx+round-1>0 and mx+round-1<MAPSIZE_X and my+cnt-(round-1)>0 and my+cnt-(round-1)<MAPSIZE_Y {
+						land_price(mx+round-1,my+cnt-(round-1),mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if mx-round+1>0 and mx-round+1<MAPSIZE_X and my+cnt-(round-1)>0 and my+cnt-(round-1)<MAPSIZE_Y {
+						land_price(mx-round+1,my+cnt-(round-1),mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+			next
+		}
+
+		; 犯罪率の変動
+		if addon_crime_rate_influence__tmp != 0 {
+			add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp * p
+
+			round = 0
+			for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
+				repeat (round*2-1)
+					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my+round-1) >= 0 and (my+round-1) < MAPSIZE_Y {
+						crime_rate(mx+cnt-(round-1),my+round-1,mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+						if crime_rate(mx+cnt-(round-1),my+round-1,mz) > 100  : crime_rate(mx+cnt-(round-1),my+round-1) = 100
+						if crime_rate(mx+cnt-(round-1),my+round-1,mz) < -100 : crime_rate(mx+cnt-(round-1),my+round-1) = -100
+					}
+				loop
+				repeat (round*2-1)
+					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my-round+1) >= 0 and (my-round+1) < MAPSIZE_Y {
+						crime_rate(mx+cnt-(round-1),my-round+1,mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+						if crime_rate(mx+cnt-(round-1),my-round+1,mz) > 100  : crime_rate(mx+cnt-(round-1),my-round+1) = 100
+						if crime_rate(mx+cnt-(round-1),my-round+1,mz) < -100 : crime_rate(mx+cnt-(round-1),my-round+1) = -100
+					}
+				loop
+				repeat (round*2-1)
+					if (mx+round-1) >= 0 and (mx+round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
+						crime_rate(mx+round-1,my+cnt-(round-1),mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+						if crime_rate(mx+round-1,my+cnt-(round-1),mz) > 100  : crime_rate(mx+round-1,my+cnt-(round-1)) = 100
+						if crime_rate(mx+round-1,my+cnt-(round-1),mz) < -100 : crime_rate(mx+round-1,my+cnt-(round-1)) = -100
+					}
+				loop
+				repeat (round*2-1)
+					if (mx-round-1) >= 0 and (mx-round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
+						crime_rate(mx-round+1,my+cnt-(round-1),mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
+						if crime_rate(mx-round+1,my+cnt-(round-1),mz) > 100  : crime_rate(mx-round+1,my+cnt-(round-1)) = 100
+						if crime_rate(mx-round+1,my+cnt-(round-1),mz) < -100 : crime_rate(mx-round+1,my+cnt-(round-1)) = -100
+					}
+				loop
+			next
+		}
+
+		; 教育度の変動
+		if addon_education_rate_influence__tmp != 0 {
+			add_value = addon_education_rate_influence__tmp / addon_education_rate_influence_grid__tmp * p
+			round = 0
+			for round, 1, addon_education_rate_influence_grid__tmp+1, 1
+				repeat (round*2-1)
+					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my+round-1) >= 0 and (my+round-1) < MAPSIZE_Y {
+						education_rate(mx+cnt-(round-1),my+round-1,mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my-round+1) >= 0 and (my-round+1) < MAPSIZE_Y {
+						education_rate(mx+cnt-(round-1),my-round+1,mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if (mx+round-1) >= 0 and (mx+round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
+						education_rate(mx+round-1,my+cnt-(round-1),mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if (mx-round-1) >= 0 and (mx-round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
+						education_rate(mx-round+1,my+cnt-(round-1),mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+			next
+		}
+
+		; 騒音の変動
+		if addon_noise_influence__tmp != 0 {
+			add_value = addon_noise_influence__tmp / addon_noise_influence_grid__tmp * p
+			round = 0
+			for round, 1, addon_noise_influence_grid__tmp+1, 1
+				repeat (round*2-1)
+					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my+round-1) >= 0 and (my+round-1) < MAPSIZE_Y {
+						noise(mx+cnt-(round-1),my+round-1,mz) += int( addon_noise_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my-round+1) >= 0 and (my-round+1) < MAPSIZE_Y {
+						noise(mx+cnt-(round-1),my-round+1,mz) += int( addon_noise_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if (mx+round-1) >= 0 and (mx+round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
+						noise(mx+round-1,my+cnt-(round-1),mz) += int( addon_noise_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+				repeat (round*2-1)
+					if (mx-round-1) >= 0 and (mx-round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
+						noise(mx-round+1,my+cnt-(round-1),mz) += int( addon_noise_influence__tmp - (add_value*(round-1)) )
+					}
+				loop
+			next
+		}
+
 	; 道路/線路/水路
-	if cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway" {
+	if cursor_mode = "put_Road" or cursor_mode = "put_Railroad" or cursor_mode = "put_Waterway" or cursor_mode = "put_Airport" {
 		; 障害物があれば削除
 		if map(mx,my,mz) != tile_addon_number {
 			from_build_roadtype = 1
@@ -4043,7 +4280,9 @@
 		map(mx,my,mz) = selected_addon_number
 		name(mx,my,mz) = sdnl(addon_name, selected_addon_number, 0)
 
-		if cursor_mode = "put_Road"     : category(mx,my,mz,0) = "road"
+		if cursor_mode = "put_Road" {
+			category(mx,my,mz,0) = "road"
+		}
 		if cursor_mode = "put_Railroad" {
 			if sdnl(addon_type, selected_addon_number, 0) = "station" {
 				category(mx,my,mz,0) = "station"
@@ -4065,6 +4304,14 @@
 				category(mx,my,mz,0) = "waterway"
 			}
 		}
+		if cursor_mode = "put_Airport" {
+			if sdnl(addon_type, selected_addon_number, 1) = "Terminal_Building" {
+				dont_return = 1
+			} else {
+				category(mx,my,mz,0) = "airport"
+				category(mx,my,mz,1) = sdnl(addon_type, selected_addon_number, 1)
+			}
+		}
 
 		if obj_type(mx,my,mz) != element2(selected_addon_number, addon_use_types_name, "under_construction")  {
 			new_roadtype_x(under_construction_tiles) = mx
@@ -4079,34 +4326,74 @@
 		from_build = 1 : gosub *get_addon_drow_position_new
 
 		map_Money -= 5
+ 
+		if dont_return = 0 {
+			return
+		} else {
+			dont_return = 0
+		}
+	}
+
+	; タイル
+	if cursor_mode = "put_Tile" {
+		map(mx,my,mz,0)				= int(selected_addon_number)
+		name(mx,my,mz,0)			= sdnl(addon_name, selected_addon_number, 0)
+
+		category(mx,my,mz,0)		= sdnl(addon_type, selected_addon_number, 0)
+		category(mx,my,mz,1)		= sdnl(addon_type, selected_addon_number, 1)
+		category(mx,my,mz,2)		= sdnl(addon_type, selected_addon_number, 2)
+
+		obj_type(mx,my,mz,0)		= 0
+		obj_type(mx,my,mz,1)		= 0
+		obj_dire(mx,my,mz,0)		= 0
+		obj_dire(mx,my,mz,1)		= 0
+
+		obj_tiles(mx,my,mz,0)		= 0
+		obj_tiles(mx,my,mz,1)		= 0
+
+		crop(mx,my,mz)				= ""
+		crop_amount(mx,my,mz)		= 0
+
+		reservation(mx,my,mz)		= "none"
+
+		original_name(mx,my,mz)		= ""
+
+		sx = mx : sy = my : sz = mz
+		from_build = 1 : gosub *get_addon_drow_position_new
 
 		return
 	}
 
 	; 住居/商業/オフィス/工業/農業/公共施設/公園
-	if cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park" {
+	if cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park" or cursor_mode = "put_Airport" {
 
 	*prebuild
 
-		; 周囲のアドオンのカテゴリを取得
-		left_chip_category   = safesearch_str(category, mx-1, my, mz, 0, mapsize_x, mapsize_y)
-		top_chip_category    = safesearch_str(category, mx, my-1, mz, 0, mapsize_x, mapsize_y)
-		bottom_chip_category = safesearch_str(category, mx, my+1, mz, 0, mapsize_x, mapsize_y)
-		right_chip_category  = safesearch_str(category, mx+1, my, mz, 0, mapsize_x, mapsize_y)
+		// 空港建設モードの場合、滑走路・誘導路ならreturn
+		if cursor_mode = "put_Airport" and sdnl(addon_type, selected_addon_number, 1) != "Terminal_Building" {
+			build_direction_number = -1
+			return
+		}
 
-		left_chip_category_2   = safesearch_str(category, mx-1, my, mz, 1, mapsize_x, mapsize_y)
-		top_chip_category_2    = safesearch_str(category, mx, my-1, mz, 1, mapsize_x, mapsize_y)
-		bottom_chip_category_2 = safesearch_str(category, mx, my+1, mz, 1, mapsize_x, mapsize_y)
-		right_chip_category_2  = safesearch_str(category, mx+1, my, mz, 1, mapsize_x, mapsize_y)
+		; 周囲のアドオンのカテゴリを取得
+		left_chip_category   = safesearch_str(category, mx-1, my, mz, 0, MAPSIZE_X, MAPSIZE_Y)
+		top_chip_category    = safesearch_str(category, mx, my-1, mz, 0, MAPSIZE_X, MAPSIZE_Y)
+		bottom_chip_category = safesearch_str(category, mx, my+1, mz, 0, MAPSIZE_X, MAPSIZE_Y)
+		right_chip_category  = safesearch_str(category, mx+1, my, mz, 0, MAPSIZE_X, MAPSIZE_Y)
+
+		left_chip_category_2   = safesearch_str(category, mx-1, my, mz, 1, MAPSIZE_X, MAPSIZE_Y)
+		top_chip_category_2    = safesearch_str(category, mx, my-1, mz, 1, MAPSIZE_X, MAPSIZE_Y)
+		bottom_chip_category_2 = safesearch_str(category, mx, my+1, mz, 1, MAPSIZE_X, MAPSIZE_Y)
+		right_chip_category_2  = safesearch_str(category, mx+1, my, mz, 1, MAPSIZE_X, MAPSIZE_Y)
 
 		; アドオンに建設可能回数が設けられている場合
 		if int(sdnl(addon_build_limit, selected_addon_number, 0)) >= 1 and prebuilding = 0 {
 			s = 0
 			sz = 0
 			printed_already_built = 1
-			repeat mapsize_x
+			repeat MAPSIZE_X
 				sx = cnt
-				repeat mapsize_y
+				repeat MAPSIZE_Y
 					sy = cnt
 					if map(sx,sy,sz,0) = selected_addon_number : s ++
 				loop
@@ -4241,17 +4528,16 @@
 
 		build_direction_number_ID = element3(selected_addon_number, build_type_number, addon_dire_names, tmp)
 
-		; アドオンを設置することによって影響される地価、犯罪率、教育度とその影響範囲
-		addon_land_price_influence__tmp = int(sdnl(addon_land_price_influence, selected_addon_number, 0))
-		addon_land_price_influence_grid__tmp = int(sdnl(addon_land_price_influence, selected_addon_number, 1))
-
-		addon_crime_rate_influence__tmp = int(sdnl(addon_crime_rate_influence, selected_addon_number, 0))
-		addon_crime_rate_influence_grid__tmp = int(sdnl(addon_crime_rate_influence, selected_addon_number, 1))
-
-		addon_education_rate_influence__tmp = int(sdnl(addon_education_rate_influence, selected_addon_number, 0))
-		addon_education_rate_influence_grid__tmp = int(sdnl(addon_education_rate_influence, selected_addon_number, 1))
-
-		p = 1
+		; アドオンに下地アドオンの設定がある場合
+		base_addon_name = sdnl(addon_base, selected_addon_number, build_type_number)
+		if base_addon_name != "" {
+			repeat total_addons
+				if sdnl(addon_name, cnt, 0) = base_addon_name {
+					name(mx,my,mz,1) = base_addon_name
+					map(mx,my,mz,1) = cnt
+				}
+			loop
+		}
 
 		; アドオン情報の書き込み時にrepeatする回数
 		repeat_x = int(sdnl3(addon_chip_x, selected_addon_number, build_type_number, build_direction_number_ID))
@@ -4265,6 +4551,7 @@
 		if cursor_mode = "put_Farm"        : category_tmp = "farm"
 		if cursor_mode = "put_Public"      : category_tmp = "public"
 		if cursor_mode = "put_Park"        : category_tmp = "park"
+		if cursor_mode = "put_Airport"	   : category_tmp = "airport_terminal"
 
 		; タイルにアドオンの情報を書き込み
 		sx = mx : sy = my : sz = 0
@@ -4332,105 +4619,8 @@
 				}
 			}
 		loop
-
-		; 地価の変動
-		if addon_land_price_influence__tmp != 0 {
-			if addon_land_price_influence_grid__tmp != 0 {
-				add_value = addon_land_price_influence__tmp / addon_land_price_influence_grid__tmp * p
-			} else : if addon_land_price_influence_grid__tmp = 0 {
-				add_value = 0
-			}
-
-			round = 0
-			for round, 1, addon_land_price_influence_grid__tmp+1, 1
-				repeat (round*2-1)
-					if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my+round-1>0 and my+round-1<mapsize_y {
-						land_price(mx+cnt-(round-1),my+round-1,mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-				repeat (round*2-1)
-					if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my-round+1>0 and my-round+1<mapsize_y {
-						land_price(mx+cnt-(round-1),my-round+1,mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-				repeat (round*2-1)
-					if mx+round-1>0 and mx+round-1<mapsize_x and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize_y {
-						land_price(mx+round-1,my+cnt-(round-1),mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-				repeat (round*2-1)
-					if mx-round+1>0 and mx-round+1<mapsize_x and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize_y {
-						land_price(mx-round+1,my+cnt-(round-1),mz) += int( addon_land_price_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-			next
-		}
-
-		; 犯罪率の変動
-		if addon_crime_rate_influence__tmp != 0 {
-			add_value = addon_crime_rate_influence__tmp / addon_crime_rate_influence_grid__tmp * p
-
-			round = 0
-			for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
-				repeat (round*2-1)
-					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my+round-1) >= 0 and (my+round-1) <= mapsize_y {
-						crime_rate(mx+cnt-(round-1),my+round-1,mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-						if crime_rate(mx+cnt-(round-1),my+round-1,mz) > 100  : crime_rate(mx+cnt-(round-1),my+round-1) = 100
-						if crime_rate(mx+cnt-(round-1),my+round-1,mz) < -100 : crime_rate(mx+cnt-(round-1),my+round-1) = -100
-					}
-				loop
-				repeat (round*2-1)
-					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my-round+1) >= 0 and (my-round+1) <= mapsize_y {
-						crime_rate(mx+cnt-(round-1),my-round+1,mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-						if crime_rate(mx+cnt-(round-1),my-round+1,mz) > 100  : crime_rate(mx+cnt-(round-1),my-round+1) = 100
-						if crime_rate(mx+cnt-(round-1),my-round+1,mz) < -100 : crime_rate(mx+cnt-(round-1),my-round+1) = -100
-					}
-				loop
-				repeat (round*2-1)
-					if (mx+round-1) >= 0 and (mx+round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
-						crime_rate(mx+round-1,my+cnt-(round-1),mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-						if crime_rate(mx+round-1,my+cnt-(round-1),mz) > 100  : crime_rate(mx+round-1,my+cnt-(round-1)) = 100
-						if crime_rate(mx+round-1,my+cnt-(round-1),mz) < -100 : crime_rate(mx+round-1,my+cnt-(round-1)) = -100
-					}
-				loop
-				repeat (round*2-1)
-					if (mx-round-1) >= 0 and (mx-round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
-						crime_rate(mx-round+1,my+cnt-(round-1),mz) += int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
-						if crime_rate(mx-round+1,my+cnt-(round-1),mz) > 100  : crime_rate(mx-round+1,my+cnt-(round-1)) = 100
-						if crime_rate(mx-round+1,my+cnt-(round-1),mz) < -100 : crime_rate(mx-round+1,my+cnt-(round-1)) = -100
-					}
-				loop
-			next
-		}
-
-		; 教育度の変動
-		if addon_education_rate_influence__tmp != 0 {
-			add_value = addon_education_rate_influence__tmp / addon_education_rate_influence_grid__tmp * p
-			round = 0
-			for round, 1, addon_education_rate_influence_grid__tmp+1, 1
-				repeat (round*2-1)
-					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my+round-1) >= 0 and (my+round-1) <= mapsize_y {
-						education_rate(mx+cnt-(round-1),my+round-1,mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-				repeat (round*2-1)
-					if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my-round+1) >= 0 and (my-round+1) <= mapsize_y {
-						education_rate(mx+cnt-(round-1),my-round+1,mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-				repeat (round*2-1)
-					if (mx+round-1) >= 0 and (mx+round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
-						education_rate(mx+round-1,my+cnt-(round-1),mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-				repeat (round*2-1)
-					if (mx-round-1) >= 0 and (mx-round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
-						education_rate(mx-round+1,my+cnt-(round-1),mz) += int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
-					}
-				loop
-			next
-		}
-
+		
+		
 		; 都市全体の収容可能人数或いは求人数を増やし、RCOIFメーターを変動
 		if category(mx,my,mz,0) = "residential" {
 			map_total_Residential_maximum_capacity += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
@@ -4457,7 +4647,7 @@
 			Vacancies += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 			map_demand_Farm -= 1
 		}
-		if category(mx,my,mz,0) = "public" {
+		if category(mx,my,mz,0) = "public" or category(mx,my,mz,0) = "airport_terminal" {	; 空港ターミナルビルも公共施設扱い
 			map_total_Public_maximum_capacity += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 			Vacancies += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 		}
@@ -4498,17 +4688,17 @@
 			obj_type_tmp  = "" : obj_dire_tmp = ""
 
 			; 周囲のアドオンのカテゴリを取得
-			left_chip_category   = safesearch_str(category, sx-1, sy, sz, 0, mapsize_x, mapsize_y)
-			top_chip_category    = safesearch_str(category, sx, sy-1, sz, 0, mapsize_x, mapsize_y)
-			bottom_chip_category = safesearch_str(category, sx, sy+1, sz, 0, mapsize_x, mapsize_y)
-			right_chip_category  = safesearch_str(category, sx+1, sy, sz, 0, mapsize_x, mapsize_y)
+			left_chip_category   = safesearch_str(category, sx-1, sy, sz, 0, MAPSIZE_X, MAPSIZE_Y)
+			top_chip_category    = safesearch_str(category, sx, sy-1, sz, 0, MAPSIZE_X, MAPSIZE_Y)
+			bottom_chip_category = safesearch_str(category, sx, sy+1, sz, 0, MAPSIZE_X, MAPSIZE_Y)
+			right_chip_category  = safesearch_str(category, sx+1, sy, sz, 0, MAPSIZE_X, MAPSIZE_Y)
 
-			left_chip_category_2   = safesearch_str(category, sx-1, sy, sz, 1, mapsize_x, mapsize_y)
-			top_chip_category_2    = safesearch_str(category, sx, sy-1, sz, 1, mapsize_x, mapsize_y)
-			bottom_chip_category_2 = safesearch_str(category, sx, sy+1, sz, 1, mapsize_x, mapsize_y)
-			right_chip_category_2  = safesearch_str(category, sx+1, sy, sz, 1, mapsize_x, mapsize_y)
+			left_chip_category_2   = safesearch_str(category, sx-1, sy, sz, 1, MAPSIZE_X, MAPSIZE_Y)
+			top_chip_category_2    = safesearch_str(category, sx, sy-1, sz, 1, MAPSIZE_X, MAPSIZE_Y)
+			bottom_chip_category_2 = safesearch_str(category, sx, sy+1, sz, 1, MAPSIZE_X, MAPSIZE_Y)
+			right_chip_category_2  = safesearch_str(category, sx+1, sy, sz, 1, MAPSIZE_X, MAPSIZE_Y)
 
-			if sx < 0 or sx >= mapsize_x or sy < 0 or sy >= mapsize_y {
+			if sx < 0 or sx >= MAPSIZE_X or sy < 0 or sy >= MAPSIZE_Y {
 				continue
 			}
 
@@ -4642,15 +4832,15 @@
 			; 水路/港
 			if category(sx,sy,sz,0) = "waterway" or category(sx,sy,sz,0) = "port" {
 				; 周囲のアドオンのカテゴリを取得
-				left_top_chip_category     = safesearch_str(category, sx-1, sy-1, sz, 0, mapsize_x, mapsize_y)
-				right_top_chip_category    = safesearch_str(category, sx+1, sy-1, sz, 0, mapsize_x, mapsize_y)
-				left_bottom_chip_category  = safesearch_str(category, sx-1, sy+1, sz, 0, mapsize_x, mapsize_y)
-				right_bottom_chip_category = safesearch_str(category, sx+1, sy+1, sz, 0, mapsize_x, mapsize_y)
+				left_top_chip_category     = safesearch_str(category, sx-1, sy-1, sz, 0, MAPSIZE_X, MAPSIZE_Y)
+				right_top_chip_category    = safesearch_str(category, sx+1, sy-1, sz, 0, MAPSIZE_X, MAPSIZE_Y)
+				left_bottom_chip_category  = safesearch_str(category, sx-1, sy+1, sz, 0, MAPSIZE_X, MAPSIZE_Y)
+				right_bottom_chip_category = safesearch_str(category, sx+1, sy+1, sz, 0, MAPSIZE_X, MAPSIZE_Y)
 
-				left_top_chip_category_2     = safesearch_str(category, sx-1, sy-1, sz, 1, mapsize_x, mapsize_y)
-				right_top_chip_category_2    = safesearch_str(category, sx+1, sy-1, sz, 1, mapsize_x, mapsize_y)
-				left_bottom_chip_category_2  = safesearch_str(category, sx-1, sy+1, sz, 1, mapsize_x, mapsize_y)
-				right_bottom_chip_category_2 = safesearch_str(category, sx+1, sy+1, sz, 1, mapsize_x, mapsize_y)
+				left_top_chip_category_2     = safesearch_str(category, sx-1, sy-1, sz, 1, MAPSIZE_X, MAPSIZE_Y)
+				right_top_chip_category_2    = safesearch_str(category, sx+1, sy-1, sz, 1, MAPSIZE_X, MAPSIZE_Y)
+				left_bottom_chip_category_2  = safesearch_str(category, sx-1, sy+1, sz, 1, MAPSIZE_X, MAPSIZE_Y)
+				right_bottom_chip_category_2 = safesearch_str(category, sx+1, sy+1, sz, 1, MAPSIZE_X, MAPSIZE_Y)
 
 				correct = iforandcorrect_3_2(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "waterway", "port", "bridge")
 
@@ -4813,6 +5003,69 @@
 				}
 			}
 
+			; 空港の滑走路/誘導路
+			if category(sx,sy,sz,0) = "airport" {
+				correct = iforandcorrect_2(left_chip_category, left_chip_category_2, top_chip_category, top_chip_category_2, bottom_chip_category, bottom_chip_category_2, right_chip_category, right_chip_category_2, "airport", ""+category(sx,sy,sz,1)+"")
+
+				; 周囲の道路接続が1つ（行き止まり）
+				if correct = 1 {
+					obj_type_tmp = "dead_end"
+					if left_chip_category = "airport"	: obj_dire_tmp = "left"
+					if top_chip_category = "airport"	: obj_dire_tmp = "top"
+					if bottom_chip_category = "airport"	: obj_dire_tmp = "bottom"
+					if right_chip_category = "airport"	: obj_dire_tmp = "right"
+				}
+
+				; 周囲の道路接続が1つ（曲がり角or直線）
+				if correct = 2 {
+					; 曲がり角（誘導路のみ）
+					if category(sx,sy,sz,1) = "Taxiway" {
+						if (left_chip_category = "airport") and (top_chip_category = "airport") {
+							obj_type_tmp = "turn" : obj_dire_tmp = "left-top"
+						}
+						if (top_chip_category = "airport") and (right_chip_category = "airport") {
+							obj_type_tmp = "turn" : obj_dire_tmp = "right-top"
+						}
+						if (left_chip_category = "airport") and (bottom_chip_category = "airport") {
+							obj_type_tmp = "turn" : obj_dire_tmp = "left-bottom"
+						}
+						if (bottom_chip_category = "airport") and (right_chip_category = "airport") {
+							obj_type_tmp = "turn" : obj_dire_tmp = "right-bottom"
+						}
+					}
+
+					; 直線
+					if (left_chip_category = "airport") and (right_chip_category = "airport") {
+						obj_type_tmp = "default" : obj_dire_tmp = "depth"
+					}
+					if (top_chip_category = "airport") and (bottom_chip_category = "airport") {
+						obj_type_tmp = "default" : obj_dire_tmp = "width"
+					}
+				}
+
+				; 周囲の道路接続が3つ（T字型交差点）
+				if correct = 3 {
+					obj_type_tmp = "intersection_T"
+					if (left_chip_category = "airport") and (top_chip_category = "airport") and (bottom_chip_category = "airport") {
+						obj_dire_tmp = "left-top-bottom"
+					}
+					if (left_chip_category = "airport") and (right_chip_category = "airport") and (top_chip_category = "airport") {
+						obj_dire_tmp = "left-right-top"
+					}
+					if (left_chip_category = "airport") and (right_chip_category = "airport") and (bottom_chip_category = "airport") {
+						obj_dire_tmp = "left-right-bottom"
+					}
+					if (right_chip_category = "airport") and (top_chip_category = "airport") and (bottom_chip_category = "airport") {
+						obj_dire_tmp = "right-top-bottom"
+					}
+				}
+
+				; 周囲の道路接続が4つ（十字型交差点）または周りに接続する道路がない場合
+				if correct = 4 or correct = 0 {
+					obj_type_tmp = "intersection_cross" : obj_dire_tmp = "null"
+				}
+			}
+
 			; タイプと向きを指定
 			if obj_type_tmp != "" and obj_dire_tmp != "" and obj_type_tmp != obj_type(sx,sy,sz) and obj_dire_tmp != obj_dire(sx,sy,sz) {
 				; 踏切または橋を設置する必要がある場合
@@ -4882,6 +5135,21 @@
 				obj_dire(sx,sy,sz,0) = obj_dire_t
 
 				from_build = 1 : gosub *get_addon_drow_position_new
+
+				; アドオンに下地アドオンの設定がある場合
+				base_addon_name = sdnl3(addon_base, map(sx,sy,sz,0), obj_type_t, 0)
+				if base_addon_name != "" {
+					base_addon_type = sdnl3(addon_base, map(sx,sy,sz,0), obj_type_t, 1)
+					base_addon_dire = sdnl3(addon_base, map(sx,sy,sz,0), obj_type_t, 2)
+					repeat total_addons
+						if sdnl(addon_name, cnt, 0) = base_addon_name {
+							name(sx,sy,sz,1) = base_addon_name
+							map(sx,sy,sz,1) = cnt
+							obj_type(sx,sy,sz,1) = int(base_addon_type)
+							obj_dire(sx,sy,sz,1) = int(base_addon_dire)
+						}
+					loop
+				}
 			}
 		loop
 	loop
@@ -4989,22 +5257,22 @@
 		round = 0
 		for round, 1, addon_land_price_influence_grid__tmp+1, 1
 			repeat (round*2-1)
-				if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my+round-1>0 and my+round-1<mapsize_y {
+				if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<MAPSIZE_X and my+round-1>0 and my+round-1<MAPSIZE_Y {
 					land_price(mx+cnt-(round-1),my+round-1,mz) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
 			repeat (round*2-1)
-				if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<mapsize_x and my-round+1>0 and my-round+1<mapsize_y {
+				if mx+cnt-(round-1)>0 and mx+cnt-(round-1)<MAPSIZE_X and my-round+1>0 and my-round+1<MAPSIZE_Y {
 					land_price(mx+cnt-(round-1),my-round+1,mz) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
 			repeat (round*2-1)
-				if mx+round-1>0 and mx+round-1<mapsize_x and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize_y {
+				if mx+round-1>0 and mx+round-1<MAPSIZE_X and my+cnt-(round-1)>0 and my+cnt-(round-1)<MAPSIZE_Y {
 					land_price(mx+round-1,my+cnt-(round-1),mz) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
 			repeat (round*2-1)
-				if mx-round+1>0 and mx-round+1<mapsize_x and my+cnt-(round-1)>0 and my+cnt-(round-1)<mapsize_y {
+				if mx-round+1>0 and mx-round+1<MAPSIZE_X and my+cnt-(round-1)>0 and my+cnt-(round-1)<MAPSIZE_Y {
 					land_price(mx-round+1,my+cnt-(round-1),mz) -= int( addon_land_price_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
@@ -5018,28 +5286,28 @@
 		round = 0
 		for round, 1, addon_crime_rate_influence_grid__tmp+1, 1
 			repeat (round*2-1)
-				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my+round-1) >= 0 and (my+round-1) <= mapsize_y {
+				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my+round-1) >= 0 and (my+round-1) < MAPSIZE_Y {
 					crime_rate(mx+cnt-(round-1),my+round-1,mz) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 					if crime_rate(mx+cnt-(round-1),my+round-1,mz) > 100  : crime_rate(mx+cnt-(round-1),my+round-1,mz) = 100
 					if crime_rate(mx+cnt-(round-1),my+round-1,mz) < -100 : crime_rate(mx+cnt-(round-1),my+round-1,mz) = -100
 				}
 			loop
 			repeat (round*2-1)
-				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my-round+1) >= 0 and (my-round+1) <= mapsize_y {
+				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my-round+1) >= 0 and (my-round+1) < MAPSIZE_Y {
 					crime_rate(mx+cnt-(round-1),my-round+1,mz) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 					if crime_rate(mx+cnt-(round-1),my-round+1,mz) > 100  : crime_rate(mx+cnt-(round-1),my-round+1,mz) = 100
 					if crime_rate(mx+cnt-(round-1),my-round+1,mz) < -100 : crime_rate(mx+cnt-(round-1),my-round+1,mz) = -100
 				}
 			loop
 			repeat (round*2-1)
-				if (mx+round-1) >= 0 and (mx+round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
+				if (mx+round-1) >= 0 and (mx+round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
 					crime_rate(mx+round-1,my+cnt-(round-1),mz) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 					if crime_rate(mx+round-1,my+cnt-(round-1),mz) > 100  : crime_rate(mx+round-1,my+cnt-(round-1),mz) = 100
 					if crime_rate(mx+round-1,my+cnt-(round-1),mz) < -100 : crime_rate(mx+round-1,my+cnt-(round-1),mz) = -100
 				}
 			loop
 			repeat (round*2-1)
-				if (mx-round-1) >= 0 and (mx-round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
+				if (mx-round-1) >= 0 and (mx-round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
 					crime_rate(mx-round+1,my+cnt-(round-1),mz) -= int( addon_crime_rate_influence__tmp - (add_value*(round-1)) )
 					if crime_rate(mx-round+1,my+cnt-(round-1),mz) > 100  : crime_rate(mx-round+1,my+cnt-(round-1)) = 100
 					if crime_rate(mx-round+1,my+cnt-(round-1),mz) < -100 : crime_rate(mx-round+1,my+cnt-(round-1)) = -100
@@ -5054,22 +5322,22 @@
 		round = 0
 		for round, 1, addon_education_rate_influence_grid__tmp+1, 1
 			repeat (round*2-1)
-				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my+round-1) >= 0 and (my+round-1) <= mapsize_y {
+				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my+round-1) >= 0 and (my+round-1) < MAPSIZE_Y {
 					education_rate(mx+cnt-(round-1),my+round-1,mz) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
 			repeat (round*2-1)
-				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) <= mapsize_x and (my-round+1) >= 0 and (my-round+1) <= mapsize_y {
+				if (mx+cnt-(round-1)) >= 0 and (mx+cnt-(round-1)) < MAPSIZE_X and (my-round+1) >= 0 and (my-round+1) < MAPSIZE_Y {
 					education_rate(mx+cnt-(round-1),my-round+1,mz) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
 			repeat (round*2-1)
-				if (mx+round-1) >= 0 and (mx+round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
+				if (mx+round-1) >= 0 and (mx+round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
 					education_rate(mx+round-1,my+cnt-(round-1),mz) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
 			repeat (round*2-1)
-				if (mx-round-1) >= 0 and (mx-round-1) <= mapsize_x and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) <= mapsize_y {
+				if (mx-round-1) >= 0 and (mx-round-1) < MAPSIZE_X and (my+cnt-(round-1)) >= 0 and (my+cnt-(round-1)) < MAPSIZE_Y {
 					education_rate(mx-round+1,my+cnt-(round-1),mz) -= int( addon_education_rate_influence__tmp - (add_value*(round-1)) )
 				}
 			loop
@@ -5459,9 +5727,9 @@
 	map_Total_Population = 0
 	map_gender_M = 0 : map_gender_F = 0
 
-	repeat mapsize_x
+	repeat MAPSIZE_X
 		sx = cnt
-		repeat mapsize_y
+		repeat MAPSIZE_Y
 			sy = cnt
 
 			; 人口・労働人口・需要度などを増減
@@ -5627,7 +5895,7 @@
 	loop
 
 	; 幸福度の平均値を算出
-	happiness_ave = happiness_tmp / (mapsize_x*mapsize_y)
+	happiness_ave = happiness_tmp / (MAPSIZE_X*MAPSIZE_Y)
 
 	; 支持率を算出
 	map_approval_rate = happiness_ave
@@ -5730,9 +5998,9 @@
 
 	gx = 0 : gy = 0 : gz = 0 : gi = 0
 
-	repeat mapsize_x
+	repeat MAPSIZE_X
 		gx = cnt
-		repeat mapsize_y
+		repeat MAPSIZE_Y
 			gy = cnt
 			if category(gx,gy,gz,0) = "commercial" or category(gx,gy,gz,0) = "office" or category(gx,gy,gz,0) = "industrial" or category(gx,gy,gz,0) = "farm" or category(gx,gy,gz,0) = "public" {
 				all_workplace_x(gi) = gx : all_workplace_y(gi) = gy : all_workplace_z(gi) = gz
@@ -5750,9 +6018,9 @@
 	gx = 0 : gy = 0 : gz = 0
 	gi_e = 0 : gi_j = 0 : gi_h = 0 : gi_u = 0
 
-	repeat mapsize_x
+	repeat MAPSIZE_X
 		gx = cnt
-		repeat mapsize_y
+		repeat MAPSIZE_Y
 			gy = cnt
 			if category(gx,gy,gz,2) = "elementary-school" {
 				all_elementary_schools_x(gi_e) = gx : all_elementary_schools_y(gi_e) = gy : all_elementary_schools_z(gi_e) = gz
@@ -5792,7 +6060,7 @@
 			if instr(workplace(sx,sy,sz), 0, "f") != -1 : map_Total_workers_Farm += 1
 			if instr(workplace(sx,sy,sz), 0, "p") != -1 : map_Total_workers_Public += 1
 
-			if sx = mapsize_x and sy = mapsize_y and sz = mapsize_z : workers_zero = 0
+			if sx = MAPSIZE_X and sy = MAPSIZE_Y and sz = MAPSIZE_Z : workers_zero = 0
 		}
 
 		if workplace_tmp(cnt) = "" and age_in_Residential(cnt) >= 18 and age_in_Residential(cnt) <= 60 {
@@ -6554,6 +6822,7 @@
 	save_crime_rate = "crime_rate(x,y) {\n"
 	save_education_rate = "education_rate(x,y) {\n"
 	save_happiness = "happiness(x,y) {\n"
+	save_noise = "noise(x,y) {\n"
 	save_crop = "crop(x,y) {\n"
 	save_crop_amount = "crop_amount(x,y) {\n"
 	save_age = "age(x,y) {\n"
@@ -6565,12 +6834,12 @@
 	save_statistics = "statistics {\n" + statistics + "}"
 
 	sz = 0
-	repeat mapsize_x
+	repeat MAPSIZE_X
 		sy = cnt
-		repeat mapsize_y
+		repeat MAPSIZE_Y
 			sx = cnt
 
-			if sx != mapsize_x-1 : comma = ", " : else : comma = "\n"
+			if sx != MAPSIZE_X-1 : comma = ", " : else : comma = "\n"
 
 			save_name            += name(sx,sy,sz,0)+comma
 			save_name2           += name(sx,sy,sz,1)+comma
@@ -6597,6 +6866,7 @@
 			save_crime_rate      += strf("%03d", crime_rate(sx,sy,sz))+comma
 			save_education_rate  += strf("%03d", education_rate(sx,sy,sz))+comma
 			save_happiness       += strf("%03d", happiness(sx,sy,sz))+comma
+			save_noise			 += strf("%03d", noise(sx,sy,sz))+comma
 			save_crop            += crop(sx,sy,sz)+comma
 			save_crop_amount     += strf("%03d", crop_amount(sx,sy,sz))+comma
 			save_age             += age(sx,sy,sz)+comma
@@ -6627,8 +6897,8 @@
 		noteadd " ", -1
 
 	; マップサイズ
-		noteadd "mapsize_x = "+mapsize_x+";", -1
-		noteadd "mapsize_y = "+mapsize_y+";", -1
+		noteadd "MAPSIZE_X = "+MAPSIZE_X+";", -1
+		noteadd "MAPSIZE_Y = "+MAPSIZE_Y+";", -1
 		noteadd " ", -1
 
 	; 日時
@@ -6691,6 +6961,7 @@
 	save_mapdata += save_crime_rate+"}\n"
 	save_mapdata += save_education_rate+"}\n"
 	save_mapdata += save_happiness+"}\n"
+	save_mapdata += save_noise+"}\n"
 	save_mapdata += save_crop+"}\n"
 	save_mapdata += save_crop_amount+"}\n"
 	save_mapdata += save_age+"}\n"

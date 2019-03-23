@@ -1,0 +1,61 @@
+addon_name = "White-gray_Tile"
+addon_jp_name = "îíÇ¡Ç€Ç¢É^ÉCÉã"
+addon_summary = "ãÛç`ÇÃóUì±òHâàÇ¢Ç…ï~Ç¢ÇƒégÇ¢Ç‹Ç∑ÅB"
+addon_icon = "icon_White-gray_Tile.png"
+
+addon_type = "tile"
+
+use_types = "null, autumn, snow"
+
+null {
+	image = "White-gray_Tile.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};
+autumn {
+	image = "White-gray_Tile.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "96"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	
+};
+snow {
+	image = "White-gray_Tile.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "160"
+		bottom_right_x = "64"
+		bottom_right_y = "192"
+	}
+};

@@ -5,7 +5,12 @@ British\road\Two_lane\British_Two_lane_normal_road(orange_line)\Two_lane_normal_
 British\tiles\ground\normal\tile_greenfield.adat
 British\tiles\water\bearch_and_walkway\Bearch_and_Walkway.adat
 British\tiles\water\normal\Normal_Waterway.adat
+Normal\airports\runways\Normaly_Runway\Normaly_Runway.adat
+Normal\airports\taxiways\Normaly_Taxiway\Normaly_Taxiway.adat
+Normal\airports\taxiways\White-gray_Taxiway\White-gray_Taxiway.adat
+Normal\airports\terminals\Glazed_Airport_Terminal\Reasonable_Multi-tenant_Building.adat
 Normal\tiles\ground\normal\tile_greenfield.adat
+Normal\tiles\optional\White-gray_Tile\White-gray_Tile.adat
 Normal\tiles\water\bearch_and_walkway\Bearch_and_Walkway.adat
 Normal\tiles\water\normal\Normal_Waterway.adat
 Normal\buildings\commercial\high_density\Buy-Buy_Building\Buy-Buy_Building.adon

@@ -28,20 +28,6 @@
 			}
 			return 0
 
-		//アドオンの番号を取得する関数
-		#defcfunc addon_num str input_addon_name
-			chdir directory@
-			exist "data/temp/"+input_addon_name+".temp"
-
-			if strsize = -1 {
-				return addon_num@("tile_greenfield")	; 一時ファイルが見つからない場合、とりあえず更地（greenfield）の値を返す
-			}
-
-			notesel temp_file
-			noteload "data/temp/"+input_addon_name+".temp"
-
-			return int(temp_file)
-
 		//各項目の読み込み（使用例：get_chapter(元の変数, "検索する項目", "始点区切りコード", "終端コード") ）
 		#defcfunc get_chapter var underlying_var, str search_chapter, str punctuate, str end_word
 			value = instr(underlying_var, 0, ""+search_chapter+""+punctuate+"")
