@@ -334,8 +334,6 @@
 		color 255, 201, 14 : boxf 0, windowy-5, windowx/2+(a_statbar_block*(cnt+3)), windowy
 	loop
 
-	bsave "test.txt", bufferings
-
 	bufferings = ""
 
 /*-----------------------------------ƒƒjƒ…[‰æ–Ê‚Æİ’è‰æ–Ê---------------------------------------*/
@@ -1564,7 +1562,6 @@
 
 	notesel addonFilesList
 	addonFilesList += adonFilesList
-	notesave "filelist.txt"
 	countOfTotalAddonFiles += countOfTotalAdonFiles
 
 	//”z—ñ‚È‚Ç‚ğ‰Šú‰»
