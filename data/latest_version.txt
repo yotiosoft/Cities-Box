@@ -1,7 +1,7 @@
-Release Number : 135;
+Release Number : 136;
 Title : Cities Box;
-Version : 1.6.6;
-About : 全てのサイズのアドオンに対応;
+Version : 1.7.0;
+About : 空港の建設、タイルの敷設に対応;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
