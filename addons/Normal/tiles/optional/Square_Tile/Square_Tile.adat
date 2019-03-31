@@ -1,0 +1,61 @@
+addon_name = "Square_Tile"
+addon_jp_name = "広場のタイル"
+addon_summary = "公園に、広場に。街中で見かけそうなタイルです。"
+addon_icon = "icon_Square_Tile.png"
+
+addon_type = "tile"
+
+use_types = "null, autumn, snow"
+
+null {
+	image = "Square_Tile.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "32"
+		bottom_right_x = "64"
+		bottom_right_y = "64"
+	}
+};
+autumn {
+	image = "Square_Tile.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "96"
+		bottom_right_x = "64"
+		bottom_right_y = "128"
+	}
+	
+};
+snow {
+	image = "Square_Tile.png"
+	direction = "null"
+	transparent_color = "0, 0, 0"
+	
+	null {
+		size_x = "64"
+		size_y = "32"
+		chip_x = "1"
+		chip_y = "1"
+		
+		top_left_x = "0"
+		top_left_y = "160"
+		bottom_right_x = "64"
+		bottom_right_y = "192"
+	}
+};

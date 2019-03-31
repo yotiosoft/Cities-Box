@@ -1466,3 +1466,19 @@ M	module.hsp
 M	start.ax
 
 }
+[Ver.1.7.1]137{
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	README.md
+M	ReadMe.txt
+A	addons/Normal/tiles/optional/Square_Tile/Square_Tile.adat
+A	addons/Normal/tiles/optional/Square_Tile/Square_Tile.png
+A	addons/Normal/tiles/optional/Square_Tile/icon_Square_Tile.png
+M	data/about.txt
+M	data/latest_version.txt
+M	data/news/others.news
+M	data/news/special.news
+M	img/logo.png
+M	start.ax
+
+}
