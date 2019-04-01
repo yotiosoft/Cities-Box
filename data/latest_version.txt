@@ -1,7 +1,7 @@
-Release Number : 137;
+Release Number : 138;
 Title : Cities Box;
 Version : 1.7.1;
-About : 鬨帝浹縺ｮ蟷ｸ遖丞ｺｦ縺ｸ縺ｮ蜿肴丐縺ｨ邨ｱ險医Γ繝九Η繝ｼ縺ｸ縺ｮ蟇ｾ蠢?;
+About : 騒音の幸福度への反映と統計メニューへの対応;
 Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
 Updater_Name : Cities_Box_UD.exe;
 URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
