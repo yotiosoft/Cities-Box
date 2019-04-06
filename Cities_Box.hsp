@@ -2580,6 +2580,8 @@
 		rain_x(cnt) = rnd(windowx) : rain_y(cnt) = -rnd(windowy)
 	loop
 
+	add_rain = -20
+
 	gosub *get_coordinates
 	goto *get_addon_drow_position
 
@@ -4337,7 +4339,7 @@
 			}
 		}
 		if cursor_mode = "put_Airport" {
-			if sdnl(addon_type, selected_addon_number, 1) = "Terminal_Building" {
+			if sdnl(addon_type, selected_addon_number, 1) = "Terminal_Building" or sdnl(addon_type, selected_addon_number, 1) = "Control_Tower" {
 				dont_return = 1
 			} else {
 				category(mx,my,mz,0) = "airport"
@@ -4402,7 +4404,7 @@
 	*prebuild
 
 		// 空港建設モードの場合、滑走路・誘導路ならreturn
-		if cursor_mode = "put_Airport" and sdnl(addon_type, selected_addon_number, 1) != "Terminal_Building" {
+		if cursor_mode = "put_Airport" and sdnl(addon_type, selected_addon_number, 1) != "Terminal_Building" and sdnl(addon_type, selected_addon_number, 1) != "Control_Tower" {
 			build_direction_number = -1
 			return
 		}
@@ -4449,8 +4451,8 @@
 
 		; 道路に接続されていない場所に建設しようとしている場合
 		if left_chip_category != "road" and top_chip_category != "road" and bottom_chip_category != "road" and right_chip_category != "road" {
-			; 農業地区と公園は除外とし、下向きに設定する
-			if cursor_mode = "put_Farm" or cursor_mode = "put_Park" {
+			; 農業地区と公園、管制塔は除外とし、下向きに設定する
+			if cursor_mode = "put_Farm" or cursor_mode = "put_Park" or (cursor_mode = "put_Airport" and sdnl(addon_type, selected_addon_number, 1) = "Control_Tower") {
 				build_direction_number = 2
 
 				if prebuilding = 1 {
@@ -4583,7 +4585,10 @@
 		if cursor_mode = "put_Farm"        : category_tmp = "farm"
 		if cursor_mode = "put_Public"      : category_tmp = "public"
 		if cursor_mode = "put_Park"        : category_tmp = "park"
-		if cursor_mode = "put_Airport"	   : category_tmp = "airport_terminal"
+		if cursor_mode = "put_Airport" {
+			if sdnl(addon_type, selected_addon_number, 1) = "Terminal_Building"	: category_tmp = "airport_terminal"
+			if sdnl(addon_type, selected_addon_number, 1) = "Control_Tower"		: category_tmp = "airport_control_tower"
+		}
 
 		; タイルにアドオンの情報を書き込み
 		sx = mx : sy = my : sz = 0
@@ -4679,7 +4684,7 @@
 			Vacancies += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 			map_demand_Farm -= 1
 		}
-		if category(mx,my,mz,0) = "public" or category(mx,my,mz,0) = "airport_terminal" {	; 空港ターミナルビルも公共施設扱い
+		if category(mx,my,mz,0) = "public" or category(mx,my,mz,0) = "airport_terminal" or category(mx,my,mz,0) = "airport_control_tower" {	; 空港ターミナルビル、管制塔も公共施設扱い
 			map_total_Public_maximum_capacity += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 			Vacancies += int(sdnl(addon_maximum_capacity, selected_addon_number, 0))
 		}
