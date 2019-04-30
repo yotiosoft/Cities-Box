@@ -1,18 +1,3 @@
 Title : Cities Box
-Version : 1.7.2
-Release_number : 139
-Title : Cities Box
-Version : 1.7.2
-Release_number : 139
-Title : Cities Box
-Version : 1.7.2
-Release_number : 139
-Title : Cities Box
-Version : 1.7.2
-Release_number : 139
-Title : Cities Box
-Version : 1.7.2
-Release_number : 139
-Title : Cities Box
-Version : 1.7.2
-Release_number : 139
+Version : 1.8.0
+Release_number : 141

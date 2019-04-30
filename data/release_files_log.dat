@@ -1495,3 +1495,36 @@ M	img/logo.png
 M	start.ax
 
 }
+
+[Ver.1.7.2]139{
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	ReadMe.txt
+M	Sample_City.cbd
+A	addons/Normal/airports/control_towers/Normal_Control-Tower/Normal_Control-Tower.adat
+A	addons/Normal/airports/control_towers/Normal_Control-Tower/Normal_Control-Tower.png
+A	addons/Normal/airports/control_towers/Normal_Control-Tower/Normal_Control-Tower__night_mask.png
+A	addons/Normal/airports/control_towers/Normal_Control-Tower/icon_Normal_Control-Tower.png
+M	data/about.txt
+M	start.ax
+
+}
+[Ver.1.8.0]141{
+M	Cities_Box.exe
+M	Cities_Box.hsp
+M	README.md
+M	ReadMe.txt
+M	Sample_City.cbd
+M	auto_save/Sample City 2019.Feb._autosave.cbd
+M	data/about.txt
+M	data/latest_version.txt
+M	data/release_files_log.dat
+A	difference_file.txt
+D	img/loading/124856y-2.png
+D	img/loading/124856y-3.png
+D	img/loading/124856y-4.png
+D	img/loading/124856y.png
+A	img/speed/very_very_fast.png
+M	start.ax
+
+}

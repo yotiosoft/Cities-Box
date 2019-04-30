@@ -1,6 +1,6 @@
 Cities Box
 =====================
-![Version](https://img.shields.io/badge/Version-1.7.1-brightgreen.svg)
+![Version](https://img.shields.io/badge/Version-1.8.0-brightgreen.svg)
 ![ReleaseType](https://img.shields.io/badge/Release%20Type-%E6%AD%A3%E5%BC%8F%E7%89%88-orange.svg)
 # 概要
 Cities Box 正式版の公開用リポジトリです。
@@ -111,9 +111,8 @@ Addon Makerについて詳細は、Addon_Makerフォルダ内のReadMe.txtをご
 
 # 最終更新
 
-## Ver.1.7.1 r138  
-騒音の幸福度への反映  
-統計メニューからの騒音レベルの表示に対応  
-タイルを1つ追加  
+## Ver.1.8.0 r141  
+外部都市との道路、線路、水路の接続機能を実装  
+マップ読み込み中に「Now Loading...」と表示するように変更  
     
 ※最新版以外の詳細は同梱のReadMe.txtを御覧ください。

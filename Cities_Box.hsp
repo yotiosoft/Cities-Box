@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.7.1
+									    Cities Box Ver.1.8.0
 									 	  (2018.03 Recode)
 
 									  (C) YotioSoft 2017-2019
@@ -47,7 +47,7 @@
 	#define BEGIN_ADDON_BUFFER_ID	100
 
 	; アドオン以外の画像のバッファ総数
-	#define BUFFER_IMAGES_TOTAL		81
+	#define BUFFER_IMAGES_TOTAL		82
 
 	; マップサイズ
 	#define MAPSIZE_X				100
@@ -251,19 +251,6 @@
 		noteadd "img/start_menu/setting.png", 65, 1							; 設定
 		noteadd "img/start_menu/addon_maker.png", 72, 1						; Addon Maker
 
-	//読み込み中アイコン
-		noteadd "img/loading/124856y.png", 53, 1							; 読み込み中アイコン1
-		noteadd "img/loading/124856y-2.png", 54, 1							; 読み込み中アイコン2
-		noteadd "img/loading/124856y-3.png", 55, 1							; 読み込み中アイコン3
-		noteadd "img/loading/124856y-4.png", 56, 1							; 読み込み中アイコン4
-
-	//速さ
-		noteadd "img/speed/slow.png", 73, 1									; 遅い
-		noteadd "img/speed/normal.png", 68, 1								; 普通
-		noteadd "img/speed/fast.png", 69, 1									; 速い
-		noteadd "img/speed/very_fast.png", 74, 1							; とても早い
-		noteadd "img/speed/pause.png", 70, 1								; 一時停止
-
 	//建物詳細ダイアログ
 		noteadd "img/show_detail/change_name.png", 71, 1					; 建物名の変更
 
@@ -316,6 +303,14 @@
 
 		noteadd "img/menu_icons/mini/roadway.png", 66, 1					; 車道
 		noteadd "img/menu_icons/mini/promenade.png", 67, 1					; 歩道 / 自転車道
+
+	//速さ
+		noteadd "img/speed/slow.png", 73, 1									; 遅い
+		noteadd "img/speed/normal.png", 68, 1								; 普通
+		noteadd "img/speed/fast.png", 69, 1									; 速い
+		noteadd "img/speed/very_fast.png", 74, 1							; とても早い
+		noteadd "img/speed/very_very_fast.png", 82, 1						; めちゃくちゃ早い
+		noteadd "img/speed/pause.png", 70, 1								; 一時停止
 
 	; 読み込み
 	a_statbar_block = windowx/2 / BUFFER_IMAGES_TOTAL
@@ -898,6 +893,8 @@
 
 	sdim original_name, 64, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z		//建物名（ユーザーがつけた名前）
 
+	dim connect, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//マップ外への接続（マップ外接続地点のみ1）
+
 	map_City_Name = ""
 	map_Mayor_Name = ""
 	map_Set_Change_Weather = 1
@@ -911,6 +908,10 @@
 	if stat != 1 {
 		goto *menu
 	}
+
+	onclick 0
+	color 0, 0, 0 : sboxf 200, 0, 0, windowx, windowy
+	color 255, 255, 255 : cmes "Now Loading...", 0, windowy/2-10, windowx, windowy/2+10
 
 	clrobj
 
@@ -1117,6 +1118,8 @@
 		reservation_buf			= get_chapter(load_mapdata, "reservation(x,y)", " {", "}")
 
 		original_name_buf		= get_chapter(load_mapdata, "original_name(x,y)", " {", "}")
+
+		connect_buf				= get_chapter(load_mapdata, "connect(x,y)", " {", "}")
 
 		if name_buf = "" {
 			error "M01 : マップデータが故障しています\nセーブファイルにname(x,y)がありません。"
@@ -1342,6 +1345,12 @@
 
 			split original_name_buf_a_line, ", ", original_name_buf_a_tile
 
+			; connect(x,y)
+			notesel connect_buf
+			noteget connect_buf_a_line, (y+1)
+
+			split original_name_buf_a_line, ", ", original_name_buf_a_tile
+
 			; 配列に代入
 			repeat MAPSIZE_X
 				x = cnt
@@ -1514,6 +1523,16 @@
 				; original_name(x,y,z)
 				original_name(x,y,z) = original_name_buf_a_tile(x)
 
+				; connect(x,y,z)
+				if connect_buf_a_line != "" {
+					connect(x,y,z) = int(connect_buf_a_line(x))
+				} else {
+					connect(x,y,z) = 0
+					
+					sx = x : sy = y : sz = z
+					gosub *connect_outside
+				}
+
 				; 幸福度の平均値を出すため、happiness_tmpにhappiness(x,y,z)を加算
 				happiness_tmp += happiness(x,y,z)
 
@@ -1529,6 +1548,171 @@
 
 	chdir directory
 	goto *initialization
+
+*connect_outside
+	// 道路と線路
+	if sx = 0 {
+		if (category(sx,sy,sz,0) = "road" or category(sx,sy,sz,0) = "railroad") and obj_type(sx,sy,sz,0) = 1 and obj_dire(sx,sy,sz,0) = 3 {
+			connect(sx,sy,sz) = 1
+			obj_type(sx,sy,sz,0) = 0 : obj_dire(sx,sy,sz,0) = 1
+		}
+	}
+	if sy = 0 {
+		if (category(sx,sy,sz,0) = "road" or category(sx,sy,sz,0) = "railroad") and obj_type(sx,sy,sz,0) = 1 and obj_dire(sx,sy,sz,0) = 2 {
+			connect(sx,sy,sz) = 1
+			obj_type(sx,sy,sz,0) = 0 : obj_dire(sx,sy,sz,0) = 0
+		}
+	}
+	if sy = MAPSIZE_Y-1 {
+		if (category(sx,sy,sz,0) = "road" or category(sx,sy,sz,0) = "railroad") and obj_type(sx,sy,sz,0) = 1 and obj_dire(sx,sy,sz,0) = 1 {
+			connect(sx,sy,sz) = 1
+			obj_type(sx,sy,sz,0) = 0 : obj_dire(sx,sy,sz,0) = 0
+		}
+	}
+	if sx = MAPSIZE_X-1 {
+		if (category(sx,sy,sz,0) = "road" or category(sx,sy,sz,0) = "railroad") and obj_type(sx,sy,sz,0) = 1 and obj_dire(sx,sy,sz,0) = 0 {
+			connect(sx,sy,sz) = 1
+			obj_type(sx,sy,sz,0) = 0 : obj_dire(sx,sy,sz,0) = 1
+		}
+	}
+
+	// 水路
+	if category(sx,sy,sz,0) = "waterway" and (sx = 0 or sy = 0 or sx = MAPSIZE_X-1 or sy = MAPSIZE_Y-1) {
+		if sx = 0 {
+			// turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 1
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 3 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 2
+			}
+
+			// intersection_T
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 2 : obj_dire(sx,sy,sz,0) = 0
+			}
+
+			// river_dead_end
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 6 and obj_dire(sx,sy,sz,0) = 3 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 5 : obj_dire(sx,sy,sz,0) = 1
+			}
+
+			// river_turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 1
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 3 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 2
+			}
+		}
+		if sy = 0 {
+			// turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 2 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 0
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 3 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 3
+			}
+
+			// intersection_T
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 2 : obj_dire(sx,sy,sz,0) = 0
+			}
+
+			// river_dead_end
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 6 and obj_dire(sx,sy,sz,0) = 2 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 5 : obj_dire(sx,sy,sz,0) = 0
+			}
+
+			// river_turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 2 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 0
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 3 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 3
+			}
+		}
+		if sy = MAPSIZE_Y-1 {
+			// turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 0 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 1
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 3
+			}
+
+			// intersection_T
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 2 : obj_dire(sx,sy,sz,0) = 0
+			}
+
+			// river_dead_end
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 6 and obj_dire(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 5 : obj_dire(sx,sy,sz,0) = 0
+			}
+
+			// river_turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 0 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 1
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 3
+			}
+		}
+		if sx = MAPSIZE_X-1 {
+			// turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 0 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 0
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 0 and obj_dire(sx,sy,sz,0) = 2 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 1 : obj_dire(sx,sy,sz,0) = 2
+			}
+
+			// intersection_T
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 1 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 2 : obj_dire(sx,sy,sz,0) = 0
+			}
+
+			// river_dead_end
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 6 and obj_dire(sx,sy,sz,0) = 0 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 5 : obj_dire(sx,sy,sz,0) = 1
+			}
+			
+			// river_turn
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 0 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 0
+			}
+			if connect(sx,sy,sz) = 0 and obj_type(sx,sy,sz,0) = 7 and obj_dire(sx,sy,sz,0) = 2 {
+				connect(sx,sy,sz) = 1
+				obj_type(sx,sy,sz,0) = 8 : obj_dire(sx,sy,sz,0) = 2
+			}
+		}
+	}
+
+	return
 
 /*-------------------------------------------アドオンの読み込み-----------------------------------*/
 *load_addons
@@ -2736,22 +2920,22 @@
 			before_camy = camy
 
 			getkey key_left, 37
-			if key_left = 1 {
+			if key_left = 1 and camx >= -(CHIP_SIZE/2)*MAPSIZE_X {
 				camx -= 20
 			}
 
 			getkey key_up, 38
-			if key_up = 1 {
+			if key_up = 1 and camy >= -(CHIP_SIZE/2)*10 {
 				camy -= 10
 			}
 
 			getkey key_right, 39
-			if key_right = 1 {
+			if key_right = 1 and camx <= (CHIP_SIZE/2)*MAPSIZE_X {
 				camx += 20
 			}
 
 			getkey key_down, 40
-			if key_down = 1 {
+			if key_down = 1 and camy <= (CHIP_SIZE/2)*MAPSIZE_Y {
 				camy += 10
 			}
 		}
@@ -2827,6 +3011,28 @@
 				if addons_drow_position_y(x,y,z,0) > -100 {
 					pos addons_drow_position_x(x,y,z,0)+intial_camx-camx, addons_drow_position_y(x,y,z,0)+intial_camy-camy
 					gmode 2 : gcopy int(sdnl3(addon_image, map(x,y,z,0), obj_type(x,y,z,0), 1))+night_mask_drow, addons_top_left_x(x,y,z,0), addons_top_left_y(x,y,z,0), addons_size_x(x,y,z,0), addons_size_y(x,y,z,0)
+				}
+
+				; マップ外との接続地点なら、接続方向に矢印を表示
+				if connect(x,y,z) = 1 and category(x,y,z) != "waterway" {
+					if x = 0 {
+						pos (x-1)*CHIP_SIZE/2-y*CHIP_SIZE/2-camx, y*CHIP_SIZE/4+(x-1)*CHIP_SIZE/4-camy
+						gmode 2 : gcopy 77, 16, 32, 32, 32
+					}
+					if y = 0 {
+						pos x*CHIP_SIZE/2-(y-1)*CHIP_SIZE/2-camx, (y-1)*CHIP_SIZE/4+x*CHIP_SIZE/4-camy
+						gmode 2 : gcopy 77, 80, 32, 32, 32
+					}
+					// 要修正
+					if x = CHIPSIZE_X-1 {
+						pos (x+2)*CHIP_SIZE/2-y*CHIP_SIZE/2-camx, y*CHIP_SIZE/4+(x+2)*CHIP_SIZE/4-camy
+						gmode 2 : gcopy 77, 16, 32, 32, 32
+					}
+					// 要修正
+					if y = CHIPSIZE_Y-1 {
+						pos x*CHIP_SIZE/2-(y+2)*CHIP_SIZE/2-camx, (y+2)*CHIP_SIZE/4+x*CHIP_SIZE/4-camy
+						gmode 2 : gcopy 77, 80, 32, 32, 32
+					}
 				}
 
 				; 統計モードが選択されている場合
@@ -3186,6 +3392,7 @@
 			if speed = 2 : gcopy 68, 0, 0, 32, 32	; 普通
 			if speed = 3 : gcopy 69, 0, 0, 32, 32	; 早い
 			if speed = 4 : gcopy 74, 0, 0, 32, 32	; とても早い
+			if speed = 5 : gcopy 82, 0, 0, 32, 32	; めちゃくちゃ早い
 
 			pos 52, windowy-45-titlebar_h+10
 			if pause = 1 : gcopy 70, 0, 32, 32, 32 : else : gcopy 70, 0, 0, 32, 32		; 一時停止ボタン
@@ -3235,9 +3442,12 @@
 
 		; 時間の変動
 			; Speed=2のとき、1回のループで1分とする
+			; Speed=5のときは1会のループで10分
 			if pause = 0 {
 				if speed = 1 {
 					if cnt \ 4 = 0 : map_time_Minutes += 1
+				} else : if speed = 5 {
+					map_time_Minutes += 10
 				} else {
 					map_time_Minutes += speed - 1
 				}
@@ -3744,7 +3954,7 @@
 	; 時間の早さ切り替え / 一時停止
 	if click_range(20, windowy-45-titlebar_h+10, 20+32, windowy-45-titlebar+10+32) = 1 and abs(cnt-changed_speed_cnt) > 2 {
 		speed++
-		if speed > 4 : speed = 1
+		if speed > 5 : speed = 1
 		changed_speed_cnt = cnt
 		return
 	}
@@ -4313,6 +4523,7 @@
 		; とりあえず工事中のタイプに指定
 		map(mx,my,mz) = selected_addon_number
 		name(mx,my,mz) = sdnl(addon_name, selected_addon_number, 0)
+		connect(mx,my,mz) = 0
 
 		if cursor_mode = "put_Road" {
 			category(mx,my,mz,0) = "road"
@@ -4384,6 +4595,8 @@
 
 		obj_tiles(mx,my,mz,0)		= 0
 		obj_tiles(mx,my,mz,1)		= 0
+
+		connect(mx,my,mz) = 0
 
 		crop(mx,my,mz)				= ""
 		crop_amount(mx,my,mz)		= 0
@@ -4604,6 +4817,8 @@
 
 				obj_type(sx,sy,sz,0)		= build_type_number
 				obj_dire(sx,sy,sz,0)		= build_direction_number_ID
+
+				connect(sx,sy,sz) = 0
 
 				obj_serial_num(sx,sy,sz)	= next_obj_serial_num : next_obj_serial_num ++
 
@@ -5171,6 +5386,9 @@
 				obj_type(sx,sy,sz,0) = obj_type_t
 				obj_dire(sx,sy,sz,0) = obj_dire_t
 
+				connect(sx,sy,sz) = 0
+				gosub *connect_outside
+
 				from_build = 1 : gosub *get_addon_drow_position_new
 
 				; アドオンに下地アドオンの設定がある場合
@@ -5255,6 +5473,8 @@
 
 			obj_tiles(sx,sy,sz,0)		= 0
 			obj_tiles(sx,sy,sz,1)		= 0
+
+			connect(sx,sy,sz)			= 0
 
 			crop(sx,sy,sz)				= ""
 			crop_amount(sx,sy,sz)		= 0
@@ -6809,7 +7029,7 @@
 
 *save
 	/*------------------------------------マップデータの保存--------------------------------------*/
-	save_mapdata = ""
+	sdim save_mapdata, 16384
 
 	; 誤反応防止
 	if from_autosave = 0 and click_range(0, 0, windowx, windowy) = 1 and click_range(windowx-54, windowy-40-titlebar_h, windowx, windowy) = 0 : return
@@ -6834,41 +7054,42 @@
 	; マップ保存
 	title "保存中..."
 
-	save_name = "name(x,y) {\n"
-	save_name2 = "name2(x,y) {\n"
-	save_category = "category(x,y) {\n"
-	save_category_2 = "category_2(x,y) {\n"
-	save_category_3 = "category_3(x,y) {\n"
-	save_obj_type = "obj_type(x,y) {\n"
-	save_obj_type2 = "obj_type2(x,y) {\n"
-	save_obj_dire = "obj_dire(x,y) {\n"
-	save_obj_dire2 = "obj_dire2(x,y) {\n"
-	save_obj_serial_num = "obj_serial_num(x,y) {\n"
-	save_obj_use_tiles_x = "obj_use_tiles_x(x,y) {\n"
-	save_obj_use_tiles_y = "obj_use_tiles_y(x,y) {\n"
-	save_obj_tiles_x = "obj_tiles_x(x,y) {\n"
-	save_obj_tiles_y = "obj_tiles_y(x,y) {\n"
-	save_residents = "residents(x,y) {\n"
+	save_name				= "name(x,y) {\n"
+	save_name2				= "name2(x,y) {\n"
+	save_category			= "category(x,y) {\n"
+	save_category_2			= "category_2(x,y) {\n"
+	save_category_3			= "category_3(x,y) {\n"
+	save_obj_type			= "obj_type(x,y) {\n"
+	save_obj_type2			= "obj_type2(x,y) {\n"
+	save_obj_dire			= "obj_dire(x,y) {\n"
+	save_obj_dire2			= "obj_dire2(x,y) {\n"
+	save_obj_serial_num		= "obj_serial_num(x,y) {\n"
+	save_obj_use_tiles_x	= "obj_use_tiles_x(x,y) {\n"
+	save_obj_use_tiles_y	= "obj_use_tiles_y(x,y) {\n"
+	save_obj_tiles_x		= "obj_tiles_x(x,y) {\n"
+	save_obj_tiles_y		= "obj_tiles_y(x,y) {\n"
+	save_residents			= "residents(x,y) {\n"
 	save_workers_Commercial = "workers_Commercial(x,y) {\n"
-	save_workers_Office = "workers_Office(x,y) {\n"
+	save_workers_Office		= "workers_Office(x,y) {\n"
 	save_workers_Industrial = "workers_Industrial(x,y) {\n"
-	save_workers_Farm = "workers_Farm(x,y) {\n"
-	save_workers_Public = "workers_Public(x,y) {\n"
-	save_studets = "students(x,y) {\n"
-	save_land_price = "land_price(x,y) {\n"
-	save_crime_rate = "crime_rate(x,y) {\n"
-	save_education_rate = "education_rate(x,y) {\n"
-	save_happiness = "happiness(x,y) {\n"
-	save_noise = "noise(x,y) {\n"
-	save_crop = "crop(x,y) {\n"
-	save_crop_amount = "crop_amount(x,y) {\n"
-	save_age = "age(x,y) {\n"
-	save_gender = "gender(x,y) {\n"
-	save_workplace = "workplace(x,y) {\n"
-	save_school = "school(x,y) {\n"
-	save_reservation = "reservation(x,y) {\n"
-	save_original_name = "original_name(x,y) {\n"
-	save_statistics = "statistics {\n" + statistics + "}"
+	save_workers_Farm		= "workers_Farm(x,y) {\n"
+	save_workers_Public		= "workers_Public(x,y) {\n"
+	save_studets			= "students(x,y) {\n"
+	save_land_price			= "land_price(x,y) {\n"
+	save_crime_rate			= "crime_rate(x,y) {\n"
+	save_education_rate		= "education_rate(x,y) {\n"
+	save_happiness			= "happiness(x,y) {\n"
+	save_noise				= "noise(x,y) {\n"
+	save_crop				= "crop(x,y) {\n"
+	save_crop_amount		= "crop_amount(x,y) {\n"
+	save_age				= "age(x,y) {\n"
+	save_gender				= "gender(x,y) {\n"
+	save_workplace			= "workplace(x,y) {\n"
+	save_school				= "school(x,y) {\n"
+	save_reservation		= "reservation(x,y) {\n"
+	save_original_name		= "original_name(x,y) {\n"
+	save_connect			= "connect(x,y) {\n"
+	save_statistics			= "statistics {\n" + statistics + "}"
 
 	sz = 0
 	repeat MAPSIZE_X
@@ -6912,6 +7133,7 @@
 			save_school          += school(sx,sy,sz)+comma
 			save_reservation     += reservation(sx,sy,sz)+comma
 			save_original_name   += original_name(sx,sy,sz)+comma
+			save_connect		 += str(connect(sx,sy,sz))+comma
 		loop
 	loop
 
@@ -7007,6 +7229,7 @@
 	save_mapdata += save_school+"}\n"
 	save_mapdata += save_reservation+"}\n"
 	save_mapdata += save_original_name+"}\n"
+	save_mapdata += save_connect+"}\n"
 	save_mapdata += save_statistics
 
 	; 保存
