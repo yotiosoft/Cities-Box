@@ -3023,15 +3023,13 @@
 						pos x*CHIP_SIZE/2-(y-1)*CHIP_SIZE/2-camx, (y-1)*CHIP_SIZE/4+x*CHIP_SIZE/4-camy
 						gmode 2 : gcopy 77, 80, 32, 32, 32
 					}
-					// 要修正
-					if x = CHIPSIZE_X-1 {
-						pos (x+2)*CHIP_SIZE/2-y*CHIP_SIZE/2-camx, y*CHIP_SIZE/4+(x+2)*CHIP_SIZE/4-camy
-						gmode 2 : gcopy 77, 16, 32, 32, 32
+					if x = MAPSIZE_X-1 {
+						pos (x+1)*CHIP_SIZE/2-y*CHIP_SIZE/2-camx, y*CHIP_SIZE/4+(x+1)*CHIP_SIZE/4-camy
+						gmode 2 : gcopy 77, 80, 96, 32, 32
 					}
-					// 要修正
-					if y = CHIPSIZE_Y-1 {
-						pos x*CHIP_SIZE/2-(y+2)*CHIP_SIZE/2-camx, (y+2)*CHIP_SIZE/4+x*CHIP_SIZE/4-camy
-						gmode 2 : gcopy 77, 80, 32, 32, 32
+					if y = MAPSIZE_Y-1 {
+						pos x*CHIP_SIZE/2-(y+1)*CHIP_SIZE/2-camx, (y+1)*CHIP_SIZE/4+x*CHIP_SIZE/4-camy
+						gmode 2 : gcopy 77, 16, 96, 32, 32
 					}
 				}
 
@@ -3292,7 +3290,7 @@
 				pos 252, windowy-70-titlebar_h : gcopy 57, 0, 0, 32, 32
 			}
 
-			; 建物（公共施設）ボタン
+			; 建物（公共施設とインフラ）ボタン
 			if cursor_mode = "put_Public" {
 				pos 284, windowy-70-titlebar_h : gcopy 7, 0, 32, 32, 32
 			} else {
@@ -3608,10 +3606,10 @@
 		color 0, 0, 0 : pos 252+2, windowy-70-titlebar_h-18+2 : mes "農業区画"
 	}
 
-	; 公共施設
+	; 公共施設とインフラ
 	if click_range(284, windowy-70-titlebar_h, 284+32, windowy-70-titlebar_h+32) = 1 {
-		color 255, 255, 255 : sboxf 128, 284, windowy-70-titlebar_h-18, 284+50, windowy-70-titlebar_h
-		color 0, 0, 0 : pos 284+2, windowy-70-titlebar_h-18+2 : mes "公共施設"
+		color 255, 255, 255 : sboxf 128, 284, windowy-70-titlebar_h-18, 284+120, windowy-70-titlebar_h
+		color 0, 0, 0 : pos 284+2, windowy-70-titlebar_h-18+2 : mes "公共施設とインフラ"
 	}
 
 	; 公園
@@ -3826,7 +3824,7 @@
 		addon_menu_categories = 1
 	}
 
-	; 公共施設
+	; 公共施設とインフラ
 	if click_range( 284, windowy-70-titlebar_h, 284+32, windowy-70-titlebar_h+32 ) = 1 {
 		cursor_mode = "put_Public"
 		addon_menu_categories = 1
@@ -4103,7 +4101,7 @@
 		category_addons = type_Farm
 		category_addons_number = type_number_Farm
 	}
-	; 公共施設
+	; 公共施設とインフラ
 	if cursor_mode = "put_Public" {
 		category_addons = type_Public
 		category_addons_number = type_number_Public
@@ -4611,7 +4609,7 @@
 		return
 	}
 
-	; 住居/商業/オフィス/工業/農業/公共施設/公園
+	; 住居/商業/オフィス/工業/農業/公共施設とインフラ/公園
 	if cursor_mode = "put_Residential" or cursor_mode = "put_Commercial" or cursor_mode = "put_Office" or cursor_mode = "put_Industrial" or cursor_mode = "put_Farm" or cursor_mode = "put_Public" or cursor_mode = "put_Park" or cursor_mode = "put_Airport" {
 
 	*prebuild
@@ -5903,7 +5901,7 @@
 		dia_lines = 5
 	}
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "public" {
-		mes_tmp = "公共施設\n労働者数 : "+workers(clicked_mx, clicked_my, clicked_mz)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my, clicked_mz)+"\n地価 : §"+land_price(clicked_mx, clicked_my, clicked_mz)+"0000"
+		mes_tmp = "公共施設・インフラ\n労働者数 : "+workers(clicked_mx, clicked_my, clicked_mz)+"人\n幸福度 : "+happiness(clicked_mx, clicked_my, clicked_mz)+"\n地価 : §"+land_price(clicked_mx, clicked_my, clicked_mz)+"0000"
 		dia_lines = 4
 	}
 	if category(clicked_mx, clicked_my, clicked_mz, 0) = "park" {
