@@ -1,0 +1,6 @@
+
+2019/20/20 20:46.03
+A05 : 拡張子adonのファイルがアドオンファイルではありません
+
+F:\git\Cities-Box\addons\Normal\buildings\public\Thermal_Power_Plant/Normal\buildings\public\Thermal_Power_Plant\Thermal_Power_Plant.adon
+

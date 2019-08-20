@@ -1,0 +1,77 @@
+addon_name = "Thermal_Power_Plant"
+addon_jp_name = "火力発電所（仮）"
+addon_author = "YotioSoft"
+addon_summary = "火力発電所のつもり"
+addon_icon = "icon_Thermal_Power_Plant.png"
+addon_maker_version = "2"
+ 
+addon_type = "public"
+addon_type_2 = "power"
+addon_type_3 = "plant"
+ 
+use_types = "null"
+ 
+maximum_capacity = "50"
+ 
+land_price_influence = "-50"
+land_price_influence_grid = "10"
+ 
+crime_rate_influence = "0"
+crime_rate_influence_grid = "0"
+ 
+education_rate_influence = "0"
+education_rate_influence_grid = "0"
+ 
+addon_crop = ""
+addon_crop_amount = ""
+ 
+null {
+	image = "Thermal_Power_Plant.png"
+	direction = "left, top, bottom, right"
+	transparent_color = "0, 0, 0"
+ 
+	left {
+		size_x = "128"
+		size_y = "180"
+		chip_x = "2"
+		chip_y = "2"
+ 
+		top_left_x = "0"
+		top_left_y = "0"
+		bottom_right_x = "128"
+		bottom_right_y = "179"
+	}
+	top {
+		size_x = "128"
+		size_y = "180"
+		chip_x = "2"
+		chip_y = "2"
+ 
+		top_left_x = "128"
+		top_left_y = "0"
+		bottom_right_x = "256"
+		bottom_right_y = "179"
+	}
+	bottom {
+		size_x = "128"
+		size_y = "180"
+		chip_x = "2"
+		chip_y = "2"
+ 
+		top_left_x = "0"
+		top_left_y = "180"
+		bottom_right_x = "128"
+		bottom_right_y = "360"
+	}
+	right {
+		size_x = "128"
+		size_y = "180"
+		chip_x = "2"
+		chip_y = "2"
+ 
+		top_left_x = "128"
+		top_left_y = "180"
+		bottom_right_x = "256"
+		bottom_right_y = "360"
+	}
+};
