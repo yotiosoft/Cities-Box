@@ -881,6 +881,8 @@
 	dim happiness, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//幸福度
 	dim noise, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z					//騒音
 
+	dim electrical, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//電力
+
 	sdim crop, 32, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z				//生産物
 	dim crop_amount, MAPSIZE_X, MAPSIZE_Y, MAPSIZE_Z			//生産量
 
@@ -1106,6 +1108,8 @@
 		happiness_buf			= get_chapter(load_mapdata, "happiness(x,y)", " {", "}")
 		noise_buf				= get_chapter(load_mapdata, "noise(x,y)", " {", "}")
 
+		electrical_buf 		= get_chapter(load_mapdata, "electrical(x,y)", " {", "}")
+
 		crop_buf				= get_chapter(load_mapdata, "crop(x,y)", " {", "}")
 		crop_amount_buf			= get_chapter(load_mapdata, "crop_amount(x,y)", " {", "}")
 
@@ -1286,6 +1290,12 @@
 			noteget noise_buf_a_line, (y+1)
 
 			split noise_buf_a_line, ", ", noise_buf_a_tile
+
+			; electrical(x,y)
+			notesel electrical_buf
+			noteget electrical_buf_a_line, (y+1)
+
+			split electrical_buf_a_line, ", ", electrical_buf_a_tile
 
 			; crop(x,y)
 			notesel crop_buf
@@ -1496,7 +1506,14 @@
 				if noise_buf != "" {
 					noise(x,y,z) = int(noise_buf_a_tile(x))
 				} else {
-					noise(x,y,z) = 0		; セーブデータにnoise配列がなければnoiseは0に設定
+					noise(x,y,z) = 0			; セーブデータにnoise配列がなければnoiseは0に設定
+				}
+
+				; electrical(x,y,z)
+				if electrical_buf != "" {
+					electrical(x,y,z) = int(electrical_buf_a_tile(x))
+				} else {
+					electrical(x,y,z) = 0		; セーブデータにelectrical配列がなければnoiseは0に設定
 				}
 
 				; crop(x,y,z)
@@ -7078,6 +7095,7 @@
 	save_education_rate		= "education_rate(x,y) {\n"
 	save_happiness			= "happiness(x,y) {\n"
 	save_noise				= "noise(x,y) {\n"
+	save_electrical			= "electrical(x,y) {\n"
 	save_crop				= "crop(x,y) {\n"
 	save_crop_amount		= "crop_amount(x,y) {\n"
 	save_age				= "age(x,y) {\n"
@@ -7123,6 +7141,7 @@
 			save_education_rate  += strf("%03d", education_rate(sx,sy,sz))+comma
 			save_happiness       += strf("%03d", happiness(sx,sy,sz))+comma
 			save_noise			 += strf("%03d", noise(sx,sy,sz))+comma
+			save_electrical	     += str(electrical(sx,sy,sz))+comma
 			save_crop            += crop(sx,sy,sz)+comma
 			save_crop_amount     += strf("%03d", crop_amount(sx,sy,sz))+comma
 			save_age             += age(sx,sy,sz)+comma
@@ -7219,6 +7238,7 @@
 	save_mapdata += save_education_rate+"}\n"
 	save_mapdata += save_happiness+"}\n"
 	save_mapdata += save_noise+"}\n"
+	save_mapdata += save_electrical+"}\n"
 	save_mapdata += save_crop+"}\n"
 	save_mapdata += save_crop_amount+"}\n"
 	save_mapdata += save_age+"}\n"
