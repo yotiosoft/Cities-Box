@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------------------------------
 
-									    Cities Box Ver.1.8.0
+									    Cities Box Ver.1.8.1
 									 	  (2018.03 Recode)
 
-									  (C) YotioSoft 2017-2019
+									  (C) YotioSoft 2017-2023
 
 --------------------------------------------------------------------------------------------------*/
 
@@ -759,9 +759,9 @@
 				}
 
 				font config_SystemFont, 14 : color 255, 255, 255
-				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+about_release_number+"\nDevelopment Language : HSP 3.5"
+				pos 100, 170 : mes ""+about_title+"\nVersion : "+about_version+"\nRelease Number : "+about_release_number+"\nDevelopment Language : HSP 3.51"
 				font config_SystemFont, 10 : color 255, 255, 255
-				pos 100, 270 : mes "Copyright(C) YotioSoft 2017-2019 All Rights Reserved."
+				pos 100, 270 : mes "Copyright(C) YotioSoft 2017-2023 All Rights Reserved."
 			}
 
 	stop
@@ -829,7 +829,7 @@
 
 			; コンタクトフォームを開く
 				if click_range(((500-64)/2)-16-40, 200, ((500-64)/2)-16-40+45+ginfo_tmp__bug_Send, 200+32) = 1{
-					exec "http://yotiosoft.com/contact-form/", 16
+					exec "https://yotiosoft.com/support/", 16
 				}
 		}
 

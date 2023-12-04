@@ -1,0 +1,144 @@
+
+2023/04/04 12:11.25
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Two_lane_normal_road(orange_line)
+のアドオンファイル(*.adat)内の
+要素 nullが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.45
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.45
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.45
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 snowが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.46
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.46
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.46
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 snowが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.47
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.47
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.47
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 snowが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.48
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.48
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:12.48
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Glazed_Airport_Terminal
+のアドオンファイル(*.adat)内の
+要素 snowが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:13.15
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Normal_Control-Tower
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:13.15
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Normal_Control-Tower
+のアドオンファイル(*.adat)内の
+要素 under_constructionが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
+
+2023/04/04 12:13.15
+Cities Box Error A04 : 要素名が見つかりません
+アドオン名 Normal_Control-Tower
+のアドオンファイル(*.adat)内の
+要素 snowが、
+規定のタイプ要素と合致しません。
+アドオン製作者にお問い合わせください。
+
