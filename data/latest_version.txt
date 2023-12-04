@@ -1,8 +1,81 @@
-Release Number : 140;
-Title : Cities Box;
-Version : 1.8.0;
-About : �O���s�s�Ƃ̓��H�A���H�A���H�̐ڑ��@�\������;
-Updater : https://github.com/YotioSoft/Cities-Box-Updater/raw/master/;
-Updater_Name : Cities_Box_UD.exe;
-URL : https://github.com/YotioSoft/Cities-Box/raw/master/;
-OS : Windows, macOS;
+<!DOCUTYPE HTML>
+<html lang="ja">
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-174934210-1"></script>
+    <meta charset="utf8">
+    <link rel="stylesheet" href="/style.css" media="screen and (min-width: 768px)">
+    <link rel="stylesheet" href="/style_m.css" media="screen and (max-width: 767px)">
+    <link rel="stylesheet" href="/header.css" media="screen and (min-width: 768px)">
+    <link rel="stylesheet" href="/header_m.css" media="screen and (max-width: 767px)">
+    <link rel="icon" type="image/png" href="/img/logo/yotiosoft32.png">
+    <title>YotioSoft</title>
+
+    <script src="/js/jquery-3.5.1.min.js"></script>
+    <script src="/js/common.js"></script>
+  </head>
+
+  <body>
+    <div id="wrap">
+      <header>
+        <div id="headers">
+          <div id="header_fixed">
+            <div id="header"></div>
+          </div>
+        </div>
+      </header>
+
+      <div style="margin-top: 130px;"></div>
+
+      <div class="main_wrap">
+
+        <div id="content">
+          <div class="column">
+            <div style="font-size: 26px; margin-bottom: 5px;">
+              <script>
+                const messages1 = [
+                  'printf("<b>404 Not Found</b>");',
+                  'print (\'<b>404 Not Found</b>\')',
+                  'mes "<b>404 Not Found</b>"',
+                  'echo("<b>404 Not Found</b>");',
+                  'std::cout << "<b>404 Not Found</b>" << std::endl;',
+                  'System.out.println("<b>404 Not Found</b>");',
+                  'console.log("<b>404 Not Found</b>");',
+                  'Concole.WriteLine("<b>404 Not Found</b>");',
+                  '&lt;h1&gt;<b>404 Not Found</b>&lt;/h1&gt;'
+                ];
+
+                const messageNo1 = Math.floor( Math.random() * messages1.length);
+                document.write(messages1[messageNo1]);
+              </script>
+            </div>
+            <div style="font-size: 14px; color: #716e77">
+              <script>
+                const messages2 = [
+                  '事実というものは<u>存在しない。</u>存在するのは解釈だけである。───フリードリヒ・ニーチェ（1844-1900）',
+                  '思考を除いて、我々の力の中で絶対的なものなど<u>存在しない。</u>───ルネ・デカルト（1596-1650）',
+                  'あなたの限界というのは、あなたがそう信じているものしか<u>存在しない。</u>───ウエイン・ダイアー（1940-2015）',
+                  '毒でないものなど<u>存在しない。</u>その服用量こそが毒であるか、 そうでないかを決めるのだ。───パラケルスス（1493-1541）',
+                  '生きる意味や価値を考え始めると、我々は気がおかしくなってしまう。生きる意味など、<u>存在しない</u>のだから。───ジークムント・フロイト（1856-1939）',
+                  '何をするにも時間は<u>見つからない</u>だろう。時間が欲しければ自分で作ることだ。───チャールズ・バクストン（1822-1871）',
+                  '欠点のない友人を見つけようとしても、決して<u>見つからない。</u>───トーマス・フラー（1608-1661）'
+                ];
+
+                const messageNo2 = Math.floor( Math.random() * messages2.length);
+                document.write(messages2[messageNo2]);
+              </script>
+            </div><br>
+            お探しのページは存在しません。<br>
+            <a href="/">トップページへ戻る</a>
+          </div>
+
+        </div>
+      </div>
+
+      <footer class="footer_class">
+        <div id="footer"></div>
+      </footer>
+    </div>
+  </body>
+
+</html>
